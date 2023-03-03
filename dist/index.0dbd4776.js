@@ -56,6 +56,7 @@ function onYouTubeIframeAPIReady() {
     player = new YT.Player("player", {
         height: "500",
         width: vid_width,
+        origin: window.location.origin,
         videoId: video_id,
         playerVars: {
             "playsinline": 1,
@@ -185,10 +186,11 @@ function sleep(ms) {
 async function idElementPrint(ref, uname) {
     iframe = dE("un_print_iframe");
     const pri = iframe.contentWindow;
+    const csspage = document.querySelector('link[rel="stylesheet"]').href;
     pri.document.open();
-    pri.document.write('<head><link rel="stylesheet" href="css/print.css" onload = "print()"></head>');
+    pri.document.write('<head><link rel="stylesheet" href="' + csspage + '" onload = "print()"><style>body{border: 3px solid black;font-family:Nunito;}</style></head>');
     pri.document.write(ref.innerHTML);
-    pri.document.write('<div class="divFooter" style = "text-align:center;">By ' + uname + " @ Quarkz!</div>");
+    pri.document.write('<div class="divFooter2" style = "text-align:center;">By ' + uname + " @ Quarkz!</div>");
     pri.document.close();
     pri.focus();
 }

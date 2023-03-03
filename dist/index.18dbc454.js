@@ -573,18 +573,12 @@ For permission requests, please contact [Mr Techtroid] at mrtechtroid@outlook.co
 var _auth = require("firebase/auth");
 var _firestore = require("firebase/firestore");
 var _storage = require("firebase/storage");
-// import $ from 'jquery';
-// window.$ = $;
-// window.jQuery = $;
 var _d3 = require("d3");
-// import 'summernote/dist/summernote-lite.js';
-// import 'summernote/dist/summernote-lite.css';
-// import { sysaccess } from 'js/reworkui.js'
 const firebaseConfig = {
     apiKey: "AIzaSyDN8T7Pmw5e-LzmC3nAHEqI0Uk7FF7y6fc",
     authDomain: "quarkz.firebaseapp.com",
     projectId: "quarkz",
-    storageBucket: "quarkz.appspot.d3",
+    storageBucket: "quarkz.appspot.com",
     messagingSenderId: "1050835442263",
     appId: "1:1050835442263:web:e7d05ca9373f2f6083a112",
     measurementId: "G-1Y3S45VWFH"
@@ -1086,9 +1080,8 @@ async function unotes1() {
 }
 function unotes2() {}
 async function getUserNotes() {
-    dE("un_rendermode").value = "edit";
     try {
-        window.notesUIHandler();
+        notesUIHandler();
     } catch  {}
     if (window.location.hash.includes("usernotes/add")) {
         var docRef = await (0, _firestore.addDoc)((0, _firestore.collection)(db, "usernotes"), {
@@ -1107,7 +1100,7 @@ async function getUserNotes() {
             })
         });
         locationHandler("#/usernotes/" + docRef.id, 1);
-    } else if (window.location.hash.includes("usernotes/delete")) await deleteDoc((0, _firestore.doc)(db, "usernotes", window.location.hash.split("usernotes/delete/")[1]));
+    } else if (window.location.hash.includes("usernotes/delete")) await (0, _firestore.deleteDoc)((0, _firestore.doc)(db, "usernotes", window.location.hash.split("usernotes/delete/")[1]));
     else if (window.location.hash == "#/usernotes/") ;
     else {
         var docRef = (0, _firestore.doc)(db, "usernotes", window.location.hash.split("usernotes/")[1]);
@@ -1115,8 +1108,24 @@ async function getUserNotes() {
         if (docSnap.exists()) {
             var docRef = docSnap.data();
             dE("un_title").value = docRef.title;
-            setHTM("un_editable", docRef.notes);
+            setHTML("un_editable", docRef.notes);
             dE("un_viewership").value = docRef.type;
+            if (docRef.type == "public_view" && userinfo.uuid != docRef.uuid) {
+                dE("un_rendermode").innerHTML = '<option value="preview">preview</option>';
+                dE("un_rendermode").value = "preview";
+                dE("un_save").style.display = "none";
+                dE("un_colorpicker").style.display = "none";
+                dE("un_viewership").style.display = "none";
+                dE("un_title").style.display = "none";
+            } else {
+                dE("un_rendermode").innerHTML = '<option value="edit">edit</option><option value="preview">preview</option>';
+                dE("un_rendermode").value = "edit";
+                dE("un_save").style.display = "block";
+                dE("un_colorpicker").style.display = "block";
+                dE("un_viewership").style.display = "block";
+                dE("un_title").style.display = "block";
+            }
+            notesUIHandler();
         }
     }
 }
@@ -1690,14 +1699,14 @@ function renderEditQLList(qno) {
     if (location1.includes("edit_test")) curr_qlid = op.qid;
     else curr_qlid = op.id;
     dE("aq_mode").value = op.mode;
-    setHTM("aq_qtext", op.title);
+    setHTML("aq_qtext", op.title);
     dE("aq_yurl").value = op.y_url;
     dE("aq_type").value = op.type;
     dE("aq_hint").value = op.hint;
     dE("aq_section").value = op.section;
     dE("aq_posmrks").value = op.pm;
     dE("aq_negmrks").value = op.nm;
-    setHTM("aq_expl", op.expl);
+    setHTML("aq_expl", op.expl);
     if (op.type == "mcq" || op.type == "mcq_multiple") {
         dE("aq_mcq_con").innerHTML = "";
         for(var g = 0; g < op.op.length; g++){
@@ -1982,13 +1991,13 @@ async function getChapterEList() {
         dE("chp_chaptername").innerText = docJSON.name;
         try {
             for (let ele of docJSON.qbanks){
-                dE("chp_qbk_list").insertAdjacentHTML("beforeend", '<span class="tlinks rpl" style = "color:pink" id="chpqbk' + btoa(ele.id) + '">' + ele.title + "</span>");
+                dE("chp_qbk_list").insertAdjacentHTML("beforeend", '<span class="tlinks_min rpl" style = "color:pink" id="chpqbk' + btoa(ele.id) + '">' + ele.title + "</span>");
                 dE("chpqbk" + btoa(ele.id)).addEventListener("click", qbkclicker);
             }
         } catch  {}
         try {
             for (let ele of docJSON.topics){
-                dE("chp_tpc_list").insertAdjacentHTML("beforeend", '<span class="tlinks rpl" style = "color:pink" id="chptpc' + btoa(ele.id) + '">' + ele.title + "</span>");
+                dE("chp_tpc_list").insertAdjacentHTML("beforeend", '<span class="tlinks_min rpl" style = "color:pink" id="chptpc' + btoa(ele.id) + '">' + ele.title + "</span>");
                 dE("chptpc" + btoa(ele.id)).addEventListener("click", tpcclicker);
             }
         } catch  {}
@@ -2001,7 +2010,6 @@ function chclicker() {
 // Rendering Chapter List
 function renderCList(type) {
     dE("qb_cont_2").innerHTML = "";
-    // console.log(chapterlist)
     for(var i = 0; i < chapterlist.length; i++){
         var ele = chapterlist[i];
         if (ele.subject == type) {
@@ -2199,8 +2207,8 @@ function addMCQ() {
     dE("aq_mcq_con").insertAdjacentHTML("beforeend", MCQ);
 }
 function clearAQ() {
-    setHTM("aq_qtext", "");
-    setHTM("aq_expl", "");
+    setHTML("aq_qtext", "");
+    setHTML("aq_expl", "");
     dE("aq_answer").value = "";
     dE("aq_yurl").value = "";
     dE("aq_hint").value = "";
@@ -2267,6 +2275,7 @@ async function authStateObserver(user) {
             editorrole = docJSON.roles["editor"];
             adminrole = docJSON.roles["admin"];
             userinfo.usernotes = docJSON.usernotes;
+            if (docJSON.usernotes == undefined) userinfo.usernotes = [];
         }
         if (docJSON.deleted == true) {
             log("Warning", "User Account Has Been Deleted");
@@ -2357,9 +2366,7 @@ function uploadImages() {
         filecontent = text.replace("", "");
         const storageRef = (0, _storage.ref)(storage, a);
         // 'file' comes from the Blob or File API
-        uploadBytes(storageRef, file).then((snapshot)=>{
-        // console.log('Uploaded a blob or file!');
-        });
+        uploadBytes(storageRef, file).then((snapshot)=>{});
     };
     reader.readAsText(file.files[0]);
 }
@@ -2368,13 +2375,11 @@ function signUpRestrict() {
 }
 function checkQuestion() {
     var qid = dE("tp_question").getAttribute("dataid");
-    // console.log(qid)
     var type = dE("tp_question").getAttribute("qtype");
     var answer;
     var crranswer, explanation, hint;
     var status = 0;
-    for(var i = 0; i < topicJSON.qllist.length; i++)// console.log(topicJSON.qllist[i])
-    if (topicJSON.qllist[i].id == qid) {
+    for(var i = 0; i < topicJSON.qllist.length; i++)if (topicJSON.qllist[i].id == qid) {
         crranswer = topicJSON.qllist[i].answer;
         explanation = topicJSON.qllist[i].expl;
         hint = topicJSON.qllist[i].hint;
@@ -2393,7 +2398,6 @@ function checkQuestion() {
     if (type == "mcq" || type == "mcq_multiple" || type == "taf") {
         answer = [];
         for(var k = 0; k < document.getElementsByClassName("tp_mcq_p").length; k++)if (document.getElementsByClassName("tp_mcq_p")[k].classList.contains("aq_mcq_ans")) answer.push(document.getElementsByClassName("tp_mcq_p")[k].innerText);
-        // console.log(answer, crranswer)
         if (areEqual(answer, crranswer)) {
             dE("tp_status").innerText = "Correct Answer";
             status = 1;
@@ -2504,7 +2508,6 @@ function renderTestList(type) {
     if (type == "active") renList = activeTestList;
     else if (type == "upcoming") renList = upcomingTestList;
     else if (type == "finished") renList = finishedTestList;
-    // else { console.log("ERROR") }
     dE("testlinks").innerHTML = "";
     for (var ele of renList){
         var strson = new Date(ele.strton.seconds * 1000);
@@ -2630,7 +2633,6 @@ async function getSimpleTestReport() {
                     time: analysedActions.questions[reQW[i].qid].time,
                     no: i + 1
                 });
-                console.log(data);
                 questionGraph("fto_draw", data);
             } catch  {
                 dE("te_title").innerText = "ERROR";
@@ -2834,7 +2836,6 @@ async function getTestInfo() {
         locationHandler("testend", 1);
         return 0;
     }
-    // console.log(testInfo, testQuestionList)
     docRef = (0, _firestore.doc)(db, "tests", testid, "responses", auth.currentUser.uid);
     docSnap = await (0, _firestore.getDoc)(docRef);
     if (docSnap.exists()) {
@@ -3336,13 +3337,17 @@ window.addEventListener("online", ()=>internetStatus(1));
 window.addEventListener("offline", ()=>internetStatus(0));
 dE("te_title").innerText = "The Test Has Ended";
 function notesUIHandler() {
-    dE("un_preview").style.display = "none";
-    dE("un_edit").style.display = "none";
     if (dE("un_rendermode").value == "preview") {
         dE("un_preview").style.display = "block";
         dE("un_preview").innerHTML = "<h1 style = 'text-align:center'>" + dE("un_title").value + "</h1><br>" + getHTML("un_editable");
-    } else if (dE("un_rendermode").value == "edit") dE("un_edit").style.display = "flex";
-    dE("uno" + window.location.hash.split("usernotes/")[1]).style.backgroundColor = dE("un_colorpicker").value;
+        dE("un_edit").style.display = "none";
+    } else if (dE("un_rendermode").value == "edit") {
+        dE("un_edit").style.display = "flex";
+        dE("un_preview").style.display = "none";
+    }
+    try {
+        dE("uno" + window.location.hash.split("usernotes/")[1]).style.backgroundColor = dE("un_colorpicker").value;
+    } catch  {}
 }
 function defineEvents() {
     function chItem() {
@@ -3555,8 +3560,8 @@ function defineEvents() {
     var un_rendermode = dE("un_rendermode").addEventListener("change", notesUIHandler);
     var un_viewership = dE("un_viewership").addEventListener("change", notesUIHandler);
     dE("un_print").addEventListener("click", function() {
-        dE("un_preview").style.display = "block";
-        dE("un_preview").innerHTML = "<h1 style = 'text-align:center;margin:0px'>" + dE("un_title").value + "</h1><br>" + getHTML("un_editable");
+        dE("un_preview").style.display = "none";
+        dE("un_preview").innerHTML = "<h1 style = 'text-align:center;margin:0px'>" + dE("un_title").value + "</h1>" + getHTML("un_editable");
         window.idElementPrint(dE("un_preview"), userinfo.name);
     });
     dE("qbnk_vid_btn_e").addEventListener("click", qbnkend);
@@ -3576,16 +3581,9 @@ function pauVid() {
 function loadVid(videoId) {
     window.player.loadVideoById(videoId);
 }
-function getHTML(id) {
-    return getHTML(id);
-}
-function setHTM(id, html) {
-    setHTML(id, html);
-}
 function renderAppInfo() {
     dE("ren_appinf").textContent = JSON.stringify(Quarkz, undefined, 2);
 }
-function immersiveMode() {}
 $(document).ready(function() {
     $(".summernote").summernote({
         toolbar: [
@@ -5054,8 +5052,8 @@ parcelHelpers.export(exports, "validateCallback", ()=>validateCallback);
 parcelHelpers.export(exports, "validateContextObject", ()=>validateContextObject);
 parcelHelpers.export(exports, "validateIndexedDBOpenable", ()=>validateIndexedDBOpenable);
 parcelHelpers.export(exports, "validateNamespace", ()=>validateNamespace);
+var process = require("d8acfab35ed80fa1");
 var global = arguments[3];
-var process = require("75c6798409183bec");
 const CONSTANTS = {
     /**
      * @define {boolean} Whether this is the client Node.js SDK.
@@ -6744,7 +6742,7 @@ function indicator(i) {
     else return service;
 }
 
-},{"75c6798409183bec":"d5jf4","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"d5jf4":[function(require,module,exports) {
+},{"d8acfab35ed80fa1":"d5jf4","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"d5jf4":[function(require,module,exports) {
 // shim for using process in browser
 var process = module.exports = {};
 // cached from whatever global is present so that test runners that stub it
@@ -16487,7 +16485,7 @@ var _component = require("@firebase/component");
 var _logger = require("@firebase/logger");
 var _util = require("@firebase/util");
 var _webchannelWrapper = require("@firebase/webchannel-wrapper");
-var process = require("4745b6d61a8f486d");
+var process = require("3a1ca4e85d5462c7");
 const b = "@firebase/firestore";
 /**
  * @license
@@ -34982,7 +34980,7 @@ function lf(t, e) {
     (0, _app.registerVersion)(b, "3.8.3", "esm2017");
 }();
 
-},{"4745b6d61a8f486d":"d5jf4","@firebase/app":"3AcPV","@firebase/component":"bi1VB","@firebase/logger":"fZmft","@firebase/util":"ePiK6","@firebase/webchannel-wrapper":"yQiQ1","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"yQiQ1":[function(require,module,exports) {
+},{"3a1ca4e85d5462c7":"d5jf4","@firebase/app":"3AcPV","@firebase/component":"bi1VB","@firebase/logger":"fZmft","@firebase/util":"ePiK6","@firebase/webchannel-wrapper":"yQiQ1","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"yQiQ1":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "ErrorCode", ()=>ErrorCode);

@@ -570,6 +570,17 @@ body {
   font-size: 14px;
 }
 
+#nt_nocontrol {
+  width: 20vw;
+  height: 10vh;
+  background-color: var(--bgcolor);
+  text-align: center;
+  border: 2px solid gray;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
 @media screen {
   div.divFooter {
     display: none;
@@ -593,6 +604,16 @@ body {
     transform: translate(-50%, -50%);
   }
 
+  .divFooter2 {
+    color: #050520;
+    z-index: 0;
+    font-size: 15px;
+    position: fixed;
+    bottom: 5px;
+    left: 50%;
+    transform: translateY(50%);
+  }
+
   body:before {
     content: "";
     z-index: -1000;
@@ -605,8 +626,10 @@ body {
   }
 
   body {
+    color: #000;
     background: url("Q_Print.82411e7a.png");
     margin: 0;
+    font-family: Nunito;
     position: relative;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
@@ -914,7 +937,7 @@ body {
   background-repeat: no-repeat;
   background-size: cover;
   flex-direction: column;
-  justify-content: space-around;
+  justify-content: center;
   display: flex;
 }
 
@@ -924,7 +947,14 @@ body {
 }
 
 #prf_tab_t {
-  background: url("prf_background.bdac6d39.webp"), url("prf_background.ad516756.png");
+  background-color: #0000;
+  background-image: url("prf_background.bdac6d39.webp"), url("prf_background.ad516756.png");
+  background-position: center;
+  background-repeat: repeat, repeat;
+  background-size: cover;
+  background-attachment: scroll, scroll;
+  background-origin: padding-box, padding-box;
+  background-clip: border-box, border-box;
 }
 
 #prf_email:before {
@@ -1245,8 +1275,21 @@ circle text {
   display: flex;
 }
 
+.db_class {
+  min-height: 30vh;
+  width: 400px;
+  height: max-content;
+  border: 2px solid gray;
+  border-radius: 10px;
+  flex-direction: column;
+  align-items: center;
+  margin: 5px;
+  display: flex;
+  overflow-y: scroll;
+}
+
 #tb_vl_br {
-  -webkit-appearance: none;
+  appearance: none;
   height: 10px;
   width: 150px;
   cursor: pointer;

@@ -13,22 +13,15 @@ For permission requests, please contact [Mr Techtroid] at mrtechtroid@outlook.co
 */
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence, GoogleAuthProvider, signInWithPopup, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
-import { getFirestore, orderBy, limit, writeBatch, collection, addDoc, onSnapshot, arrayUnion, arrayRemove, setDoc, updateDoc, getDocs, doc, serverTimestamp, getDoc, query, where } from "firebase/firestore";
+import { getFirestore, orderBy, limit, writeBatch, collection, addDoc, onSnapshot,deleteDoc, arrayUnion, arrayRemove, setDoc, updateDoc, getDocs, doc, serverTimestamp, getDoc, query, where } from "firebase/firestore";
 import { getStorage, ref, uploadBytesResumable, getDownloadURL, } from 'firebase/storage';
-// import $ from 'jquery';
-// window.$ = $;
-// window.jQuery = $;
 import * as d3 from 'd3';
-// import 'summernote/dist/summernote-lite.js';
-// import 'summernote/dist/summernote-lite.css';
-
-// import { sysaccess } from 'js/reworkui.js'
 
 const firebaseConfig = {
   apiKey: "AIzaSyDN8T7Pmw5e-LzmC3nAHEqI0Uk7FF7y6fc",
   authDomain: "quarkz.firebaseapp.com",
   projectId: "quarkz",
-  storageBucket: "quarkz.appspot.d3",
+  storageBucket: "quarkz.appspot.com",
   messagingSenderId: "1050835442263",
   appId: "1:1050835442263:web:e7d05ca9373f2f6083a112",
   measurementId: "G-1Y3S45VWFH"
@@ -447,8 +440,7 @@ function unotes2() {
 
 }
 async function getUserNotes() {
-  dE("un_rendermode").value = "edit"
-  try { window.notesUIHandler() } catch { }
+  try { notesUIHandler() } catch { }
   if (window.location.hash.includes("usernotes/add")) {
     var docRef = await addDoc(collection(db, "usernotes"), {
       title: "Notes Title",
@@ -473,6 +465,22 @@ async function getUserNotes() {
       dE("un_title").value = docRef.title;
       setHTML("un_editable", docRef.notes);
       dE("un_viewership").value = docRef.type;
+      if (docRef.type == "public_view" && userinfo.uuid != docRef.uuid){
+        dE("un_rendermode").innerHTML = '<option value="preview">preview</option>'
+        dE("un_rendermode").value = "preview";
+        dE("un_save").style.display = "none"
+        dE("un_colorpicker").style.display = "none"
+        dE("un_viewership").style.display = "none"
+        dE("un_title").style.display = "none"
+      }else{
+        dE("un_rendermode").innerHTML = '<option value="edit">edit</option><option value="preview">preview</option>'
+        dE("un_rendermode").value = "edit";
+        dE("un_save").style.display = "block"
+        dE("un_colorpicker").style.display = "block"
+        dE("un_viewership").style.display = "block"
+        dE("un_title").style.display = "block"
+      }
+      notesUIHandler()
     }
   }
 }
@@ -1278,13 +1286,13 @@ async function getChapterEList() {
     dE("chp_chaptername").innerText = docJSON.name
     try {
       for (let ele of docJSON.qbanks) {
-        dE("chp_qbk_list").insertAdjacentHTML('beforeend', '<span class="tlinks rpl" style = "color:pink" id="chpqbk' + btoa(ele.id) + '">' + ele.title + '</span>')
+        dE("chp_qbk_list").insertAdjacentHTML('beforeend', '<span class="tlinks_min rpl" style = "color:pink" id="chpqbk' + btoa(ele.id) + '">' + ele.title + '</span>')
         dE("chpqbk" + btoa(ele.id)).addEventListener('click', qbkclicker)
       }
     } catch { }
     try {
       for (let ele of docJSON.topics) {
-        dE("chp_tpc_list").insertAdjacentHTML('beforeend', '<span class="tlinks rpl" style = "color:pink" id="chptpc' + btoa(ele.id) + '">' + ele.title + '</span>')
+        dE("chp_tpc_list").insertAdjacentHTML('beforeend', '<span class="tlinks_min rpl" style = "color:pink" id="chptpc' + btoa(ele.id) + '">' + ele.title + '</span>')
         dE("chptpc" + btoa(ele.id)).addEventListener('click', tpcclicker)
       }
     } catch { }
@@ -1297,7 +1305,6 @@ function chclicker() {
 // Rendering Chapter List
 function renderCList(type) {
   dE("qb_cont_2").innerHTML = ""
-  // console.log(chapterlist)
   for (var i = 0; i < chapterlist.length; i++) {
     var ele = chapterlist[i]
     if (ele.subject == type) {
@@ -1568,6 +1575,7 @@ async function authStateObserver(user) {
       editorrole = docJSON.roles['editor']
       adminrole = docJSON.roles['admin']
       userinfo.usernotes = docJSON.usernotes
+      if (docJSON.usernotes == undefined){userinfo.usernotes = []}
     }
     if (docJSON.deleted == true) {
       log("Warning", "User Account Has Been Deleted")
@@ -1659,7 +1667,6 @@ function uploadImages() {
     const storageRef = ref(storage, a);
     // 'file' comes from the Blob or File API
     uploadBytes(storageRef, file).then((snapshot) => {
-      // console.log('Uploaded a blob or file!');
     });
   };
   reader.readAsText(file.files[0]);
@@ -1669,13 +1676,11 @@ function signUpRestrict() {
 }
 function checkQuestion() {
   var qid = dE("tp_question").getAttribute("dataid");
-  // console.log(qid)
   var type = dE("tp_question").getAttribute("qtype");
   var answer
   var crranswer, explanation, hint
   var status = 0
   for (var i = 0; i < topicJSON.qllist.length; i++) {
-    // console.log(topicJSON.qllist[i])
     if (topicJSON.qllist[i].id == qid) {
       crranswer = topicJSON.qllist[i].answer
       explanation = topicJSON.qllist[i].expl
@@ -1698,7 +1703,6 @@ function checkQuestion() {
     for (var k = 0; k < document.getElementsByClassName("tp_mcq_p").length; k++) {
       if (document.getElementsByClassName("tp_mcq_p")[k].classList.contains("aq_mcq_ans")) { answer.push(document.getElementsByClassName("tp_mcq_p")[k].innerText) }
     }
-    // console.log(answer, crranswer)
     if (areEqual(answer, crranswer)) {
       dE("tp_status").innerText = "Correct Answer"
       status = 1
@@ -1820,7 +1824,6 @@ function renderTestList(type) {
     renList = activeTestList
   } else if (type == "upcoming") { renList = upcomingTestList }
   else if (type == "finished") { renList = finishedTestList }
-  // else { console.log("ERROR") }
   dE("testlinks").innerHTML = ""
   for (var ele of renList) {
     var strson = new Date(ele.strton.seconds * 1000)
@@ -1932,7 +1935,6 @@ async function getSimpleTestReport() {
               }
               
             }
-            console.log(data)
             questionGraph("fto_draw",data)
 
           }
@@ -2116,7 +2118,6 @@ async function getTestInfo() {
     locationHandler("testend", 1)
     return 0;
   }
-  // console.log(testInfo, testQuestionList)
   docRef = doc(db, "tests", testid, "responses", auth.currentUser.uid);
   docSnap = await getDoc(docRef);
   if (docSnap.exists()) {
@@ -2547,15 +2548,15 @@ window.addEventListener('online', () => internetStatus(1));
 window.addEventListener('offline', () => internetStatus(0));
 dE("te_title").innerText = "The Test Has Ended"
 function notesUIHandler(){
-  dE("un_preview").style.display = "none"
-  dE("un_edit").style.display = "none"
  if (dE("un_rendermode").value == "preview"){
   dE("un_preview").style.display = "block"
   dE("un_preview").innerHTML = "<h1 style = 'text-align:center'>"+dE("un_title").value+"</h1><br>"+getHTML("un_editable")
- }else if (dE("un_rendermode").value == "edit"){
+  dE("un_edit").style.display = "none"
+}else if (dE("un_rendermode").value == "edit"){
   dE("un_edit").style.display = "flex"
+  dE("un_preview").style.display = "none"
  }
- dE("uno"+window.location.hash.split("usernotes/")[1]).style.backgroundColor = dE("un_colorpicker").value
+ try{dE("uno"+window.location.hash.split("usernotes/")[1]).style.backgroundColor = dE("un_colorpicker").value}catch{}
 }
 function defineEvents() {
   function chItem() { changeItem(1) }
@@ -2671,8 +2672,8 @@ function defineEvents() {
   var un_rendermode = dE("un_rendermode").addEventListener("change",notesUIHandler)
   var un_viewership = dE("un_viewership").addEventListener("change",notesUIHandler)
   dE("un_print").addEventListener("click", function () {
-    dE("un_preview").style.display = "block";
-    dE("un_preview").innerHTML = "<h1 style = 'text-align:center;margin:0px'>" + dE("un_title").value + "</h1><br>" + getHTML("un_editable");
+    dE("un_preview").style.display = "none";
+    dE("un_preview").innerHTML = "<h1 style = 'text-align:center;margin:0px'>" + dE("un_title").value + "</h1>" + getHTML("un_editable");
     window.idElementPrint(dE("un_preview"), userinfo.name);
   })
   dE("qbnk_vid_btn_e").addEventListener("click", qbnkend)
@@ -2686,9 +2687,7 @@ function loadVid(videoId) { window.player.loadVideoById(videoId); }
 function renderAppInfo() {
   dE("ren_appinf").textContent = JSON.stringify(Quarkz, undefined, 2);
 }
-function immersiveMode() {
 
-}
 $(document).ready(function() {
   $('.summernote').summernote({   
     toolbar: [

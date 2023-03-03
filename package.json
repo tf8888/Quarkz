@@ -5,6 +5,9 @@
     "start": "parcel",
     "build": "parcel build"
   },
+  "copy": {
+    "src/css/styles.css": "dist/print.css"
+  },
   "devDependencies": {
     "@parcel/packager-raw-url": "^2.8.3",
     "@parcel/transformer-webmanifest": "^2.8.3",
@@ -12,7 +15,7 @@
     "process": "^0.11.10"
   },
   "description": "An Online Quiz And Education Platform Built With Vanilla Javascript. \r ## NOTE\r This Repository Is Protected Under Copyright Law. Using Any File or Parts of Files From this Repository for Any Use Without Prior Consent May Result In DMCA Strikes. \r ### Copyright © 2020-22 Mr Techtroid",
-  "version": "1.0.0",
+  "version": "0.4.1",
   "author": "Mr Techtroid",
   "license": "ISC",
   "browserslist": [

@@ -613,6 +613,17 @@ body {
   font-size: 14px;
 }
 
+#nt_nocontrol {
+  position: absolute;
+  right: 0px;
+  top: 0px;
+  width: 20vw;
+  height: 10vh;
+  background-color: var(--bgcolor);
+  text-align: center;
+  border: grey 2px solid;
+}
+
 @media screen {
   div.divFooter {
     display: none;
@@ -635,6 +646,16 @@ body {
     color: rgb(168, 168, 173);
     z-index: 0;
 
+  }
+
+  .divFooter2 {
+    position: fixed;
+    bottom: 5px;
+    left: 50%;
+    transform: translateY(50%);
+    font-size: 15px;
+    color: rgb(5, 5, 32);
+    z-index: 0;
   }
 
   body:before {
@@ -660,6 +681,8 @@ body {
     background-image: none;
     margin: 0;
     background: url("../assets/Q_Print.png");
+    color: rgb(0, 0, 0);
+    font-family: Nunito;
   }
 
   #ovr_l_1 {
@@ -871,31 +894,59 @@ body {
   border-radius: 30px 0px 0px 30px;
   margin: 10px;
 }
-.tt_question hr{
-  background-color:grey;
+
+.tt_question hr {
+  background-color: grey;
 }
-#tt_question{
-  height:70vh;
-  border:grey 3px solid;
+
+#tt_question {
+  height: 70vh;
+  border: grey 3px solid;
   overflow-y: scroll;
   /* min-width: 600px; */
 }
-#tt_timeleft, #tt_marksaward,#tt_timespent,#tt_testname{
-  padding-left:20px;
+
+#tt_timeleft,
+#tt_marksaward,
+#tt_timespent,
+#tt_testname {
+  padding-left: 20px;
   padding-right: 20px;
   border-radius: 5px 5px 5px 5px;
   border: grey 1px solid;
 }
-#testv1{
-  flex-direction: row;flex-wrap: wrap;height:max-content;min-height: 90vh;
+
+#testv1 {
+  flex-direction: row;
+  flex-wrap: wrap;
+  height: max-content;
+  min-height: 90vh;
 }
-#tw_Physics_c,#tw_Chemistry_c,#tw_Math_c,#tw_Computer_c,#tw_Biology_c,#tw_Statistics_c,#tw_Unfiled_c{
-  display: flex;flex-direction: row;flex-wrap:wrap;height:auto
+
+#tw_Physics_c,
+#tw_Chemistry_c,
+#tw_Math_c,
+#tw_Computer_c,
+#tw_Biology_c,
+#tw_Statistics_c,
+#tw_Unfiled_c {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  height: auto
 }
-#tw_Physics,#tw_Chemistry,#tw_Math,#tw_Computer,#tw_Biology,#tw_Statistics,#tw_Unfiled{
+
+#tw_Physics,
+#tw_Chemistry,
+#tw_Math,
+#tw_Computer,
+#tw_Biology,
+#tw_Statistics,
+#tw_Unfiled {
   display: flex;
   flex-direction: column;
 }
+
 #tt_qnobx {
   display: flex;
   flex-direction: row;
@@ -908,11 +959,13 @@ body {
   overflow-y: scroll;
   border: grey 1px solid;
 }
-.fto_small{
+
+.fto_small {
   font-size: 12px;
   color: grey;
   margin: 5px
 }
+
 .t_gre {
   background-color: #122235;
   border-radius: 5px 5px 5px 5px;
@@ -966,7 +1019,8 @@ body {
   margin-top: 1px;
 }
 
-#prf_tab_t,#abt_tab_t {
+#prf_tab_t,
+#abt_tab_t {
   height: 30vh;
   object-fit: cover;
   width: 100%;
@@ -976,16 +1030,20 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  justify-content: space-around;
 }
-#abt_tab_t{
+
+#abt_tab_t {
   /* background: url("/../assets/banner.webp"), url("/../assets/banner.png"); */
   background-position: center;
   background-size: 50px;
 }
-#prf_tab_t{
+
+#prf_tab_t {
   background: url("../assets/prf_background.webp"), url("../assets/prf_background.png");
+  background-size: cover;
+  background-position: center;
 }
+
 #prf_email::before {
   content: "✉ "
 }
@@ -995,19 +1053,23 @@ body {
   color: rgb(0, 0, 0);
   font-weight: bold;
 }
-#abt_name{
+
+#abt_name {
   font-size: 4vh;
   color: rgb(255, 255, 255);
   font-weight: bold;
 }
+
 .prf_det {
   font-size: 2vh;
   color: rgb(80, 79, 79)
 }
-.abt_det{
+
+.abt_det {
   font-size: 2vh;
   color: rgb(155, 137, 137)
 }
+
 #prf_phone::before {
   content: "☎ "
 }
@@ -1020,7 +1082,8 @@ body {
   content: "Joined On "
 }
 
-#prf_tab_t_t,#abt_tab_t_t {
+#prf_tab_t_t,
+#abt_tab_t_t {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -1028,25 +1091,30 @@ body {
   height: 30vh;
 }
 
-#prf_tab_t_t_img{
+#prf_tab_t_t_img {
   height: 100px;
   width: 100px;
 }
-.prf_male{
+
+.prf_male {
   background: url("../assets/q_male.svg");
   background-size: cover;
 }
-.prf_female{
+
+.prf_female {
   background: url("../assets/q_female.svg");
   background-size: cover;
 }
-#abt_tab_t_t_img{
-  border:#06D85F 2px solid;
+
+#abt_tab_t_t_img {
+  border: #06D85F 2px solid;
   border-radius: 30px;
   width: 200px;
-  height:200px
+  height: 200px
 }
-#prf_tab_t_hold,#abt_tab_t_hold {
+
+#prf_tab_t_hold,
+#abt_tab_t_hold {
   display: flex;
   flex-direction: column;
   height: 7vh;
@@ -1054,12 +1122,15 @@ body {
   height: max-content;
   justify-content: left;
 }
-#abt_tab_t_hold{
-  margin:10px;
+
+#abt_tab_t_hold {
+  margin: 10px;
 }
+
 circle text {
   fill: #fff;
 }
+
 #yt_progressBar div {
   height: 100%;
   width: 0;
@@ -1322,8 +1393,22 @@ circle text {
   justify-content: space-evenly;
 }
 
+.db_class {
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+  min-height: 30vh;
+  border: grey solid 2px;
+  width: 400px;
+  border-radius: 10px 10px 10px 10px;
+  align-items: center;
+  margin: 5px;
+  height:max-content
+}
+
 #tb_vl_br {
   margin: auto;
+  appearance: none;
   -webkit-appearance: none;
   position: relative;
   overflow: hidden;
