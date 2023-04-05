@@ -621,6 +621,7 @@ function log(title, msg, action, actionname, type) {
     if (actionname == undefined) actionname = "";
     (0, _helper.dE)("msg_action_" + no).onclick = action;
     (0, _helper.dE)("msg_action_" + no).innerText = actionname;
+    return "msg_popup_" + no;
 }
 // Merge The Contents of Two Array's
 const mergeById = (a1, a2)=>a1.map((itm)=>({
@@ -2835,9 +2836,10 @@ async function computeResult(type) {
     var marksList = [];
     var fg = [];
     var testid = "";
+    var gty = "";
     if (window.location.hash.includes("/attempt/")) {
         testid = window.location.hash.split("#/attempt/")[1];
-        log("Warning", "Submitting Tests Answers: Please Do Not Close The Tab.");
+        gty = log("Warning", "Submitting Tests Answers: Please Do Not Close The Tab.");
     } else if (window.location.hash.includes("/finished/")) testid = window.location.hash.split("#/finished/")[1];
     else if (window.location.hash.includes("/testreport/")) testid = window.location.hash.split("#/testreport/")[1];
     var docRef = (0, _firestore.doc)(db, "tests", testid, "responses", auth.currentUser.uid);
@@ -2972,8 +2974,8 @@ async function computeResult(type) {
         });
         locationHandler("testend", 1);
     }
-    document.getElementById("msg_popup").style.visibility = "hidden";
-    document.getElementById("msg_popup").style.opacity = "0";
+    document.getElementById(gty).style.visibility = "hidden";
+    document.getElementById(gty).style.opacity = "0";
 }
 function testqHandler(id, no) {
     var MCQ = ``;
@@ -3247,10 +3249,7 @@ window.onbeforeunload = function(event) {
     updatePoints();
 };
 function internetStatus(type) {
-    if (type == 1) {
-        document.getElementById("msg_popup").style.visibility = "hidden";
-        document.getElementById("msg_popup").style.opacity = "0";
-    } else if (type == 0) log("WARNING", "You Are Currently Offline.");
+    if (type == 0) log("WARNING", "You Are Currently Offline.");
 }
 window.addEventListener("online", ()=>internetStatus(1));
 window.addEventListener("offline", ()=>internetStatus(0));
@@ -4971,8 +4970,8 @@ parcelHelpers.export(exports, "validateCallback", ()=>validateCallback);
 parcelHelpers.export(exports, "validateContextObject", ()=>validateContextObject);
 parcelHelpers.export(exports, "validateIndexedDBOpenable", ()=>validateIndexedDBOpenable);
 parcelHelpers.export(exports, "validateNamespace", ()=>validateNamespace);
-var process = require("d8acfab35ed80fa1");
 var global = arguments[3];
+var process = require("d8acfab35ed80fa1");
 const CONSTANTS = {
     /**
      * @define {boolean} Whether this is the client Node.js SDK.
