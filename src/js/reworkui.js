@@ -21,13 +21,16 @@ export function sysaccess() {
     function init(){
         r("Ariel","color:pink;align-text:center;")
     }
-    function x(){
+    function x(fn){
         const u = w("c-input").value;
-    }
-    w("c-exec").addEventListener("click",x)
-    document.querySelector("body").insertAdjacentHTML("beforeend",
+        document.querySelector("body").insertAdjacentHTML("beforeend",
         `<script></script>`
     )
+    }
+    var clog = console
+    console = {}
+    console = {log:function(logtxt){r("",logtxt)},error:function(logtxt){r("",logtxt)}}
+    w("c-exec").addEventListener("click",x(w("c-input").value))
     const cs = console
     // console = {}
     init()

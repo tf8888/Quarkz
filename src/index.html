@@ -61,7 +61,7 @@ For permission requests, please contact [Mr Techtroid] at mrtechtroid@outlook.co
     </style>
 </head>
 
-<body>
+<body id = "quarkz_body">
     <div id="overlay">
         <div id="overlay_div">
             <span id="ovr_logo"><img src="assets/Quarkz_white.png" alt="Quarkz Coming soon">
@@ -100,9 +100,6 @@ For permission requests, please contact [Mr Techtroid] at mrtechtroid@outlook.co
                 <a href="/#/downloads">Downloads</a>
             </span>
         </div>
-    </div>
-    <div id="guest_dashboard" class="full_page flex_type">
-
     </div>
     <div id="appinfo" class="full_page flex_type">
         <span class="in_t">App Info</span>
@@ -289,10 +286,15 @@ For permission requests, please contact [Mr Techtroid] at mrtechtroid@outlook.co
                 <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/add/tests'">Add Test</div>
                 <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/update/tests'">Update Test</div>
             </div>
+            <div id="fc_batch" class = "db_class">
+                <span style="font-size: 25px;color:yellow">Batches</span>
+                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/add/batch'">Add New Batch</div>
+                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/list/batch'">Update Batches</div>
+                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/update/batch'">Update Batches</div>
+            </div>
             <div id="fc_misc" class = "db_class">
                 <span style="font-size: 25px;color:yellow">Misc</span>
                 <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/edit_exams'">Edit Exams</div>
-                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/update/batch'">Update Batches</div>
             </div>
         </div>
     </div>
@@ -320,22 +322,24 @@ For permission requests, please contact [Mr Techtroid] at mrtechtroid@outlook.co
     </div>
     <div id="fu_topic" class="full_page flex_type ovr-scroll">
         <span class="in_t" class="" id="fu_topic_title">Add/Edit Topic</span>
-        <input type="text" id="aq_tpcname" class="_in_aq" placeholder="Tests/Topic/Question Bank Name">
-        <select name="type" id="aq_tpclevel" class="_in_aq col-red">
-            <option value="jee">JEE</option>
-            <option value="neet">NEET</option>
-            <option value="foundation">Foundation</option>
-        </select>
-        <input type="text" id="aq_tpc_chapterid" class="_in_aq" placeholder="Chapter ID">
-        <select name="type" id="aq_tpc_subj" class="_in_aq col-red">
-            <option value="physics">Physics</option>
-            <option value="chemistry">Chemistry</option>
-            <option value="maths">Maths</option>
-            <option value="biology">Biology</option>
-            <option value="computer">Computer</option>
-            <option value="statistics">Statistics</option>
-            <option value="unfiled">Unfiled</option>
-        </select>
+        <div id="aq_basic" style="flex-direction: column;">
+            <input type="text" id="aq_tpcname" class="_in_aq" placeholder="Tests/Topic/Question Bank Name">
+            <select name="type" id="aq_tpclevel" class="_in_aq col-red">
+                <option value="jee">JEE</option>
+                <option value="neet">NEET</option>
+                <option value="foundation">Foundation</option>
+            </select>
+            <input type="text" id="aq_tpc_chapterid" class="_in_aq" placeholder="Chapter ID">
+            <select name="type" id="aq_tpc_subj" class="_in_aq col-red">
+                <option value="physics">Physics</option>
+                <option value="chemistry">Chemistry</option>
+                <option value="maths">Maths</option>
+                <option value="biology">Biology</option>
+                <option value="computer">Computer</option>
+                <option value="statistics">Statistics</option>
+                <option value="unfiled">Unfiled</option>
+            </select>
+        </div>
         <div id="aq_test_extra" style="flex-direction: column;">
             <input type="text" id="aq_tst_batches" class="_in_aq" placeholder="Batch ID">
             <input type="datetime-local" id="aq_tst_stron" class="_in_aq">
@@ -445,7 +449,7 @@ For permission requests, please contact [Mr Techtroid] at mrtechtroid@outlook.co
         <div id="sidebar">
             <div id="options_tab"
                 style="display: flex;flex-direction: row;align-items:center;height:50px;justify-content: space-evenly;width: 25vw;max-width: 250px;">
-                <span class="material-symbols-outlined rpl">settings</span>
+                <span class="material-symbols-outlined rpl" onclick="window.location = '#/settings'">settings</span>
                 <span class="material-symbols-outlined rpl" id="abt_btn">info</span>
                 <span class="material-symbols-outlined rpl" onclick="window.location = '#/update'">notifications</span>
                 <span class="material-symbols-outlined rpl" id="prf_btn">account_circle</span>
@@ -488,7 +492,7 @@ For permission requests, please contact [Mr Techtroid] at mrtechtroid@outlook.co
             </div>
             <div id="db_social_media" class = "db_class">
                 <span style="font-size: 25px;color:yellow">We're on Social Media</span>
-                <span style="font-size: 14px;color:grey">Follow us, & share with your friends. It motivates us to keep
+                <span style="font-size: 14px;color:grey;margin-left: 10px;">Follow us, & share with your friends. It motivates us to keep
                     working hard for you to bring new features. </span>
                 <img style="width:50px;" alt="Youtube Logo" class="rpl"
                     onclick="window.open('https://www.youtube.com/@quarkz./', '_blank');"
@@ -599,17 +603,6 @@ For permission requests, please contact [Mr Techtroid] at mrtechtroid@outlook.co
         </div>
     </div>
     <div id="testv1" class="full_page flex_type">
-        <div id="t1_msg_popup" class="overlay">
-            <div class="popup">
-                <center>
-                    <h2 id="t1_msg_popup_txt">Note</h2>
-                </center>
-                <a class="close"
-                    onclick="document.getElementById('t1_msg_popup').style.visibility = 'hidden';document.getElementById('t1_msg_popup').style.opacity = '0';document.getElementById('t1_msg_action').onclick = ''">&times;</a>
-                <p id="t1_msg_popup_content"></p>
-                <button class="tst_btn rpl" id="t1_msg_action"></button>
-            </div>
-        </div>
         <div style="border: grey 2px dashed;flex-direction: row;margin:10px;" class="flex_type">
             <div style="display: flex;flex-direction: column;width: 60vw;height:80vh;margin:10px;min-width: 300px;">
                 <div id="tt_extrabx" style="display: flex;flex-direction:row;height: 40px;margin:10px;">
@@ -796,7 +789,6 @@ For permission requests, please contact [Mr Techtroid] at mrtechtroid@outlook.co
 
         <div id="tp_question" style="width: 80%;align-items: center;display: flex;flex-direction: column;">
             <div id="tp_qtext" style="width:80%;height:max-content;min-height: 12vh;">Question</div>
-            <img alt="Quarkz Logo" id="tp_img" src="assets/Quarkz.png">
             <div id="tp_ans_hold">
                 <input type="answer" id="tp_answer" class="_in_aq" placeholder="Answer">
                 <div id="tp_mcq_con" class="flex_type">
@@ -917,6 +909,10 @@ For permission requests, please contact [Mr Techtroid] at mrtechtroid@outlook.co
             <button class="tst_btn rpl" id="c-exec">Execute</button>
         </div>
     </div>
+    <div id="settings" class="flex_type full_page">
+        <span class="in_t">Settings</span>
+        <hr color="white" width="100%">
+    </div>
     <div id="cyberhunt" class="full_page flex_type">
         <div id="cyb_code" class="flex_type">
             <span class="in_t">Join Cyberhunt!</span>
@@ -1025,9 +1021,7 @@ For permission requests, please contact [Mr Techtroid] at mrtechtroid@outlook.co
         </div>
     </div>
     <div id="usernotes" class="full_page flex_type" style="flex-direction: row;">
-        <div id="un_list" style="border:3px solid grey;width:25vw;height:90%">
-
-        </div>
+        <div id="un_list" style="border:3px solid grey;width:25vw;height:90%"></div>
         <div id="un_render" style="width:77vw;height:100%">
             <div id="un_tools" style="width:100%;display: flex;flex-direction: row;flex-wrap: wrap;">
                 <select id="un_rendermode" class="_in_aq" style="width: 100px;color:red;"
@@ -1054,17 +1048,6 @@ For permission requests, please contact [Mr Techtroid] at mrtechtroid@outlook.co
             <iframe style="display: none;" id="un_print_iframe"></iframe>
         </div>
     </div>
-    <div id="msg_popup" class="overlay">
-        <div class="popup">
-            <center>
-                <h2 id="msg_popup_txt">Note</h2>
-            </center>
-            <a class="close"
-                onclick="document.getElementById('msg_popup').style.visibility = 'hidden';document.getElementById('msg_popup').style.opacity = '0';document.getElementById('msg_action').onclick = ''">&times;</a>
-            <p id="msg_popup_content"></p>
-            <button class="tst_btn rpl" id="msg_action"></button>
-        </div>
-    </div>
     <div id="downloads" class="full_page flex_type">
 
     </div>
@@ -1073,13 +1056,7 @@ For permission requests, please contact [Mr Techtroid] at mrtechtroid@outlook.co
     </div>
     <script src="js/main.js" type="module"></script>
     <script src="js/extras.js"></script>
-    <!-- <script>setInterval(function (){console.clear()},1000)</script> -->
     <noscript>Javascript Disabled! This Site Requires Javascript To Run</noscript>
-    <!-- <script>
-        function clearData(){
-            window.clipboardData.setData('text','') 
-        }
-    </script> -->
 </body>
 
 </html>

@@ -574,6 +574,8 @@ var _auth = require("firebase/auth");
 var _firestore = require("firebase/firestore");
 var _storage = require("firebase/storage");
 var _d3 = require("d3");
+var _helper = require("../js/helper");
+var _reworkui = require("./reworkui");
 const firebaseConfig = {
     apiKey: "AIzaSyDN8T7Pmw5e-LzmC3nAHEqI0Uk7FF7y6fc",
     authDomain: "quarkz.firebaseapp.com",
@@ -591,143 +593,40 @@ const auth = (0, _auth.getAuth)();
 }).catch((error)=>{});
 const storage = (0, _storage.getStorage)();
 // Helper Functions
-// Convert Seconds to Hours-Mins-Seconds.
-// StackOverFlow - https://stackoverflow.com/a/52387803
-function sd(seconds) {
-    seconds = Number(seconds);
-    var d = Math.floor(seconds / 86400);
-    var h = Math.floor(seconds % 86400 / 3600);
-    var m = Math.floor(seconds % 3600 / 60);
-    var s = Math.floor(seconds % 60);
-    var dDisplay = d > 0 ? d + (d == 1 ? " day, " : " days, ") : "";
-    var hDisplay = h > 0 ? h + (h == 1 ? " hour, " : " hours, ") : "";
-    var mDisplay = m > 0 ? m + (m == 1 ? " minute, " : " minutes, ") : "";
-    var sDisplay = s > 0 ? s + (s == 1 ? " second" : " seconds") : "";
-    return dDisplay + hDisplay + mDisplay + sDisplay;
-}
-// Generate a Random ID of certain length
-// StakOverflow: https://stackoverflow.com/a/1349426/15107474
-function makeid(length) {
-    var result = "";
-    var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    var charactersLength = characters.length;
-    for(var i = 0; i < length; i++)result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    return result;
-}
-// Find the sha256 hash of a Text
-// StakOverflow: https://stackoverflow.com/a/48161723
-async function sha256(message) {
-    const msgBuffer = new TextEncoder().encode(message);
-    const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray.map((b)=>b.toString(16).padStart(2, "0")).join("");
-    return hashHex;
-}
-// Check if Two Array's are Equal
-// GeeksForGeeks: https://www.geeksforgeeks.org/check-if-two-arrays-are-equal-or-not/
-function areEqual(arr1, arr2) {
-    let N = arr1.length;
-    let M = arr2.length;
-    if (N != M) return false;
-    arr1.sort();
-    arr2.sort();
-    for(let i = 0; i < N; i++)if (arr1[i] != arr2[i]) return false;
-    return true;
-}
-// Check for Mobile Devices
-// StackOverflow: https://stackoverflow.com/a/11381730
-function mobileCheck() {
-    let check = false;
-    (function(a) {
-        if (/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(a) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0, 4))) check = true;
-    })(navigator.userAgent || navigator.vendor || window.opera);
-    return check;
-}
-// Check if Two Objects are Equal
-// StackOverflow: https://stackoverflow.com/a/32922084
-function areObjectsEqual(x, y) {
-    const ok = Object.keys, tx = typeof x, ty = typeof y;
-    return x && y && tx === "object" && tx === ty ? ok(x).length === ok(y).length && ok(x).every((key)=>areObjectsEqual(x[key], y[key])) : x === y;
-}
-// Get Time Of Server
-function getServerTime(url) {
-    fetch(url).then((response)=>{
-        var date;
-        for (var pair of response.headers.entries())if (pair[0] === "date") date = new Date(pair[1]).getTime();
-        return date;
-    });
-}
-// Make A Element Full Screen
-function fullEle(ele) {
-    if (ele.requestFullscreen) ele.requestFullscreen();
-    else if (ele.mozRequestFullScreen) /* Firefox */ ele.mozRequestFullScreen();
-    else if (ele.webkitRequestFullscreen) /* Chrome, Safari and Opera */ ele.webkitRequestFullscreen();
-    else if (ele.msRequestFullscreen) /* IE/Edge */ ele.msRequestFullscreen();
-}
-// Get Elements With ID in Short Form
-function dE(ele) {
-    return document.getElementById(ele);
-}
-// Sort An Object based on a parameter.
-function sortObj(objs, param, type) {
-    var sorter2;
-    if (type == 0) sorter2 = (sortBy)=>(a, b)=>a[sortBy] > b[sortBy] ? 1 : -1;
-    if (type == 1) sorter2 = (sortBy)=>(a, b)=>a[sortBy] > b[sortBy] ? -1 : 1;
-    return objs.sort(sorter2(param));
-}
-function sortObjv2(objs, param1, param2, type) {
-    var sorter2;
-    if (type == 0) sorter2 = (sortBy1, sortBy2)=>(a, b)=>{
-            if (a[sortBy1] === b[sortBy1]) return a[sortBy2] > b[sortBy2] ? 1 : -1;
-            return a[sortBy1] > b[sortBy1] ? 1 : -1;
-        };
-    else if (type == 1) sorter2 = (sortBy1, sortBy2)=>(a, b)=>{
-            if (a[sortBy1] === b[sortBy1]) return a[sortBy2] > b[sortBy2] ? -1 : 1;
-            return a[sortBy1] > b[sortBy1] ? -1 : 1;
-        };
-    return objs.sort(sorter2(param1, param2));
-}
-// Make Elements Latex Rendered
-function renderMarkedMath(eleid, toid) {
-    var v = marked.parse(dE(eleid).value);
-    dE(toid).innerHTML = v;
-    renderMathInElement(dE(toid));
-}
 // Special Logging Function
-function log(title, msg, action, actionname) {
-    dE("msg_popup").style.visibility = "visible";
-    dE("msg_popup").style.opacity = "1";
-    dE("msg_action").style.display = "none";
-    document.getElementById("msg_popup_txt").innerText = title;
-    document.getElementById("msg_popup_content").innerText = msg;
+function log(title, msg, action, actionname, type) {
+    var no = Math.floor(Math.random() * 10000);
+    var html = `
+  <div id="msg_popup_` + no + `" class="overlay">
+  <div class="popup">
+      <center>
+          <h2 id="msg_popup_txt_` + no + `">Note</h2>
+      </center>
+      <a class="close"
+          onclick="document.getElementById('msg_popup_` + no + `').remove()">&times;</a>
+      <p id="msg_popup_content_` + no + `"></p>
+      <button class="tst_btn rpl" id="msg_action_` + no + `"></button>
+  </div>
+  </div>
+  `;
+    if (type == undefined || type == 1) (0, _helper.dE)("testv1").insertAdjacentHTML("beforeend", html);
+    else (0, _helper.dE)("quarkz_body").insertAdjacentHTML("beforeend", html);
+    (0, _helper.dE)("msg_popup_" + no).style.visibility = "visible";
+    (0, _helper.dE)("msg_popup_" + no).style.opacity = "1";
+    (0, _helper.dE)("msg_action_" + no).style.display = "none";
+    document.getElementById("msg_popup_txt_" + no).innerText = title;
+    document.getElementById("msg_popup_content_" + no).innerText = msg;
     if (action == undefined) action = function() {};
-    else dE("msg_action").style.display = "block";
+    else (0, _helper.dE)("msg_action_" + no).style.display = "block";
     if (actionname == undefined) actionname = "";
-    dE("msg_action").onclick = action;
-    dE("msg_action").innerText = actionname;
-}
-// Special Logging Function For Tests
-function t_log(title, msg, action, actionname) {
-    dE("t1_msg_popup").style.visibility = "visible";
-    dE("t1_msg_popup").style.opacity = "1";
-    dE("t1_msg_action").style.display = "none";
-    document.getElementById("t1_msg_popup_txt").innerText = title;
-    document.getElementById("t1_msg_popup_content").innerText = msg;
-    if (action == undefined) action = function() {};
-    else dE("t1_msg_action").style.display = "block";
-    if (actionname == undefined) actionname = "";
-    dE("t1_msg_action").onclick = action;
-    dE("t1_msg_action").innerText = actionname;
+    (0, _helper.dE)("msg_action_" + no).onclick = action;
+    (0, _helper.dE)("msg_action_" + no).innerText = actionname;
 }
 // Merge The Contents of Two Array's
 const mergeById = (a1, a2)=>a1.map((itm)=>({
             ...a2.find((item)=>item.qid === itm.qid && item),
             ...itm
         }));
-//Get Server Time
-function gST() {
-    return getServerTime("https:/quarkz.netlify.app/time");
-}
 // Video Creator - https://www.educative.io/edpresso/how-to-create-a-screen-recorder-in-javascript
 let mediaRecorder;
 async function recordScreen() {
@@ -766,8 +665,8 @@ function saveFile(recordedChunks) {
 // Login Page
 // Sign In A User
 async function signIn() {
-    var email1 = dE("lg_uname").value;
-    var password1 = dE("lg_pass").value;
+    var email1 = (0, _helper.dE)("lg_uname").value;
+    var password1 = (0, _helper.dE)("lg_pass").value;
     (0, _auth.signInWithEmailAndPassword)(auth, email1, password1).then((userCredential)=>{
         const user = userCredential.user;
         userdetails.email = email1;
@@ -775,8 +674,8 @@ async function signIn() {
     }).catch((error)=>{
         const errorCode = error.code;
         const errorMessage = error.message;
-        dE("lgn_err").style.display = "block";
-        dE("lg_pass").value = "";
+        (0, _helper.dE)("lgn_err").style.display = "block";
+        (0, _helper.dE)("lg_pass").value = "";
     });
 }
 // Sign Out A User
@@ -788,14 +687,14 @@ function signOutUser() {
 }
 // Register A User
 function signUp() {
-    var email1 = dE("rg_uname").value;
-    var password1 = dE("rg_pass").value;
-    var name = dE("rg_name").value;
-    var mblno = dE("rg_mbleno").value;
-    var stclass = dE("rg_class").value;
-    var stgender = dE("rg_gender").value;
+    var email1 = (0, _helper.dE)("rg_uname").value;
+    var password1 = (0, _helper.dE)("rg_pass").value;
+    var name = (0, _helper.dE)("rg_name").value;
+    var mblno = (0, _helper.dE)("rg_mbleno").value;
+    var stclass = (0, _helper.dE)("rg_class").value;
+    var stgender = (0, _helper.dE)("rg_gender").value;
     if (email1 == "" || password1 == "" || name == "" || mblno == "" || stclass == "") alert("Details Cannot Be Empty");
-    if (password1 != dE("rg_pass1").value) ;
+    if (password1 != (0, _helper.dE)("rg_pass1").value) ;
     else (0, _auth.createUserWithEmailAndPassword)(auth, email1, password1).then((userCredential)=>{
         // Signed in 
         const user = userCredential.user;
@@ -810,6 +709,7 @@ function signUp() {
                     email: email1,
                     spoints: 0,
                     gen: stgender,
+                    batch: "guest",
                     sgndon: (0, _firestore.serverTimestamp)(),
                     roles: {
                         user: true
@@ -834,15 +734,15 @@ function signUp() {
 function locationHandler(newlocation, n1) {
     var iorole = adminrole == true || editorrole == true;
     if (iorole) {
-        dE("adminonly").style.display = "flex";
-        dE("tp_pnt").style.display = "block";
-        dE("tp_edt").style.display = "block";
-        dE("sms_edit").style.display = "block";
+        (0, _helper.dE)("adminonly").style.display = "flex";
+        (0, _helper.dE)("tp_pnt").style.display = "block";
+        (0, _helper.dE)("tp_edt").style.display = "block";
+        (0, _helper.dE)("sms_edit").style.display = "block";
     } else {
-        dE("adminonly").style.display = "none";
-        dE("sms_edit").style.display = "none";
+        (0, _helper.dE)("adminonly").style.display = "none";
+        (0, _helper.dE)("sms_edit").style.display = "none";
     }
-    dE(handlebox).classList.remove("_open");
+    (0, _helper.dE)(handlebox).classList.remove("_open");
     if (n1 == 1) window.location.hash = "#/" + newlocation;
     handlebox = newlocation;
     location1 = window.location.hash.split("#/")[1];
@@ -932,6 +832,14 @@ function locationHandler(newlocation, n1) {
             handlebox = "fu_topic";
             newTest();
             break;
+        case "add/batch":
+            handlebox = "fu_topic";
+            newBatch();
+            break;
+        case "settings":
+            handlebox = "settings";
+            break;
+        // case "list/batch": handlebox = "fu_topic"; newBatch(); break;
         case "chplist":
             handlebox = "chapterlist";
             renderCList();
@@ -967,7 +875,7 @@ function locationHandler(newlocation, n1) {
     }
     if (location1.includes("qbnk_vid")) {
         handlebox = "qbnk_vid";
-        dE("qbnk_vid_btn").style.display = "block";
+        (0, _helper.dE)("qbnk_vid_btn").style.display = "block";
     }
     if (location1.includes("attempt")) {
         handlebox = "testv1";
@@ -1039,7 +947,7 @@ function locationHandler(newlocation, n1) {
         if (location1 == "login" || location1 == "register" || location1.includes("notes") || location1 == "legal" || location1 == "about" || location1 == "bugreport" || location1 == "appinfo" || location1 == "mainsformulas" || location1 == "downloads") ;
         else handlebox = "error_page";
     }
-    dE(handlebox).classList.add("_open");
+    (0, _helper.dE)(handlebox).classList.add("_open");
     stpVid();
     editqllist = [];
     if (location1 == "forum") gtMsg(1);
@@ -1054,6 +962,158 @@ function locationHandler(newlocation, n1) {
     testInfo = [];
     activequestionid = "";
 }
+// -----------------------
+// SIMULATIONS
+// Creates A Blank Simulation
+let simlist = [];
+async function newSimulation() {
+    try {
+        const docRef = await (0, _firestore.addDoc)((0, _firestore.collection)(db, "sims"), {
+            name: "",
+            license: "",
+            provider: "",
+            url: ""
+        });
+        locationHandler("edit_sim/" + docRef.id, 1);
+    } catch  {}
+}
+// Prepares The Simulation Editor
+async function prepareSimulation() {
+    try {
+        let docSnap = await (0, _firestore.getDoc)((0, _firestore.doc)(db, "sims", window.location.hash.split("edit_sim/")[1]));
+        if (docSnap.exists()) {
+            var docJSON = docSnap.data();
+            (0, _helper.dE)("aq_simname").value = docJSON.name;
+            (0, _helper.dE)("aq_simprov").value = docJSON.provider;
+            (0, _helper.dE)("aq_simurl").value = docJSON.url;
+            (0, _helper.dE)("aq_simlicense").value = docJSON.license;
+            (0, _helper.dE)("aq_simsubj").value = docJSON.subject;
+        }
+    } catch  {}
+}
+// Updates Simulation Details
+async function updateSimulationWeb() {
+    try {
+        await (0, _firestore.updateDoc)((0, _firestore.doc)(db, "sims", window.location.hash.split("edit_sim/")[1]), {
+            name: (0, _helper.dE)("aq_simname").value,
+            license: (0, _helper.dE)("aq_simlicense").value,
+            provider: (0, _helper.dE)("aq_simprov").value,
+            url: (0, _helper.dE)("aq_simurl").value,
+            subject: (0, _helper.dE)("aq_simsubj").value
+        });
+        var subj = (0, _helper.dE)("aq_simsubj").value;
+        if (subj == "physics") await (0, _firestore.updateDoc)((0, _firestore.doc)(db, "sims", "sims"), {
+            physics: (0, _firestore.arrayUnion)((0, _helper.dE)("aq_simname").value)
+        });
+        if (subj == "chemistry") await (0, _firestore.updateDoc)((0, _firestore.doc)(db, "sims", "sims"), {
+            chemistry: (0, _firestore.arrayUnion)((0, _helper.dE)("aq_simname").value)
+        });
+        if (subj == "maths") await (0, _firestore.updateDoc)((0, _firestore.doc)(db, "sims", "sims"), {
+            maths: (0, _firestore.arrayUnion)((0, _helper.dE)("aq_simname").value)
+        });
+        if (subj == "computer") await (0, _firestore.updateDoc)((0, _firestore.doc)(db, "sims", "sims"), {
+            computer: (0, _firestore.arrayUnion)((0, _helper.dE)("aq_simname").value)
+        });
+        if (subj == "biology") await (0, _firestore.updateDoc)((0, _firestore.doc)(db, "sims", "sims"), {
+            biology: (0, _firestore.arrayUnion)((0, _helper.dE)("aq_simname").value)
+        });
+        if (subj == "statistics") await (0, _firestore.updateDoc)((0, _firestore.doc)(db, "sims", "sims"), {
+            statistics: (0, _firestore.arrayUnion)((0, _helper.dE)("aq_simname").value)
+        });
+        if (subj == "unfiled") await (0, _firestore.updateDoc)((0, _firestore.doc)(db, "sims", "sims"), {
+            unfiled: (0, _firestore.arrayUnion)((0, _helper.dE)("aq_simname").value)
+        });
+        clearAQ();
+    } catch (error) {
+        console.error("Error writing new message to Firebase Database", error);
+    }
+}
+// Displays Simulation For End User
+async function getSimulation() {
+    var simid = window.location.hash.split("sims/")[1];
+    var docRef = (0, _firestore.doc)(db, "sims", simid);
+    var docSnap = await (0, _firestore.getDoc)(docRef);
+    if (docSnap.exists()) {
+        var docJSON = docSnap.data();
+        (0, _helper.dE)("sms_name").innerText = docJSON.name;
+        (0, _helper.dE)("sms_prov").innerText = docJSON.provider;
+        (0, _helper.dE)("sim_frame").src = docJSON.url;
+    } else {
+        locationHandler("error_page", 1);
+        throw new Error;
+    }
+}
+// Get SimID From SimName
+async function getSimID(sim_name) {
+    var docID;
+    const q = (0, _firestore.query)((0, _firestore.collection)(db, "sims"), (0, _firestore.where)("name", "==", sim_name));
+    const querySnapshot = await (0, _firestore.getDocs)(q);
+    querySnapshot.forEach((doc)=>{
+        docID = doc.id;
+    });
+    locationHandler("sims/" + docID, 1);
+}
+// Helper Function To Get Simulation Name
+function simClicker() {
+    getSimID(this.innerText);
+}
+// Get Simulation List
+async function getSimList(type) {
+    (0, _helper.dE)("sim_cont").innerHTML = "";
+    if (simlist.length == 0) {
+        var docRef = (0, _firestore.doc)(db, "sims", "sims");
+        var docSnap = await (0, _firestore.getDoc)(docRef);
+        if (docSnap.exists()) {
+            var docJSON = docSnap.data();
+            simlist = docJSON;
+        } else {
+            locationHandler("error_page", 1);
+            throw new Error;
+        }
+    }
+    if (type == "physics") try {
+        for (let ele of simlist.physics)if (ele != "") {
+            (0, _helper.dE)("sim_cont").insertAdjacentHTML("beforeend", '<span class="tlinks rpl" style = "color:pink" id="sim' + btoa(ele) + '">' + ele + "</span>");
+            (0, _helper.dE)("sim" + btoa(ele)).addEventListener("click", simClicker);
+        }
+    } catch  {}
+    if (type == "chemistry") try {
+        for (let ele of simlist.chemistry)if (ele != "") {
+            (0, _helper.dE)("sim_cont").insertAdjacentHTML("beforeend", '<span class="tlinks rpl" style = "color:crimson" id="sim' + btoa(ele) + '">' + ele + "</span>");
+            (0, _helper.dE)("sim" + btoa(ele)).addEventListener("click", simClicker);
+        }
+    } catch  {}
+    if (type == "maths") try {
+        for (let ele of simlist.maths)if (ele != "") {
+            (0, _helper.dE)("sim_cont").insertAdjacentHTML("beforeend", '<span class="tlinks rpl" style = "color:turquoise" id="sim' + btoa(ele) + '">' + ele + "</span>");
+            (0, _helper.dE)("sim" + btoa(ele)).addEventListener("click", simClicker);
+        }
+    } catch  {}
+    if (type == "biology") try {
+        for (let ele of simlist.biology)if (ele != "") {
+            (0, _helper.dE)("sim_cont").insertAdjacentHTML("beforeend", '<span class="tlinks rpl" style = "color:lime" id="sim' + btoa(ele) + '">' + ele + "</span>");
+            (0, _helper.dE)("sim" + btoa(ele)).addEventListener("click", simClicker);
+        }
+    } catch  {}
+    if (type == "computer") try {
+        for (let ele of simlist.computer)if (ele != "") {
+            (0, _helper.dE)("sim_cont").insertAdjacentHTML("beforeend", '<span class="tlinks rpl" style = "color:violet" id="sim' + btoa(ele) + '">' + ele + "</span>");
+            (0, _helper.dE)("sim" + btoa(ele)).addEventListener("click", simClicker);
+        }
+    } catch  {}
+    if (type == "statistics") try {
+        for (let ele of simlist.statistics)if (ele != "") {
+            (0, _helper.dE)("sim_cont").insertAdjacentHTML("beforeend", '<span class="tlinks rpl" style = "color:orange" id="sim' + btoa(ele) + '">' + ele + "</span>");
+            (0, _helper.dE)("sim" + btoa(ele)).addEventListener("click", simClicker);
+        }
+    } catch  {}
+    if (type == "unfiled") try {
+        for (let ele of simlist.unfiled)if (ele != "") {
+            (0, _helper.dE)("sim_cont").insertAdjacentHTML("beforeend", '<span class="tlinks rpl" style = "color:white" id="sim' + btoa(ele) + '">' + ele + "</span>");
+            (0, _helper.dE)("sim" + btoa(ele)).addEventListener("click", simClicker);
+        }
+    } catch  {}
+}
 // ----------------------
 // BATCHES
 async function newBatch() {
@@ -1062,7 +1122,15 @@ async function newBatch() {
             name: "",
             timetable: "",
             crton: (0, _firestore.serverTimestamp)(),
-            class: 0
+            class: 12,
+            chlist: [],
+            delon: (0, _firestore.serverTimestamp)()
+        });
+        var docRef1 = await (0, _firestore.setDoc)((0, _firestore.doc)(db, "batch", docRef.id, "info", "tests"), {
+            tests: []
+        });
+        var docRef2 = await (0, _firestore.setDoc)((0, _firestore.doc)(db, "batch", docRef.id, "info", "updates"), {
+            u: []
         });
         locationHandler("edit_batch/" + docRef.id, 1);
     } catch  {}
@@ -1072,10 +1140,10 @@ async function updateBatch() {}
 async function getBatch() {}
 async function unotes1() {
     await (0, _firestore.updateDoc)((0, _firestore.doc)(db, "usernotes", window.location.hash.split("usernotes/")[1]), {
-        title: dE("un_title").value,
+        title: (0, _helper.dE)("un_title").value,
         notes: getHTML("un_editable"),
         lastupdated: (0, _firestore.serverTimestamp)(),
-        type: dE("un_viewership").value
+        type: (0, _helper.dE)("un_viewership").value
     });
 }
 function unotes2() {}
@@ -1099,7 +1167,7 @@ async function getUserNotes() {
                 title: "Notes Title"
             })
         });
-        locationHandler("#/usernotes/" + docRef.id, 1);
+        locationHandler("usernotes/" + docRef.id, 1);
     } else if (window.location.hash.includes("usernotes/delete")) await (0, _firestore.deleteDoc)((0, _firestore.doc)(db, "usernotes", window.location.hash.split("usernotes/delete/")[1]));
     else if (window.location.hash == "#/usernotes/") ;
     else {
@@ -1107,23 +1175,23 @@ async function getUserNotes() {
         var docSnap = await (0, _firestore.getDoc)(docRef);
         if (docSnap.exists()) {
             var docRef = docSnap.data();
-            dE("un_title").value = docRef.title;
+            (0, _helper.dE)("un_title").value = docRef.title;
             setHTML("un_editable", docRef.notes);
-            dE("un_viewership").value = docRef.type;
+            (0, _helper.dE)("un_viewership").value = docRef.type;
             if (docRef.type == "public_view" && userinfo.uuid != docRef.uuid) {
-                dE("un_rendermode").innerHTML = '<option value="preview">preview</option>';
-                dE("un_rendermode").value = "preview";
-                dE("un_save").style.display = "none";
-                dE("un_colorpicker").style.display = "none";
-                dE("un_viewership").style.display = "none";
-                dE("un_title").style.display = "none";
+                (0, _helper.dE)("un_rendermode").innerHTML = '<option value="preview">preview</option>';
+                (0, _helper.dE)("un_rendermode").value = "preview";
+                (0, _helper.dE)("un_save").style.display = "none";
+                (0, _helper.dE)("un_colorpicker").style.display = "none";
+                (0, _helper.dE)("un_viewership").style.display = "none";
+                (0, _helper.dE)("un_title").style.display = "none";
             } else {
-                dE("un_rendermode").innerHTML = '<option value="edit">edit</option><option value="preview">preview</option>';
-                dE("un_rendermode").value = "edit";
-                dE("un_save").style.display = "block";
-                dE("un_colorpicker").style.display = "block";
-                dE("un_viewership").style.display = "block";
-                dE("un_title").style.display = "block";
+                (0, _helper.dE)("un_rendermode").innerHTML = '<option value="edit">edit</option><option value="preview">preview</option>';
+                (0, _helper.dE)("un_rendermode").value = "edit";
+                (0, _helper.dE)("un_save").style.display = "block";
+                (0, _helper.dE)("un_colorpicker").style.display = "block";
+                (0, _helper.dE)("un_viewership").style.display = "block";
+                (0, _helper.dE)("un_title").style.display = "block";
             }
             notesUIHandler();
         }
@@ -1134,18 +1202,18 @@ function uNotesClicker() {
 }
 async function getUserNotesList() {
     for(var i = 0; i < userinfo.usernotes.length; i++){
-        dE("un_list").insertAdjacentHTML("beforeend", "<div class='t_notes' id='uno" + userinfo.usernotes[i].id + "' style='background-color: " + userinfo.usernotes[i].color + "'><span class='tntc2' id='" + userinfo.usernotes[i].id + "'>" + userinfo.usernotes[i].title + "</span></div>");
-        dE("uno" + userinfo.usernotes[i].id).addEventListener("click", uNotesClicker);
+        (0, _helper.dE)("un_list").insertAdjacentHTML("beforeend", "<div class='t_notes' id='uno" + userinfo.usernotes[i].id + "' style='background-color: " + userinfo.usernotes[i].color + "'><span class='tntc2' id='" + userinfo.usernotes[i].id + "'>" + userinfo.usernotes[i].title + "</span></div>");
+        (0, _helper.dE)("uno" + userinfo.usernotes[i].id).addEventListener("click", uNotesClicker);
     }
 }
 async function getPDF() {
     var id = window.location.hash.split("notes/")[1];
     (0, _storage.getDownloadURL)((0, _storage.ref)(storage, "public/" + id + ".pdf")).then((url)=>{
-        dE("nt_id").src = url + "";
+        (0, _helper.dE)("nt_id").src = "https://docs.google.com/gview?url=" + encodeURI(url) + "&embedded=true";
     }).catch((error)=>{
         switch(error.code){
             case "storage/object-not-found":
-                dE("nt_id").src = "https://firebasestorage.googleapis.com/v0/b/quarkz.appspot.com/o/public%2F404.pdf?alt=media&token=8cc8f23a-6e24-41d6-984b-6d2cc9b89d11";
+                (0, _helper.dE)("nt_id").src = "https://docs.google.com/gview?url=" + encodeURI("https://firebasestorage.googleapis.com/v0/b/quarkz.appspot.com/o/public%2F404.pdf?alt=media&token=8cc8f23a-6e24-41d6-984b-6d2cc9b89d11") + "&embedded=true";
                 break;
             case "storage/unauthorized":
                 log("Unauthorised", "You dont have necessary permissions to The file you requested.");
@@ -1156,7 +1224,7 @@ async function getPDF() {
 // FORUM
 // ----------------------
 async function sndMsg() {
-    var qtxt = dE("fm_message").value;
+    var qtxt = (0, _helper.dE)("fm_message").value;
     if (qtxt.includes("/pinned")) {
         qtxt = qtxt.split("/pinned")[1];
         try {
@@ -1175,7 +1243,7 @@ async function sndMsg() {
                 })
             });
         }
-        var sTime = await getServerTime("http://localhost:5500/time.html").then(upDoc(sTime));
+        var sTime = await (0, _helper.getServerTime)("http://localhost:5500/time.html").then(upDoc(sTime));
     } else if (qtxt != "" && qtxt != null) {
         await (0, _firestore.addDoc)((0, _firestore.collection)(db, "forum"), {
             name: userinfo.name,
@@ -1183,26 +1251,26 @@ async function sndMsg() {
             userid: userinfo.uuid,
             sgndon: (0, _firestore.serverTimestamp)()
         });
-        dE("fm_message").value = "";
+        (0, _helper.dE)("fm_message").value = "";
     } else alert("Message Cannot Be Empty");
 }
 function displayMessage(id, time, name, text, userid) {
     if (userid == "shh5oUIhRpdBkEKQ3GCZwoKE9u42") {
         var d = "<div id = 'dM" + id + "'><span class = 'dmName'>" + name + "\uD83D\uDC51: </span><span class = 'dmText'>" + text + "</span><span class = 'dmtime'>" + time + "</span></div>";
-        dE("forum_live").insertAdjacentHTML(forum_d, d);
+        (0, _helper.dE)("forum_live").insertAdjacentHTML(forum_d, d);
     } else {
         var d = "<div id = 'dM" + id + "'><span class = 'dmName'>" + name + ": </span><span class = 'dmText'>" + text + "</span><span class = 'dmtime'>" + time + "</span></div>";
-        dE("forum_live").insertAdjacentHTML(forum_d, d);
+        (0, _helper.dE)("forum_live").insertAdjacentHTML(forum_d, d);
     }
 }
 function deleteMessage(id) {
-    dE("dM" + id).remove();
+    (0, _helper.dE)("dM" + id).remove();
 }
 let recentMessagesQuery;
 let reMSG = function() {};
 async function gtMsg(type) {
     if (type == 1) {
-        dE("forum_live").innerHTML = "";
+        (0, _helper.dE)("forum_live").innerHTML = "";
         recentMessagesQuery = (0, _firestore.query)((0, _firestore.collection)((0, _firestore.getFirestore)(), "forum"), (0, _firestore.orderBy)("sgndon", "desc"), (0, _firestore.limit)(10));
         reMSG = (0, _firestore.onSnapshot)(recentMessagesQuery, function(snapshot) {
             snapshot.docChanges().forEach(function(change) {
@@ -1225,10 +1293,10 @@ async function getPinned() {
     var docSnap = await (0, _firestore.getDoc)(docRef);
     if (docSnap.exists()) {
         var docRef = docSnap.data();
-        dE("pinnedtxt").innerText = docRef.message;
+        (0, _helper.dE)("pinnedtxt").innerText = docRef.message;
     }
 }
-var fmsend = dE("fm_send").addEventListener("click", sndMsg);
+var fmsend = (0, _helper.dE)("fm_send").addEventListener("click", sndMsg);
 var forum_length = 1;
 var forum_d = "afterbegin";
 gtMsg();
@@ -1246,11 +1314,11 @@ function vidSlideController(docJSON) {
     function qif(ele) {
         ele.style.display = "flex";
     }
-    var tpmcqcon = dE("tb_q_mcq_con");
-    var tpmatrix = dE("tb_q_matrix");
-    var tpanswer = dE("tb_q_answer");
+    var tpmcqcon = (0, _helper.dE)("tb_q_mcq_con");
+    var tpmatrix = (0, _helper.dE)("tb_q_matrix");
+    var tpanswer = (0, _helper.dE)("tb_q_answer");
     tpmcqcon.innerHTML = "";
-    dE("tb_q_qtext").innerHTML = docJSON.title + "<span class = 'sp_txt'>(" + docJSON.type + ")</span>";
+    (0, _helper.dE)("tb_q_qtext").innerHTML = docJSON.title + "<span class = 'sp_txt'>(" + docJSON.type + ")</span>";
     // dE("tb_q_img").src = docJSON.img
     if (docJSON.type == "mcq" || docJSON.type == "mcq_multiple") {
         qif(tpmcqcon);
@@ -1259,7 +1327,7 @@ function vidSlideController(docJSON) {
         var qop = docJSON.op;
         var asi = "";
         for (let ele1 of qop)asi += '<div class="tb_q_mcq_p rpl">' + ele1 + "</div>";
-        dE("tb_q_mcq_con").insertAdjacentHTML("beforeend", asi);
+        (0, _helper.dE)("tb_q_mcq_con").insertAdjacentHTML("beforeend", asi);
     } else if (docJSON.type == "matrix") {
         iu(tpmcqcon);
         io(tpmatrix);
@@ -1278,74 +1346,74 @@ function vidSlideController(docJSON) {
         iu(tpmatrix);
         iu(tpanswer);
         var asi = '<div class="tp_mcq_p rpl">True</div><div class="tp_mcq_p rpl">False</div>';
-        dE("tp_mcq_con").insertAdjacentHTML("beforeend", asi);
+        (0, _helper.dE)("tp_mcq_con").insertAdjacentHTML("beforeend", asi);
     } else {
         iu(tpmcqcon);
         iu(tpmatrix);
         iu(tpanswer);
     }
-    renderMathInElement(dE("tp_ans_hold"));
-    renderMathInElement(dE("tp_qtext"));
+    renderMathInElement((0, _helper.dE)("tp_ans_hold"));
+    renderMathInElement((0, _helper.dE)("tp_qtext"));
 }
 // Prepares Slides Controller
 async function prepareVideo() {
-    dE("qbnk_vid_btn").style.display = "none";
-    dE("qbnk_vid_btn_e").style.display = "none";
+    (0, _helper.dE)("qbnk_vid_btn").style.display = "none";
+    (0, _helper.dE)("qbnk_vid_btn_e").style.display = "none";
     try {
         let docSnap = await (0, _firestore.getDoc)((0, _firestore.doc)(db, "qbank", window.location.hash.split("qbnk_vid/")[1]));
         if (docSnap.exists()) {
             var docJSON = docSnap.data();
-            dE("tb_q_title").innerText = docJSON.name;
-            dE("qb_vid_ti").innerText = docJSON.name;
-            dE("qbnk_vid_q").style.display = "none";
-            dE("qbnk_vid_ans").style.display = "none";
-            dE("qbnk_vid_title").style.display = "flex";
-            dE("qbnk_vid_end").style.display = "none";
-            dE("watermark").style.display = "none";
+            (0, _helper.dE)("tb_q_title").innerText = docJSON.name;
+            (0, _helper.dE)("qb_vid_ti").innerText = docJSON.name;
+            (0, _helper.dE)("qbnk_vid_q").style.display = "none";
+            (0, _helper.dE)("qbnk_vid_ans").style.display = "none";
+            (0, _helper.dE)("qbnk_vid_title").style.display = "flex";
+            (0, _helper.dE)("qbnk_vid_end").style.display = "none";
+            (0, _helper.dE)("watermark").style.display = "none";
             let qllist = docJSON.qllist;
             let stream = await recordScreen();
             let mimeType = "video/mp4";
-            fullEle(dE("qbnk_vid"));
+            (0, _helper.fullEle)((0, _helper.dE)("qbnk_vid"));
             mediaRecorder = createRecorder(stream, mimeType);
             var ji = 0;
             var ti = 0;
             var jno = 0;
             var timer;
             var iou = setInterval(function() {
-                dE("qbnk_vid_q").style.display = "none";
-                dE("qbnk_vid_ans").style.display = "none";
-                dE("qbnk_vid_title").style.display = "none";
-                dE("qbnk_vid_end").style.display = "none";
+                (0, _helper.dE)("qbnk_vid_q").style.display = "none";
+                (0, _helper.dE)("qbnk_vid_ans").style.display = "none";
+                (0, _helper.dE)("qbnk_vid_title").style.display = "none";
+                (0, _helper.dE)("qbnk_vid_end").style.display = "none";
                 if (ti == 0) {
-                    dE("qbnk_vid_title").style.display = "flex";
+                    (0, _helper.dE)("qbnk_vid_title").style.display = "flex";
                     ti++;
                 } else if (jno == qllist.length - 1) {
-                    dE("qbnk_vid_end").style.display = "flex";
+                    (0, _helper.dE)("qbnk_vid_end").style.display = "flex";
                     setTimeout(function() {
                         mediaRecorder.stop();
-                        dE("qbnk_vid_btn").style.display = "block";
+                        (0, _helper.dE)("qbnk_vid_btn").style.display = "block";
                     }, 5000);
                     clearInterval(iou);
                 } else if (ji == 0 || ji == 1) {
                     vidSlideController(qllist[jno]);
                     var f = jno + 1;
                     if (ji == 0) {
-                        dE("qbnk_timer").innerText = 10;
+                        (0, _helper.dE)("qbnk_timer").innerText = 10;
                         timer = setInterval(function() {
-                            dE("qbnk_timer").innerText = dE("qbnk_timer").innerText - 1;
+                            (0, _helper.dE)("qbnk_timer").innerText = (0, _helper.dE)("qbnk_timer").innerText - 1;
                         }, 1000);
                     }
-                    dE("tb_q_qno").innerText = "Question " + f + ":";
-                    dE("qbnk_vid_q").style.display = "flex";
+                    (0, _helper.dE)("tb_q_qno").innerText = "Question " + f + ":";
+                    (0, _helper.dE)("qbnk_vid_q").style.display = "flex";
                     ji++;
                 } else if (ji == 2) {
-                    dE("qbnk_vid_ans").style.display = "flex";
+                    (0, _helper.dE)("qbnk_vid_ans").style.display = "flex";
                     clearInterval(timer);
                     var asi = "";
                     for(var i = 0; i < qllist[jno].answer.length; i++)asi += '<div class="tb_q_mcq_p rpl" style = "background-color:green">' + qllist[jno].answer[i] + "</div>";
-                    dE("tb_q_ans").innerHTML = asi;
-                    dE("tb_q_hint").innerHTML = qllist[jno].hint;
-                    dE("tb_q_expl").innerHTML = qllist[jno].expl;
+                    (0, _helper.dE)("tb_q_ans").innerHTML = asi;
+                    (0, _helper.dE)("tb_q_hint").innerHTML = qllist[jno].hint;
+                    (0, _helper.dE)("tb_q_expl").innerHTML = qllist[jno].expl;
                     ji = 0;
                     jno++;
                 }
@@ -1355,173 +1423,22 @@ async function prepareVideo() {
 }
 async function getCyberhunt() {
     if (window.location.hash.split("/cyberhunt/")[1] == "" || window.location.hash.split("/cyberhunt")[1] == "") {
-        dE("cyb_code").style.display = "flex";
-        dE("cyb_viewer").style.display = "none";
-        dE("cyb_edit").style.display = "none";
+        (0, _helper.dE)("cyb_code").style.display = "flex";
+        (0, _helper.dE)("cyb_viewer").style.display = "none";
+        (0, _helper.dE)("cyb_edit").style.display = "none";
     } else {
-        dE("cyb_code").style.display = "none";
-        dE("cyb_viewer").style.display = "flex";
-        dE("cyb_edit").style.display = "none";
+        (0, _helper.dE)("cyb_code").style.display = "none";
+        (0, _helper.dE)("cyb_viewer").style.display = "flex";
+        (0, _helper.dE)("cyb_edit").style.display = "none";
     }
-}
-// -----------------------
-// SIMULATIONS
-// Creates A Blank Simulation
-async function newSimulation() {
-    try {
-        const docRef = await (0, _firestore.addDoc)((0, _firestore.collection)(db, "sims"), {
-            name: "",
-            license: "",
-            provider: "",
-            url: ""
-        });
-        locationHandler("edit_sim/" + docRef.id, 1);
-    } catch  {}
-}
-// Prepares The Simulation Editor
-async function prepareSimulation() {
-    try {
-        let docSnap = await (0, _firestore.getDoc)((0, _firestore.doc)(db, "sims", window.location.hash.split("edit_sim/")[1]));
-        if (docSnap.exists()) {
-            var docJSON = docSnap.data();
-            dE("aq_simname").value = docJSON.name;
-            dE("aq_simprov").value = docJSON.provider;
-            dE("aq_simurl").value = docJSON.url;
-            dE("aq_simlicense").value = docJSON.license;
-            dE("aq_simsubj").value = docJSON.subject;
-        }
-    } catch  {}
-}
-// Updates Simulation Details
-async function updateSimulationWeb() {
-    try {
-        await (0, _firestore.updateDoc)((0, _firestore.doc)(db, "sims", window.location.hash.split("edit_sim/")[1]), {
-            name: dE("aq_simname").value,
-            license: dE("aq_simlicense").value,
-            provider: dE("aq_simprov").value,
-            url: dE("aq_simurl").value,
-            subject: dE("aq_simsubj").value
-        });
-        var subj = dE("aq_simsubj").value;
-        if (subj == "physics") await (0, _firestore.updateDoc)((0, _firestore.doc)(db, "sims", "sims"), {
-            physics: (0, _firestore.arrayUnion)(dE("aq_simname").value)
-        });
-        if (subj == "chemistry") await (0, _firestore.updateDoc)((0, _firestore.doc)(db, "sims", "sims"), {
-            chemistry: (0, _firestore.arrayUnion)(dE("aq_simname").value)
-        });
-        if (subj == "maths") await (0, _firestore.updateDoc)((0, _firestore.doc)(db, "sims", "sims"), {
-            maths: (0, _firestore.arrayUnion)(dE("aq_simname").value)
-        });
-        if (subj == "computer") await (0, _firestore.updateDoc)((0, _firestore.doc)(db, "sims", "sims"), {
-            computer: (0, _firestore.arrayUnion)(dE("aq_simname").value)
-        });
-        if (subj == "biology") await (0, _firestore.updateDoc)((0, _firestore.doc)(db, "sims", "sims"), {
-            biology: (0, _firestore.arrayUnion)(dE("aq_simname").value)
-        });
-        if (subj == "statistics") await (0, _firestore.updateDoc)((0, _firestore.doc)(db, "sims", "sims"), {
-            statistics: (0, _firestore.arrayUnion)(dE("aq_simname").value)
-        });
-        if (subj == "unfiled") await (0, _firestore.updateDoc)((0, _firestore.doc)(db, "sims", "sims"), {
-            unfiled: (0, _firestore.arrayUnion)(dE("aq_simname").value)
-        });
-        clearAQ();
-    } catch (error) {
-        console.error("Error writing new message to Firebase Database", error);
-    }
-}
-// Displays Simulation For End User
-async function getSimulation() {
-    var simid = window.location.hash.split("sims/")[1];
-    var docRef = (0, _firestore.doc)(db, "sims", simid);
-    var docSnap = await (0, _firestore.getDoc)(docRef);
-    if (docSnap.exists()) {
-        var docJSON = docSnap.data();
-        dE("sms_name").innerText = docJSON.name;
-        dE("sms_prov").innerText = docJSON.provider;
-        dE("sim_frame").src = docJSON.url;
-    } else {
-        locationHandler("error_page", 1);
-        throw new Error;
-    }
-}
-// Get SimID From SimName
-async function getSimID(sim_name) {
-    var docID;
-    const q = (0, _firestore.query)((0, _firestore.collection)(db, "sims"), (0, _firestore.where)("name", "==", sim_name));
-    const querySnapshot = await (0, _firestore.getDocs)(q);
-    querySnapshot.forEach((doc)=>{
-        docID = doc.id;
-    });
-    locationHandler("sims/" + docID, 1);
-}
-// Helper Function To Get Simulation Name
-function simClicker() {
-    getSimID(this.innerText);
-}
-// Get Simulation List
-async function getSimList(type) {
-    dE("sim_cont").innerHTML = "";
-    if (simlist.length == 0) {
-        var docRef = (0, _firestore.doc)(db, "sims", "sims");
-        var docSnap = await (0, _firestore.getDoc)(docRef);
-        if (docSnap.exists()) {
-            var docJSON = docSnap.data();
-            simlist = docJSON;
-        } else {
-            locationHandler("error_page", 1);
-            throw new Error;
-        }
-    }
-    if (type == "physics") try {
-        for (let ele of simlist.physics)if (ele != "") {
-            dE("sim_cont").insertAdjacentHTML("beforeend", '<span class="tlinks rpl" style = "color:pink" id="sim' + btoa(ele) + '">' + ele + "</span>");
-            dE("sim" + btoa(ele)).addEventListener("click", simClicker);
-        }
-    } catch  {}
-    if (type == "chemistry") try {
-        for (let ele of simlist.chemistry)if (ele != "") {
-            dE("sim_cont").insertAdjacentHTML("beforeend", '<span class="tlinks rpl" style = "color:crimson" id="sim' + btoa(ele) + '">' + ele + "</span>");
-            dE("sim" + btoa(ele)).addEventListener("click", simClicker);
-        }
-    } catch  {}
-    if (type == "maths") try {
-        for (let ele of simlist.maths)if (ele != "") {
-            dE("sim_cont").insertAdjacentHTML("beforeend", '<span class="tlinks rpl" style = "color:turquoise" id="sim' + btoa(ele) + '">' + ele + "</span>");
-            dE("sim" + btoa(ele)).addEventListener("click", simClicker);
-        }
-    } catch  {}
-    if (type == "biology") try {
-        for (let ele of simlist.biology)if (ele != "") {
-            dE("sim_cont").insertAdjacentHTML("beforeend", '<span class="tlinks rpl" style = "color:lime" id="sim' + btoa(ele) + '">' + ele + "</span>");
-            dE("sim" + btoa(ele)).addEventListener("click", simClicker);
-        }
-    } catch  {}
-    if (type == "computer") try {
-        for (let ele of simlist.computer)if (ele != "") {
-            dE("sim_cont").insertAdjacentHTML("beforeend", '<span class="tlinks rpl" style = "color:violet" id="sim' + btoa(ele) + '">' + ele + "</span>");
-            dE("sim" + btoa(ele)).addEventListener("click", simClicker);
-        }
-    } catch  {}
-    if (type == "statistics") try {
-        for (let ele of simlist.statistics)if (ele != "") {
-            dE("sim_cont").insertAdjacentHTML("beforeend", '<span class="tlinks rpl" style = "color:orange" id="sim' + btoa(ele) + '">' + ele + "</span>");
-            dE("sim" + btoa(ele)).addEventListener("click", simClicker);
-        }
-    } catch  {}
-    if (type == "unfiled") try {
-        for (let ele of simlist.unfiled)if (ele != "") {
-            dE("sim_cont").insertAdjacentHTML("beforeend", '<span class="tlinks rpl" style = "color:white" id="sim' + btoa(ele) + '">' + ele + "</span>");
-            dE("sim" + btoa(ele)).addEventListener("click", simClicker);
-        }
-    } catch  {}
 }
 // -----------------------
 // TOPIC/QBANK
 function addItemToQLLIst() {
     var qans = [
-        dE("aq_answer").value
+        (0, _helper.dE)("aq_answer").value
     ];
-    var qtype = dE("aq_type").value;
+    var qtype = (0, _helper.dE)("aq_type").value;
     var qop = [];
     var qop1 = [];
     var qop2 = [];
@@ -1537,43 +1454,43 @@ function addItemToQLLIst() {
     for(var i = 0; i < document.getElementsByClassName("aq_i2").length; i++)qop2.push(document.getElementsByClassName("aq_i2")[i].value);
     if (location1.includes("edit_test")) var json = {
         qid: curr_qlid,
-        mode: dE("aq_mode").value,
+        mode: (0, _helper.dE)("aq_mode").value,
         title: getHTML("aq_qtext"),
-        y_url: dE("aq_yurl").value,
-        hint: dE("aq_hint").value,
+        y_url: (0, _helper.dE)("aq_yurl").value,
+        hint: (0, _helper.dE)("aq_hint").value,
         expl: getHTML("aq_expl"),
         type: qtype,
         answer: qans,
         op: qop,
         op1: qop1,
         op2: qop2,
-        section: dE("aq_section").value,
-        pm: dE("aq_posmrks").value,
-        nm: dE("aq_negmrks").value
+        section: (0, _helper.dE)("aq_section").value,
+        pm: (0, _helper.dE)("aq_posmrks").value,
+        nm: (0, _helper.dE)("aq_negmrks").value
     };
     else if (location1.includes("edit_exams")) var json = {
         id: curr_qlid,
-        name: dE("aq_examname").value,
-        date: dE("aq_examdate").value,
-        info: dE("aq_examinfo").value,
-        syllabus: dE("aq_examsyllabus").value,
+        name: (0, _helper.dE)("aq_examname").value,
+        date: (0, _helper.dE)("aq_examdate").value,
+        info: (0, _helper.dE)("aq_examinfo").value,
+        syllabus: (0, _helper.dE)("aq_examsyllabus").value,
         mode: "exams"
     };
     else var json = {
         id: curr_qlid,
-        mode: dE("aq_mode").value,
+        mode: (0, _helper.dE)("aq_mode").value,
         title: getHTML("aq_qtext"),
-        y_url: dE("aq_yurl").value,
-        hint: dE("aq_hint").value,
+        y_url: (0, _helper.dE)("aq_yurl").value,
+        hint: (0, _helper.dE)("aq_hint").value,
         expl: getHTML("aq_expl"),
         type: qtype,
         answer: qans,
         op: qop,
         op1: qop1,
         op2: qop2,
-        section: dE("aq_section").value,
-        pm: dE("aq_posmrks").value,
-        nm: dE("aq_negmrks").value
+        section: (0, _helper.dE)("aq_section").value,
+        pm: (0, _helper.dE)("aq_posmrks").value,
+        nm: (0, _helper.dE)("aq_negmrks").value
     };
     return json;
 }
@@ -1587,18 +1504,18 @@ async function changeItem(t) {
     function qif(ele) {
         ele.style.display = "flex";
     }
-    var mode = dE("aq_mode").value;
-    var qcont = dE("aq_ans_hold");
-    var qtype = dE("aq_type");
-    var qans = dE("aq_answer");
-    var qyurl = dE("aq_yurl");
-    var qmcq = dE("aq_mcq_con");
-    var qmat = dE("aq_matrix");
-    var qimgupl = dE("aq_upl");
-    var qqall = dE("aq_all");
-    var qtpc = dE("aq_tpc");
-    var qqbk = dE("aq_qbk");
-    var qsims = dE("aq_sims");
+    var mode = (0, _helper.dE)("aq_mode").value;
+    var qcont = (0, _helper.dE)("aq_ans_hold");
+    var qtype = (0, _helper.dE)("aq_type");
+    var qans = (0, _helper.dE)("aq_answer");
+    var qyurl = (0, _helper.dE)("aq_yurl");
+    var qmcq = (0, _helper.dE)("aq_mcq_con");
+    var qmat = (0, _helper.dE)("aq_matrix");
+    var qimgupl = (0, _helper.dE)("aq_upl");
+    var qqall = (0, _helper.dE)("aq_all");
+    var qtpc = (0, _helper.dE)("aq_tpc");
+    var qqbk = (0, _helper.dE)("aq_qbk");
+    var qsims = (0, _helper.dE)("aq_sims");
     // var qsubj = dE("aq_subject").value
     if (mode == "question") {
         iu(qyurl);
@@ -1675,13 +1592,13 @@ function renderEditQLList(qno) {
         if (location1.includes("edit_test")) editqllist[po].qid = editqllist[po].id;
         qno = po;
     }
-    dE("question_list").innerHTML = "";
+    (0, _helper.dE)("question_list").innerHTML = "";
     for(var i = 1; i < editqllist.length + 1; i++){
-        dE("question_list").insertAdjacentHTML("beforeend", '<span class = "t_no_qno" id = "t_no_qno_' + i + '">' + i + "</span>");
-        dE("t_no_qno_" + i).addEventListener("click", rEQL);
+        (0, _helper.dE)("question_list").insertAdjacentHTML("beforeend", '<span class = "t_no_qno" id = "t_no_qno_' + i + '">' + i + "</span>");
+        (0, _helper.dE)("t_no_qno_" + i).addEventListener("click", rEQL);
     }
-    dE("question_list").insertAdjacentHTML("beforeend", '<span class = "t_no_qno" id = "t_no_qno_add">+</span>');
-    dE("t_no_qno_add").addEventListener("click", rEQL);
+    (0, _helper.dE)("question_list").insertAdjacentHTML("beforeend", '<span class = "t_no_qno" id = "t_no_qno_add">+</span>');
+    (0, _helper.dE)("t_no_qno_add").addEventListener("click", rEQL);
     // }
     if (qno != 0) {
         editqllist[curr_qlno - 1] = addItemToQLLIst();
@@ -1689,26 +1606,26 @@ function renderEditQLList(qno) {
     }
     var op = editqllist[curr_qlno - 1];
     if (window.location.href.includes("edit_exams")) {
-        dE("aq_examname").value = op.name;
-        dE("aq_examdate").value = op.date;
-        dE("aq_examinfo").value = op.info;
-        dE("aq_examsyllabus").value = op.syllabus;
+        (0, _helper.dE)("aq_examname").value = op.name;
+        (0, _helper.dE)("aq_examdate").value = op.date;
+        (0, _helper.dE)("aq_examinfo").value = op.info;
+        (0, _helper.dE)("aq_examsyllabus").value = op.syllabus;
         changeItem();
         return;
     }
     if (location1.includes("edit_test")) curr_qlid = op.qid;
     else curr_qlid = op.id;
-    dE("aq_mode").value = op.mode;
+    (0, _helper.dE)("aq_mode").value = op.mode;
     setHTML("aq_qtext", op.title);
-    dE("aq_yurl").value = op.y_url;
-    dE("aq_type").value = op.type;
-    dE("aq_hint").value = op.hint;
-    dE("aq_section").value = op.section;
-    dE("aq_posmrks").value = op.pm;
-    dE("aq_negmrks").value = op.nm;
+    (0, _helper.dE)("aq_yurl").value = op.y_url;
+    (0, _helper.dE)("aq_type").value = op.type;
+    (0, _helper.dE)("aq_hint").value = op.hint;
+    (0, _helper.dE)("aq_section").value = op.section;
+    (0, _helper.dE)("aq_posmrks").value = op.pm;
+    (0, _helper.dE)("aq_negmrks").value = op.nm;
     setHTML("aq_expl", op.expl);
     if (op.type == "mcq" || op.type == "mcq_multiple") {
-        dE("aq_mcq_con").innerHTML = "";
+        (0, _helper.dE)("aq_mcq_con").innerHTML = "";
         for(var g = 0; g < op.op.length; g++){
             addMCQ();
             document.getElementsByClassName("aq_mcq")[g].value = op.op[g];
@@ -1717,7 +1634,7 @@ function renderEditQLList(qno) {
                 document.getElementsByClassName("aq_mcq_p")[g].style.borderColor = "lime";
             }
         }
-    } else if (op.type == "numerical" || op.type == "explain" || op.type == "fill" || op.type == "taf") dE("aq_answer").value = op.answer[0];
+    } else if (op.type == "numerical" || op.type == "explain" || op.type == "fill" || op.type == "taf") (0, _helper.dE)("aq_answer").value = op.answer[0];
     changeItem();
 }
 async function newTopic() {
@@ -1748,88 +1665,90 @@ async function newQBank() {
 }
 async function prepareTopicQBank(iun) {
     var col, id;
+    (0, _helper.dE)("aq_basic").style.display = "flex";
     if (iun == 1) {
         // Topic
         col = "topic";
         id = window.location.hash.split("edit_tpc/")[1];
-        dE("fu_topic_title").innerText = "Add/Edit Topic";
-        dE("aq_mode").innerHTML = `<option value="question">Question</option><option value="lesson">Lesson</option>`;
-        dE("aq_tpc_save").style.display = "block";
-        dE("aq_qbc_save").style.display = "none";
-        dE("aq_tst_save").style.display = "none";
-        dE("aq_test_extra").style.display = "none";
-        dE("aq_exam_save").style.display = "none";
-        dE("aq_exams").style.display = "none";
-        dE("aq_all").style.display = "flex";
-        dE("aq_ans_hold").style.display = "flex";
+        (0, _helper.dE)("fu_topic_title").innerText = "Add/Edit Topic";
+        (0, _helper.dE)("aq_mode").innerHTML = `<option value="question">Question</option><option value="lesson">Lesson</option>`;
+        (0, _helper.dE)("aq_tpc_save").style.display = "block";
+        (0, _helper.dE)("aq_qbc_save").style.display = "none";
+        (0, _helper.dE)("aq_tst_save").style.display = "none";
+        (0, _helper.dE)("aq_test_extra").style.display = "none";
+        (0, _helper.dE)("aq_exam_save").style.display = "none";
+        (0, _helper.dE)("aq_exams").style.display = "none";
+        (0, _helper.dE)("aq_all").style.display = "flex";
+        (0, _helper.dE)("aq_ans_hold").style.display = "flex";
     } else if (iun == 2) {
         // QBank
         col = "qbank";
         id = window.location.hash.split("edit_qubank/")[1];
-        dE("fu_topic_title").innerText = "Add/Edit QBank";
-        dE("aq_mode").innerHTML = `<option value="question">Question</option>`;
-        dE("aq_tpc_save").style.display = "none";
-        dE("aq_tst_save").style.display = "none";
-        dE("aq_test_extra").style.display = "none";
-        dE("aq_qbc_save").style.display = "block";
-        dE("aq_exam_save").style.display = "none";
-        dE("aq_exams").style.display = "none";
-        dE("aq_all").style.display = "flex";
-        dE("aq_ans_hold").style.display = "flex";
+        (0, _helper.dE)("fu_topic_title").innerText = "Add/Edit QBank";
+        (0, _helper.dE)("aq_mode").innerHTML = `<option value="question">Question</option>`;
+        (0, _helper.dE)("aq_tpc_save").style.display = "none";
+        (0, _helper.dE)("aq_tst_save").style.display = "none";
+        (0, _helper.dE)("aq_test_extra").style.display = "none";
+        (0, _helper.dE)("aq_qbc_save").style.display = "block";
+        (0, _helper.dE)("aq_exam_save").style.display = "none";
+        (0, _helper.dE)("aq_exams").style.display = "none";
+        (0, _helper.dE)("aq_all").style.display = "flex";
+        (0, _helper.dE)("aq_ans_hold").style.display = "flex";
     } else if (iun == 3) {
         // Tests
         col = "tests";
         id = window.location.hash.split("edit_tests/")[1];
-        dE("fu_topic_title").innerText = "Add/Edit Tests";
-        dE("aq_mode").innerHTML = `<option value="question">Question</option>`;
-        dE("aq_tpc_save").style.display = "none";
-        dE("aq_qbc_save").style.display = "none";
-        dE("aq_test_extra").style.display = "flex";
-        dE("aq_tst_save").style.display = "block";
-        dE("aq_exam_save").style.display = "none";
-        dE("aq_exams").style.display = "none";
-        dE("aq_all").style.display = "flex";
-        dE("aq_ans_hold").style.display = "flex";
+        (0, _helper.dE)("fu_topic_title").innerText = "Add/Edit Tests";
+        (0, _helper.dE)("aq_mode").innerHTML = `<option value="question">Question</option>`;
+        (0, _helper.dE)("aq_tpc_save").style.display = "none";
+        (0, _helper.dE)("aq_qbc_save").style.display = "none";
+        (0, _helper.dE)("aq_test_extra").style.display = "flex";
+        (0, _helper.dE)("aq_tst_save").style.display = "block";
+        (0, _helper.dE)("aq_exam_save").style.display = "none";
+        (0, _helper.dE)("aq_exams").style.display = "none";
+        (0, _helper.dE)("aq_all").style.display = "flex";
+        (0, _helper.dE)("aq_ans_hold").style.display = "flex";
     } else if (iun == 4) {
         col = "quarkz";
         id = "exams";
-        dE("fu_topic_title").innerText = "Add/Edit Exams";
-        dE("aq_mode").innerHTML = `<option value="exam">Exam</option>`;
-        dE("aq_tpc_save").style.display = "none";
-        dE("aq_qbc_save").style.display = "none";
-        dE("aq_test_extra").style.display = "none";
-        dE("aq_exam_save").style.display = "block";
-        dE("aq_tst_save").style.display = "none";
-        dE("aq_exams").style.display = "flex";
-        dE("aq_all").style.display = "none";
-        dE("aq_ans_hold").style.display = "none";
+        (0, _helper.dE)("fu_topic_title").innerText = "Add/Edit Exams";
+        (0, _helper.dE)("aq_mode").innerHTML = `<option value="exam">Exam</option>`;
+        (0, _helper.dE)("aq_tpc_save").style.display = "none";
+        (0, _helper.dE)("aq_qbc_save").style.display = "none";
+        (0, _helper.dE)("aq_test_extra").style.display = "none";
+        (0, _helper.dE)("aq_exam_save").style.display = "block";
+        (0, _helper.dE)("aq_tst_save").style.display = "none";
+        (0, _helper.dE)("aq_exams").style.display = "flex";
+        (0, _helper.dE)("aq_all").style.display = "none";
+        (0, _helper.dE)("aq_ans_hold").style.display = "none";
+        (0, _helper.dE)("aq_basic").style.display = "none";
     }
     try {
         let docSnap = await (0, _firestore.getDoc)((0, _firestore.doc)(db, col, id));
         if (docSnap.exists()) {
             if (iun == 1 || iun == 2) {
                 var docJSON = docSnap.data();
-                dE("aq_tpcname").value = docJSON.name;
-                dE("aq_tpclevel").value = docJSON.level;
-                dE("aq_tpc_subj").value = docJSON.subject;
-                dE("aq_tpc_chapterid").value = docJSON.chid;
+                (0, _helper.dE)("aq_tpcname").value = docJSON.name;
+                (0, _helper.dE)("aq_tpclevel").value = docJSON.level;
+                (0, _helper.dE)("aq_tpc_subj").value = docJSON.subject;
+                (0, _helper.dE)("aq_tpc_chapterid").value = docJSON.chid;
                 editqllist = docJSON.qllist;
                 renderEditQLList(0);
             } else if (iun == 3) {
                 var docJSON = docSnap.data();
-                dE("aq_tpcname").value = docJSON.title;
-                dE("aq_tpclevel").value = docJSON.level;
-                dE("aq_tpc_subj").value = docJSON.subject;
-                dE("aq_tst_batches").value = docJSON.batch.toString();
+                (0, _helper.dE)("aq_tpcname").value = docJSON.title;
+                (0, _helper.dE)("aq_tpclevel").value = docJSON.level;
+                (0, _helper.dE)("aq_tpc_subj").value = docJSON.subject;
+                (0, _helper.dE)("aq_tst_batches").value = docJSON.batch.toString();
                 function dateparser(var1) {
                     var now = new Date(var1);
                     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
                     return now.toISOString().slice(0, 16);
                 }
-                dE("aq_tst_stron").value = dateparser(docJSON.strton.seconds * 1000);
-                dE("aq_tst_endon").value = dateparser(docJSON.endon.seconds * 1000);
-                dE("aq_tst_timealotted").value = docJSON.timeallotted;
-                dE("aq_tst_syllabi").value = docJSON.syllabus;
+                (0, _helper.dE)("aq_tst_stron").value = dateparser(docJSON.strton.seconds * 1000);
+                (0, _helper.dE)("aq_tst_endon").value = dateparser(docJSON.endon.seconds * 1000);
+                (0, _helper.dE)("aq_tst_timealotted").value = docJSON.timeallotted;
+                (0, _helper.dE)("aq_tst_syllabi").value = docJSON.syllabus;
                 let docSnap2 = await (0, _firestore.getDoc)((0, _firestore.doc)(db, "tests", id, "questions", "questions"));
                 let docSnap3 = await (0, _firestore.getDoc)((0, _firestore.doc)(db, "tests", id, "questions", "answers"));
                 let q = [];
@@ -1853,7 +1772,7 @@ async function prepareTopicQBank(iun) {
     } catch  {}
 }
 function removeEntry() {
-    for(var i = 0; i < editqllist.length; i++)if (editqllist[i].qid == curr_qlid || editqllist.id == curr_qlid) {
+    for(var i = 0; i < editqllist.length; i++)if (editqllist[i].qid == curr_qlid || editqllist[i].id == curr_qlid) {
         editqllist.splice(i, 1);
         renderEditQLList(0);
         curr_qlid = editqllist[i - 1].qid || editqllist[i - 1].id;
@@ -1880,22 +1799,22 @@ async function updateTopicQBank(iun) {
     }
     if (iun == 1 || iun == 2) try {
         const docRef = await (0, _firestore.updateDoc)((0, _firestore.doc)(db, col, id), {
-            name: dE("aq_tpcname").value,
+            name: (0, _helper.dE)("aq_tpcname").value,
             qllist: editqllist,
-            level: dE("aq_tpclevel").value,
-            chid: dE("aq_tpc_chapterid").value,
-            subject: dE("aq_tpc_subj").value
+            level: (0, _helper.dE)("aq_tpclevel").value,
+            chid: (0, _helper.dE)("aq_tpc_chapterid").value,
+            subject: (0, _helper.dE)("aq_tpc_subj").value
         });
     } catch  {}
     else if (iun == 3) {
         try {
-            var fgio = new Date(dE("aq_tst_stron").value);
-            var fgio2 = new Date(dE("aq_tst_endon").value);
-            var wer = dE("aq_tst_batches").value.split(",");
+            var fgio = new Date((0, _helper.dE)("aq_tst_stron").value);
+            var fgio2 = new Date((0, _helper.dE)("aq_tst_endon").value);
+            var wer = (0, _helper.dE)("aq_tst_batches").value.split(",");
             const docRef = await (0, _firestore.updateDoc)((0, _firestore.doc)(db, col, id), {
-                title: dE("aq_tpcname").value,
-                timeallotted: dE("aq_tst_timealotted").value,
-                syllabus: dE("aq_tst_syllabi").value,
+                title: (0, _helper.dE)("aq_tpcname").value,
+                timeallotted: (0, _helper.dE)("aq_tst_timealotted").value,
+                syllabus: (0, _helper.dE)("aq_tst_syllabi").value,
                 strton: fgio,
                 endon: fgio2,
                 batch: wer
@@ -1979,26 +1898,26 @@ async function getTopic(type) {
 // /#/chapter
 // Get Chapter List From Web
 async function getChapterEList() {
-    dE("chp_chaptername").innerHTML = "";
-    dE("chp_qbk_list").innerHTML = "";
-    dE("chp_tpc_list").innerHTML = "";
+    (0, _helper.dE)("chp_chaptername").innerHTML = "";
+    (0, _helper.dE)("chp_qbk_list").innerHTML = "";
+    (0, _helper.dE)("chp_tpc_list").innerHTML = "";
     var docRef = (0, _firestore.doc)(db, "chapter", window.location.hash.split("#/chapter/")[1]);
     var docSnap = await (0, _firestore.getDoc)(docRef);
     var iupa, docJSON;
     var poll = "";
     if (docSnap.exists()) {
         var docJSON = docSnap.data();
-        dE("chp_chaptername").innerText = docJSON.name;
+        (0, _helper.dE)("chp_chaptername").innerText = docJSON.name;
         try {
             for (let ele of docJSON.qbanks){
-                dE("chp_qbk_list").insertAdjacentHTML("beforeend", '<span class="tlinks_min rpl" style = "color:pink" id="chpqbk' + btoa(ele.id) + '">' + ele.title + "</span>");
-                dE("chpqbk" + btoa(ele.id)).addEventListener("click", qbkclicker);
+                (0, _helper.dE)("chp_qbk_list").insertAdjacentHTML("beforeend", '<span class="tlinks_min rpl" style = "color:pink" id="chpqbk' + btoa(ele.id) + '">' + ele.title + "</span>");
+                (0, _helper.dE)("chpqbk" + btoa(ele.id)).addEventListener("click", qbkclicker);
             }
         } catch  {}
         try {
             for (let ele of docJSON.topics){
-                dE("chp_tpc_list").insertAdjacentHTML("beforeend", '<span class="tlinks_min rpl" style = "color:pink" id="chptpc' + btoa(ele.id) + '">' + ele.title + "</span>");
-                dE("chptpc" + btoa(ele.id)).addEventListener("click", tpcclicker);
+                (0, _helper.dE)("chp_tpc_list").insertAdjacentHTML("beforeend", '<span class="tlinks_min rpl" style = "color:pink" id="chptpc' + btoa(ele.id) + '">' + ele.title + "</span>");
+                (0, _helper.dE)("chptpc" + btoa(ele.id)).addEventListener("click", tpcclicker);
             }
         } catch  {}
     }
@@ -2009,12 +1928,12 @@ function chclicker() {
 }
 // Rendering Chapter List
 function renderCList(type) {
-    dE("qb_cont_2").innerHTML = "";
+    (0, _helper.dE)("qb_cont_2").innerHTML = "";
     for(var i = 0; i < chapterlist.length; i++){
         var ele = chapterlist[i];
         if (ele.subject == type) {
-            dE("qb_cont_2").insertAdjacentHTML("beforeend", '<span class="tlinks rpl" style = "color:pink" id="qb' + btoa(ele.id) + '">' + ele.name + "</span>");
-            dE("qb" + btoa(ele.id)).addEventListener("click", chclicker);
+            (0, _helper.dE)("qb_cont_2").insertAdjacentHTML("beforeend", '<span class="tlinks rpl" style = "color:pink" id="qb' + btoa(ele.id) + '">' + ele.name + "</span>");
+            (0, _helper.dE)("qb" + btoa(ele.id)).addEventListener("click", chclicker);
         }
     }
 }
@@ -2024,16 +1943,16 @@ async function printQBank(type) {
     var fireID = "";
     if (type == 1) {
         fireID = "qbank";
-        dE("pe_tst_info").style.display = "flex";
-        dE("eqb_instr").style.display = "none";
+        (0, _helper.dE)("pe_tst_info").style.display = "flex";
+        (0, _helper.dE)("eqb_instr").style.display = "none";
     } else if (type == 2) {
         fireID = "topic";
-        dE("pe_tst_info").style.display = "none";
-        dE("eqb_instr").style.display = "none";
+        (0, _helper.dE)("pe_tst_info").style.display = "none";
+        (0, _helper.dE)("eqb_instr").style.display = "none";
     } else if (type == 3) fireID = "tests";
     else fireID = "qbank";
     var qbankno = window.location.hash.split("printable/" + fireID + "/")[1];
-    var qbanktitle = dE("qb_title");
+    var qbanktitle = (0, _helper.dE)("qb_title");
     var docRef = (0, _firestore.doc)(db, fireID, qbankno);
     var docSnap = await (0, _firestore.getDoc)(docRef);
     if (docSnap.exists()) {
@@ -2045,7 +1964,7 @@ async function printQBank(type) {
         throw new Error;
     }
     var qnos, qtitle, qtype, qimg;
-    dE("eqb_add").innerHTML = "";
+    (0, _helper.dE)("eqb_add").innerHTML = "";
     for (let ele of qnos){
         if (ele.mode == "question") {
             var docJSON = ele;
@@ -2056,10 +1975,10 @@ async function printQBank(type) {
             var expl = '<div class = "q_ans_expl" style = "font-weight:bold;color:green;font-size:10px;flex-direction:row;display:none;">Explaination:' + docJSON.expl + "</div>";
             var ans = "<div style = 'font-weight:bold;color:green;font-size:10px;flex-direction:row;display:none' class = 'q_ans_1'>Answer:";
             var inhtml = '<div class = "qbtp_q"><div id = "' + ele.id + '">' + qtitle + '<div class = "qb_q_ty">(' + qtype + ")</div></div>";
-            dE("eqb_add").insertAdjacentHTML("beforeend", inhtml);
+            (0, _helper.dE)("eqb_add").insertAdjacentHTML("beforeend", inhtml);
             if (qimg != "") {
                 var iwo = '<div class = "qb_img"><img src = "' + qimg + '"></div>';
-                dE(ele.id).insertAdjacentHTML("beforeend", iwo);
+                (0, _helper.dE)(ele.id).insertAdjacentHTML("beforeend", iwo);
             }
             var asi = "";
             if (qtype == "mcq" || qtype == "mcq_multiple") {
@@ -2077,26 +1996,26 @@ async function printQBank(type) {
                 for(var i = 0; i < qopn1; i++)asi += "<tr><td>" + qop1[i] + "</td><td>" + qop2[i] + "</td>";
                 qrt = "<table>" + asi + "</table>";
             }
-            dE(ele.id).insertAdjacentHTML("beforeend", qrt);
-            dE(ele.id).insertAdjacentHTML("beforeend", ans + "</div>");
-            dE(ele.id).insertAdjacentHTML("beforeend", expl);
-            renderMathInElement(dE("eqb_add"));
+            (0, _helper.dE)(ele.id).insertAdjacentHTML("beforeend", qrt);
+            (0, _helper.dE)(ele.id).insertAdjacentHTML("beforeend", ans + "</div>");
+            (0, _helper.dE)(ele.id).insertAdjacentHTML("beforeend", expl);
+            renderMathInElement((0, _helper.dE)("eqb_add"));
         } else if (ele.mode == "lesson") {
             var docJSON = ele;
             qtitle = docJSON.title;
             qtype = docJSON.type;
             qimg = docJSON.img;
             var inhtml = '<div class = "les_q"><div id = "' + ele.id + '"><div style = "font-size:3vh;">' + qtitle + '</div><hr color="white" width="100%"></div>';
-            dE("eqb_add").insertAdjacentHTML("beforeend", inhtml);
+            (0, _helper.dE)("eqb_add").insertAdjacentHTML("beforeend", inhtml);
             var expl = '<div class = "les_expl" style = "">' + docJSON.expl + '</div><hr color="white" width="100%">';
-            dE(ele.id).insertAdjacentHTML("beforeend", expl);
-            renderMathInElement(dE("eqb_add"));
+            (0, _helper.dE)(ele.id).insertAdjacentHTML("beforeend", expl);
+            renderMathInElement((0, _helper.dE)("eqb_add"));
         }
     }
-    dE("printable").insertAdjacentHTML("beforeend", "<br></br>");
+    (0, _helper.dE)("printable").insertAdjacentHTML("beforeend", "<br></br>");
 }
 function renderDownloadPage(type) {
-    if (type == 1) dE("mainsformulas").innerHTML = `
+    if (type == 1) (0, _helper.dE)("mainsformulas").innerHTML = `
     <span style="font-size: 5vh;color:yellow" id="fm_title">Mains Formula Sheet</span>
     <hr color="white" width="100%">
     <div style="overflow-y: scroll;height:50vh;" class="flex_type">
@@ -2108,7 +2027,7 @@ function renderDownloadPage(type) {
     </div>
     <span style="font-size: 8px;">All PDF's Are Owned by their Respective Owners</span>
     `;
-    else if (type == 2) dE("downloads").innerHTML = `
+    else if (type == 2) (0, _helper.dE)("downloads").innerHTML = `
     <span style="font-size: 5vh;color:yellow" id="fm_title">Downloads</span>
     <hr color="white" width="100%">
     <div style="overflow-y: scroll;height:50vh;" class="flex_type">
@@ -2117,15 +2036,15 @@ function renderDownloadPage(type) {
     `;
 }
 async function lessonRenderer(docJSON) {
-    dE("tp_question").style.display = "none";
-    dE("tp_lesson").style.display = "block";
-    if (docJSON.y_url == "") dE("tp_full_vid").style.display = "none";
+    (0, _helper.dE)("tp_question").style.display = "none";
+    (0, _helper.dE)("tp_lesson").style.display = "block";
+    if (docJSON.y_url == "") (0, _helper.dE)("tp_full_vid").style.display = "none";
     else {
-        dE("tp_full_vid").style.display = "flex";
+        (0, _helper.dE)("tp_full_vid").style.display = "flex";
         loadVid(docJSON.y_url);
     }
-    dE("tp_lsno").innerText = docJSON.title;
-    dE("tp_expl").innerHTML = docJSON.expl;
+    (0, _helper.dE)("tp_lsno").innerText = docJSON.title;
+    (0, _helper.dE)("tp_expl").innerHTML = docJSON.expl;
 // dE("tp_lsimg").src = docJSON.img
 }
 async function questionRenderer(docJSON, type) {
@@ -2138,21 +2057,21 @@ async function questionRenderer(docJSON, type) {
     function qif(ele) {
         ele.style.display = "flex";
     }
-    iu(dE("tp_hint"));
-    iu(dE("tp_a_expl"));
-    iu(dE("tp_e_answer"));
-    iu(dE("tp_status"));
-    var tpmcqcon = dE("tp_mcq_con");
-    var tpmatrix = dE("tp_matrix");
-    var tpanswer = dE("tp_answer");
-    dE("tp_lsno").innerText = "Question";
-    dE("tp_question").style.display = "flex";
-    dE("tp_lesson").style.display = "none";
-    dE("tp_question").setAttribute("dataid", docJSON.id);
-    dE("tp_question").setAttribute("qtype", docJSON.type);
+    iu((0, _helper.dE)("tp_hint"));
+    iu((0, _helper.dE)("tp_a_expl"));
+    iu((0, _helper.dE)("tp_e_answer"));
+    iu((0, _helper.dE)("tp_status"));
+    var tpmcqcon = (0, _helper.dE)("tp_mcq_con");
+    var tpmatrix = (0, _helper.dE)("tp_matrix");
+    var tpanswer = (0, _helper.dE)("tp_answer");
+    (0, _helper.dE)("tp_lsno").innerText = "Question";
+    (0, _helper.dE)("tp_question").style.display = "flex";
+    (0, _helper.dE)("tp_lesson").style.display = "none";
+    (0, _helper.dE)("tp_question").setAttribute("dataid", docJSON.id);
+    (0, _helper.dE)("tp_question").setAttribute("qtype", docJSON.type);
     tpmcqcon.innerHTML = "";
-    dE("tp_qtext").innerHTML = docJSON.title;
-    dE("tp_img").src = "";
+    (0, _helper.dE)("tp_qtext").innerHTML = docJSON.title;
+    // dE("tp_img").src = ""
     if (docJSON.type == "mcq" || docJSON.type == "mcq_multiple") {
         qif(tpmcqcon);
         iu(tpmatrix);
@@ -2160,7 +2079,7 @@ async function questionRenderer(docJSON, type) {
         var qop = docJSON.op;
         var asi = "";
         for (let ele1 of qop)asi += '<div class="tp_mcq_p rpl" onclick = "mcqchose(this)">' + ele1 + "</div>";
-        dE("tp_mcq_con").insertAdjacentHTML("beforeend", asi);
+        (0, _helper.dE)("tp_mcq_con").insertAdjacentHTML("beforeend", asi);
     } else if (docJSON.type == "matrix") {
         iu(tpmcqcon);
         io(tpmatrix);
@@ -2179,14 +2098,14 @@ async function questionRenderer(docJSON, type) {
         iu(tpmatrix);
         iu(tpanswer);
         var asi = '<div class="tp_mcq_p rpl">True</div><div class="tp_mcq_p rpl">False</div>';
-        dE("tp_mcq_con").insertAdjacentHTML("beforeend", asi);
+        (0, _helper.dE)("tp_mcq_con").insertAdjacentHTML("beforeend", asi);
     } else {
         iu(tpmcqcon);
         iu(tpmatrix);
         iu(tpanswer);
     }
-    renderMathInElement(dE("tp_ans_hold"));
-    renderMathInElement(dE("tp_qtext"));
+    renderMathInElement((0, _helper.dE)("tp_ans_hold"));
+    renderMathInElement((0, _helper.dE)("tp_qtext"));
 }
 async function topicHandler(type) {
     var pol;
@@ -2196,22 +2115,22 @@ async function topicHandler(type) {
     else if (type == 1 && topicJSONno > 0) topicJSONno = topicJSONno + pol;
     if (type == 3) topicJSONno = 0;
     var a = topicJSON.title;
-    dE("tp_title").innerText = a;
-    var cddd = topicJSON.qllist[topicJSONno];
-    if (cddd.mode == "lesson") lessonRenderer(cddd);
-    else if (cddd.mode == "question") questionRenderer(cddd);
+    (0, _helper.dE)("tp_title").innerText = a;
+    var tqQus = topicJSON.qllist[topicJSONno];
+    if (tqQus.mode == "lesson") lessonRenderer(tqQus);
+    else if (tqQus.mode == "question") questionRenderer(tqQus);
     stpVid();
 }
 function addMCQ() {
     var MCQ = `<div class="aq_mcq_p" onclick="changeColor(this)"><input class="aq_mcq"></div>`;
-    dE("aq_mcq_con").insertAdjacentHTML("beforeend", MCQ);
+    (0, _helper.dE)("aq_mcq_con").insertAdjacentHTML("beforeend", MCQ);
 }
 function clearAQ() {
     setHTML("aq_qtext", "");
     setHTML("aq_expl", "");
-    dE("aq_answer").value = "";
-    dE("aq_yurl").value = "";
-    dE("aq_hint").value = "";
+    (0, _helper.dE)("aq_answer").value = "";
+    (0, _helper.dE)("aq_yurl").value = "";
+    (0, _helper.dE)("aq_hint").value = "";
     for(var i = 0; i < document.getElementsByClassName("aq_mcq").length; i++)document.getElementsByClassName("aq_mcq")[i].value = "";
     for(var i = 0; i < document.getElementsByClassName("aq_i1").length; i++)document.getElementsByClassName("aq_i1")[i].value = "";
     for(var i = 0; i < document.getElementsByClassName("aq_i2").length; i++)document.getElementsByClassName("aq_i2")[i].value = "";
@@ -2225,7 +2144,7 @@ function initFirebaseAuth() {
 // locationHandler("dashboard", 1)
 }
 function shuffleQBank() {
-    var ol = dE("eqb_add");
+    var ol = (0, _helper.dE)("eqb_add");
     for(var i = ol.children.length; i >= 0; i--)ol.appendChild(ol.children[Math.random() * i | 0]);
 }
 function requestPasschange() {
@@ -2240,17 +2159,17 @@ function requestPasschange() {
 }
 async function authStateObserver(user) {
     // var uname = dE("prf_uname")
-    var upic = dE("prf_pphoto");
-    var name = dE("prf_name");
-    var phone = dE("prf_phone");
-    var email1 = dE("prf_email");
+    var upic = (0, _helper.dE)("prf_pphoto");
+    var name = (0, _helper.dE)("prf_name");
+    var phone = (0, _helper.dE)("prf_phone");
+    var email1 = (0, _helper.dE)("prf_email");
     // var course = dE("prf_course")
-    var stclass = dE("prf_class");
-    var batch = dE("prf_batch");
-    var gender = dE("prf_gender");
-    var crton = dE("prf_crton");
-    var tmtifr = dE("tmt_frame");
-    var spoints = dE("spoints");
+    var stclass = (0, _helper.dE)("prf_class");
+    var batch = (0, _helper.dE)("prf_batch");
+    var gender = (0, _helper.dE)("prf_gender");
+    var crton = (0, _helper.dE)("prf_crton");
+    var tmtifr = (0, _helper.dE)("tmt_frame");
+    var spoints = (0, _helper.dE)("spoints");
     var courseno, batchno, calenid;
     if (user) {
         var docRef = (0, _firestore.doc)(db, "users", user.uid);
@@ -2260,8 +2179,8 @@ async function authStateObserver(user) {
             userinfo = docJSON;
             userinfo.uuid = user.uid;
             // uname.textContent = docJSON.email
-            dE("dshd_uname").innerText = docJSON.email;
-            dE("dshd_name").innerText = docJSON.name;
+            (0, _helper.dE)("dshd_uname").innerText = docJSON.email;
+            (0, _helper.dE)("dshd_name").innerText = docJSON.name;
             name.textContent = docJSON.name;
             phone.textContent = docJSON.mblno;
             email1.textContent = docJSON.email;
@@ -2282,15 +2201,15 @@ async function authStateObserver(user) {
             signOutUser();
         }
         if (docJSON.gen == "Male") {
-            dE("prf_tab_img").classList.remove("prf_male", "prf_female");
-            dE("prf_tab_img").classList.add("prf_male");
-            dE("prf_tab_t_t_img").classList.remove("prf_male", "prf_female");
-            dE("prf_tab_t_t_img").classList.add("prf_male");
+            (0, _helper.dE)("prf_tab_img").classList.remove("prf_male", "prf_female");
+            (0, _helper.dE)("prf_tab_img").classList.add("prf_male");
+            (0, _helper.dE)("prf_tab_t_t_img").classList.remove("prf_male", "prf_female");
+            (0, _helper.dE)("prf_tab_t_t_img").classList.add("prf_male");
         } else if (docJSON.gen == "Female") {
-            dE("prf_tab_img").classList.remove("prf_male", "prf_female");
-            dE("prf_tab_img").classList.add("prf_female");
-            dE("prf_tab_t_t_img").classList.remove("prf_male", "prf_female");
-            dE("prf_tab_t_t_img").classList.add("prf_female");
+            (0, _helper.dE)("prf_tab_img").classList.remove("prf_male", "prf_female");
+            (0, _helper.dE)("prf_tab_img").classList.add("prf_female");
+            (0, _helper.dE)("prf_tab_t_t_img").classList.remove("prf_male", "prf_female");
+            (0, _helper.dE)("prf_tab_t_t_img").classList.add("prf_female");
         }
         try {
             var docRef = (0, _firestore.doc)(db, "batch", batchno);
@@ -2298,7 +2217,7 @@ async function authStateObserver(user) {
             if (docSnap.exists()) {
                 var docJSON = docSnap.data();
                 batch.textContent = docJSON.name;
-                dE("dshd_batch").innerText = docJSON.name;
+                (0, _helper.dE)("dshd_batch").innerText = docJSON.name;
                 calenid = docJSON.timetable;
                 getTestList(batchno, user.uid);
                 var iframeurl = "https://calendar.google.com/calendar/embed??height=600&wkst=2&bgcolor=%23ffffff&ctz=Asia%2FKolkata&showTitle=0&showCalendars=0&showTabs=0&showPrint=0&showDate=1&src=" + calenid + "%40group.calendar.google.com&amp;ctz=Asia%2FKolkata";
@@ -2316,10 +2235,10 @@ async function authStateObserver(user) {
                 });
             }
         } catch  {}
-        dE("lg_uname").value = "";
-        dE("lg_pass").value = "";
+        (0, _helper.dE)("lg_uname").value = "";
+        (0, _helper.dE)("lg_pass").value = "";
         spoints.style.display = "block";
-        dE("dsh_btn").style.display = "block";
+        (0, _helper.dE)("dsh_btn").style.display = "block";
         if (window.location.hash == "" || window.location.hash == null || window.location.hash == undefined) {
             // locationHandler("dashboard", 1);
             window.location.hash = "#/dashboard";
@@ -2329,13 +2248,13 @@ async function authStateObserver(user) {
         var docSnap = await (0, _firestore.getDoc)(docRef);
         if (docSnap.exists()) {
             var docJSON = docSnap.data();
-            dE("db_exam_list").innerHTML = "";
+            (0, _helper.dE)("db_exam_list").innerHTML = "";
             if (docJSON.warning != "") log("Notice", docJSON.warning, function() {
                 window.location.hash = "#/usernotes/releasenotes";
             }, "Release Notes");
             for(var i = 0; i < docJSON.examinfo.length; i++){
                 var f = docJSON.examinfo[i];
-                dE("db_exam_list").insertAdjacentHTML("beforeend", `<div class = "tlinks_min rpl"><span style="font-size: 16px;" onclick = "examlog('` + f.name + `','` + f.date + `','` + f.info + `','` + f.syllabus + `')">` + f.name + `</span></div>`);
+                (0, _helper.dE)("db_exam_list").insertAdjacentHTML("beforeend", `<div class = "tlinks_min rpl"><span style="font-size: 16px;" onclick = "examlog('` + f.name + `','` + f.date + `','` + f.info + `','` + f.syllabus + `')">` + f.name + `</span></div>`);
             }
         }
         locationHandler(window.location.hash.split("#/")[1], 1);
@@ -2348,9 +2267,9 @@ async function authStateObserver(user) {
         stclass.textContent = "";
         spoints.textContent = "";
         spoints.style.display = "none";
-        dE("dsh_btn").style.display = "none";
-        dE("tp_pnt").style.display = "none";
-        dE("tp_edt").style.display = "none";
+        (0, _helper.dE)("dsh_btn").style.display = "none";
+        (0, _helper.dE)("tp_pnt").style.display = "none";
+        (0, _helper.dE)("tp_edt").style.display = "none";
         locationHandler("login", 1);
         if (autosignin == 1) document.location.reload();
     // 
@@ -2358,7 +2277,7 @@ async function authStateObserver(user) {
 }
 function uploadImages() {
     var a = (0, _firestore.serverTimestamp)();
-    var file = dE("aq_file");
+    var file = (0, _helper.dE)("aq_file");
     var filecontent;
     var reader = new FileReader();
     reader.onload = function() {
@@ -2374,8 +2293,8 @@ function signUpRestrict() {
     alert("The App Is Invite Only Registrations Are NOT Available Right Now");
 }
 function checkQuestion() {
-    var qid = dE("tp_question").getAttribute("dataid");
-    var type = dE("tp_question").getAttribute("qtype");
+    var qid = (0, _helper.dE)("tp_question").getAttribute("dataid");
+    var type = (0, _helper.dE)("tp_question").getAttribute("qtype");
     var answer;
     var crranswer, explanation, hint;
     var status = 0;
@@ -2386,33 +2305,33 @@ function checkQuestion() {
         break;
     }
     if (type == "numerical" || type == "fill") {
-        answer = dE("tp_answer").value;
+        answer = (0, _helper.dE)("tp_answer").value;
         if (crranswer == answer) {
-            dE("tp_status").innerText = "Correct Answer";
+            (0, _helper.dE)("tp_status").innerText = "Correct Answer";
             status = 1;
         } else {
-            dE("tp_status").innerText = "Wrong Answer";
+            (0, _helper.dE)("tp_status").innerText = "Wrong Answer";
             status = 0;
         }
     }
     if (type == "mcq" || type == "mcq_multiple" || type == "taf") {
         answer = [];
         for(var k = 0; k < document.getElementsByClassName("tp_mcq_p").length; k++)if (document.getElementsByClassName("tp_mcq_p")[k].classList.contains("aq_mcq_ans")) answer.push(document.getElementsByClassName("tp_mcq_p")[k].innerText);
-        if (areEqual(answer, crranswer)) {
-            dE("tp_status").innerText = "Correct Answer";
+        if ((0, _helper.areEqual)(answer, crranswer)) {
+            (0, _helper.dE)("tp_status").innerText = "Correct Answer";
             status = 1;
         } else {
-            dE("tp_status").innerText = "Wrong Answer";
+            (0, _helper.dE)("tp_status").innerText = "Wrong Answer";
             status = 0;
         }
     }
-    dE("tp_status").style.display = "block";
-    dE("tp_hint").style.display = "block";
-    dE("tp_a_expl").style.display = "block";
-    dE("tp_e_answer").style.display = "block";
-    dE("tp_a_expl").innerHTML = explanation;
-    dE("tp_hint").innerHTML = hint;
-    dE("tp_e_answer").innerHTML = "Answer:" + crranswer;
+    (0, _helper.dE)("tp_status").style.display = "block";
+    (0, _helper.dE)("tp_hint").style.display = "block";
+    (0, _helper.dE)("tp_a_expl").style.display = "block";
+    (0, _helper.dE)("tp_e_answer").style.display = "block";
+    (0, _helper.dE)("tp_a_expl").innerHTML = explanation;
+    (0, _helper.dE)("tp_hint").innerHTML = hint;
+    (0, _helper.dE)("tp_e_answer").innerHTML = "Answer:" + crranswer;
 }
 function printStuff() {
     if (window.location.hash.includes("topic")) changeLocationHash("printable/topic/" + window.location.hash.split("topic/")[1], 1);
@@ -2508,17 +2427,17 @@ function renderTestList(type) {
     if (type == "active") renList = activeTestList;
     else if (type == "upcoming") renList = upcomingTestList;
     else if (type == "finished") renList = finishedTestList;
-    dE("testlinks").innerHTML = "";
+    (0, _helper.dE)("testlinks").innerHTML = "";
     for (var ele of renList){
         var strson = new Date(ele.strton.seconds * 1000);
         var endson = new Date(ele.endon.seconds * 1000);
         var output = '<div class="tlinks" id = "' + ele.testid + '"><span class = "t_title">' + ele.title + '</span><span class = "t_stron">Starts At:' + strson + '</span><span class ="t_endon">Ends At:' + endson + "</div>";
         if (type != "finished" && ele.finished == false) {
-            dE("testlinks").insertAdjacentHTML("beforeend", output);
-            dE(ele.testid).addEventListener("click", testClicker);
+            (0, _helper.dE)("testlinks").insertAdjacentHTML("beforeend", output);
+            (0, _helper.dE)(ele.testid).addEventListener("click", testClicker);
         } else if (type == "finished") {
-            dE("testlinks").insertAdjacentHTML("beforeend", output);
-            dE(ele.testid).addEventListener("click", finishedtestClicker);
+            (0, _helper.dE)("testlinks").insertAdjacentHTML("beforeend", output);
+            (0, _helper.dE)(ele.testid).addEventListener("click", finishedtestClicker);
         }
     }
 }
@@ -2529,7 +2448,7 @@ async function getSimpleTestReport() {
     if (docSnap.exists()) {
         testInfo = docSnap.data();
         var attempted = 0;
-        dE("fti_title").innerText = testInfo.title;
+        (0, _helper.dE)("fti_title").innerText = testInfo.title;
         docRef = (0, _firestore.doc)(db, "tests", testid, "responses", "finished");
         docSnap = await (0, _firestore.getDoc)(docRef);
         if (docSnap.exists()) {
@@ -2540,7 +2459,7 @@ async function getSimpleTestReport() {
         }
         if (attempted == 0) {
             locationHandler("testend", 1);
-            dE("te_title").innerText = "You Have NOT Attempted This Test";
+            (0, _helper.dE)("te_title").innerText = "You Have NOT Attempted This Test";
         } else try {
             try {
                 computeResult(1);
@@ -2550,13 +2469,13 @@ async function getSimpleTestReport() {
                 docSnap = await (0, _firestore.getDoc)(docRef);
                 var tT = docSnap.data();
                 if (docSnap.exists()) {
-                    dE("fto_total").innerText = tT.info.usermarks + "/" + tT.info.total;
-                    dE("fto_correct").innerText = tT.info.correct;
-                    dE("fto_incorrect").innerText = tT.info.incorrect;
-                    dE("fto_unanswered").innerText = tT.info.unattempted;
+                    (0, _helper.dE)("fto_total").innerText = tT.info.usermarks + "/" + tT.info.total;
+                    (0, _helper.dE)("fto_correct").innerText = tT.info.correct;
+                    (0, _helper.dE)("fto_incorrect").innerText = tT.info.incorrect;
+                    (0, _helper.dE)("fto_unanswered").innerText = tT.info.unattempted;
                     testActionLogger = tT.actions;
                     reQW = tT.info.mList;
-                    dE("fto_rank").innerText = "0";
+                    (0, _helper.dE)("fto_rank").innerText = "0";
                     function r(t, c, ic, un, tm) {
                         var z = tm - (c - ic * 4);
                         var gf = c + ic;
@@ -2571,20 +2490,20 @@ async function getSimpleTestReport() {
                         "Computer",
                         "Unfiled"
                     ];
-                    dE("fto_percents").innerHTML = "";
+                    (0, _helper.dE)("fto_percents").innerHTML = "";
                     for (var eleX of ion1){
                         var el2e2 = tT.info.subjectmarks[eleX];
-                        if (!areObjectsEqual(el2e2, {
+                        if (!(0, _helper.areObjectsEqual)(el2e2, {
                             correct: 0,
                             unattempted: 0,
                             incorrect: 0,
                             total: 0
-                        })) dE("fto_percents").insertAdjacentHTML("beforeend", r(eleX, el2e2.correct, el2e2.incorrect, el2e2.unattempted, el2e2.total));
+                        })) (0, _helper.dE)("fto_percents").insertAdjacentHTML("beforeend", r(eleX, el2e2.correct, el2e2.incorrect, el2e2.unattempted, el2e2.total));
                     }
                     analyseActions(1).then(function() {
                         function qw(t, c, ic, un, tm) {
                             var z = tm - (c + ic);
-                            return `<div><span>` + t + `(` + sd(tm) + `)</span><div style = "width:80vw;height:30px;display:flex;flex-direction:row;"><div style="width:` + c / tm * 80 + `vw;background-color:green;height:30px;text-align:center;color:white">` + sd(c) + `</div><div style="width:` + ic / tm * 80 + `vw;background-color:red;height:30px;text-align:center;color:white">` + sd(ic) + `</div><div style="width:` + (1 - (c + ic) / tm) * 80 + `vw;background-color:orange;height:30px;text-align:center;color:black">` + sd(z) + `</div></div></div>`;
+                            return `<div><span>` + t + `(` + (0, _helper.sd)(tm) + `)</span><div style = "width:80vw;height:30px;display:flex;flex-direction:row;"><div style="width:` + c / tm * 80 + `vw;background-color:green;height:30px;text-align:center;color:white">` + (0, _helper.sd)(c) + `</div><div style="width:` + ic / tm * 80 + `vw;background-color:red;height:30px;text-align:center;color:white">` + (0, _helper.sd)(ic) + `</div><div style="width:` + (1 - (c + ic) / tm) * 80 + `vw;background-color:orange;height:30px;text-align:center;color:black">` + (0, _helper.sd)(z) + `</div></div></div>`;
                         }
                         var ion1 = [
                             "Physics",
@@ -2595,15 +2514,15 @@ async function getSimpleTestReport() {
                             "Computer",
                             "Unfiled"
                         ];
-                        dE("fto_time").innerHTML = "";
+                        (0, _helper.dE)("fto_time").innerHTML = "";
                         for (var eleX of ion1){
                             var eXZe2 = analysedActions.subject[eleX];
-                            if (!areObjectsEqual(eXZe2, {
+                            if (!(0, _helper.areObjectsEqual)(eXZe2, {
                                 correct: 0,
                                 unattempted: 0,
                                 incorrect: 0,
                                 total: 0
-                            })) dE("fto_time").insertAdjacentHTML("beforeend", qw(eleX, eXZe2.correct, eXZe2.incorrect, eXZe2.unattempted, eXZe2.total));
+                            })) (0, _helper.dE)("fto_time").insertAdjacentHTML("beforeend", qw(eleX, eXZe2.correct, eXZe2.incorrect, eXZe2.unattempted, eXZe2.total));
                         }
                     });
                 }
@@ -2612,12 +2531,12 @@ async function getSimpleTestReport() {
                     docRef = (0, _firestore.doc)(db, "tests", testid, "responses", "finished");
                     docSnap = await (0, _firestore.getDoc)(docRef);
                     if (docSnap.exists()) leaderboard = docSnap.data().leaderboard;
-                    dE("fto_leaderboard").innerHTML = "";
-                    leaderboard = sortObj(leaderboard, "marks", 1);
+                    (0, _helper.dE)("fto_leaderboard").innerHTML = "";
+                    leaderboard = (0, _helper.sortObj)(leaderboard, "marks", 1);
                     for(var i = 0; i < leaderboard.length; i++){
                         var e = i + 1;
-                        if (userinfo.uuid == leaderboard[i].uid) dE("fto_rank").innerText = e;
-                        dE("fto_leaderboard").insertAdjacentHTML("beforeend", '<div class = "tlinks" style = "flex-direction:row;width:25vw;justify-content:space-between;"><span class = "t_gre">&nbsp;' + e + '</span><span class = "t_name">' + leaderboard[i].name + '</span><span class = "t_gre">&nbsp;&nbsp;' + leaderboard[i].marks + "</span></div>");
+                        if (userinfo.uuid == leaderboard[i].uid) (0, _helper.dE)("fto_rank").innerText = e;
+                        (0, _helper.dE)("fto_leaderboard").insertAdjacentHTML("beforeend", '<div class = "tlinks" style = "flex-direction:row;width:25vw;justify-content:space-between;"><span class = "t_gre">&nbsp;' + e + '</span><span class = "t_name">' + leaderboard[i].name + '</span><span class = "t_gre">&nbsp;&nbsp;' + leaderboard[i].marks + "</span></div>");
                     }
                 } catch  {}
                 var data = [];
@@ -2635,7 +2554,7 @@ async function getSimpleTestReport() {
                 });
                 questionGraph("fto_draw", data);
             } catch  {
-                dE("te_title").innerText = "ERROR";
+                (0, _helper.dE)("te_title").innerText = "ERROR";
                 locationHandler("testend", 1);
                 return 0;
             }
@@ -2655,7 +2574,7 @@ async function analyseActions(typi) {
     }
     var qnos = {};
     for(var i = 0; i < testActionLogger.length; i++)testActionLogger[i].time = testActionLogger[i].time.seconds;
-    var tAL = sortObjv2(testActionLogger, "time", "type", 0);
+    var tAL = (0, _helper.sortObjv2)(testActionLogger, "time", "type", 0);
     var curr_time;
     var next_time;
     var aqid = "";
@@ -2752,17 +2671,17 @@ async function analyseActions(typi) {
     analysedActions = tFinal;
 }
 async function getTestReport() {
-    dE("tt_footer").style.display = "none";
-    dE("tt_sub").style.display = "none";
-    dE("tt_timeleft").style.display = "none";
-    dE("tt_marksaward").style.display = "block";
+    (0, _helper.dE)("tt_footer").style.display = "none";
+    (0, _helper.dE)("tt_sub").style.display = "none";
+    (0, _helper.dE)("tt_timeleft").style.display = "none";
+    (0, _helper.dE)("tt_marksaward").style.display = "block";
     var testid = window.location.hash.split("#/testreport/")[1];
     var docRef = (0, _firestore.doc)(db, "tests", testid);
     var docSnap = await (0, _firestore.getDoc)(docRef);
     if (docSnap.exists()) {
         testInfo = docSnap.data();
         var attempted = 0;
-        dE("tt_testname").innerText = testInfo.title;
+        (0, _helper.dE)("tt_testname").innerText = testInfo.title;
         docRef = (0, _firestore.doc)(db, "tests", testid, "responses", "finished");
         docSnap = await (0, _firestore.getDoc)(docRef);
         if (docSnap.exists()) {
@@ -2773,10 +2692,10 @@ async function getTestReport() {
         }
         if (attempted == 0) {
             locationHandler("testend", 1);
-            dE("te_title").innerText = "You Have NOT Attempted This Test";
+            (0, _helper.dE)("te_title").innerText = "You Have NOT Attempted This Test";
         } else if (Date.now() / 1000 <= testInfo.endon.seconds && testInfo.noresult == false) {
             locationHandler("testend", 1);
-            dE("te_title").innerText = "Detailed Test Reports will be available after deadline";
+            (0, _helper.dE)("te_title").innerText = "Detailed Test Reports will be available after deadline";
         } else {
             try {
                 docRef = (0, _firestore.doc)(db, "tests", testid, "questions", "questions");
@@ -2798,7 +2717,7 @@ async function getTestReport() {
                 docSnap = await (0, _firestore.getDoc)(docRef);
                 if (docSnap.exists()) testReportAnswers = docSnap.data();
             } catch  {
-                dE("te_title").innerText = "ERROR";
+                (0, _helper.dE)("te_title").innerText = "ERROR";
                 locationHandler("testend", 1);
                 return 0;
             }
@@ -2808,10 +2727,10 @@ async function getTestReport() {
 }
 var testTimerfunction;
 async function getTestInfo() {
-    dE("tt_footer").style.display = "flex";
-    dE("tt_sub").style.display = "block";
-    dE("tt_timeleft").style.display = "block";
-    dE("tt_marksaward").style.display = "none";
+    (0, _helper.dE)("tt_footer").style.display = "flex";
+    (0, _helper.dE)("tt_sub").style.display = "block";
+    (0, _helper.dE)("tt_timeleft").style.display = "block";
+    (0, _helper.dE)("tt_marksaward").style.display = "none";
     var testid = window.location.hash.split("#/attempt/")[1];
     var docRef = (0, _firestore.doc)(db, "tests", testid);
     var docSnap = await (0, _firestore.getDoc)(docRef);
@@ -2822,7 +2741,7 @@ async function getTestInfo() {
         if (docSnap.exists()) {
             for (var ele of docSnap.data().finished)if (auth.currentUser.uid == ele) {
                 locationHandler("testend", 1);
-                dE("te_title").innerText = "You Have Already Attempted This Test";
+                (0, _helper.dE)("te_title").innerText = "You Have Already Attempted This Test";
                 return 0;
             }
         }
@@ -2832,7 +2751,7 @@ async function getTestInfo() {
         docSnap = await (0, _firestore.getDoc)(docRef);
         if (docSnap.exists()) testQuestionList = docSnap.data();
     } catch  {
-        dE("te_title").innerText = "The Test Hasnt Started Yet";
+        (0, _helper.dE)("te_title").innerText = "The Test Hasnt Started Yet";
         locationHandler("testend", 1);
         return 0;
     }
@@ -2884,9 +2803,9 @@ async function getTestInfo() {
     if (window.location.hash.includes("/attempt/")) testTimerfunction = setInterval(function() {
         var seconds = testInfo.timeallotted - 1;
         testInfo.timeallotted -= 1;
-        dE("tt_timeleft").innerText = Math.floor(seconds % 86400 / 3600) + ":" + Math.floor(seconds % 3600 / 60) + ":" + Math.floor(seconds % 60);
+        (0, _helper.dE)("tt_timeleft").innerText = Math.floor(seconds % 86400 / 3600) + ":" + Math.floor(seconds % 3600 / 60) + ":" + Math.floor(seconds % 60);
         testQTime += 1;
-        dE("tt_timespent").innerText = Math.floor(testQTime % 86400 / 3600) + ":" + Math.floor(testQTime % 3600 / 60) + ":" + Math.floor(testQTime % 60);
+        (0, _helper.dE)("tt_timespent").innerText = Math.floor(testQTime % 86400 / 3600) + ":" + Math.floor(testQTime % 3600 / 60) + ":" + Math.floor(testQTime % 60);
         if (seconds == 0) submitTest();
     }, 1000);
     window.onbeforeunload = function(e) {
@@ -2897,13 +2816,13 @@ async function getTestInfo() {
         locationHandler();
         submitTest();
     };
-    dE("tt_testname").innerText = testInfo.title;
-    dE("dsh_btn").style.display = "none";
-    dE("tp_pnt").style.display = "none";
-    dE("tp_pnt").style.display = "none";
-    var tbox = dE("testv1");
+    (0, _helper.dE)("tt_testname").innerText = testInfo.title;
+    (0, _helper.dE)("dsh_btn").style.display = "none";
+    (0, _helper.dE)("tp_pnt").style.display = "none";
+    (0, _helper.dE)("tp_pnt").style.display = "none";
+    var tbox = (0, _helper.dE)("testv1");
     try {
-        fullEle(tbox);
+        (0, _helper.fullEle)(tbox);
     } catch  {}
     inittestHandler();
 }
@@ -2994,7 +2913,7 @@ async function computeResult(type) {
                 u = u + parseFloat(trA[i].pm);
                 subjectmarks[trA[i].section].unattempted += parseFloat(trA[i].pm);
                 subjectmarks[trA[i].section].total += parseFloat(trA[i].pm);
-            } else if (areEqual(trA[i].answer, ele.ans)) {
+            } else if ((0, _helper.areEqual)(trA[i].answer, ele.ans)) {
                 marksList.push({
                     qid: trA[i].qid,
                     marks: parseFloat(trA[i].pm),
@@ -3026,7 +2945,7 @@ async function computeResult(type) {
         subjectmarks: subjectmarks
     };
     if (type == 1) {
-        if (!areObjectsEqual(tFinal, fg)) {
+        if (!(0, _helper.areObjectsEqual)(tFinal, fg)) {
             log("NOTICE", "Please Wait, Marks Are Being Updated");
             await (0, _firestore.updateDoc)((0, _firestore.doc)(db, "tests", testid, "responses", auth.currentUser.uid), {
                 info: tFinal
@@ -3072,9 +2991,9 @@ function testqHandler(id, no) {
             value: activequestionid
         });
     }
-    dE("tt_qno").innerText = no;
+    (0, _helper.dE)("tt_qno").innerText = no;
     try {
-        dE(activequestionid).style.border = "";
+        (0, _helper.dE)(activequestionid).style.border = "";
     } catch  {}
     activequestionid = id;
     if (window.location.hash.includes("/attempt/")) testActionLogger.push({
@@ -3082,11 +3001,11 @@ function testqHandler(id, no) {
         time: u,
         value: activequestionid
     });
-    dE(activequestionid).style.border = "purple 3px solid";
+    (0, _helper.dE)(activequestionid).style.border = "purple 3px solid";
     for (let ele of testQuestionList.questions)if (id == ele.qid) {
-        dE("tt_qtitle").innerHTML = "";
+        (0, _helper.dE)("tt_qtitle").innerHTML = "";
         var inhtml = '<div class = "qb_q" id = "Q' + ele.qid + '"><div class = "qb_ttl">' + ele.title + '<div id = "qb_q_ty" class = "qb_q_ty qb_qt_ty" >(' + ele.type + ")</div></div></div>";
-        dE("tt_qtitle").insertAdjacentHTML("beforeend", inhtml);
+        (0, _helper.dE)("tt_qtitle").insertAdjacentHTML("beforeend", inhtml);
         var asi = "";
         if (ele.type == "mcq") {
             var qop = ele.op;
@@ -3107,7 +3026,7 @@ function testqHandler(id, no) {
             for(var i = 0; i < qopn1; i++)asi += "<tr><td>" + qop1[i] + "</td><td>" + qop2[i] + "</td>";
             qrt = "<table>" + asi + "</table>";
         }
-        dE("tt_qtitle").insertAdjacentHTML("beforeend", qrt);
+        (0, _helper.dE)("tt_qtitle").insertAdjacentHTML("beforeend", qrt);
         var ANS;
         switch(ele.type){
             case "mcq":
@@ -3130,20 +3049,20 @@ function testqHandler(id, no) {
                 ANS = FILL;
                 break;
         }
-        dE("tt_qtitle").insertAdjacentHTML("beforeend", ANS);
+        (0, _helper.dE)("tt_qtitle").insertAdjacentHTML("beforeend", ANS);
         var tyio;
         if (!window.location.hash.includes("attempt")) {
             for (let ele of testReportAnswers.questions)if (id == ele.qid) {
                 tyio = ele.answer;
                 if (analysedActions != undefined) {
-                    if (analysedActions.questions[ele.qid] == undefined) dE("tt_timespent").innerText = "0 seconds";
-                    else dE("tt_timespent").innerText = sd(analysedActions.questions[ele.qid].time);
+                    if (analysedActions.questions[ele.qid] == undefined) (0, _helper.dE)("tt_timespent").innerText = "0 seconds";
+                    else (0, _helper.dE)("tt_timespent").innerText = (0, _helper.sd)(analysedActions.questions[ele.qid].time);
                 }
                 var lio = '<div id="tg_answer">Answer: ' + ele.answer + '</div><div id="tg_expl">Explanation: ' + ele.expl + "</div>";
-                dE("tt_qtitle").insertAdjacentHTML("beforeend", lio);
+                (0, _helper.dE)("tt_qtitle").insertAdjacentHTML("beforeend", lio);
             }
         }
-        renderMathInElement(dE("tt_qtitle"));
+        renderMathInElement((0, _helper.dE)("tt_qtitle"));
         var fghu = 0;
         for (let ele23 of testResponseList)if (ele23.qid == id) {
             for(var i = 0; i < document.getElementsByClassName("q_ans").length; i++){
@@ -3161,9 +3080,9 @@ function testqHandler(id, no) {
                 }
             }
             if (!window.location.hash.includes("attempt")) {
-                if (areEqual(ele23.ans, tyio)) dE("tt_marksaward").innerHTML = '<div style="color:lime">Correct(+4)</div>';
-                else if (ele23.ans.length == 0) dE("tt_marksaward").innerHTML = '<div style="color:orange">Unanswered(0)</div>';
-                else dE("tt_marksaward").innerHTML = '<div style="color:red">Incorrect(-1)</div>';
+                if ((0, _helper.areEqual)(ele23.ans, tyio)) (0, _helper.dE)("tt_marksaward").innerHTML = '<div style="color:lime">Correct(+4)</div>';
+                else if (ele23.ans.length == 0) (0, _helper.dE)("tt_marksaward").innerHTML = '<div style="color:orange">Unanswered(0)</div>';
+                else (0, _helper.dE)("tt_marksaward").innerHTML = '<div style="color:red">Incorrect(-1)</div>';
             }
         }
         // var fghut = 0;
@@ -3174,8 +3093,8 @@ function testqHandler(id, no) {
                     testOperator("tts_notanswer");
                     testResponseList[k].ans = [];
                     // fghut = 1
-                    dE(activequestionid).classList.remove("tts_notanswer", "tts_notvisit", "tts_answered", "tts_review", "tts_ansreview");
-                    dE(activequestionid).classList.add("tts_notanswer");
+                    (0, _helper.dE)(activequestionid).classList.remove("tts_notanswer", "tts_notvisit", "tts_answered", "tts_review", "tts_ansreview");
+                    (0, _helper.dE)(activequestionid).classList.add("tts_notanswer");
                 }
             }
         }
@@ -3194,15 +3113,15 @@ function inittestHandler() {
         "tw_Unfiled"
     ];
     for (let e2le3 of itsections){
-        dE(e2le3 + "_c").innerHTML = "";
-        dE(e2le3).style.display = "none";
+        (0, _helper.dE)(e2le3 + "_c").innerHTML = "";
+        (0, _helper.dE)(e2le3).style.display = "none";
     }
     for (let ele of testQuestionList.questions){
         var box = '<span class = "tts_notvisit" id = "' + ele.qid + '">' + a + "</span>";
         a = a + 1;
-        dE("tw_" + ele.section + "_c").insertAdjacentHTML("beforeend", box);
-        dE("tw_" + ele.section).style.display = "flex";
-        dE(ele.qid).addEventListener("click", tqH);
+        (0, _helper.dE)("tw_" + ele.section + "_c").insertAdjacentHTML("beforeend", box);
+        (0, _helper.dE)("tw_" + ele.section).style.display = "flex";
+        (0, _helper.dE)(ele.qid).addEventListener("click", tqH);
     }
     if (!window.location.hash.includes("attempt")) {
         for (let ele23 of testResponseList){
@@ -3210,14 +3129,14 @@ function inittestHandler() {
             for (let ele of testReportAnswers.questions)if (id == ele.qid) {
                 var tyio = ele.answer;
                 if (ele23.ans == undefined) ele23.ans = [];
-                if (areEqual(ele23.ans, tyio)) dE(id).classList.add("t_crr");
-                else if (ele23.ans.length == 0) dE(id).classList.add("t_unat");
-                else dE(id).classList.add("t_incrr");
+                if ((0, _helper.areEqual)(ele23.ans, tyio)) (0, _helper.dE)(id).classList.add("t_crr");
+                else if (ele23.ans.length == 0) (0, _helper.dE)(id).classList.add("t_unat");
+                else (0, _helper.dE)(id).classList.add("t_incrr");
             }
         }
         analyseActions(2);
-    } else dE("tt_sub").style.display = "block";
-    for (let ele of testResponseList)dE(ele.qid).classList.replace("tts_notvisit", ele.type);
+    } else (0, _helper.dE)("tt_sub").style.display = "block";
+    for (let ele of testResponseList)(0, _helper.dE)(ele.qid).classList.replace("tts_notvisit", ele.type);
     testqHandler(testQuestionList.questions[0].qid, 1);
 }
 async function testOperator(type) {
@@ -3227,7 +3146,7 @@ async function testOperator(type) {
     }
     var aqid = "answers." + activequestionid;
     var testid = window.location.hash.split("#/attempt/")[1];
-    var triu = dE("qb_q_ty").innerText.split("(")[1];
+    var triu = (0, _helper.dE)("qb_q_ty").innerText.split("(")[1];
     if (type == "tts_notanswer") {
         await (0, _firestore.updateDoc)((0, _firestore.doc)(db, "tests", testid, "responses", auth.currentUser.uid), {
             [`${aqid}`]: {
@@ -3279,8 +3198,8 @@ async function testOperator(type) {
             type: type
         });
     }
-    dE(activequestionid).classList.remove("tts_notanswer", "tts_notvisit", "tts_answered", "tts_review", "tts_ansreview");
-    dE(activequestionid).classList.add(type);
+    (0, _helper.dE)(activequestionid).classList.remove("tts_notanswer", "tts_notvisit", "tts_answered", "tts_review", "tts_ansreview");
+    (0, _helper.dE)(activequestionid).classList.add(type);
 }
 async function submitTest() {
     if (!window.location.hash.includes("attempt")) {
@@ -3312,7 +3231,7 @@ async function submitTest() {
         finished: (0, _firestore.arrayUnion)(auth.currentUser.uid)
     }).then(computeResult(0));
     var endat = new Date(testInfo.endon.seconds * 1000);
-    dE("te_endtime").innerText = endat;
+    (0, _helper.dE)("te_endtime").innerText = endat;
     testList = [];
     activeTestList = [];
     upcomingTestList = [];
@@ -3320,8 +3239,8 @@ async function submitTest() {
     testInfo = [];
     testQuestionList = [];
     activequestionid = "";
-    dE("dsh_btn").style.display = "block";
-    dE("tp_pnt").style.display = "none";
+    (0, _helper.dE)("dsh_btn").style.display = "block";
+    (0, _helper.dE)("tp_pnt").style.display = "none";
     clearInterval(testTimerfunction);
 }
 window.onbeforeunload = function(event) {
@@ -3335,18 +3254,18 @@ function internetStatus(type) {
 }
 window.addEventListener("online", ()=>internetStatus(1));
 window.addEventListener("offline", ()=>internetStatus(0));
-dE("te_title").innerText = "The Test Has Ended";
+(0, _helper.dE)("te_title").innerText = "The Test Has Ended";
 function notesUIHandler() {
-    if (dE("un_rendermode").value == "preview") {
-        dE("un_preview").style.display = "block";
-        dE("un_preview").innerHTML = "<h1 style = 'text-align:center'>" + dE("un_title").value + "</h1><br>" + getHTML("un_editable");
-        dE("un_edit").style.display = "none";
-    } else if (dE("un_rendermode").value == "edit") {
-        dE("un_edit").style.display = "flex";
-        dE("un_preview").style.display = "none";
+    if ((0, _helper.dE)("un_rendermode").value == "preview") {
+        (0, _helper.dE)("un_preview").style.display = "block";
+        (0, _helper.dE)("un_preview").innerHTML = "<h1 style = 'text-align:center'>" + (0, _helper.dE)("un_title").value + "</h1><br>" + getHTML("un_editable");
+        (0, _helper.dE)("un_edit").style.display = "none";
+    } else if ((0, _helper.dE)("un_rendermode").value == "edit") {
+        (0, _helper.dE)("un_edit").style.display = "flex";
+        (0, _helper.dE)("un_preview").style.display = "none";
     }
     try {
-        dE("uno" + window.location.hash.split("usernotes/")[1]).style.backgroundColor = dE("un_colorpicker").value;
+        (0, _helper.dE)("uno" + window.location.hash.split("usernotes/")[1]).style.backgroundColor = (0, _helper.dE)("un_colorpicker").value;
     } catch  {}
 }
 function defineEvents() {
@@ -3402,7 +3321,7 @@ function defineEvents() {
         changeLocationHash("chplist", 1);
     }
     function sTestHand() {
-        t_log("Warning", "Are You Sure You Want To End The Test", submitTest, "Yes,Submit");
+        log("Warning", "Are You Sure You Want To End The Test", submitTest, "Yes,Submit", 1);
     }
     function prvHand() {
         topicHandler(1);
@@ -3420,8 +3339,8 @@ function defineEvents() {
         renderTestList("finished");
     }
     function qbnkend() {
-        dE("watermark").style.display = "flex";
-        fullEle(dE("qbnk_vid"));
+        (0, _helper.dE)("watermark").style.display = "flex";
+        (0, _helper.fullEle)((0, _helper.dE)("qbnk_vid"));
     }
     function qbnkstr() {
         prepareVideo();
@@ -3495,77 +3414,77 @@ function defineEvents() {
     function rgbtn() {
         log("Note", "By Clicking on 'Accept And Register' you agree that you accept all Terms And Conditions and Privacy Policy of Quarkz!", signUp, "Accept And Register");
     }
-    var simbtn = dE("sim_btn").addEventListener("click", simHand);
-    var sgnbtn = dE("sgn_in").addEventListener("click", signIn);
+    var simbtn = (0, _helper.dE)("sim_btn").addEventListener("click", simHand);
+    var sgnbtn = (0, _helper.dE)("sgn_in").addEventListener("click", signIn);
     // var sgngglbtn = dE("sgn_in_google").addEventListener("click", signInwithGoogle);
-    var regbtn = dE("reg_in").addEventListener("click", regHand);
-    var rgbtn = dE("rg_in").addEventListener("click", rgbtn);
-    var sgnout = dE("lgt_btn").addEventListener("click", signOutUser);
-    var tmtbtn = dE("tmt_btn").addEventListener("click", tmtHand);
-    var prfbtn = dE("prf_btn").addEventListener("click", prfHand);
-    var abtbtn = dE("abt_btn").addEventListener("click", abtHand);
-    var shfbtn = dE("shf_btn").addEventListener("click", shuffleQBank);
-    var aqao = dE("aq_ao").addEventListener("click", addMCQ);
-    var aqro = dE("aq_ro").addEventListener("click", removeMCQ);
-    var aqre = dE("aq_re").addEventListener("click", removeEntry);
-    var tmode = dE("aq_mode").addEventListener("change", changeItem);
-    var ttype = dE("aq_type").addEventListener("change", changeItem);
-    var dshbtn = dE("dsh_btn").addEventListener("click", dshHand);
-    var adibtn = dE("adi_btn").addEventListener("click", adiHand);
-    var aqsave = dE("aq_tpc_save").addEventListener("click", uQL);
-    var aqsave = dE("aq_qbc_save").addEventListener("click", uQL2);
-    var aqsave = dE("aq_tst_save").addEventListener("click", uQL3);
-    var aqsave = dE("aq_exam_save").addEventListener("click", uQL4);
-    var unsave = dE("un_save").addEventListener("click", unotes1);
-    var unprint = dE("un_print").addEventListener("click", unotes2);
-    var tstinfbtn = dE("tstinf_btn").addEventListener("click", tstinfHand);
-    var tpcbtn = dE("tpc_btn").addEventListener("click", tpcHand);
-    var uscbtn = dE("usc_btn").addEventListener("click", uscHand);
-    var lvqbtn = dE("lvq_btn").addEventListener("click", lvqHand);
-    var frmbtn = dE("frm_btn").addEventListener("click", frmHand);
-    var tpnxt = dE("tp_nxt").addEventListener("click", nxtHand);
-    var tpprv = dE("tp_prv").addEventListener("click", prvHand);
-    var tpsbm = dE("tp_sbm").addEventListener("click", checkQuestion);
-    var lglbtn = dE("lgl_btn").addEventListener("click", lglHand);
-    var qbabtn = dE("qba_btn").addEventListener("click", qbaHand);
-    var tppnt = dE("tp_pnt").addEventListener("click", printStuff);
-    var tppnt = dE("aq_export").addEventListener("click", printStuff);
-    var tpedt = dE("tp_edt").addEventListener("click", editStuff);
-    var cybbtn = dE("cyb_btn").addEventListener("click", cybHand);
-    var tiact = dE("ti_act").addEventListener("click", actHand);
-    var tiupc = dE("ti_upc").addEventListener("click", upcHand);
-    var tifin = dE("ti_fin").addEventListener("click", finHand);
-    var tt_save = dE("tt_save").addEventListener("click", tsave);
-    var tt_clear = dE("tt_clear").addEventListener("click", tclear);
-    var tt_review = dE("tt_review").addEventListener("click", treview);
-    var tt_ansreview = dE("tt_ansreview").addEventListener("click", tansrev);
-    var p_sims = dE("psims").addEventListener("click", psims);
-    var c_sims = dE("csims").addEventListener("click", csims);
-    var m_sims = dE("msims").addEventListener("click", msims);
-    var b_sims = dE("bsims").addEventListener("click", bsims);
-    var co_sims = dE("cosims").addEventListener("click", cosims);
-    var s_sims = dE("ssims").addEventListener("click", ssims);
-    var u_sims = dE("usims").addEventListener("click", usims);
-    var p_chb = dE("pchb").addEventListener("click", pchb);
-    var c_chb = dE("cchb").addEventListener("click", cchb);
-    var m_chb = dE("mchb").addEventListener("click", mchb);
-    var b_chb = dE("bchb").addEventListener("click", bchb);
-    var co_chb = dE("cochb").addEventListener("click", cochb);
-    var s_chb = dE("schb").addEventListener("click", schb);
-    var u_chb = dE("uchb").addEventListener("click", uchb);
-    var ttsub = dE("tt_sub").addEventListener("click", sTestHand);
-    var chp_btn = dE("chp_btn").addEventListener("click", chpHand);
-    var pass_rst_btn = dE("pass_rst_btn").addEventListener("click", requestPasschange);
-    var aq_sims_save = dE("aq_sims_save").addEventListener("click", updateSimulationWeb);
-    var un_rendermode = dE("un_rendermode").addEventListener("change", notesUIHandler);
-    var un_viewership = dE("un_viewership").addEventListener("change", notesUIHandler);
-    dE("un_print").addEventListener("click", function() {
-        dE("un_preview").style.display = "none";
-        dE("un_preview").innerHTML = "<h1 style = 'text-align:center;margin:0px'>" + dE("un_title").value + "</h1>" + getHTML("un_editable");
-        window.idElementPrint(dE("un_preview"), userinfo.name);
+    var regbtn = (0, _helper.dE)("reg_in").addEventListener("click", regHand);
+    var rgbtn = (0, _helper.dE)("rg_in").addEventListener("click", rgbtn);
+    var sgnout = (0, _helper.dE)("lgt_btn").addEventListener("click", signOutUser);
+    var tmtbtn = (0, _helper.dE)("tmt_btn").addEventListener("click", tmtHand);
+    var prfbtn = (0, _helper.dE)("prf_btn").addEventListener("click", prfHand);
+    var abtbtn = (0, _helper.dE)("abt_btn").addEventListener("click", abtHand);
+    var shfbtn = (0, _helper.dE)("shf_btn").addEventListener("click", shuffleQBank);
+    var aqao = (0, _helper.dE)("aq_ao").addEventListener("click", addMCQ);
+    var aqro = (0, _helper.dE)("aq_ro").addEventListener("click", removeMCQ);
+    var aqre = (0, _helper.dE)("aq_re").addEventListener("click", removeEntry);
+    var tmode = (0, _helper.dE)("aq_mode").addEventListener("change", changeItem);
+    var ttype = (0, _helper.dE)("aq_type").addEventListener("change", changeItem);
+    var dshbtn = (0, _helper.dE)("dsh_btn").addEventListener("click", dshHand);
+    var adibtn = (0, _helper.dE)("adi_btn").addEventListener("click", adiHand);
+    var aqsave = (0, _helper.dE)("aq_tpc_save").addEventListener("click", uQL);
+    var aqsave = (0, _helper.dE)("aq_qbc_save").addEventListener("click", uQL2);
+    var aqsave = (0, _helper.dE)("aq_tst_save").addEventListener("click", uQL3);
+    var aqsave = (0, _helper.dE)("aq_exam_save").addEventListener("click", uQL4);
+    var unsave = (0, _helper.dE)("un_save").addEventListener("click", unotes1);
+    var unprint = (0, _helper.dE)("un_print").addEventListener("click", unotes2);
+    var tstinfbtn = (0, _helper.dE)("tstinf_btn").addEventListener("click", tstinfHand);
+    var tpcbtn = (0, _helper.dE)("tpc_btn").addEventListener("click", tpcHand);
+    var uscbtn = (0, _helper.dE)("usc_btn").addEventListener("click", uscHand);
+    var lvqbtn = (0, _helper.dE)("lvq_btn").addEventListener("click", lvqHand);
+    var frmbtn = (0, _helper.dE)("frm_btn").addEventListener("click", frmHand);
+    var tpnxt = (0, _helper.dE)("tp_nxt").addEventListener("click", nxtHand);
+    var tpprv = (0, _helper.dE)("tp_prv").addEventListener("click", prvHand);
+    var tpsbm = (0, _helper.dE)("tp_sbm").addEventListener("click", checkQuestion);
+    var lglbtn = (0, _helper.dE)("lgl_btn").addEventListener("click", lglHand);
+    var qbabtn = (0, _helper.dE)("qba_btn").addEventListener("click", qbaHand);
+    var tppnt = (0, _helper.dE)("tp_pnt").addEventListener("click", printStuff);
+    var tppnt = (0, _helper.dE)("aq_export").addEventListener("click", printStuff);
+    var tpedt = (0, _helper.dE)("tp_edt").addEventListener("click", editStuff);
+    var cybbtn = (0, _helper.dE)("cyb_btn").addEventListener("click", cybHand);
+    var tiact = (0, _helper.dE)("ti_act").addEventListener("click", actHand);
+    var tiupc = (0, _helper.dE)("ti_upc").addEventListener("click", upcHand);
+    var tifin = (0, _helper.dE)("ti_fin").addEventListener("click", finHand);
+    var tt_save = (0, _helper.dE)("tt_save").addEventListener("click", tsave);
+    var tt_clear = (0, _helper.dE)("tt_clear").addEventListener("click", tclear);
+    var tt_review = (0, _helper.dE)("tt_review").addEventListener("click", treview);
+    var tt_ansreview = (0, _helper.dE)("tt_ansreview").addEventListener("click", tansrev);
+    var p_sims = (0, _helper.dE)("psims").addEventListener("click", psims);
+    var c_sims = (0, _helper.dE)("csims").addEventListener("click", csims);
+    var m_sims = (0, _helper.dE)("msims").addEventListener("click", msims);
+    var b_sims = (0, _helper.dE)("bsims").addEventListener("click", bsims);
+    var co_sims = (0, _helper.dE)("cosims").addEventListener("click", cosims);
+    var s_sims = (0, _helper.dE)("ssims").addEventListener("click", ssims);
+    var u_sims = (0, _helper.dE)("usims").addEventListener("click", usims);
+    var p_chb = (0, _helper.dE)("pchb").addEventListener("click", pchb);
+    var c_chb = (0, _helper.dE)("cchb").addEventListener("click", cchb);
+    var m_chb = (0, _helper.dE)("mchb").addEventListener("click", mchb);
+    var b_chb = (0, _helper.dE)("bchb").addEventListener("click", bchb);
+    var co_chb = (0, _helper.dE)("cochb").addEventListener("click", cochb);
+    var s_chb = (0, _helper.dE)("schb").addEventListener("click", schb);
+    var u_chb = (0, _helper.dE)("uchb").addEventListener("click", uchb);
+    var ttsub = (0, _helper.dE)("tt_sub").addEventListener("click", sTestHand);
+    var chp_btn = (0, _helper.dE)("chp_btn").addEventListener("click", chpHand);
+    var pass_rst_btn = (0, _helper.dE)("pass_rst_btn").addEventListener("click", requestPasschange);
+    var aq_sims_save = (0, _helper.dE)("aq_sims_save").addEventListener("click", updateSimulationWeb);
+    var un_rendermode = (0, _helper.dE)("un_rendermode").addEventListener("change", notesUIHandler);
+    var un_viewership = (0, _helper.dE)("un_viewership").addEventListener("change", notesUIHandler);
+    (0, _helper.dE)("un_print").addEventListener("click", function() {
+        (0, _helper.dE)("un_preview").style.display = "none";
+        (0, _helper.dE)("un_preview").innerHTML = "<h1 style = 'text-align:center;margin:0px'>" + (0, _helper.dE)("un_title").value + "</h1>" + getHTML("un_editable");
+        window.idElementPrint((0, _helper.dE)("un_preview"), userinfo.name);
     });
-    dE("qbnk_vid_btn_e").addEventListener("click", qbnkend);
-    dE("qbnk_vid_btn").addEventListener("click", qbnkstr);
+    (0, _helper.dE)("qbnk_vid_btn_e").addEventListener("click", qbnkend);
+    (0, _helper.dE)("qbnk_vid_btn").addEventListener("click", qbnkstr);
 }
 function plyVid() {
     window.player.playVideo();
@@ -3582,7 +3501,7 @@ function loadVid(videoId) {
     window.player.loadVideoById(videoId);
 }
 function renderAppInfo() {
-    dE("ren_appinf").textContent = JSON.stringify(Quarkz, undefined, 2);
+    (0, _helper.dE)("ren_appinf").textContent = JSON.stringify(Quarkz, undefined, 2);
 }
 $(document).ready(function() {
     $(".summernote").summernote({
@@ -3674,7 +3593,7 @@ function questionGraph(ipd, data) {
         };
         const width = 800 - margin.left - margin.right;
         const height = 400 - margin.top - margin.bottom;
-        dE(ipd).innerHTML = "";
+        (0, _helper.dE)(ipd).innerHTML = "";
         const svg = _d3.select("#" + ipd).append("svg").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", `translate(${margin.left}, ${margin.top})`);
         // Define color scale for circle fill
         const colorScale = _d3.scaleOrdinal().domain([
@@ -3743,7 +3662,7 @@ function questionGraph(ipd, data) {
 }
 var Quarkz = {
     "copyright": "Mr Techtroid 2021-23",
-    "vno": "v0.4.1",
+    "vno": "v0.4.2",
     "author": "Mr Techtroid",
     "last-updated": "10/02/2023(IST)",
     "serverstatus": "firebase-online"
@@ -3754,7 +3673,6 @@ var userinfo;
 var topicJSON = {};
 var topicJSONno = 0;
 var editorrole, adminrole, userrole;
-var simlist = [];
 var chapterlist = [];
 var userdetails = [];
 var curr_qlno = 0;
@@ -3777,8 +3695,9 @@ var analysedActions;
 window.onhashchange = locationHandler;
 initFirebaseAuth();
 defineEvents();
+(0, _reworkui.sysaccess)();
 
-},{"firebase/app":"aM3Fo","firebase/auth":"79vzg","firebase/firestore":"8A4BC","firebase/storage":"8WX7E","d3":"17XFv"}],"aM3Fo":[function(require,module,exports) {
+},{"firebase/app":"aM3Fo","firebase/auth":"79vzg","firebase/firestore":"8A4BC","firebase/storage":"8WX7E","d3":"17XFv","../js/helper":"lVRAz","./reworkui":"66uq8"}],"aM3Fo":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _app = require("@firebase/app");
@@ -63683,6 +63602,196 @@ exports.default = function(event) {
     event.preventDefault();
     event.stopImmediatePropagation();
 };
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"lVRAz":[function(require,module,exports) {
+/*
+Copyright 2021-23 Quarkz By Mr Techtroid
+
+All rights reserved by [Mr Techtroid]. This work is not open-source.
+
+No part of these HTML, CSS, and JavaScript files may be reproduced, distributed, 
+or transmitted in any form or by any means, including photocopying, recording, 
+or other electronic or mechanical methods, without the prior written permission 
+of the author, except in the case of brief quotations embodied in critical reviews 
+and certain other noncommercial uses permitted by copyright law.
+
+For permission requests, please contact [Mr Techtroid] at mrtechtroid@outlook.com .
+*/ // Convert Seconds to Hours-Mins-Seconds.
+// StackOverFlow - https://stackoverflow.com/a/52387803
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "sd", ()=>sd);
+// Generate a Random ID of certain length
+// StakOverflow: https://stackoverflow.com/a/1349426/15107474
+parcelHelpers.export(exports, "makeid", ()=>makeid);
+// Find the sha256 hash of a Text
+// StakOverflow: https://stackoverflow.com/a/48161723
+parcelHelpers.export(exports, "sha256", ()=>sha256);
+// Check if Two Array's are Equal
+// GeeksForGeeks: https://www.geeksforgeeks.org/check-if-two-arrays-are-equal-or-not/
+parcelHelpers.export(exports, "areEqual", ()=>areEqual);
+// Check for Mobile Devices
+// StackOverflow: https://stackoverflow.com/a/11381730
+parcelHelpers.export(exports, "mobileCheck", ()=>mobileCheck);
+// Check if Two Objects are Equal
+// StackOverflow: https://stackoverflow.com/a/32922084
+parcelHelpers.export(exports, "areObjectsEqual", ()=>areObjectsEqual);
+// Get Time Of Server
+parcelHelpers.export(exports, "getServerTime", ()=>getServerTime);
+// Make A Element Full Screen
+parcelHelpers.export(exports, "fullEle", ()=>fullEle);
+// Get Elements With ID in Short Form
+parcelHelpers.export(exports, "dE", ()=>dE);
+// Sort An Object based on a parameter.
+parcelHelpers.export(exports, "sortObj", ()=>sortObj);
+parcelHelpers.export(exports, "sortObjv2", ()=>sortObjv2);
+// Make Elements Latex Rendered
+parcelHelpers.export(exports, "renderMarkedMath", ()=>renderMarkedMath);
+function sd(seconds) {
+    seconds = Number(seconds);
+    var d = Math.floor(seconds / 86400);
+    var h = Math.floor(seconds % 86400 / 3600);
+    var m = Math.floor(seconds % 3600 / 60);
+    var s = Math.floor(seconds % 60);
+    var dDisplay = d > 0 ? d + (d == 1 ? " day, " : " days, ") : "";
+    var hDisplay = h > 0 ? h + (h == 1 ? " hour, " : " hours, ") : "";
+    var mDisplay = m > 0 ? m + (m == 1 ? " minute, " : " minutes, ") : "";
+    var sDisplay = s > 0 ? s + (s == 1 ? " second" : " seconds") : "";
+    return dDisplay + hDisplay + mDisplay + sDisplay;
+}
+function makeid(length) {
+    var result = "";
+    var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    var charactersLength = characters.length;
+    for(var i = 0; i < length; i++)result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    return result;
+}
+async function sha256(message) {
+    const msgBuffer = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map((b)=>b.toString(16).padStart(2, "0")).join("");
+    return hashHex;
+}
+function areEqual(arr1, arr2) {
+    let N = arr1.length;
+    let M = arr2.length;
+    if (N != M) return false;
+    arr1.sort();
+    arr2.sort();
+    for(let i = 0; i < N; i++)if (arr1[i] != arr2[i]) return false;
+    return true;
+}
+function mobileCheck() {
+    let check = false;
+    (function(a) {
+        if (/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(a) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0, 4))) check = true;
+    })(navigator.userAgent || navigator.vendor || window.opera);
+    return check;
+}
+function areObjectsEqual(x, y) {
+    const ok = Object.keys, tx = typeof x, ty = typeof y;
+    return x && y && tx === "object" && tx === ty ? ok(x).length === ok(y).length && ok(x).every((key)=>areObjectsEqual(x[key], y[key])) : x === y;
+}
+function getServerTime(url) {
+    fetch(url).then((response)=>{
+        var date;
+        for (var pair of response.headers.entries())if (pair[0] === "date") date = new Date(pair[1]).getTime();
+        return date;
+    });
+}
+function fullEle(ele) {
+    if (ele.requestFullscreen) ele.requestFullscreen();
+    else if (ele.mozRequestFullScreen) /* Firefox */ ele.mozRequestFullScreen();
+    else if (ele.webkitRequestFullscreen) /* Chrome, Safari and Opera */ ele.webkitRequestFullscreen();
+    else if (ele.msRequestFullscreen) /* IE/Edge */ ele.msRequestFullscreen();
+}
+function dE(ele) {
+    return document.getElementById(ele);
+}
+function sortObj(objs, param, type) {
+    var sorter2;
+    if (type == 0) sorter2 = (sortBy)=>(a, b)=>a[sortBy] > b[sortBy] ? 1 : -1;
+    if (type == 1) sorter2 = (sortBy)=>(a, b)=>a[sortBy] > b[sortBy] ? -1 : 1;
+    return objs.sort(sorter2(param));
+}
+function sortObjv2(objs, param1, param2, type) {
+    var sorter2;
+    if (type == 0) sorter2 = (sortBy1, sortBy2)=>(a, b)=>{
+            if (a[sortBy1] === b[sortBy1]) return a[sortBy2] > b[sortBy2] ? 1 : -1;
+            return a[sortBy1] > b[sortBy1] ? 1 : -1;
+        };
+    else if (type == 1) sorter2 = (sortBy1, sortBy2)=>(a, b)=>{
+            if (a[sortBy1] === b[sortBy1]) return a[sortBy2] > b[sortBy2] ? -1 : 1;
+            return a[sortBy1] > b[sortBy1] ? -1 : 1;
+        };
+    return objs.sort(sorter2(param1, param2));
+}
+function renderMarkedMath(eleid, toid) {
+    var v = marked.parse(dE(eleid).value);
+    dE(toid).innerHTML = v;
+    renderMathInElement(dE(toid));
+}
+exports.default = {
+    sd,
+    sha256,
+    makeid,
+    mobileCheck,
+    areObjectsEqual,
+    areEqual,
+    getServerTime,
+    fullEle,
+    dE,
+    sortObj,
+    sortObjv2,
+    renderMarkedMath
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"66uq8":[function(require,module,exports) {
+/*
+Copyright 2021-23 Quarkz By Mr Techtroid
+
+All rights reserved by [Mr Techtroid]. This work is not open-source.
+
+No part of these HTML, CSS, and JavaScript files may be reproduced, distributed, 
+or transmitted in any form or by any means, including photocopying, recording, 
+or other electronic or mechanical methods, without the prior written permission 
+of the author, except in the case of brief quotations embodied in critical reviews 
+and certain other noncommercial uses permitted by copyright law.
+
+For permission requests, please contact [Mr Techtroid] at mrtechtroid@outlook.com .
+*/ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "sysaccess", ()=>sysaccess);
+function sysaccess() {
+    function w(ele) {
+        return document.getElementById(ele);
+    }
+    function r(txt, st) {
+        w("c-output").insertAdjacentHTML("beforeend", "<div style = " + st + ">" + txt + "</div>");
+    }
+    function init() {
+        r("Ariel", "color:pink;align-text:center;");
+    }
+    function x(fn) {
+        const u = w("c-input").value;
+        document.querySelector("body").insertAdjacentHTML("beforeend", `<script></script>`);
+    }
+    var clog = console;
+    console = {};
+    console = {
+        log: function(logtxt) {
+            r("", logtxt);
+        },
+        error: function(logtxt) {
+            r("", logtxt);
+        }
+    };
+    w("c-exec").addEventListener("click", x(w("c-input").value));
+    const cs = console;
+    // console = {}
+    init();
+}
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["9tRox","1SICI"], "1SICI", "parcelRequire43c0")
 

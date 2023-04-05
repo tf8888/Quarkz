@@ -16,7 +16,8 @@ import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence, G
 import { getFirestore, orderBy, limit, writeBatch, collection, addDoc, onSnapshot,deleteDoc, arrayUnion, arrayRemove, setDoc, updateDoc, getDocs, doc, serverTimestamp, getDoc, query, where } from "firebase/firestore";
 import { getStorage, ref, uploadBytesResumable, getDownloadURL, } from 'firebase/storage';
 import * as d3 from 'd3';
-
+import {sd, sha256, makeid,mobileCheck,areObjectsEqual,areEqual,getServerTime,fullEle,dE,sortObj,sortObjv2,renderMarkedMath} from '../js/helper'
+import { sysaccess } from "./reworkui";
 const firebaseConfig = {
   apiKey: "AIzaSyDN8T7Pmw5e-LzmC3nAHEqI0Uk7FF7y6fc",
   authDomain: "quarkz.firebaseapp.com",
@@ -40,170 +41,46 @@ setPersistence(auth, browserLocalPersistence)
 const storage = getStorage();
 
 // Helper Functions
-// Convert Seconds to Hours-Mins-Seconds.
-// StackOverFlow - https://stackoverflow.com/a/52387803
-function sd(seconds) {
-  seconds = Number(seconds);
-  var d = Math.floor(seconds / (3600 * 24));
-  var h = Math.floor(seconds % (3600 * 24) / 3600);
-  var m = Math.floor(seconds % 3600 / 60);
-  var s = Math.floor(seconds % 60);
-  var dDisplay = d > 0 ? d + (d == 1 ? " day, " : " days, ") : "";
-  var hDisplay = h > 0 ? h + (h == 1 ? " hour, " : " hours, ") : "";
-  var mDisplay = m > 0 ? m + (m == 1 ? " minute, " : " minutes, ") : "";
-  var sDisplay = s > 0 ? s + (s == 1 ? " second" : " seconds") : "";
-  return dDisplay + hDisplay + mDisplay + sDisplay
-}
-// Generate a Random ID of certain length
-// StakOverflow: https://stackoverflow.com/a/1349426/15107474
-function makeid(length) {
-  var result = '';
-  var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  var charactersLength = characters.length;
-  for (var i = 0; i < length; i++) {
-    result += characters.charAt(Math.floor(Math.random() *
-      charactersLength));
-  }
-  return result;
-}
-// Find the sha256 hash of a Text
-// StakOverflow: https://stackoverflow.com/a/48161723
-async function sha256(message) {
-  const msgBuffer = new TextEncoder().encode(message);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  return hashHex;
-}
-// Check if Two Array's are Equal
-// GeeksForGeeks: https://www.geeksforgeeks.org/check-if-two-arrays-are-equal-or-not/
-function areEqual(arr1, arr2) {
-  let N = arr1.length;
-  let M = arr2.length;
-  if (N != M)
-    return false;
-  arr1.sort();
-  arr2.sort();
-  for (let i = 0; i < N; i++)
-    if (arr1[i] != arr2[i])
-      return false;
-  return true;
-}
-// Check for Mobile Devices
-// StackOverflow: https://stackoverflow.com/a/11381730
-function mobileCheck() {
-  let check = false;
-  (function (a) { if (/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(a) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0, 4))) check = true; })(navigator.userAgent || navigator.vendor || window.opera);
-  return check;
-};
-// Check if Two Objects are Equal
-// StackOverflow: https://stackoverflow.com/a/32922084
-function areObjectsEqual(x, y) {
-  const ok = Object.keys, tx = typeof x, ty = typeof y;
-  return x && y && tx === 'object' && tx === ty ? (
-    ok(x).length === ok(y).length &&
-    ok(x).every(key => areObjectsEqual(x[key], y[key]))
-  ) : (x === y);
-}
-// Get Time Of Server
-function getServerTime(url) {
-  fetch(url)
-    .then((response) => {
-      var date;
-      for (var pair of response.headers.entries()) {
-        if (pair[0] === 'date') {
-          date = new Date(pair[1]).getTime()
-        }
-      }
-      return date;
-    });
-}
-// Make A Element Full Screen
-function fullEle(ele) {
-  if (ele.requestFullscreen) {
-    ele.requestFullscreen();
-  } else if (ele.mozRequestFullScreen) {
-    /* Firefox */
-    ele.mozRequestFullScreen();
-  } else if (ele.webkitRequestFullscreen) {
-    /* Chrome, Safari and Opera */
-    ele.webkitRequestFullscreen();
-  } else if (ele.msRequestFullscreen) {
-    /* IE/Edge */
-    ele.msRequestFullscreen();
-  }
-}
-// Get Elements With ID in Short Form
-function dE(ele) {
-  return document.getElementById(ele)
-}
-// Sort An Object based on a parameter.
-function sortObj(objs, param, type) {
-  var sorter2;
-  if (type == 0) {
-    sorter2 = (sortBy) => (a, b) => a[sortBy] > b[sortBy] ? 1 : -1;
-  } if (type == 1) {
-    sorter2 = (sortBy) => (a, b) => a[sortBy] > b[sortBy] ? -1 : 1;
-  }
-  return objs.sort(sorter2(param));
-}
-function sortObjv2(objs, param1, param2, type) {
-  var sorter2;
-  if (type == 0) {
-    sorter2 = (sortBy1, sortBy2) => (a, b) => {
-      if (a[sortBy1] === b[sortBy1]) {
-        return a[sortBy2] > b[sortBy2] ? 1 : -1;
-      }
-      return a[sortBy1] > b[sortBy1] ? 1 : -1;
-    };
-  } else if (type == 1) {
-    sorter2 = (sortBy1, sortBy2) => (a, b) => {
-      if (a[sortBy1] === b[sortBy1]) {
-        return a[sortBy2] > b[sortBy2] ? -1 : 1;
-      }
-      return a[sortBy1] > b[sortBy1] ? -1 : 1;
-    };
-  }
-  return objs.sort(sorter2(param1, param2));
-}
-// Make Elements Latex Rendered
-function renderMarkedMath(eleid, toid) {
-  var v = marked.parse(dE(eleid).value)
-  dE(toid).innerHTML = v
-  renderMathInElement(dE(toid));
-}
+
+
 // Special Logging Function
-function log(title, msg, action, actionname) {
-  dE("msg_popup").style.visibility = "visible"
-  dE("msg_popup").style.opacity = "1"
-  dE("msg_action").style.display = "none"
-  document.getElementById("msg_popup_txt").innerText = title
-  document.getElementById("msg_popup_content").innerText = msg
-  if (action == undefined) { action = function () { } } else { dE("msg_action").style.display = "block" }
+function log(title, msg, action, actionname,type) {
+  var no = Math.floor(Math.random()*10000)
+  var html = `
+  <div id="msg_popup_`+ no +`" class="overlay">
+  <div class="popup">
+      <center>
+          <h2 id="msg_popup_txt_`+ no +`">Note</h2>
+      </center>
+      <a class="close"
+          onclick="document.getElementById('msg_popup_`+ no +`').remove()">&times;</a>
+      <p id="msg_popup_content_`+ no +`"></p>
+      <button class="tst_btn rpl" id="msg_action_`+ no +`"></button>
+  </div>
+  </div>
+  `
+  if (type == undefined || type == 1){
+    dE("testv1").insertAdjacentHTML("beforeend",html)
+  }else{
+    dE("quarkz_body").insertAdjacentHTML("beforeend",html)
+  }
+  dE("msg_popup_"+no).style.visibility = "visible"
+  dE("msg_popup_"+no).style.opacity = "1"
+  dE("msg_action_"+no).style.display = "none"
+  document.getElementById("msg_popup_txt_"+no).innerText = title
+  document.getElementById("msg_popup_content_"+no).innerText = msg
+  if (action == undefined) { action = function () { } } else { dE("msg_action_"+no).style.display = "block" }
   if (actionname == undefined) { actionname = "" }
-  dE("msg_action").onclick = action
-  dE("msg_action").innerText = actionname
+  dE("msg_action_"+no).onclick = action
+  dE("msg_action_"+no).innerText = actionname
 }
-// Special Logging Function For Tests
-function t_log(title, msg, action, actionname) {
-  dE("t1_msg_popup").style.visibility = "visible"
-  dE("t1_msg_popup").style.opacity = "1"
-  dE("t1_msg_action").style.display = "none"
-  document.getElementById("t1_msg_popup_txt").innerText = title
-  document.getElementById("t1_msg_popup_content").innerText = msg
-  if (action == undefined) { action = function () { } } else { dE("t1_msg_action").style.display = "block" }
-  if (actionname == undefined) { actionname = "" }
-  dE("t1_msg_action").onclick = action
-  dE("t1_msg_action").innerText = actionname
-}
+
 // Merge The Contents of Two Array's
 const mergeById = (a1, a2) =>
   a1.map(itm => ({
     ...a2.find((item) => (item.qid === itm.qid) && item),
     ...itm
   }));
-//Get Server Time
-function gST() { return getServerTime("https:/quarkz.netlify.app/time") }
 // Video Creator - https://www.educative.io/edpresso/how-to-create-a-screen-recorder-in-javascript
 let mediaRecorder;
 async function recordScreen() {
@@ -295,6 +172,7 @@ function signUp() {
               email: email,
               spoints: 0,
               gen: stgender,
+              batch: "guest",
               sgndon: serverTimestamp(),
               roles: { user: true }
             }).then(function () {
@@ -360,6 +238,9 @@ function locationHandler(newlocation, n1) {
     case "add/qubank": handlebox = "fu_topic"; newQBank(); break;
     case "add/simulation": handlebox = "fu_simulation"; newSimulation(); break;
     case "add/tests": handlebox = "fu_topic"; newTest(); break;
+    case "add/batch": handlebox = "fu_topic"; newBatch(); break;
+    case "settings": handlebox = "settings";break;
+    // case "list/batch": handlebox = "fu_topic"; newBatch(); break;
     case "chplist": handlebox = "chapterlist"; renderCList(); break;
     default: handlebox = "error_page"; break;
   }
@@ -405,6 +286,196 @@ function locationHandler(newlocation, n1) {
   testQuestionList = []; testResponseList = []; testInfo = []; activequestionid = ""
 
 }
+// -----------------------
+// SIMULATIONS
+// Creates A Blank Simulation
+let simlist = []
+async function newSimulation() {
+    try {
+
+        const docRef = await addDoc(collection(db, 'sims'), {
+            name: "",
+            license: "",
+            provider: "",
+            url: "",
+        })
+        locationHandler("edit_sim/" + docRef.id, 1)
+    } catch {
+
+    }
+}
+// Prepares The Simulation Editor
+async function prepareSimulation() {
+    try {
+        let docSnap = await getDoc(doc(db, 'sims', window.location.hash.split("edit_sim/")[1]))
+        if (docSnap.exists()) {
+            var docJSON = docSnap.data();
+            dE("aq_simname").value = docJSON.name
+            dE("aq_simprov").value = docJSON.provider
+            dE("aq_simurl").value = docJSON.url
+            dE("aq_simlicense").value = docJSON.license
+            dE("aq_simsubj").value = docJSON.subject
+        }
+    } catch { }
+}
+// Updates Simulation Details
+async function updateSimulationWeb() {
+    try {
+        await updateDoc(doc(db, 'sims', window.location.hash.split("edit_sim/")[1]), {
+            name: dE("aq_simname").value,
+            license: dE("aq_simlicense").value,
+            provider: dE("aq_simprov").value,
+            url: dE("aq_simurl").value,
+            subject: dE("aq_simsubj").value
+        });
+        var subj = dE("aq_simsubj").value
+        if (subj == "physics") {
+            await updateDoc(doc(db, 'sims', 'sims'), {
+                physics: arrayUnion(dE("aq_simname").value)
+            })
+        }
+        if (subj == "chemistry") {
+            await updateDoc(doc(db, 'sims', 'sims'), {
+                chemistry: arrayUnion(dE("aq_simname").value)
+            })
+        }
+        if (subj == "maths") {
+            await updateDoc(doc(db, 'sims', 'sims'), {
+                maths: arrayUnion(dE("aq_simname").value)
+            })
+        }
+        if (subj == "computer") {
+            await updateDoc(doc(db, 'sims', 'sims'), {
+                computer: arrayUnion(dE("aq_simname").value)
+            })
+        }
+        if (subj == "biology") {
+            await updateDoc(doc(db, 'sims', 'sims'), {
+                biology: arrayUnion(dE("aq_simname").value)
+            })
+        }
+        if (subj == "statistics") {
+            await updateDoc(doc(db, 'sims', 'sims'), {
+                statistics: arrayUnion(dE("aq_simname").value)
+            })
+        }
+        if (subj == "unfiled") {
+            await updateDoc(doc(db, 'sims', 'sims'), {
+                unfiled: arrayUnion(dE("aq_simname").value)
+            })
+        }
+        clearAQ();
+    } catch (error) {
+        console.error('Error writing new message to Firebase Database', error);
+    }
+}
+// Displays Simulation For End User
+async function getSimulation() {
+    var simid = window.location.hash.split("sims/")[1]
+    var docRef = doc(db, 'sims', simid)
+    var docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+        var docJSON = docSnap.data();
+        dE("sms_name").innerText = docJSON.name
+        dE("sms_prov").innerText = docJSON.provider
+        dE("sim_frame").src = docJSON.url
+    }
+    else { locationHandler("error_page", 1); throw new Error }
+}
+// Get SimID From SimName
+async function getSimID(sim_name) {
+    var docID;
+    const q = query(collection(db, "sims"), where("name", "==", sim_name));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((doc) => {
+        docID = doc.id
+    });
+    locationHandler("sims/" + docID, 1)
+}
+// Helper Function To Get Simulation Name
+function simClicker() {
+    getSimID(this.innerText)
+}
+// Get Simulation List
+async function getSimList(type) {
+    dE("sim_cont").innerHTML = ""
+    if (simlist.length == 0) {
+        var docRef = doc(db, 'sims', 'sims')
+        var docSnap = await getDoc(docRef);
+        if (docSnap.exists()) { var docJSON = docSnap.data(); simlist = docJSON; }
+        else { locationHandler("error_page", 1); throw new Error }
+    }
+    if (type == "physics") {
+        try {
+            for (let ele of simlist.physics) {
+                if (ele != "") {
+                    dE("sim_cont").insertAdjacentHTML('beforeend', '<span class="tlinks rpl" style = "color:pink" id="sim' + btoa(ele) + '">' + ele + '</span>')
+                    dE("sim" + btoa(ele)).addEventListener('click', simClicker)
+                }
+            }
+        } catch { }
+    }
+    if (type == "chemistry") {
+        try {
+            for (let ele of simlist.chemistry) {
+                if (ele != "") {
+                    dE("sim_cont").insertAdjacentHTML('beforeend', '<span class="tlinks rpl" style = "color:crimson" id="sim' + btoa(ele) + '">' + ele + '</span>')
+                    dE("sim" + btoa(ele)).addEventListener('click', simClicker)
+                }
+            }
+        } catch { }
+    }
+    if (type == "maths") {
+        try {
+            for (let ele of simlist.maths) {
+                if (ele != "") {
+                    dE("sim_cont").insertAdjacentHTML('beforeend', '<span class="tlinks rpl" style = "color:turquoise" id="sim' + btoa(ele) + '">' + ele + '</span>')
+                    dE("sim" + btoa(ele)).addEventListener('click', simClicker)
+                }
+            }
+        } catch { }
+    }
+    if (type == "biology") {
+        try {
+            for (let ele of simlist.biology) {
+                if (ele != "") {
+                    dE("sim_cont").insertAdjacentHTML('beforeend', '<span class="tlinks rpl" style = "color:lime" id="sim' + btoa(ele) + '">' + ele + '</span>')
+                    dE("sim" + btoa(ele)).addEventListener('click', simClicker)
+                }
+            }
+        } catch { }
+    }
+    if (type == "computer") {
+        try {
+            for (let ele of simlist.computer) {
+                if (ele != "") {
+                    dE("sim_cont").insertAdjacentHTML('beforeend', '<span class="tlinks rpl" style = "color:violet" id="sim' + btoa(ele) + '">' + ele + '</span>')
+                    dE("sim" + btoa(ele)).addEventListener('click', simClicker)
+                }
+            }
+        } catch { }
+    }
+    if (type == "statistics") {
+        try {
+            for (let ele of simlist.statistics) {
+                if (ele != "") {
+                    dE("sim_cont").insertAdjacentHTML('beforeend', '<span class="tlinks rpl" style = "color:orange" id="sim' + btoa(ele) + '">' + ele + '</span>')
+                    dE("sim" + btoa(ele)).addEventListener('click', simClicker)
+                }
+            }
+        } catch { }
+    }
+    if (type == "unfiled") {
+        try {
+            for (let ele of simlist.unfiled) {
+                if (ele != "") {
+                    dE("sim_cont").insertAdjacentHTML('beforeend', '<span class="tlinks rpl" style = "color:white" id="sim' + btoa(ele) + '">' + ele + '</span>')
+                    dE("sim" + btoa(ele)).addEventListener('click', simClicker)
+                }
+            }
+        } catch { }
+    }
+}
 // ----------------------
 // BATCHES
 async function newBatch() {
@@ -413,7 +484,15 @@ async function newBatch() {
       name: "",
       timetable: "",
       crton: serverTimestamp(),
-      class: 0,
+      class: 12,
+      chlist: [],
+      delon: serverTimestamp()
+    })
+    var docRef1 = await setDoc(doc(db, 'batch', docRef.id, "info", "tests"), {
+      tests: []
+    })
+    var docRef2 = await setDoc(doc(db, 'batch', docRef.id, "info", "updates"), {
+      u: []
     })
     locationHandler("edit_batch/" + docRef.id, 1)
   } catch {
@@ -453,7 +532,7 @@ async function getUserNotes() {
     await updateDoc(doc(db, "users", userinfo.uuid), {
       usernotes: arrayUnion({ color: "black", id: docRef.id, title: "Notes Title" })
     })
-    locationHandler("#/usernotes/" + docRef.id, 1)
+    locationHandler("usernotes/" + docRef.id, 1)
   } else if (window.location.hash.includes("usernotes/delete")) {
     await deleteDoc(doc(db, "usernotes", window.location.hash.split("usernotes/delete/")[1]));
   } else if (window.location.hash == "#/usernotes/") {
@@ -495,10 +574,10 @@ async function getUserNotesList() {
 }
 async function getPDF() {
   var id = window.location.hash.split("notes/")[1]
-  getDownloadURL(ref(storage, 'public/' + id + '.pdf')).then((url) => { dE("nt_id").src = url + ""; }).catch((error) => {
+  getDownloadURL(ref(storage, 'public/' + id + '.pdf')).then((url) => { dE("nt_id").src = "https://docs.google.com/gview?url=" + encodeURI(url) + "&embedded=true"; }).catch((error) => {
     switch (error.code) {
       case 'storage/object-not-found':
-        dE("nt_id").src = "https://firebasestorage.googleapis.com/v0/b/quarkz.appspot.com/o/public%2F404.pdf?alt=media&token=8cc8f23a-6e24-41d6-984b-6d2cc9b89d11"
+        dE("nt_id").src = "https://docs.google.com/gview?url="+encodeURI("https://firebasestorage.googleapis.com/v0/b/quarkz.appspot.com/o/public%2F404.pdf?alt=media&token=8cc8f23a-6e24-41d6-984b-6d2cc9b89d11")+"&embedded=true"
         break;
       case 'storage/unauthorized':
         log("Unauthorised", "You dont have necessary permissions to The file you requested.")
@@ -706,195 +785,7 @@ async function getCyberhunt() {
 
   }
 }
-// -----------------------
-// SIMULATIONS
-// Creates A Blank Simulation
-async function newSimulation() {
-  try {
 
-    const docRef = await addDoc(collection(db, 'sims'), {
-      name: "",
-      license: "",
-      provider: "",
-      url: "",
-    })
-    locationHandler("edit_sim/" + docRef.id, 1)
-  } catch {
-
-  }
-}
-// Prepares The Simulation Editor
-async function prepareSimulation() {
-  try {
-    let docSnap = await getDoc(doc(db, 'sims', window.location.hash.split("edit_sim/")[1]))
-    if (docSnap.exists()) {
-      var docJSON = docSnap.data();
-      dE("aq_simname").value = docJSON.name
-      dE("aq_simprov").value = docJSON.provider
-      dE("aq_simurl").value = docJSON.url
-      dE("aq_simlicense").value = docJSON.license
-      dE("aq_simsubj").value = docJSON.subject
-    }
-  } catch { }
-}
-// Updates Simulation Details
-async function updateSimulationWeb() {
-  try {
-    await updateDoc(doc(db, 'sims', window.location.hash.split("edit_sim/")[1]), {
-      name: dE("aq_simname").value,
-      license: dE("aq_simlicense").value,
-      provider: dE("aq_simprov").value,
-      url: dE("aq_simurl").value,
-      subject: dE("aq_simsubj").value
-    });
-    var subj = dE("aq_simsubj").value
-    if (subj == "physics") {
-      await updateDoc(doc(db, 'sims', 'sims'), {
-        physics: arrayUnion(dE("aq_simname").value)
-      })
-    }
-    if (subj == "chemistry") {
-      await updateDoc(doc(db, 'sims', 'sims'), {
-        chemistry: arrayUnion(dE("aq_simname").value)
-      })
-    }
-    if (subj == "maths") {
-      await updateDoc(doc(db, 'sims', 'sims'), {
-        maths: arrayUnion(dE("aq_simname").value)
-      })
-    }
-    if (subj == "computer") {
-      await updateDoc(doc(db, 'sims', 'sims'), {
-        computer: arrayUnion(dE("aq_simname").value)
-      })
-    }
-    if (subj == "biology") {
-      await updateDoc(doc(db, 'sims', 'sims'), {
-        biology: arrayUnion(dE("aq_simname").value)
-      })
-    }
-    if (subj == "statistics") {
-      await updateDoc(doc(db, 'sims', 'sims'), {
-        statistics: arrayUnion(dE("aq_simname").value)
-      })
-    }
-    if (subj == "unfiled") {
-      await updateDoc(doc(db, 'sims', 'sims'), {
-        unfiled: arrayUnion(dE("aq_simname").value)
-      })
-    }
-    clearAQ();
-  } catch (error) {
-    console.error('Error writing new message to Firebase Database', error);
-  }
-}
-// Displays Simulation For End User
-async function getSimulation() {
-  var simid = window.location.hash.split("sims/")[1]
-  var docRef = doc(db, 'sims', simid)
-  var docSnap = await getDoc(docRef);
-  if (docSnap.exists()) {
-    var docJSON = docSnap.data();
-    dE("sms_name").innerText = docJSON.name
-    dE("sms_prov").innerText = docJSON.provider
-    dE("sim_frame").src = docJSON.url
-  }
-  else { locationHandler("error_page", 1); throw new Error }
-}
-// Get SimID From SimName
-async function getSimID(sim_name) {
-  var docID;
-  const q = query(collection(db, "sims"), where("name", "==", sim_name));
-  const querySnapshot = await getDocs(q);
-  querySnapshot.forEach((doc) => {
-    docID = doc.id
-  });
-  locationHandler("sims/" + docID, 1)
-}
-// Helper Function To Get Simulation Name
-function simClicker() {
-  getSimID(this.innerText)
-}
-// Get Simulation List
-async function getSimList(type) {
-  dE("sim_cont").innerHTML = ""
-  if (simlist.length == 0) {
-    var docRef = doc(db, 'sims', 'sims')
-    var docSnap = await getDoc(docRef);
-    if (docSnap.exists()) { var docJSON = docSnap.data(); simlist = docJSON; }
-    else { locationHandler("error_page", 1); throw new Error }
-  }
-  if (type == "physics") {
-    try {
-      for (let ele of simlist.physics) {
-        if (ele != "") {
-          dE("sim_cont").insertAdjacentHTML('beforeend', '<span class="tlinks rpl" style = "color:pink" id="sim' + btoa(ele) + '">' + ele + '</span>')
-          dE("sim" + btoa(ele)).addEventListener('click', simClicker)
-        }
-      }
-    } catch { }
-  }
-  if (type == "chemistry") {
-    try {
-      for (let ele of simlist.chemistry) {
-        if (ele != "") {
-          dE("sim_cont").insertAdjacentHTML('beforeend', '<span class="tlinks rpl" style = "color:crimson" id="sim' + btoa(ele) + '">' + ele + '</span>')
-          dE("sim" + btoa(ele)).addEventListener('click', simClicker)
-        }
-      }
-    } catch { }
-  }
-  if (type == "maths") {
-    try {
-      for (let ele of simlist.maths) {
-        if (ele != "") {
-          dE("sim_cont").insertAdjacentHTML('beforeend', '<span class="tlinks rpl" style = "color:turquoise" id="sim' + btoa(ele) + '">' + ele + '</span>')
-          dE("sim" + btoa(ele)).addEventListener('click', simClicker)
-        }
-      }
-    } catch { }
-  }
-  if (type == "biology") {
-    try {
-      for (let ele of simlist.biology) {
-        if (ele != "") {
-          dE("sim_cont").insertAdjacentHTML('beforeend', '<span class="tlinks rpl" style = "color:lime" id="sim' + btoa(ele) + '">' + ele + '</span>')
-          dE("sim" + btoa(ele)).addEventListener('click', simClicker)
-        }
-      }
-    } catch { }
-  }
-  if (type == "computer") {
-    try {
-      for (let ele of simlist.computer) {
-        if (ele != "") {
-          dE("sim_cont").insertAdjacentHTML('beforeend', '<span class="tlinks rpl" style = "color:violet" id="sim' + btoa(ele) + '">' + ele + '</span>')
-          dE("sim" + btoa(ele)).addEventListener('click', simClicker)
-        }
-      }
-    } catch { }
-  }
-  if (type == "statistics") {
-    try {
-      for (let ele of simlist.statistics) {
-        if (ele != "") {
-          dE("sim_cont").insertAdjacentHTML('beforeend', '<span class="tlinks rpl" style = "color:orange" id="sim' + btoa(ele) + '">' + ele + '</span>')
-          dE("sim" + btoa(ele)).addEventListener('click', simClicker)
-        }
-      }
-    } catch { }
-  }
-  if (type == "unfiled") {
-    try {
-      for (let ele of simlist.unfiled) {
-        if (ele != "") {
-          dE("sim_cont").insertAdjacentHTML('beforeend', '<span class="tlinks rpl" style = "color:white" id="sim' + btoa(ele) + '">' + ele + '</span>')
-          dE("sim" + btoa(ele)).addEventListener('click', simClicker)
-        }
-      }
-    } catch { }
-  }
-}
 // -----------------------
 // TOPIC/QBANK
 function addItemToQLLIst() {
@@ -1062,6 +953,7 @@ async function newQBank() {
 }
 async function prepareTopicQBank(iun) {
   var col, id;
+  dE("aq_basic").style.display = "flex"
   if (iun == 1) {
     // Topic
     col = 'topic'
@@ -1117,6 +1009,7 @@ async function prepareTopicQBank(iun) {
     dE("aq_exams").style.display = "flex"
     dE("aq_all").style.display = "none"
     dE("aq_ans_hold").style.display = "none"
+    dE("aq_basic").style.display = "none"
   }
   try {
     let docSnap = await getDoc(doc(db, col, id))
@@ -1163,7 +1056,7 @@ async function prepareTopicQBank(iun) {
 }
 function removeEntry() {
   for (var i = 0; i < editqllist.length; i++) {
-    if (editqllist[i].qid == curr_qlid || editqllist.id == curr_qlid) {
+    if (editqllist[i].qid == curr_qlid || editqllist[i].id == curr_qlid) {
       editqllist.splice(i, 1)
       renderEditQLList(0)
       curr_qlid = editqllist[i - 1].qid || editqllist[i - 1].id
@@ -1445,7 +1338,7 @@ async function questionRenderer(docJSON, type) {
   dE("tp_question").setAttribute("qtype", docJSON.type)
   tpmcqcon.innerHTML = ""
   dE("tp_qtext").innerHTML = docJSON.title
-  dE("tp_img").src = ""
+  // dE("tp_img").src = ""
   if (docJSON.type == "mcq" || docJSON.type == "mcq_multiple") {
     qif(tpmcqcon); iu(tpmatrix); iu(tpanswer)
     var qop = docJSON.op; var asi = "";
@@ -1487,9 +1380,9 @@ async function topicHandler(type) {
   if (type == 3) { topicJSONno = 0 }
   var a = topicJSON.title
   dE("tp_title").innerText = a
-  var cddd = topicJSON.qllist[topicJSONno]
-  if (cddd.mode == "lesson") { lessonRenderer(cddd) }
-  else if (cddd.mode == "question") { questionRenderer(cddd) }
+  var tqQus = topicJSON.qllist[topicJSONno]
+  if (tqQus.mode == "lesson") { lessonRenderer(tqQus) }
+  else if (tqQus.mode == "question") { questionRenderer(tqQus) }
   stpVid();
 }
 function addMCQ() {
@@ -2576,7 +2469,7 @@ function defineEvents() {
   function lglHand() { changeLocationHash("legal", 1) }
   function qbaHand() { changeLocationHash("qblist", 1) }
   function chpHand() { changeLocationHash("chplist", 1) }
-  function sTestHand() { t_log("Warning", "Are You Sure You Want To End The Test", submitTest, "Yes,Submit") }
+  function sTestHand() { log("Warning", "Are You Sure You Want To End The Test", submitTest, "Yes,Submit",1) }
   function prvHand() { topicHandler(1) }
   function nxtHand() { topicHandler(2) }
   function actHand() { renderTestList("active") }
@@ -2813,7 +2706,7 @@ function questionGraph(ipd,data){
 }catch{}}
 var Quarkz = {
   "copyright": "Mr Techtroid 2021-23",
-  "vno": "v0.4.1",
+  "vno": "v0.4.2",
   "author": "Mr Techtroid",
   "last-updated": "10/02/2023(IST)",
   "serverstatus": "firebase-online",
@@ -2824,7 +2717,6 @@ var userinfo;
 var topicJSON = {};
 var topicJSONno = 0;
 var editorrole, adminrole, userrole;
-var simlist = []
 var chapterlist = []
 var userdetails = []
 var curr_qlno = 0
@@ -2847,3 +2739,4 @@ var analysedActions;
 window.onhashchange = locationHandler
 initFirebaseAuth()
 defineEvents()
+sysaccess()
