@@ -105,6 +105,12 @@ export function fullEle(ele) {
         ele.msRequestFullscreen();
     }
 }
+// Merge The Contents of Two Array's
+export const mergeById = (a1, a2) =>
+  a1.map(itm => ({
+    ...a2.find((item) => (item.qid === itm.qid) && item),
+    ...itm
+  }));
 // Get Elements With ID in Short Form
 export function dE(ele) {
     return document.getElementById(ele)
@@ -144,4 +150,4 @@ export function renderMarkedMath(eleid, toid) {
     dE(toid).innerHTML = v
     renderMathInElement(dE(toid));
 }
-export default { sd, sha256, makeid,mobileCheck,areObjectsEqual,areEqual,getServerTime,fullEle,dE,sortObj,sortObjv2,renderMarkedMath}
+export default { sd, sha256, makeid,mobileCheck,areObjectsEqual,areEqual,getServerTime,fullEle,dE,sortObj,sortObjv2,renderMarkedMath,mergeById}

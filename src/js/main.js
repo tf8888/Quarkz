@@ -13,10 +13,35 @@ For permission requests, please contact [Mr Techtroid] at mrtechtroid@outlook.co
 */
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence, GoogleAuthProvider, signInWithPopup, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
-import { getFirestore, orderBy, limit, writeBatch, collection, addDoc, onSnapshot,deleteDoc, arrayUnion, arrayRemove, setDoc, updateDoc, getDocs, doc, serverTimestamp, getDoc, query, where } from "firebase/firestore";
+import { getFirestore, orderBy, limit, writeBatch, collection, addDoc, onSnapshot, deleteDoc, arrayUnion, arrayRemove, setDoc, updateDoc, getDocs, doc, serverTimestamp, getDoc, query, where } from "firebase/firestore";
 import { getStorage, ref, uploadBytesResumable, getDownloadURL, } from 'firebase/storage';
+import { page_about } from "../embeds/about";
+import { page_chapter, page_edit_chapter, page_list_chapter } from "../embeds/chapter"
+import { page_cyberhunt } from "../embeds/cyb";
+import { page_app_info, page_ariel, page_bug_report, page_dashboard, page_notes, page_schedule, error_page } from "../embeds/dashboard";
+import { page_downloads,page_jee_main } from "../embeds/downloads";
+import { page_finished_test } from "../embeds/finished_test";
+import { page_forum } from "../embeds/forum";
+import { page_functions } from "../embeds/functions";
+import { log } from "../embeds/log";
+import { page_login } from "../embeds/login";
+import { page_printable } from "../embeds/printable";
+import profile, { page_profile } from "../embeds/profile";
+import { page_qbnkvid } from "../embeds/qbnkvid";
+import { page_register } from "../embeds/register";
+import { page_settings } from "../embeds/settings";
+import { page_sims, page_edit_sims, page_list_sims } from "../embeds/sims";
+import { page_test_instructions } from "../embeds/test_instructions";
+import { page_test_end, page_test_list, page_test_v1 } from "../embeds/tests"
+import { page_toc } from '../embeds/toc'
+import { page_topic, page_edit_topic } from "../embeds/topics";
+import { page_edit_user } from "../embeds/user";
+import { page_usernotes } from "../embeds/usernotes"
+
+
+import { saveFile, createRecorder, recordScreen } from "../js/recorder"
 import * as d3 from 'd3';
-import {sd, sha256, makeid,mobileCheck,areObjectsEqual,areEqual,getServerTime,fullEle,dE,sortObj,sortObjv2,renderMarkedMath} from '../js/helper'
+import { sd, sha256, makeid, mobileCheck, areObjectsEqual, areEqual, getServerTime, fullEle, dE, sortObj, sortObjv2, renderMarkedMath, mergeById } from '../js/helper'
 import { sysaccess } from "./reworkui";
 const firebaseConfig = {
   apiKey: "AIzaSyDN8T7Pmw5e-LzmC3nAHEqI0Uk7FF7y6fc",
@@ -40,85 +65,6 @@ setPersistence(auth, browserLocalPersistence)
 
 const storage = getStorage();
 
-// Helper Functions
-
-
-// Special Logging Function
-function log(title, msg, action, actionname,type) {
-  var no = Math.floor(Math.random()*10000)
-  var html = `
-  <div id="msg_popup_`+ no +`" class="overlay">
-  <div class="popup">
-      <center>
-          <h2 id="msg_popup_txt_`+ no +`">Note</h2>
-      </center>
-      <a class="close"
-          onclick="document.getElementById('msg_popup_`+ no +`').remove()">&times;</a>
-      <p id="msg_popup_content_`+ no +`"></p>
-      <button class="tst_btn rpl" id="msg_action_`+ no +`"></button>
-  </div>
-  </div>
-  `
-  if (type == undefined || type == 1){
-    dE("testv1").insertAdjacentHTML("beforeend",html)
-  }else{
-    dE("quarkz_body").insertAdjacentHTML("beforeend",html)
-  }
-  dE("msg_popup_"+no).style.visibility = "visible"
-  dE("msg_popup_"+no).style.opacity = "1"
-  dE("msg_action_"+no).style.display = "none"
-  document.getElementById("msg_popup_txt_"+no).innerText = title
-  document.getElementById("msg_popup_content_"+no).innerText = msg
-  if (action == undefined) { action = function () { } } else { dE("msg_action_"+no).style.display = "block" }
-  if (actionname == undefined) { actionname = "" }
-  dE("msg_action_"+no).onclick = action
-  dE("msg_action_"+no).innerText = actionname
-  return "msg_popup_"+no
-}
-
-// Merge The Contents of Two Array's
-const mergeById = (a1, a2) =>
-  a1.map(itm => ({
-    ...a2.find((item) => (item.qid === itm.qid) && item),
-    ...itm
-  }));
-// Video Creator - https://www.educative.io/edpresso/how-to-create-a-screen-recorder-in-javascript
-let mediaRecorder;
-async function recordScreen() {
-  return await navigator.mediaDevices.getDisplayMedia({
-    audio: true,
-    video: { mediaSource: "screen" }
-  });
-}
-function createRecorder(stream, mimeType) {
-  let recordedChunks = [];
-  const mediaRecorder = new MediaRecorder(stream);
-  mediaRecorder.ondataavailable = function (e) {
-    if (e.data.size > 0) {
-      recordedChunks.push(e.data);
-    }
-  };
-  mediaRecorder.onstop = function () {
-    saveFile(recordedChunks);
-    recordedChunks = [];
-  };
-  mediaRecorder.start(200);
-  return mediaRecorder;
-}
-function saveFile(recordedChunks) {
-  const blob = new Blob(recordedChunks, {
-    type: 'video/webm'
-  });
-  let filename = window.prompt('Enter file name'),
-    downloadLink = document.createElement('a');
-  downloadLink.href = URL.createObjectURL(blob);
-  downloadLink.download = `${filename}.webm`;
-
-  document.body.appendChild(downloadLink);
-  downloadLink.click();
-  URL.revokeObjectURL(blob); // clear from memory
-  document.body.removeChild(downloadLink);
-}
 // Login Page
 // Sign In A User
 async function signIn() {
@@ -128,7 +74,7 @@ async function signIn() {
     .then((userCredential) => {
       const user = userCredential.user;
       userdetails.email = email
-      locationHandler("dashboard", 1);
+      creMng("dashboard", 1);
     })
     .catch((error) => {
       const errorCode = error.code;
@@ -142,7 +88,8 @@ function signOutUser() {
   // Sign out of Firebase.
   signOut(getAuth());
   userdetails = []
-  // locationHandler("login",1);
+  creMng("login",1);
+  window.location.reload()
 }
 // Register A User
 function signUp() {
@@ -196,82 +143,226 @@ function signUp() {
 }
 // Location Handler 
 // Important: Handles All Locations
-function locationHandler(newlocation, n1) {
-  var iorole = adminrole == true || editorrole == true
-  if (iorole) {
-    dE("adminonly").style.display = "flex";
-    dE("tp_pnt").style.display = "block";
-    dE("tp_edt").style.display = "block";
-    dE("sms_edit").style.display = "block";
+function creMng(a, b) {
+  coreManager(a, b)
+}
+function renderBody(body, styles, s_class) {
+  dE("output").style = ""
+  dE("output").classList.remove("ovr-scroll")
+  dE("output").innerHTML = body;
+  if (s_class != undefined && s_class != "") { dE("output").classList.add(s_class) }
+  dE("output").style = styles
+}
+function dashboardEvents() {
+  function simHand() { changeLocationHash("simlist", 1) }
+  function cybHand() { changeLocationHash("cyberhunt", 1) }
+  function abtHand() { changeLocationHash("about", 1) }
+  function tmtHand() { changeLocationHash("timetable", 1) }
+  function prfHand() { changeLocationHash("profile", 1) }
+  function adiHand() { changeLocationHash("functions", 1) }
+  function tstinfHand() { changeLocationHash("testinfo", 1) }
+  function uscHand() { changeLocationHash("users", 1) }
+  function tpcHand() { changeLocationHash("tpclist", 1) }
+  function lvqHand() { changeLocationHash("livequiz", 1) }
+  function frmHand() { changeLocationHash("forum", 1) }
+  function qbaHand() { changeLocationHash("qblist", 1) }
+  function chpHand() { changeLocationHash("chplist", 1) }
+  var simbtn = dE("sim_btn").addEventListener("click", simHand)
+  var sgnout = dE("lgt_btn").addEventListener("click", signOutUser);
+  var tmtbtn = dE("tmt_btn").addEventListener("click", tmtHand);
+  var prfbtn = dE("prf_btn").addEventListener("click", prfHand);
+  var abtbtn = dE("abt_btn").addEventListener("click", abtHand);
+  var tmtbtn = dE("tmt_btn").addEventListener("click", tmtHand);
+  var prfbtn = dE("prf_btn").addEventListener("click", prfHand);
+  var abtbtn = dE("abt_btn").addEventListener("click", abtHand);
+  var tpcbtn = dE("tpc_btn").addEventListener("click", tpcHand)
+  var uscbtn = dE("usc_btn").addEventListener("click", uscHand)
+  var lvqbtn = dE("lvq_btn").addEventListener("click", lvqHand)
+  var frmbtn = dE("frm_btn").addEventListener("click", frmHand)
+  var adibtn = dE("adi_btn").addEventListener("click", adiHand)
+  var qbabtn = dE("qba_btn").addEventListener("click", qbaHand)
+  var cybbtn = dE("cyb_btn").addEventListener("click", cybHand)
+  var chp_btn = dE("chp_btn").addEventListener("click", chpHand)
+  var tstinfbtn = dE("tstinf_btn").addEventListener("click", tstinfHand)
+  var sgnout = dE("lgt_btn").addEventListener("click", signOutUser);
+  dE("dshd_uname").innerText = userinfo.email
+  dE("dshd_name").innerText = userinfo.name
+  dE("dshd_batch").innerText = userinfo.batchname
+  if (userinfo.gen == "Male") {
+    dE("prf_tab_img").classList.remove("prf_male", "prf_female")
+    dE("prf_tab_img").classList.add("prf_male")
+  } else if (userinfo.gen == "Female") {
+    dE("prf_tab_img").classList.remove("prf_male", "prf_female")
+    dE("prf_tab_img").classList.add("prf_female")
   }
-  else {
-    dE("adminonly").style.display = "none";
-    dE("sms_edit").style.display = "none"
+  renderExams()
+}
+function simEvents() {
+  function psims() { getSimList("physics") }
+  function csims() { getSimList("chemistry") }
+  function msims() { getSimList("maths") }
+  function bsims() { getSimList("biology") }
+  function cosims() { getSimList("computer") }
+  function ssims() { getSimList("statistics") }
+  function usims() { getSimList("unfiled") }
+  var p_sims = dE("psims").addEventListener("click", psims)
+  var c_sims = dE("csims").addEventListener("click", csims)
+  var m_sims = dE("msims").addEventListener("click", msims)
+  var b_sims = dE("bsims").addEventListener("click", bsims)
+  var co_sims = dE("cosims").addEventListener("click", cosims)
+  var s_sims = dE("ssims").addEventListener("click", ssims)
+  var u_sims = dE("usims").addEventListener("click", usims)
+
+}
+function chapterEvents() {
+  function pchb() { renderCList("physics") }
+  function cchb() { renderCList("chemistry") }
+  function mchb() { renderCList("maths") }
+  function bchb() { renderCList("biology") }
+  function cochb() { renderCList("computer") }
+  function schb() { renderCList("statistics") }
+  function uchb() { renderCList("unfiled") }
+  var p_chb = dE("pchb").addEventListener("click", pchb)
+  var c_chb = dE("cchb").addEventListener("click", cchb)
+  var m_chb = dE("mchb").addEventListener("click", mchb)
+  var b_chb = dE("bchb").addEventListener("click", bchb)
+  var co_chb = dE("cochb").addEventListener("click", cochb)
+  var s_chb = dE("schb").addEventListener("click", schb)
+  var u_chb = dE("uchb").addEventListener("click", uchb)
+}
+function testEvents(){
+  function tsave() { testOperator("tts_answered") }
+  function tclear() { testOperator("tts_notanswer") }
+  function treview() { testOperator("tts_review") }
+  function tansrev() { testOperator("tts_ansreview") }
+  function sTestHand() { log("Warning", "Are You Sure You Want To End The Test", submitTest, "Yes,Submit", 1) }
+  var tt_save = dE("tt_save").addEventListener("click", tsave)
+  var tt_clear = dE("tt_clear").addEventListener("click", tclear)
+  var tt_review = dE("tt_review").addEventListener("click", treview)
+  var tt_ansreview = dE("tt_ansreview").addEventListener("click", tansrev)
+  var ttsub = dE("tt_sub").addEventListener("click", sTestHand)
+}
+function topicEvents(){
+  function prvHand() { topicHandler(1) }
+  function nxtHand() { topicHandler(2) }
+  var tpnxt = dE("tp_nxt").addEventListener("click", nxtHand)
+  var tpprv = dE("tp_prv").addEventListener("click", prvHand)
+  var tpedt = dE("tp_edt").addEventListener("click", editStuff)
+  var tpsbm = dE("tp_sbm").addEventListener("click", checkQuestion)
+  var tppnt = dE("tp_pnt").addEventListener("click", printStuff)
+}
+function edittopicEvents(){
+  function chItem() { changeItem(1) }
+  var tmode = dE("aq_mode").addEventListener("change", changeItem)
+  var ttype = dE("aq_type").addEventListener("change", changeItem)
+  var aqao = dE("aq_ao").addEventListener("click", addMCQ);
+  var aqro = dE("aq_ro").addEventListener("click", removeMCQ);
+  var aqre = dE("aq_re").addEventListener("click", removeEntry);
+  var tppnt = dE("aq_export").addEventListener("click", printStuff)
+}
+function testlistEvents(){
+  function actHand() { renderTestList("active") }
+  function upcHand() { renderTestList("upcoming") }
+  function finHand() { renderTestList("finished") }
+  var tiact = dE("ti_act").addEventListener("click", actHand)
+  var tiupc = dE("ti_upc").addEventListener("click", upcHand)
+  var tifin = dE("ti_fin").addEventListener("click", finHand)
+}
+function userNotesEvents(){
+  var unsave = dE("un_save").addEventListener("click", unotes1)
+  var unprint = dE("un_print").addEventListener("click", unotes2)
+  var un_rendermode = dE("un_rendermode").addEventListener("change", notesUIHandler)
+  var un_viewership = dE("un_viewership").addEventListener("change", notesUIHandler)
+  dE("un_print").addEventListener("click", function () {
+    dE("un_preview").style.display = "none";
+    dE("un_preview").innerHTML = "<h1 style = 'text-align:center;margin:0px'>" + dE("un_title").value + "</h1>" + getHTML("un_editable");
+    window.idElementPrint(dE("un_preview"), userinfo.name);
+  })
+}
+function dshHand() { changeLocationHash("dashboard", 1) }
+var dshbtn = dE("dsh_btn").addEventListener("click", dshHand);
+function printableEvents(){
+  document.getElementById("pe_tst_type_1").addEventListener('change',updateUI)
+document.getElementById("pe_tst_type_2").addEventListener('change',updateUI)
+document.getElementById("tsinf_btn").addEventListener('change',updateUI)
+document.getElementById("tans_btn").addEventListener("click",function(){
+  for (var i =0;i<document.getElementsByClassName("q_ans_1").length;i++){
+    document.getElementsByClassName("q_ans_1")[i].style.display = "flex"
   }
-  dE(handlebox).classList.remove("_open")
+})
+document.getElementById("tansexpl_btn").addEventListener("click",function(){
+  for (var i =0;i<document.getElementsByClassName("q_ans_1").length;i++){
+    document.getElementsByClassName("q_ans_1")[i].style.display = "flex"
+  }
+  for (var i =0;i<document.getElementsByClassName("q_ans_expl").length;i++){
+    document.getElementsByClassName("q_ans_expl")[i].style.display = "flex"
+  }
+})
+document.getElementById("tremove_btn").addEventListener("click",function(){
+  for (var i =0;i<document.getElementsByClassName("q_ans_1").length;i++){
+    document.getElementsByClassName("q_ans_1")[i].style.display = "none"
+  }
+  for (var i =0;i<document.getElementsByClassName("q_ans_expl").length;i++){
+    document.getElementsByClassName("q_ans_expl")[i].style.display = "none"
+  }
+})
+}
+function coreManager(newlocation, n1) {
   if (n1 == 1) { window.location.hash = "#/" + newlocation }
   handlebox = newlocation
   location1 = window.location.hash.split("#/")[1]
-
   switch (location1) {
-    case "profile": handlebox = "profile"; break;
-    case "about": handlebox = "aboutus"; break;
-    case "login": handlebox = "login"; break;
-    case "dashboard": handlebox = "dashboard"; break;
-    case "timetable": handlebox = "schedule"; break;
+    case "profile": { handlebox = "profile"; renderBody(page_profile, "", "");profileDetails(); break; }
+    case "about": handlebox = "aboutus"; renderBody(page_about, "text-align: center;overflow-y: scroll;", ""); function lglHand() { changeLocationHash("legal", 1) };dE("lgl_btn").addEventListener("click", lglHand);break;
+    case "login": handlebox = "login"; renderBody(page_login, "justify-content: center;", ""); dE("sgn_in").addEventListener("click", signIn);function regHand() { changeLocationHash("register", 1) };dE("reg_in").addEventListener("click", regHand);break;
+    case "dashboard": handlebox = "dashboard"; renderBody(page_dashboard, "display: flex;flex-direction: row;", ""); dashboardEvents(); break;
+    case "timetable": handlebox = "schedule"; renderBody(page_schedule, "", ""); iframeLoadScreen(); dE("tmt_frame").src = userinfo.timetableurl;break;
     case "logout": signOut(); break;
-    case "mainsformulas": handlebox = "mainsformulas"; renderDownloadPage(1); break;
-    case "downloads": handlebox = "downloads"; renderDownloadPage(2); break;
-    case "livequiz": handlebox = "livequiz"; break;
-    case "register": handlebox = "register"; break;
-    case "testinfo": handlebox = "testinfo"; renderTestList("active"); break;
-    case "legal": handlebox = "legal"; break;
-    case "appinfo": handlebox = "appinfo"; renderAppInfo(); break;
-    case "forum": handlebox = "forum"; break;
-    case 'testing': handlebox = "testing"; break;
-    case "bugreport": handlebox = "bugreport"; break;
-    case "simlist": handlebox = "simlist"; getSimList(); break;
-    case "testend": handlebox = "test_end"; break;
-    case "add/question": handlebox = "fu_question"; break;
+    case "mainsformulas": handlebox = "mainsformulas"; renderBody(page_jee_main, "", ""); break;
+    case "downloads": handlebox = "downloads"; renderBody(page_downloads, "", ""); break;
+    case "register": handlebox = "register"; renderBody(page_register, "", "");dE("rg_in").addEventListener("click", rgbtn); break;
+    case "testinfo": handlebox = "testinfo"; renderBody(page_test_list, "", ""); renderTestList("active"); break;
+    case "legal": handlebox = "legal"; renderBody(page_toc, "", ""); break;
+    case "appinfo": handlebox = "appinfo"; renderBody(page_app_info, "", ""); renderAppInfo(); break;
+    case "forum": handlebox = "forum"; renderBody(page_forum, "", "");var fmsend = dE("fm_send").addEventListener("click", sndMsg);gtMsg();getPinned(); break;
+    case "bugreport": handlebox = "bugreport"; renderBody(page_bug_report, "", ""); break;
+    case "simlist": handlebox = "simlist"; renderBody(page_list_sims, "", "");simEvents(); getSimList(); break;
+    case "testend": handlebox = "test_end"; renderBody(page_test_end, "", "");dE("te_title").innerText = "The Test Has Ended"; break;
     case "add/lesson": handlebox = "fu_lesson"; newLesson(); break;
     case "add/tpc": handlebox = "fu_topic"; newTopic(); break;
-    case "add/images": handlebox = "fu_images"; break;
     case "add/qubank": handlebox = "fu_topic"; newQBank(); break;
     case "add/simulation": handlebox = "fu_simulation"; newSimulation(); break;
     case "add/tests": handlebox = "fu_topic"; newTest(); break;
     case "add/batch": handlebox = "fu_topic"; newBatch(); break;
-    case "settings": handlebox = "settings";break;
-    // case "list/batch": handlebox = "fu_topic"; newBatch(); break;
-    case "chplist": handlebox = "chapterlist"; renderCList(); break;
-    default: handlebox = "error_page"; break;
+    case "settings": handlebox = "settings"; renderBody(page_settings, "", "");dE("pass_rst_btn").addEventListener("click", requestPasschange); break;
+    case "chplist": handlebox = "chapterlist"; renderBody(page_list_chapter, "", "");chapterEvents(); renderCList(); break;
+    default: handlebox = "error_page"; renderBody(error_page, "", ""); break;
   }
-
-  if (location1.includes("instructions")) { handlebox = "test_instructions"; }
-  if (location1.includes("cyberhunt")) { handlebox = "cyberhunt"; getCyberhunt() }
-  if (location1.includes("notes") && !location1.includes("usernotes")) { handlebox = "notes"; getPDF() }
-  if (location1.includes("sims")) { handlebox = "simulations"; getSimulation() }
-  if (location1.includes("chapter")) { handlebox = "chapter"; getChapterEList() }
-  if (location1.includes("qbanks")) { handlebox = "topic"; getTopic(2); }
-  if (location1.includes("usernotes")) { handlebox = "usernotes"; getUserNotes(); }
-  if (location1.includes("qbnk_vid")) { handlebox = "qbnk_vid"; dE("qbnk_vid_btn").style.display = "block" }
-  if (location1.includes("attempt")) { handlebox = "testv1"; getTestInfo() }
-  if (location1.includes("finished")) { handlebox = "finishedtestinfo"; getSimpleTestReport() }
-  if (location1.includes("testreport")) { handlebox = "testv1"; getTestReport() }
-  if (location1.includes("printable/qbank") && iorole == true) { handlebox = "printable"; printQBank(1); }
-  if (location1.includes("ARIEL") && iorole == true) { handlebox = "Ariel"; }
-  if (location1.includes("printable/tests") && iorole == true) { handlebox = "printable"; printQBank(3); }
-  if (location1 == "functions" && iorole == true) { handlebox = "functions"; changeItem() }
-  if (location1.includes("users") && iorole == true) { handlebox = "users"; userUpdate() }
-  if (location1.includes("topic")) { handlebox = "topic"; getTopic(1); }
-  if (location1.includes("printable/topic") && iorole == true) { handlebox = "printable"; printQBank(2); }
-  if (location1.includes("livequiz")) { handlebox = "livequiz"; lquizinit(); }
-  if (location1.includes("edit_sim") && iorole == true) { handlebox = "fu_simulation"; prepareSimulation() }
-  if (location1.includes("edit_lesson") && iorole == true) { handlebox = "fu_simulation"; prepareLesson() }
-  if (location1.includes("edit_tpc") && iorole == true) { handlebox = "fu_topic"; prepareTopicQBank(1) }
-  if (location1.includes("edit_test") && iorole == true) { handlebox = "fu_topic"; prepareTopicQBank(3) }
-  if (location1.includes("edit_qubank") && iorole == true) { handlebox = "fu_topic"; prepareTopicQBank(2) }
-  if (location1.includes("edit_exams") && iorole == true) { handlebox = "fu_topic"; prepareTopicQBank(4) }
-  // if (location1.includes("redirect"))
+  var iorole = adminrole == true || editorrole == true
+  if (location1.includes("instructions")) { handlebox = "test_instructions"; renderBody(page_test_instructions, "", ""); }
+  if (location1.includes("cyberhunt")) { handlebox = "cyberhunt"; renderBody(page_cyberhunt, "", ""); getCyberhunt() }
+  if (location1.includes("notes") && !location1.includes("usernotes")) { handlebox = "notes"; renderBody(page_notes, "", ""); getPDF() }
+  if (location1.includes("sims")) { handlebox = "simulations"; renderBody(page_sims, "", "");iframeLoadScreen();  getSimulation(); }
+  if (location1.includes("chapter")) { handlebox = "chapter"; renderBody(page_chapter, "", ""); getChapterEList() }
+  if (location1.includes("qbanks")) { handlebox = "topic"; renderBody(page_topic, "height:max-content;", "");topicEvents(); getTopic(2); }
+  if (location1.includes("usernotes")) { handlebox = "usernotes"; renderBody(page_usernotes, "flex-direction: row;", "");userNotesEvents(); getUserNotes(); }
+  if (location1.includes("qbnk_vid")) { handlebox = "qbnk_vid"; renderBody(page_qbnkvid, "height:90vh;position: relative;", ""); dE("qbnk_vid_btn").style.display = "block";dE("qbnk_vid_btn").addEventListener("click", prepareVideo);dE("qbnk_vid_btn_e").addEventListener("click", qbnkend);function qbnkend() { dE("watermark").style.display = "flex"; fullEle(dE("qbnk_vid")) } }
+  if (location1.includes("attempt")) { handlebox = "testv1"; renderBody(page_test_v1, "", "");testEvents(); getTestInfo() }
+  if (location1.includes("finished")) { handlebox = "finishedtestinfo"; renderBody(page_finished_test, "overflow-y: scroll;", ""); getSimpleTestReport() }
+  if (location1.includes("testreport")) { handlebox = "testv1"; renderBody(page_test_v1, "", ""); getTestReport() }
+  if (location1.includes("printable/qbank") && iorole == true) { handlebox = "printable"; renderBody(page_printable, "height:max-content;", "");printableEvents();var shfbtn = dE("shf_btn").addEventListener("click", shuffleQBank); printQBank(1); }
+  if (location1.includes("ARIEL") && iorole == true) { handlebox = "Ariel"; renderBody(page_ariel, "", ""); }
+  if (location1.includes("printable/tests") && iorole == true) { handlebox = "printable"; renderBody(page_printable, "height:max-content;", "");printableEvents();var shfbtn = dE("shf_btn").addEventListener("click", shuffleQBank); printQBank(3); }
+  if (location1 == "functions" && iorole == true) { handlebox = "functions"; renderBody(page_functions, "", ""); changeItem() }
+  if (location1.includes("users") && iorole == true) { handlebox = "users"; renderBody(page_edit_user, "", ""); userUpdate() }
+  if (location1.includes("topic")) { handlebox = "topic"; renderBody(page_topic, "height: max-content;", "");topicEvents(); getTopic(1); }
+  if (location1.includes("printable/topic") && iorole == true) { handlebox = "printable"; renderBody(page_printable, "height:max-content;", ""); printQBank(2); }
+  if (location1.includes("edit_sim") && iorole == true) { handlebox = "fu_simulation"; renderBody(page_edit_sims, "", "ovr-scroll");dE("aq_sims_save").addEventListener("click", updateSimulationWeb); prepareSimulation() }
+  if (location1.includes("edit_lesson") && iorole == true) { handlebox = "fu_simulation"; renderBody(page_edit_sims, "", "ovr-scroll"); prepareLesson() }
+  if (location1.includes("edit_tpc") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll");dE("aq_tpc_save").addEventListener("click", function(){updateTopicQBank(1)});edittopicEvents(); prepareTopicQBank(1) }
+  if (location1.includes("edit_test") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll");dE("aq_tst_save").addEventListener("click", function(){updateTopicQBank(3)});edittopicEvents(); prepareTopicQBank(3) }
+  if (location1.includes("edit_qubank") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll");dE("aq_qbc_save").addEventListener("click", function(){updateTopicQBank(2)});edittopicEvents(); prepareTopicQBank(2) }
+  if (location1.includes("edit_exams") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll");dE("aq_exam_save").addEventListener("click", function(){updateTopicQBank(4)});edittopicEvents(); prepareTopicQBank(4) }
   if (userrole == false || userrole == null || userrole == undefined) {
     if (location1 == "login" || location1 == "register" || location1.includes("notes") || location1 == "legal" || location1 == "about" || location1 == "bugreport" || location1 == "appinfo" || location1 == "mainsformulas" || location1 == "downloads") {
 
@@ -279,7 +370,16 @@ function locationHandler(newlocation, n1) {
       handlebox = "error_page"
     }
   }
-  dE(handlebox).classList.add("_open")
+  if (iorole) {
+    if (window.location.hash.includes("dashboard")) {
+      dE("adminonly").style.display = "flex";
+    } 
+    if (window.location.hash.includes("topic") || window.location.hash.includes("qbanks")) {
+      dE("tp_pnt").style.display = "block";
+      dE("tp_edt").style.display = "block";
+    }
+    if (window.location.hash.includes("sims")) { dE("sms_edit").style.display = "block"; }
+  }
   stpVid()
   editqllist = []
   if (location1 == "forum") { gtMsg(1); } else { gtMsg(2); forum_length = 1; forum_d = "afterbegin" }
@@ -292,190 +392,190 @@ function locationHandler(newlocation, n1) {
 // Creates A Blank Simulation
 let simlist = []
 async function newSimulation() {
-    try {
+  try {
 
-        const docRef = await addDoc(collection(db, 'sims'), {
-            name: "",
-            license: "",
-            provider: "",
-            url: "",
-        })
-        locationHandler("edit_sim/" + docRef.id, 1)
-    } catch {
+    const docRef = await addDoc(collection(db, 'sims'), {
+      name: "",
+      license: "",
+      provider: "",
+      url: "",
+    })
+    creMng("edit_sim/" + docRef.id, 1)
+  } catch {
 
-    }
+  }
 }
 // Prepares The Simulation Editor
 async function prepareSimulation() {
-    try {
-        let docSnap = await getDoc(doc(db, 'sims', window.location.hash.split("edit_sim/")[1]))
-        if (docSnap.exists()) {
-            var docJSON = docSnap.data();
-            dE("aq_simname").value = docJSON.name
-            dE("aq_simprov").value = docJSON.provider
-            dE("aq_simurl").value = docJSON.url
-            dE("aq_simlicense").value = docJSON.license
-            dE("aq_simsubj").value = docJSON.subject
-        }
-    } catch { }
+  try {
+    let docSnap = await getDoc(doc(db, 'sims', window.location.hash.split("edit_sim/")[1]))
+    if (docSnap.exists()) {
+      var docJSON = docSnap.data();
+      dE("aq_simname").value = docJSON.name
+      dE("aq_simprov").value = docJSON.provider
+      dE("aq_simurl").value = docJSON.url
+      dE("aq_simlicense").value = docJSON.license
+      dE("aq_simsubj").value = docJSON.subject
+    }
+  } catch { }
 }
 // Updates Simulation Details
 async function updateSimulationWeb() {
-    try {
-        await updateDoc(doc(db, 'sims', window.location.hash.split("edit_sim/")[1]), {
-            name: dE("aq_simname").value,
-            license: dE("aq_simlicense").value,
-            provider: dE("aq_simprov").value,
-            url: dE("aq_simurl").value,
-            subject: dE("aq_simsubj").value
-        });
-        var subj = dE("aq_simsubj").value
-        if (subj == "physics") {
-            await updateDoc(doc(db, 'sims', 'sims'), {
-                physics: arrayUnion(dE("aq_simname").value)
-            })
-        }
-        if (subj == "chemistry") {
-            await updateDoc(doc(db, 'sims', 'sims'), {
-                chemistry: arrayUnion(dE("aq_simname").value)
-            })
-        }
-        if (subj == "maths") {
-            await updateDoc(doc(db, 'sims', 'sims'), {
-                maths: arrayUnion(dE("aq_simname").value)
-            })
-        }
-        if (subj == "computer") {
-            await updateDoc(doc(db, 'sims', 'sims'), {
-                computer: arrayUnion(dE("aq_simname").value)
-            })
-        }
-        if (subj == "biology") {
-            await updateDoc(doc(db, 'sims', 'sims'), {
-                biology: arrayUnion(dE("aq_simname").value)
-            })
-        }
-        if (subj == "statistics") {
-            await updateDoc(doc(db, 'sims', 'sims'), {
-                statistics: arrayUnion(dE("aq_simname").value)
-            })
-        }
-        if (subj == "unfiled") {
-            await updateDoc(doc(db, 'sims', 'sims'), {
-                unfiled: arrayUnion(dE("aq_simname").value)
-            })
-        }
-        clearAQ();
-    } catch (error) {
-        console.error('Error writing new message to Firebase Database', error);
+  try {
+    await updateDoc(doc(db, 'sims', window.location.hash.split("edit_sim/")[1]), {
+      name: dE("aq_simname").value,
+      license: dE("aq_simlicense").value,
+      provider: dE("aq_simprov").value,
+      url: dE("aq_simurl").value,
+      subject: dE("aq_simsubj").value
+    });
+    var subj = dE("aq_simsubj").value
+    if (subj == "physics") {
+      await updateDoc(doc(db, 'sims', 'sims'), {
+        physics: arrayUnion(dE("aq_simname").value)
+      })
     }
+    if (subj == "chemistry") {
+      await updateDoc(doc(db, 'sims', 'sims'), {
+        chemistry: arrayUnion(dE("aq_simname").value)
+      })
+    }
+    if (subj == "maths") {
+      await updateDoc(doc(db, 'sims', 'sims'), {
+        maths: arrayUnion(dE("aq_simname").value)
+      })
+    }
+    if (subj == "computer") {
+      await updateDoc(doc(db, 'sims', 'sims'), {
+        computer: arrayUnion(dE("aq_simname").value)
+      })
+    }
+    if (subj == "biology") {
+      await updateDoc(doc(db, 'sims', 'sims'), {
+        biology: arrayUnion(dE("aq_simname").value)
+      })
+    }
+    if (subj == "statistics") {
+      await updateDoc(doc(db, 'sims', 'sims'), {
+        statistics: arrayUnion(dE("aq_simname").value)
+      })
+    }
+    if (subj == "unfiled") {
+      await updateDoc(doc(db, 'sims', 'sims'), {
+        unfiled: arrayUnion(dE("aq_simname").value)
+      })
+    }
+    clearAQ();
+  } catch (error) {
+    console.error('Error writing new message to Firebase Database', error);
+  }
 }
 // Displays Simulation For End User
 async function getSimulation() {
-    var simid = window.location.hash.split("sims/")[1]
-    var docRef = doc(db, 'sims', simid)
-    var docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-        var docJSON = docSnap.data();
-        dE("sms_name").innerText = docJSON.name
-        dE("sms_prov").innerText = docJSON.provider
-        dE("sim_frame").src = docJSON.url
-    }
-    else { locationHandler("error_page", 1); throw new Error }
+  var simid = window.location.hash.split("sims/")[1]
+  var docRef = doc(db, 'sims', simid)
+  var docSnap = await getDoc(docRef);
+  if (docSnap.exists()) {
+    var docJSON = docSnap.data();
+    dE("sms_name").innerText = docJSON.name
+    dE("sms_prov").innerText = docJSON.provider
+    dE("sim_frame").src = docJSON.url
+  }
+  else { creMng("error_page", 1); throw new Error }
 }
 // Get SimID From SimName
 async function getSimID(sim_name) {
-    var docID;
-    const q = query(collection(db, "sims"), where("name", "==", sim_name));
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach((doc) => {
-        docID = doc.id
-    });
-    locationHandler("sims/" + docID, 1)
+  var docID;
+  const q = query(collection(db, "sims"), where("name", "==", sim_name));
+  const querySnapshot = await getDocs(q);
+  querySnapshot.forEach((doc) => {
+    docID = doc.id
+  });
+  creMng("sims/" + docID, 1)
 }
 // Helper Function To Get Simulation Name
 function simClicker() {
-    getSimID(this.innerText)
+  getSimID(this.innerText)
 }
 // Get Simulation List
 async function getSimList(type) {
-    dE("sim_cont").innerHTML = ""
-    if (simlist.length == 0) {
-        var docRef = doc(db, 'sims', 'sims')
-        var docSnap = await getDoc(docRef);
-        if (docSnap.exists()) { var docJSON = docSnap.data(); simlist = docJSON; }
-        else { locationHandler("error_page", 1); throw new Error }
-    }
-    if (type == "physics") {
-        try {
-            for (let ele of simlist.physics) {
-                if (ele != "") {
-                    dE("sim_cont").insertAdjacentHTML('beforeend', '<span class="tlinks rpl" style = "color:pink" id="sim' + btoa(ele) + '">' + ele + '</span>')
-                    dE("sim" + btoa(ele)).addEventListener('click', simClicker)
-                }
-            }
-        } catch { }
-    }
-    if (type == "chemistry") {
-        try {
-            for (let ele of simlist.chemistry) {
-                if (ele != "") {
-                    dE("sim_cont").insertAdjacentHTML('beforeend', '<span class="tlinks rpl" style = "color:crimson" id="sim' + btoa(ele) + '">' + ele + '</span>')
-                    dE("sim" + btoa(ele)).addEventListener('click', simClicker)
-                }
-            }
-        } catch { }
-    }
-    if (type == "maths") {
-        try {
-            for (let ele of simlist.maths) {
-                if (ele != "") {
-                    dE("sim_cont").insertAdjacentHTML('beforeend', '<span class="tlinks rpl" style = "color:turquoise" id="sim' + btoa(ele) + '">' + ele + '</span>')
-                    dE("sim" + btoa(ele)).addEventListener('click', simClicker)
-                }
-            }
-        } catch { }
-    }
-    if (type == "biology") {
-        try {
-            for (let ele of simlist.biology) {
-                if (ele != "") {
-                    dE("sim_cont").insertAdjacentHTML('beforeend', '<span class="tlinks rpl" style = "color:lime" id="sim' + btoa(ele) + '">' + ele + '</span>')
-                    dE("sim" + btoa(ele)).addEventListener('click', simClicker)
-                }
-            }
-        } catch { }
-    }
-    if (type == "computer") {
-        try {
-            for (let ele of simlist.computer) {
-                if (ele != "") {
-                    dE("sim_cont").insertAdjacentHTML('beforeend', '<span class="tlinks rpl" style = "color:violet" id="sim' + btoa(ele) + '">' + ele + '</span>')
-                    dE("sim" + btoa(ele)).addEventListener('click', simClicker)
-                }
-            }
-        } catch { }
-    }
-    if (type == "statistics") {
-        try {
-            for (let ele of simlist.statistics) {
-                if (ele != "") {
-                    dE("sim_cont").insertAdjacentHTML('beforeend', '<span class="tlinks rpl" style = "color:orange" id="sim' + btoa(ele) + '">' + ele + '</span>')
-                    dE("sim" + btoa(ele)).addEventListener('click', simClicker)
-                }
-            }
-        } catch { }
-    }
-    if (type == "unfiled") {
-        try {
-            for (let ele of simlist.unfiled) {
-                if (ele != "") {
-                    dE("sim_cont").insertAdjacentHTML('beforeend', '<span class="tlinks rpl" style = "color:white" id="sim' + btoa(ele) + '">' + ele + '</span>')
-                    dE("sim" + btoa(ele)).addEventListener('click', simClicker)
-                }
-            }
-        } catch { }
-    }
+  dE("sim_cont").innerHTML = ""
+  if (simlist.length == 0) {
+    var docRef = doc(db, 'sims', 'sims')
+    var docSnap = await getDoc(docRef);
+    if (docSnap.exists()) { var docJSON = docSnap.data(); simlist = docJSON; }
+    else { creMng("error_page", 1); throw new Error }
+  }
+  if (type == "physics") {
+    try {
+      for (let ele of simlist.physics) {
+        if (ele != "") {
+          dE("sim_cont").insertAdjacentHTML('beforeend', '<span class="tlinks rpl" style = "color:pink" id="sim' + btoa(ele) + '">' + ele + '</span>')
+          dE("sim" + btoa(ele)).addEventListener('click', simClicker)
+        }
+      }
+    } catch { }
+  }
+  if (type == "chemistry") {
+    try {
+      for (let ele of simlist.chemistry) {
+        if (ele != "") {
+          dE("sim_cont").insertAdjacentHTML('beforeend', '<span class="tlinks rpl" style = "color:crimson" id="sim' + btoa(ele) + '">' + ele + '</span>')
+          dE("sim" + btoa(ele)).addEventListener('click', simClicker)
+        }
+      }
+    } catch { }
+  }
+  if (type == "maths") {
+    try {
+      for (let ele of simlist.maths) {
+        if (ele != "") {
+          dE("sim_cont").insertAdjacentHTML('beforeend', '<span class="tlinks rpl" style = "color:turquoise" id="sim' + btoa(ele) + '">' + ele + '</span>')
+          dE("sim" + btoa(ele)).addEventListener('click', simClicker)
+        }
+      }
+    } catch { }
+  }
+  if (type == "biology") {
+    try {
+      for (let ele of simlist.biology) {
+        if (ele != "") {
+          dE("sim_cont").insertAdjacentHTML('beforeend', '<span class="tlinks rpl" style = "color:lime" id="sim' + btoa(ele) + '">' + ele + '</span>')
+          dE("sim" + btoa(ele)).addEventListener('click', simClicker)
+        }
+      }
+    } catch { }
+  }
+  if (type == "computer") {
+    try {
+      for (let ele of simlist.computer) {
+        if (ele != "") {
+          dE("sim_cont").insertAdjacentHTML('beforeend', '<span class="tlinks rpl" style = "color:violet" id="sim' + btoa(ele) + '">' + ele + '</span>')
+          dE("sim" + btoa(ele)).addEventListener('click', simClicker)
+        }
+      }
+    } catch { }
+  }
+  if (type == "statistics") {
+    try {
+      for (let ele of simlist.statistics) {
+        if (ele != "") {
+          dE("sim_cont").insertAdjacentHTML('beforeend', '<span class="tlinks rpl" style = "color:orange" id="sim' + btoa(ele) + '">' + ele + '</span>')
+          dE("sim" + btoa(ele)).addEventListener('click', simClicker)
+        }
+      }
+    } catch { }
+  }
+  if (type == "unfiled") {
+    try {
+      for (let ele of simlist.unfiled) {
+        if (ele != "") {
+          dE("sim_cont").insertAdjacentHTML('beforeend', '<span class="tlinks rpl" style = "color:white" id="sim' + btoa(ele) + '">' + ele + '</span>')
+          dE("sim" + btoa(ele)).addEventListener('click', simClicker)
+        }
+      }
+    } catch { }
+  }
 }
 // ----------------------
 // BATCHES
@@ -495,7 +595,7 @@ async function newBatch() {
     var docRef2 = await setDoc(doc(db, 'batch', docRef.id, "info", "updates"), {
       u: []
     })
-    locationHandler("edit_batch/" + docRef.id, 1)
+    creMng("edit_batch/" + docRef.id, 1)
   } catch {
   }
 }
@@ -519,6 +619,16 @@ async function unotes1() {
 function unotes2() {
 
 }
+function iframeLoadScreen(){
+  const iframe = document.querySelector('iframe');
+  var iload = "";
+  iframe.addEventListener('loadstart', () => {
+    iload = log("Loading", "Content Is Loading. Please Wait") 
+  });
+  iframe.addEventListener('load', () => {
+    document.getElementById(iload).remove()
+  });
+}
 async function getUserNotes() {
   try { notesUIHandler() } catch { }
   if (window.location.hash.includes("usernotes/add")) {
@@ -533,11 +643,13 @@ async function getUserNotes() {
     await updateDoc(doc(db, "users", userinfo.uuid), {
       usernotes: arrayUnion({ color: "black", id: docRef.id, title: "Notes Title" })
     })
-    locationHandler("usernotes/" + docRef.id, 1)
+    creMng("usernotes/" + docRef.id, 1)
   } else if (window.location.hash.includes("usernotes/delete")) {
     await deleteDoc(doc(db, "usernotes", window.location.hash.split("usernotes/delete/")[1]));
   } else if (window.location.hash == "#/usernotes/") {
-  } else {
+    getUserNotesList()
+  } else if (window.location.hash.includes("usernotes")){
+    getUserNotesList()
     var docRef = doc(db, 'usernotes', window.location.hash.split("usernotes/")[1])
     var docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
@@ -545,14 +657,14 @@ async function getUserNotes() {
       dE("un_title").value = docRef.title;
       setHTML("un_editable", docRef.notes);
       dE("un_viewership").value = docRef.type;
-      if (docRef.type == "public_view" && userinfo.uuid != docRef.uuid){
+      if (docRef.type == "public_view" && userinfo.uuid != docRef.uuid) {
         dE("un_rendermode").innerHTML = '<option value="preview">preview</option>'
         dE("un_rendermode").value = "preview";
         dE("un_save").style.display = "none"
         dE("un_colorpicker").style.display = "none"
         dE("un_viewership").style.display = "none"
         dE("un_title").style.display = "none"
-      }else{
+      } else {
         dE("un_rendermode").innerHTML = '<option value="edit">edit</option><option value="preview">preview</option>'
         dE("un_rendermode").value = "edit";
         dE("un_save").style.display = "block"
@@ -562,7 +674,7 @@ async function getUserNotes() {
       }
       notesUIHandler()
     }
-  }
+  }else{}
 }
 function uNotesClicker() {
   window.location.hash = "#/usernotes/" + this.id.split("uno")[1]
@@ -578,7 +690,7 @@ async function getPDF() {
   getDownloadURL(ref(storage, 'public/' + id + '.pdf')).then((url) => { dE("nt_id").src = "https://docs.google.com/gview?url=" + encodeURI(url) + "&embedded=true"; }).catch((error) => {
     switch (error.code) {
       case 'storage/object-not-found':
-        dE("nt_id").src = "https://docs.google.com/gview?url="+encodeURI("https://firebasestorage.googleapis.com/v0/b/quarkz.appspot.com/o/public%2F404.pdf?alt=media&token=8cc8f23a-6e24-41d6-984b-6d2cc9b89d11")+"&embedded=true"
+        dE("nt_id").src = "https://docs.google.com/gview?url=" + encodeURI("https://firebasestorage.googleapis.com/v0/b/quarkz.appspot.com/o/public%2F404.pdf?alt=media&token=8cc8f23a-6e24-41d6-984b-6d2cc9b89d11") + "&embedded=true"
         break;
       case 'storage/unauthorized':
         log("Unauthorised", "You dont have necessary permissions to The file you requested.")
@@ -660,11 +772,10 @@ async function getPinned() {
     dE("pinnedtxt").innerText = docRef.message;
   }
 }
-var fmsend = dE("fm_send").addEventListener("click", sndMsg)
+
 var forum_length = 1;
 var forum_d = "afterbegin"
-gtMsg();
-getPinned();
+
 // ----------------------
 // QBANK VIDEO
 // Slide Controller For QBANK Video
@@ -707,7 +818,7 @@ function vidSlideController(docJSON) {
   }
   renderMathInElement(dE('tp_ans_hold'));
   renderMathInElement(dE('tp_qtext'));
-}
+}let mediaRecorder;
 // Prepares Slides Controller
 async function prepareVideo() {
   dE("qbnk_vid_btn").style.display = "none"
@@ -812,11 +923,11 @@ function addItemToQLLIst() {
     qop2.push(document.getElementsByClassName("aq_i2")[i].value)
   }
   if (location1.includes("edit_test")) {
-    var json = { qid: curr_qlid, mode: dE("aq_mode").value, title: getHTML("aq_qtext"), y_url: dE("aq_yurl").value, hint: dE("aq_hint").value, expl: getHTML("aq_expl"), type: qtype, answer: qans, op: qop, op1: qop1, op2: qop2, section: dE("aq_section").value,pm:dE("aq_posmrks").value,nm:dE("aq_negmrks").value }
+    var json = { qid: curr_qlid, mode: dE("aq_mode").value, title: getHTML("aq_qtext"), y_url: dE("aq_yurl").value, hint: dE("aq_hint").value, expl: getHTML("aq_expl"), type: qtype, answer: qans, op: qop, op1: qop1, op2: qop2, section: dE("aq_section").value, pm: dE("aq_posmrks").value, nm: dE("aq_negmrks").value }
   } else if (location1.includes("edit_exams")) {
     var json = { id: curr_qlid, name: dE("aq_examname").value, date: dE("aq_examdate").value, info: dE("aq_examinfo").value, syllabus: dE("aq_examsyllabus").value, mode: "exams" }
   } else {
-    var json = { id: curr_qlid, mode: dE("aq_mode").value, title: getHTML("aq_qtext"), y_url: dE("aq_yurl").value, hint: dE("aq_hint").value, expl: getHTML("aq_expl"), type: qtype, answer: qans, op: qop, op1: qop1, op2: qop2, section: dE("aq_section").value,pm:dE("aq_posmrks").value,nm:dE("aq_negmrks").value }
+    var json = { id: curr_qlid, mode: dE("aq_mode").value, title: getHTML("aq_qtext"), y_url: dE("aq_yurl").value, hint: dE("aq_hint").value, expl: getHTML("aq_expl"), type: qtype, answer: qans, op: qop, op1: qop1, op2: qop2, section: dE("aq_section").value, pm: dE("aq_posmrks").value, nm: dE("aq_negmrks").value }
   }
   return json
 }
@@ -861,7 +972,7 @@ function renderEditQLList(qno) {
     if (window.location.hash.includes("edit_exams")) {
       editqllist[po] = { id: Date.now() + Math.random().toString(36).substr(2), name: "", date: "", info: "", syllabus: "", mode: "exams" }
     } else {
-      editqllist[po] = { id: Date.now() + Math.random().toString(36).substr(2), mode: "", title: "", y_url: "", img: "", hint: "", expl: "", type: "mcq", answer: ["1"], op: ["1", "2", "3", "4"], op1: [], op2: [], section: "Unfiled",pm:4,nm:-1 }
+      editqllist[po] = { id: Date.now() + Math.random().toString(36).substr(2), mode: "", title: "", y_url: "", img: "", hint: "", expl: "", type: "mcq", answer: ["1"], op: ["1", "2", "3", "4"], op1: [], op2: [], section: "Unfiled", pm: 4, nm: -1 }
     }
     if (window.location.hash.includes("edit_qubank") || window.location.hash.includes("edit_test")) { editqllist[po].mode = "question" }
     if (location1.includes("edit_test")) {
@@ -933,7 +1044,7 @@ async function newTopic() {
       chname: "",
       subject: ""
     })
-    locationHandler("edit_tpc/" + docRef.id, 1)
+    creMng("edit_tpc/" + docRef.id, 1)
   } catch {
   }
 }
@@ -948,7 +1059,7 @@ async function newQBank() {
       chname: "",
       subject: ""
     })
-    locationHandler("edit_qubank/" + docRef.id, 1)
+    creMng("edit_qubank/" + docRef.id, 1)
   } catch {
   }
 }
@@ -1117,8 +1228,8 @@ async function updateTopicQBank(iun) {
     var a = [];
     for (var i = 0; i < editqllist.length; i++) {
       var ele = editqllist[i]
-      q.push({ qid: ele.qid, mode: ele.mode, title: ele.title, type: ele.type, op: ele.op, op1: ele.op1, op2: ele.op2, section: ele.section,pm:ele.pm,nm:ele.nm })
-      a.push({ qid: ele.qid, hint: ele.hint, expl: ele.expl, answer: ele.answer, section: ele.section,pm:ele.pm,nm:ele.nm })
+      q.push({ qid: ele.qid, mode: ele.mode, title: ele.title, type: ele.type, op: ele.op, op1: ele.op1, op2: ele.op2, section: ele.section, pm: ele.pm, nm: ele.nm })
+      a.push({ qid: ele.qid, hint: ele.hint, expl: ele.expl, answer: ele.answer, section: ele.section, pm: ele.pm, nm: ele.nm })
     }
     try {
       const docRef = await updateDoc(doc(db, col, id, "questions", "questions"), {
@@ -1158,7 +1269,7 @@ async function getTopic(type) {
   var docRef = doc(db, fireID, topicno)
   var docSnap = await getDoc(docRef);
   if (docSnap.exists()) { var docJSON = docSnap.data(); }
-  else { locationHandler("error_page", 1); throw new Error }
+  else { creMng("error_page", 1); throw new Error }
 
   topicJSON = {}
   topicJSON.title = docJSON.name
@@ -1223,7 +1334,7 @@ async function printQBank(type) {
     var docJSON = docSnap.data(); qnos = docJSON.qllist;
     qbanktitle.innerText = docJSON.name;
   }
-  else { locationHandler("error_page", 1); throw new Error }
+  else { creMng("error_page", 1); throw new Error }
 
 
   var qnos, qtitle, qtype, qimg;
@@ -1286,30 +1397,6 @@ async function printQBank(type) {
     }
   }
   dE("printable").insertAdjacentHTML('beforeend', '<br></br>')
-}
-function renderDownloadPage(type) {
-  if (type == 1) {
-    dE("mainsformulas").innerHTML = `
-    <span style="font-size: 5vh;color:yellow" id="fm_title">Mains Formula Sheet</span>
-    <hr color="white" width="100%">
-    <div style="overflow-y: scroll;height:50vh;" class="flex_type">
-    <span class="tlinks rpl" onclick = "window.location.hash = '/notes/PHYFORMULAS'">Physics Formula Sheet</span>
-    <span class="tlinks rpl" onclick = "window.location.hash = '/notes/MATHFORMULAS'">Maths Formula Sheet</span>
-    <span class="tlinks rpl" onclick = "window.location.hash = '/notes/PCHEMNOTES'">Physical Chemistry Formula Sheet</span>
-    <span class="tlinks rpl" onclick = "window.location.hash = '/notes/OCHEMNOTES'">Organic Chemistry Formula Sheet</span>
-    <span class="tlinks rpl" onclick = "window.location.hash = '/notes/ICHEMNOTES'">Inorganic Chemistry Formula Sheet</span>
-    </div>
-    <span style="font-size: 8px;">All PDF's Are Owned by their Respective Owners</span>
-    `
-  } else if (type == 2) {
-    dE("downloads").innerHTML = `
-    <span style="font-size: 5vh;color:yellow" id="fm_title">Downloads</span>
-    <hr color="white" width="100%">
-    <div style="overflow-y: scroll;height:50vh;" class="flex_type">
-      
-    </div>
-    `
-  }
 }
 async function lessonRenderer(docJSON) {
   dE("tp_question").style.display = "none"
@@ -1412,7 +1499,7 @@ function removeMCQ() {
 function initFirebaseAuth() {
   // Listen to auth states.
   onAuthStateChanged(getAuth(), authStateObserver);
-  // locationHandler("dashboard", 1)
+  // creMng("dashboard", 1)
 }
 function shuffleQBank() {
   var ol = dE("eqb_add")
@@ -1432,19 +1519,44 @@ function requestPasschange() {
       // ..
     });
 }
-async function authStateObserver(user) {
-  // var uname = dE("prf_uname")
+
+async function profileDetails() {
   var upic = dE("prf_pphoto")
   var name = dE("prf_name")
   var phone = dE("prf_phone")
   var email = dE("prf_email")
-  // var course = dE("prf_course")
   var stclass = dE("prf_class")
   var batch = dE("prf_batch")
   var gender = dE("prf_gender")
   var crton = dE("prf_crton")
   var tmtifr = dE("tmt_frame")
   var spoints = dE("spoints")
+  var courseno, batchno, calenid;
+  name.textContent = userinfo.name
+  phone.textContent = userinfo.mblno
+  email.textContent = userinfo.email
+  stclass.textContent = userinfo.class
+  crton.textContent = new Date(userinfo.sgndon.seconds * 1000).toDateString()
+  gender.textContent = userinfo.gen
+  batchno = userinfo.batch
+  courseno = userinfo.course
+  spoints.textContent = userinfo.spoints
+  userinfo.usernotes = userinfo.usernotes
+  if (userinfo.gen == "Male") {
+    dE("prf_tab_t_t_img").classList.remove("prf_male", "prf_female")
+    dE("prf_tab_t_t_img").classList.add("prf_male")
+  } else if (userinfo.gen == "Female") {
+    dE("prf_tab_t_t_img").classList.remove("prf_male", "prf_female")
+    dE("prf_tab_t_t_img").classList.add("prf_female")
+  }
+}
+function renderExams() {
+  for (let i = 0; i < userinfo.examslist.examinfo.length; i++) {
+    var f = userinfo.examslist.examinfo[i]
+    dE("db_exam_list").insertAdjacentHTML("beforeend", `<div class = "tlinks_min rpl"><span style="font-size: 16px;" onclick = "examlog('` + f.name + `','` + f.date + `','` + f.info + `','` + f.syllabus + `')">` + f.name + `</span></div>`)
+  }
+}
+async function authStateObserver(user) {
   var courseno, batchno, calenid;
   if (user) {
     var docRef = doc(db, "users", user.uid);
@@ -1453,50 +1565,26 @@ async function authStateObserver(user) {
       var docJSON = docSnap.data()
       userinfo = docJSON
       userinfo.uuid = user.uid
-      // uname.textContent = docJSON.email
-      dE("dshd_uname").innerText = docJSON.email
-      dE("dshd_name").innerText = docJSON.name
-      name.textContent = docJSON.name
-      phone.textContent = docJSON.mblno
-      email.textContent = docJSON.email
-      stclass.textContent = docJSON.class
-      crton.textContent = new Date(docJSON.sgndon.seconds * 1000).toDateString()
-      gender.textContent = docJSON.gen
-      batchno = docJSON.batch
-      courseno = docJSON.course
-      spoints.textContent = docJSON.spoints
-      userrole = docJSON.roles['user']
-      editorrole = docJSON.roles['editor']
-      adminrole = docJSON.roles['admin']
-      userinfo.usernotes = docJSON.usernotes
-      if (docJSON.usernotes == undefined){userinfo.usernotes = []}
+      batchno = userinfo.batch
+      userrole = userinfo.roles['user']
+      editorrole = userinfo.roles['editor']
+      adminrole = userinfo.roles['admin']
+      dE("spoints").innerText = userinfo.spoints
+      if (docJSON.usernotes == undefined) { userinfo.usernotes = [] }
     }
     if (docJSON.deleted == true) {
       log("Warning", "User Account Has Been Deleted")
       signOutUser()
-    }
-    if (docJSON.gen == "Male") {
-      dE("prf_tab_img").classList.remove("prf_male","prf_female")
-      dE("prf_tab_img").classList.add("prf_male")
-      dE("prf_tab_t_t_img").classList.remove("prf_male","prf_female")
-      dE("prf_tab_t_t_img").classList.add("prf_male")
-    } else if (docJSON.gen == "Female") {
-      dE("prf_tab_img").classList.remove("prf_male","prf_female")
-      dE("prf_tab_img").classList.add("prf_female")
-      dE("prf_tab_t_t_img").classList.remove("prf_male","prf_female")
-      dE("prf_tab_t_t_img").classList.add("prf_female")
     }
     try {
       var docRef = doc(db, "batch", batchno)
       var docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         var docJSON = docSnap.data();
-        batch.textContent = docJSON.name;
-        dE("dshd_batch").innerText = docJSON.name;
-        calenid = docJSON.timetable
+        userinfo.batchname = docJSON.name;
+        userinfo.timetable = docJSON.timetable
         getTestList(batchno, user.uid)
-        var iframeurl = "https://calendar.google.com/calendar/embed??height=600&wkst=2&bgcolor=%23ffffff&ctz=Asia%2FKolkata&showTitle=0&showCalendars=0&showTabs=0&showPrint=0&showDate=1&src=" + calenid + "%40group.calendar.google.com&amp;ctz=Asia%2FKolkata"
-        tmtifr.src = iframeurl
+        userinfo.timetableurl = "https://calendar.google.com/calendar/embed??height=600&wkst=2&bgcolor=%23ffffff&ctz=Asia%2FKolkata&showTitle=0&showCalendars=0&showTabs=0&showPrint=0&showDate=1&src=" + docJSON.timetable + "%40group.calendar.google.com&amp;ctz=Asia%2FKolkata"
         if (docJSON.delon.seconds <= parseInt(Date.now() / 1000)) {
           log("Warning", "This Batch Has Been Deleted")
           signOutUser()
@@ -1508,12 +1596,9 @@ async function authStateObserver(user) {
         }
       }
     } catch { }
-    dE("lg_uname").value = ""
-    dE("lg_pass").value = ""
     spoints.style.display = "block"
     dE("dsh_btn").style.display = "block"
     if (window.location.hash == "" || window.location.hash == null || window.location.hash == undefined) {
-      // locationHandler("dashboard", 1);
       window.location.hash = "#/dashboard"
       autosignin = 1;
     }
@@ -1521,29 +1606,17 @@ async function authStateObserver(user) {
     var docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
       var docJSON = docSnap.data();
-      dE("db_exam_list").innerHTML = ""
+      userinfo.examslist = docJSON
       if (docJSON.warning != "") {
-        log("Notice", docJSON.warning,function(){window.location.hash = "#/usernotes/releasenotes"},"Release Notes")
-      }
-      for (var i = 0; i < docJSON.examinfo.length; i++) {
-        var f = docJSON.examinfo[i]
-        dE("db_exam_list").insertAdjacentHTML("beforeend", `<div class = "tlinks_min rpl"><span style="font-size: 16px;" onclick = "examlog('` + f.name + `','` + f.date + `','` + f.info + `','` + f.syllabus + `')">` + f.name + `</span></div>`)
+        log("Notice", docJSON.warning, function () { window.location.hash = "#/usernotes/releasenotes" }, "Release Notes")
       }
     }
-    locationHandler(window.location.hash.split("#/")[1], 1)
-    getUserNotesList()
+    creMng(window.location.hash.split("#/")[1], 1)
   } else {
-    // uname.textContent = ""
-    name.textContent = ""
-    phone.textContent = ""
-    email.textContent = ""
-    stclass.textContent = ""
     spoints.textContent = ""
     spoints.style.display = "none"
     dE("dsh_btn").style.display = "none"
-    dE("tp_pnt").style.display = "none"
-    dE("tp_edt").style.display = "none";
-    locationHandler("login", 1)
+    creMng("login", 1)
     if (autosignin == 1) {
       document.location.reload()
     }
@@ -1634,7 +1707,7 @@ function editStuff() {
 }
 function changeLocationHash(ele, v) {
   window.location.hash = "#/" + ele
-  if (ele == "dashboard") { locationHandler("dashboard", 1) }
+  if (ele == "dashboard") { creMng("dashboard", 1) }
 }
 async function lquizinit() {
   lquizcode = location1.split("livequiz")[1]
@@ -1708,7 +1781,7 @@ async function newTest() {
       leaderboard: []
     })
 
-    locationHandler("edit_tests/" + docRef.id, 1)
+    creMng("edit_tests/" + docRef.id, 1)
   } catch {
   }
 }
@@ -1754,12 +1827,12 @@ async function getSimpleTestReport() {
       }
     }
     if (attempted == 0) {
-      locationHandler("testend", 1)
+      creMng("testend", 1)
       dE("te_title").innerText = "You Have NOT Attempted This Test"
     } else {
       if (0 && (Date.now() / 1000 <= testInfo.endon.seconds && testInfo.noresult == false)) {
-        // locationHandler("testend", 1)
-        // dE("te_title").innerText = "Test Reports will be available after deadline"
+        creMng("testend", 1)
+        dE("te_title").innerText = "Test Reports will be available after deadline"
       } else {
         try {
           try { computeResult(1) } catch { }
@@ -1818,23 +1891,23 @@ async function getSimpleTestReport() {
                 dE("fto_leaderboard").insertAdjacentHTML("beforeend", '<div class = "tlinks" style = "flex-direction:row;width:25vw;justify-content:space-between;"><span class = "t_gre">&nbsp;' + e + '</span><span class = "t_name">' + leaderboard[i].name + '</span><span class = "t_gre">&nbsp;&nbsp;' + leaderboard[i].marks + '</span></div>')
               }
             } catch {
-              
+
             }
             var data = []
-            for (var i = 0;i<reQW.length;i++){
-              if (analysedActions.questions[reQW[i].qid] == undefined){
-                data.push({qid:reQW[i].qid,type:reQW[i].type,time:0,no:i+1})
-              }else{
-                data.push({qid:reQW[i].qid,type:reQW[i].type,time:analysedActions.questions[reQW[i].qid].time,no:i+1})
+            for (var i = 0; i < reQW.length; i++) {
+              if (analysedActions.questions[reQW[i].qid] == undefined) {
+                data.push({ qid: reQW[i].qid, type: reQW[i].type, time: 0, no: i + 1 })
+              } else {
+                data.push({ qid: reQW[i].qid, type: reQW[i].type, time: analysedActions.questions[reQW[i].qid].time, no: i + 1 })
               }
-              
+
             }
-            questionGraph("fto_draw",data)
+            questionGraph("fto_draw", data)
 
           }
           catch {
             dE("te_title").innerText = "ERROR"
-            locationHandler("testend", 1)
+            creMng("testend", 1)
             return 0;
           }
         } catch { }
@@ -1939,11 +2012,11 @@ async function getTestReport() {
       }
     }
     if (attempted == 0) {
-      locationHandler("testend", 1)
+      creMng("testend", 1)
       dE("te_title").innerText = "You Have NOT Attempted This Test"
     } else {
       if (Date.now() / 1000 <= testInfo.endon.seconds && testInfo.noresult == false) {
-        locationHandler("testend", 1)
+        creMng("testend", 1)
         dE("te_title").innerText = "Detailed Test Reports will be available after deadline"
       } else {
         try {
@@ -1969,7 +2042,7 @@ async function getTestReport() {
         }
         catch {
           dE("te_title").innerText = "ERROR"
-          locationHandler("testend", 1)
+          creMng("testend", 1)
           return 0;
         }
         inittestHandler()
@@ -1993,7 +2066,7 @@ async function getTestInfo() {
     if (docSnap.exists()) {
       for (var ele of docSnap.data().finished) {
         if (auth.currentUser.uid == ele) {
-          locationHandler("testend", 1)
+          creMng("testend", 1)
           dE("te_title").innerText = "You Have Already Attempted This Test"
           return 0;
         }
@@ -2009,7 +2082,7 @@ async function getTestInfo() {
   }
   catch {
     dE("te_title").innerText = "The Test Hasnt Started Yet"
-    locationHandler("testend", 1)
+    creMng("testend", 1)
     return 0;
   }
   docRef = doc(db, "tests", testid, "responses", auth.currentUser.uid);
@@ -2043,7 +2116,7 @@ async function getTestInfo() {
       var seconds = testInfo.timeallotted - 1;
       testInfo.timeallotted -= 1
       dE("tt_timeleft").innerText = Math.floor(seconds % (3600 * 24) / 3600) + ":" + Math.floor(seconds % 3600 / 60) + ":" + Math.floor(seconds % 60);
-      testQTime +=1
+      testQTime += 1
       dE("tt_timespent").innerText = Math.floor(testQTime % (3600 * 24) / 3600) + ":" + Math.floor(testQTime % 3600 / 60) + ":" + Math.floor(testQTime % 60);
       if (seconds == 0) {
         submitTest()
@@ -2055,7 +2128,7 @@ async function getTestInfo() {
     submitTest()
   }
   window.onhashchange = function (e) {
-    locationHandler()
+    creMng()
     submitTest()
   }
   dE("tt_testname").innerText = testInfo.title
@@ -2134,7 +2207,7 @@ async function computeResult(type) {
       }
     }
   }
-  var t = subjectmarks["Physics"].total+subjectmarks["Chemistry"].total+subjectmarks["Math"].total+subjectmarks["Biology"].total+subjectmarks["Computer"].total+subjectmarks["Statistics"].total+subjectmarks["Unfiled"].total
+  var t = subjectmarks["Physics"].total + subjectmarks["Chemistry"].total + subjectmarks["Math"].total + subjectmarks["Biology"].total + subjectmarks["Computer"].total + subjectmarks["Statistics"].total + subjectmarks["Unfiled"].total
   var tFinal = { correct: c, incorrect: ic, unattempted: u, mList: marksList, total: t, usermarks: c + ic, subjectmarks: subjectmarks }
   if (type == 1) {
     if (!areObjectsEqual(tFinal, fg)) {
@@ -2145,7 +2218,7 @@ async function computeResult(type) {
       await updateDoc(doc(db, "tests", testid, "responses", "finished"), {
         leaderboard: arrayUnion({ "uid": userinfo.uuid, "marks": tFinal.usermarks, "name": userinfo.name }),
       })
-      locationHandler()
+      creMng()
     }
   } else if (type == 0) {
     await updateDoc(doc(db, "tests", testid, "responses", auth.currentUser.uid), {
@@ -2154,7 +2227,7 @@ async function computeResult(type) {
     await updateDoc(doc(db, "tests", testid, "responses", "finished"), {
       leaderboard: arrayUnion({ "uid": userinfo.uuid, "marks": tFinal.usermarks, "name": userinfo.name }),
     })
-    locationHandler("testend", 1)
+    creMng("testend", 1)
   }
   document.getElementById(gty).style.visibility = 'hidden';
   document.getElementById(gty).style.opacity = '0'
@@ -2225,9 +2298,9 @@ function testqHandler(id, no) {
           if (id == ele.qid) {
             tyio = ele.answer
             if (analysedActions != undefined) {
-              if (analysedActions.questions[ele.qid] == undefined){
+              if (analysedActions.questions[ele.qid] == undefined) {
                 dE("tt_timespent").innerText = "0 seconds"
-              }else{
+              } else {
                 dE("tt_timespent").innerText = sd(analysedActions.questions[ele.qid].time)
               }
             }
@@ -2326,7 +2399,7 @@ function inittestHandler() {
       }
     }
     analyseActions(2)
-  }else{
+  } else {
     dE("tt_sub").style.display = "block"
   }
   for (let ele of testResponseList) {
@@ -2410,12 +2483,12 @@ async function submitTest() {
   testActionLogger.push({ type: "end", time: it, value: "1" })
   var testid = window.location.hash.split("#/attempt/")[1]
   window.onbeforeunload = function () { }
-  window.onhashchange = locationHandler
+  window.onhashchange = creMng
   await updateDoc(doc(db, "tests", testid, "responses", auth.currentUser.uid), {
     endon: serverTimestamp(),
     actions: testActionLogger,
     warning: []
-  }).then(function(){testResponseList = [];})
+  }).then(function () { testResponseList = []; })
   await updateDoc(doc(db, "tests", testid, "responses", "finished"), {
     finished: arrayUnion(auth.currentUser.uid),
   }).then(computeResult(0))
@@ -2441,150 +2514,92 @@ function internetStatus(type) {
 }
 window.addEventListener('online', () => internetStatus(1));
 window.addEventListener('offline', () => internetStatus(0));
-dE("te_title").innerText = "The Test Has Ended"
-function notesUIHandler(){
- if (dE("un_rendermode").value == "preview"){
-  dE("un_preview").style.display = "block"
-  dE("un_preview").innerHTML = "<h1 style = 'text-align:center'>"+dE("un_title").value+"</h1><br>"+getHTML("un_editable")
-  dE("un_edit").style.display = "none"
-}else if (dE("un_rendermode").value == "edit"){
-  dE("un_edit").style.display = "flex"
-  dE("un_preview").style.display = "none"
- }
- try{dE("uno"+window.location.hash.split("usernotes/")[1]).style.backgroundColor = dE("un_colorpicker").value}catch{}
+function notesUIHandler() {
+  if (dE("un_rendermode").value == "preview") {
+    dE("un_preview").style.display = "block"
+    dE("un_preview").innerHTML = "<h1 style = 'text-align:center'>" + dE("un_title").value + "</h1><br>" + getHTML("un_editable")
+    dE("un_edit").style.display = "none"
+  } else if (dE("un_rendermode").value == "edit") {
+    dE("un_edit").style.display = "flex"
+    dE("un_preview").style.display = "none"
+  }
+  try { dE("uno" + window.location.hash.split("usernotes/")[1]).style.backgroundColor = dE("un_colorpicker").value } catch { }
 }
-function defineEvents() {
-  function chItem() { changeItem(1) }
-  function simHand() { changeLocationHash("simlist", 1) }
-  function cybHand() { changeLocationHash("cyberhunt", 1) }
-  function abtHand() { changeLocationHash("about", 1) }
-  function tmtHand() { changeLocationHash("timetable", 1) }
-  function regHand() { changeLocationHash("register", 1) }
-  function prfHand() { changeLocationHash("profile", 1) }
-  function dshHand() { changeLocationHash("dashboard", 1) }
-  function adiHand() { changeLocationHash("functions", 1) }
-  function tstinfHand() { changeLocationHash("testinfo", 1) }
-  function uscHand() { changeLocationHash("users", 1) }
-  function tpcHand() { changeLocationHash("tpclist", 1) }
-  function lvqHand() { changeLocationHash("livequiz", 1) }
-  function frmHand() { changeLocationHash("forum", 1) }
-  function lglHand() { changeLocationHash("legal", 1) }
-  function qbaHand() { changeLocationHash("qblist", 1) }
-  function chpHand() { changeLocationHash("chplist", 1) }
-  function sTestHand() { log("Warning", "Are You Sure You Want To End The Test", submitTest, "Yes,Submit",1) }
-  function prvHand() { topicHandler(1) }
-  function nxtHand() { topicHandler(2) }
-  function actHand() { renderTestList("active") }
-  function upcHand() { renderTestList("upcoming") }
-  function finHand() { renderTestList("finished") }
-  function qbnkend() { dE("watermark").style.display = "flex"; fullEle(dE("qbnk_vid")) }
-  function qbnkstr() { prepareVideo() }
-  function tsave() { testOperator("tts_answered") }
-  function tclear() { testOperator("tts_notanswer") }
-  function treview() { testOperator("tts_review") }
-  function tansrev() { testOperator("tts_ansreview") }
-  function psims() { getSimList("physics") }
-  function csims() { getSimList("chemistry") }
-  function msims() { getSimList("maths") }
-  function bsims() { getSimList("biology") }
-  function cosims() { getSimList("computer") }
-  function ssims() { getSimList("statistics") }
-  function usims() { getSimList("unfiled") }
-  function pchb() { renderCList("physics") }
-  function cchb() { renderCList("chemistry") }
-  function mchb() { renderCList("maths") }
-  function bchb() { renderCList("biology") }
-  function cochb() { renderCList("computer") }
-  function schb() { renderCList("statistics") }
-  function uchb() { renderCList("unfiled") }
-  function uQL() { updateTopicQBank(1) }
-  function uQL2() { updateTopicQBank(2) }
-  function uQL3() { updateTopicQBank(3) }
-  function uQL4() { updateTopicQBank(4) }
-  function rgbtn() { log("Note", "By Clicking on 'Accept And Register' you agree that you accept all Terms And Conditions and Privacy Policy of Quarkz!", signUp, "Accept And Register") }
-  var simbtn = dE("sim_btn").addEventListener("click", simHand)
-  var sgnbtn = dE("sgn_in").addEventListener("click", signIn);
-  // var sgngglbtn = dE("sgn_in_google").addEventListener("click", signInwithGoogle);
-  var regbtn = dE("reg_in").addEventListener("click", regHand);;
-  var rgbtn = dE("rg_in").addEventListener("click", rgbtn);
-  var sgnout = dE("lgt_btn").addEventListener("click", signOutUser);
-  var tmtbtn = dE("tmt_btn").addEventListener("click", tmtHand);
-  var prfbtn = dE("prf_btn").addEventListener("click", prfHand);
-  var abtbtn = dE("abt_btn").addEventListener("click", abtHand);
-  var shfbtn = dE("shf_btn").addEventListener("click", shuffleQBank);
-  var aqao = dE("aq_ao").addEventListener("click", addMCQ);
-  var aqro = dE("aq_ro").addEventListener("click", removeMCQ);
-  var aqre = dE("aq_re").addEventListener("click", removeEntry);
-  var tmode = dE("aq_mode").addEventListener("change", changeItem)
-  var ttype = dE("aq_type").addEventListener("change", changeItem)
-  var dshbtn = dE("dsh_btn").addEventListener("click", dshHand);
-  var adibtn = dE("adi_btn").addEventListener("click", adiHand)
-  var aqsave = dE("aq_tpc_save").addEventListener("click", uQL)
-  var aqsave = dE("aq_qbc_save").addEventListener("click", uQL2)
-  var aqsave = dE("aq_tst_save").addEventListener("click", uQL3)
-  var aqsave = dE("aq_exam_save").addEventListener("click", uQL4)
-  var unsave = dE("un_save").addEventListener("click", unotes1)
-  var unprint = dE("un_print").addEventListener("click", unotes2)
-  var tstinfbtn = dE("tstinf_btn").addEventListener("click", tstinfHand)
-  var tpcbtn = dE("tpc_btn").addEventListener("click", tpcHand)
-  var uscbtn = dE("usc_btn").addEventListener("click", uscHand)
-  var lvqbtn = dE("lvq_btn").addEventListener("click", lvqHand)
-  var frmbtn = dE("frm_btn").addEventListener("click", frmHand)
-  var tpnxt = dE("tp_nxt").addEventListener("click", nxtHand)
-  var tpprv = dE("tp_prv").addEventListener("click", prvHand)
-  var tpsbm = dE("tp_sbm").addEventListener("click", checkQuestion)
-  var lglbtn = dE("lgl_btn").addEventListener("click", lglHand)
-  var qbabtn = dE("qba_btn").addEventListener("click", qbaHand)
-  var tppnt = dE("tp_pnt").addEventListener("click", printStuff)
-  var tppnt = dE("aq_export").addEventListener("click", printStuff)
-  var tpedt = dE("tp_edt").addEventListener("click", editStuff)
-  var cybbtn = dE("cyb_btn").addEventListener("click", cybHand)
-  var tiact = dE("ti_act").addEventListener("click", actHand)
-  var tiupc = dE("ti_upc").addEventListener("click", upcHand)
-  var tifin = dE("ti_fin").addEventListener("click", finHand)
-  var tt_save = dE("tt_save").addEventListener("click", tsave)
-  var tt_clear = dE("tt_clear").addEventListener("click", tclear)
-  var tt_review = dE("tt_review").addEventListener("click", treview)
-  var tt_ansreview = dE("tt_ansreview").addEventListener("click", tansrev)
-  var p_sims = dE("psims").addEventListener("click", psims)
-  var c_sims = dE("csims").addEventListener("click", csims)
-  var m_sims = dE("msims").addEventListener("click", msims)
-  var b_sims = dE("bsims").addEventListener("click", bsims)
-  var co_sims = dE("cosims").addEventListener("click", cosims)
-  var s_sims = dE("ssims").addEventListener("click", ssims)
-  var u_sims = dE("usims").addEventListener("click", usims)
-  var p_chb = dE("pchb").addEventListener("click", pchb)
-  var c_chb = dE("cchb").addEventListener("click", cchb)
-  var m_chb = dE("mchb").addEventListener("click", mchb)
-  var b_chb = dE("bchb").addEventListener("click", bchb)
-  var co_chb = dE("cochb").addEventListener("click", cochb)
-  var s_chb = dE("schb").addEventListener("click", schb)
-  var u_chb = dE("uchb").addEventListener("click", uchb)
-  var ttsub = dE("tt_sub").addEventListener("click", sTestHand)
-  var chp_btn = dE("chp_btn").addEventListener("click", chpHand)
-  var pass_rst_btn = dE("pass_rst_btn").addEventListener("click", requestPasschange)
-  var aq_sims_save = dE("aq_sims_save").addEventListener("click", updateSimulationWeb)
-  var un_rendermode = dE("un_rendermode").addEventListener("change",notesUIHandler)
-  var un_viewership = dE("un_viewership").addEventListener("change",notesUIHandler)
-  dE("un_print").addEventListener("click", function () {
-    dE("un_preview").style.display = "none";
-    dE("un_preview").innerHTML = "<h1 style = 'text-align:center;margin:0px'>" + dE("un_title").value + "</h1>" + getHTML("un_editable");
-    window.idElementPrint(dE("un_preview"), userinfo.name);
-  })
-  dE("qbnk_vid_btn_e").addEventListener("click", qbnkend)
-  dE("qbnk_vid_btn").addEventListener("click", qbnkstr)
+function rgbtn() {
+  let mobileNo = document.querySelector('#rg_mbleno').value;
+  let email = document.querySelector('#rg_uname').value;
+  let password = document.querySelector('#rg_pass').value;
+  let confirmPassword = document.querySelector('#rg_pass1').value;
+  let name = document.querySelector('#rg_name').value;
+  let dob = document.querySelector('#rg_dob').value;
+  let selectedClass = document.querySelector('#rg_class').value;
+  let selectedGender = document.querySelector('#rg_gender').value;
+
+  // Check if all fields are filled
+  if (mobileNo && email && password && confirmPassword && name && dob && selectedClass && selectedGender) {
+    // Check if mobile number is in correct format
+    const mobileNoRegex = /^\+91\d{10}$/;
+    if (!mobileNo.match(mobileNoRegex)) {
+      log("Warning", 'Mobile number should be in the format +91XXXXXXXXXX');
+      return;
+    }
+
+    // Check if email is in correct format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email.match(emailRegex)) {
+      log("Warning", 'Please enter a valid email address');
+      return;
+    }
+
+    // Check if password meets the criteria (at least 8 characters long)
+    if (password.length < 8) {
+      log("Warning", 'Password should be at least 8 characters long');
+      return;
+    }
+
+    // Check if password and confirm password match
+    if (password !== confirmPassword) {
+      log("Warning", 'Passwords do not match');
+      return;
+    }
+
+  } else {
+    log("Warning", 'Please fill in all fields');
+    return;
+  }
+
+  log("Note", "By Clicking on 'Accept And Register' you agree that you accept all Terms And Conditions and Privacy Policy of Quarkz!", signUp, "Accept And Register")
 }
 
+
 function plyVid() { window.player.playVideo() }
-function stpVid() { try { window.player.stopVideo() } catch { } }
+function stpVid() { try { window.player.stopVideo();if (!window.location.hash.includes("topic")){window.player = undefined} } catch { } }
 function pauVid() { window.player.pauseVideo() }
-function loadVid(videoId) { window.player.loadVideoById(videoId); }
+function loadVid(videoId) { 
+  var vid_width = 0.8 * window.innerWidth || 0.8 * document.documentElement.clientWidth || 0.8 * document.body.clientWidth;
+  if (player == undefined || dE("player").tagName == "div"){
+  window.player = new YT.Player('player', {
+    height: '500',
+    width: vid_width,
+    origin: window.location.origin,
+    videoId: videoId,
+    playerVars: {
+      'playsinline': 1,
+      'controls': 0,
+      'modestbranding': 1,
+    },
+    events: {
+      'onReady': onPlayerReady,
+      'onStateChange': onPlayerStateChange
+    }
+  });
+}else{window.player.loadVideoById(videoId);} }
 function renderAppInfo() {
   dE("ren_appinf").textContent = JSON.stringify(Quarkz, undefined, 2);
 }
 
-$(document).ready(function() {
-  $('.summernote').summernote({   
+$(document).ready(function () {
+  $('.summernote').summernote({
     toolbar: [
       ['style', ['style']],
       ['font', ['bold', 'italic', 'underline', 'clear']],
@@ -2599,116 +2614,117 @@ $(document).ready(function() {
     ],
   });
 });
-function getHTML(id){
-  return $("#"+id).summernote('code')
+function getHTML(id) {
+  return $("#" + id).summernote('code')
 }
-function setHTML(id,html){
-  $("#"+id).summernote('code', html);
+function setHTML(id, html) {
+  $("#" + id).summernote('code', html);
 }
-function questionGraph(ipd,data){
-  try{
-  const margin = { top: 20, right: 20, bottom: 50, left: 50 };
-  const width = 800 - margin.left - margin.right;
-  const height = 400 - margin.top - margin.bottom;
-  dE(ipd).innerHTML = ""
-  const svg = d3
-    .select("#"+ipd)
-    .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-    .attr("transform", `translate(${margin.left}, ${margin.top})`);
-  
-  // Define color scale for circle fill
-  const colorScale = d3
-    .scaleOrdinal()
-    .domain(["correct", "incorrect", "unattempted"])
-    .range(["#2ecc71", "#e74c3c", "#f39c12"]);
-  
-  // Define circle radius scale based on attempt time
-  const radiusScale = d3
-    .scaleLinear()
-    .domain([0, d3.max(data, (d) => d.time)])
-    .range([5, 30]);
-  
-  // Define x scale for question index
-  const xScale = d3
-    .scaleLinear()
-    .domain([1, data.length])
-    .range([0, width]);
-  
-  // Define y scale for attempt time
-  const yScale = d3
-    .scaleLinear()
-    .domain([0, d3.max(data, (d) => d.time)])
-    .range([height, 0]);
-  svg.append("text")
-    .attr("class", "axis-label")
-    .attr("text-anchor", "middle")
-    .attr("x", width-120)
-    .attr("y", height+40)
-    .attr("color","white")
-    .text("Question Number");
-  
-  svg.append("text")
-    .attr("class", "axis-label")
-    .attr("text-anchor", "middle")
-    .attr("transform", "rotate(-90)")
-    .attr("x", -innerHeight / 2 + 40)
-    .attr("y", -margin.left + 25)
-    .text("Time Taken(in s)")
-    .attr("color","white");
-  // Draw x axis
-  svg
-    .append("g")
-    .attr("transform", `translate(0, ${height})`)
-    .call(d3.axisBottom(xScale));
-  
-  // Draw y axis
-  svg.append("g").call(d3.axisLeft(yScale));
-  
-  // Draw circles for each data point
-  svg
-    .selectAll("circle")
-    .data(data)
-    .enter()
-    .append("circle")
-    .attr("cx", (d, i) => xScale(i + 1))
-    .attr("cy", (d) => yScale(d.time))
-    .attr("r", (d) => radiusScale(d.time))
-    .attr("fill", (d) => {
+function questionGraph(ipd, data) {
+  try {
+    const margin = { top: 20, right: 20, bottom: 50, left: 50 };
+    const width = 800 - margin.left - margin.right;
+    const height = 400 - margin.top - margin.bottom;
+    dE(ipd).innerHTML = ""
+    const svg = d3
+      .select("#" + ipd)
+      .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+    // Define color scale for circle fill
+    const colorScale = d3
+      .scaleOrdinal()
+      .domain(["correct", "incorrect", "unattempted"])
+      .range(["#2ecc71", "#e74c3c", "#f39c12"]);
+
+    // Define circle radius scale based on attempt time
+    const radiusScale = d3
+      .scaleLinear()
+      .domain([0, d3.max(data, (d) => d.time)])
+      .range([5, 30]);
+
+    // Define x scale for question index
+    const xScale = d3
+      .scaleLinear()
+      .domain([1, data.length])
+      .range([0, width]);
+
+    // Define y scale for attempt time
+    const yScale = d3
+      .scaleLinear()
+      .domain([0, d3.max(data, (d) => d.time)])
+      .range([height, 0]);
+    svg.append("text")
+      .attr("class", "axis-label")
+      .attr("text-anchor", "middle")
+      .attr("x", width - 120)
+      .attr("y", height + 40)
+      .attr("color", "white")
+      .text("Question Number");
+
+    svg.append("text")
+      .attr("class", "axis-label")
+      .attr("text-anchor", "middle")
+      .attr("transform", "rotate(-90)")
+      .attr("x", -innerHeight / 2 + 40)
+      .attr("y", -margin.left + 25)
+      .text("Time Taken(in s)")
+      .attr("color", "white");
+    // Draw x axis
+    svg
+      .append("g")
+      .attr("transform", `translate(0, ${height})`)
+      .call(d3.axisBottom(xScale));
+
+    // Draw y axis
+    svg.append("g").call(d3.axisLeft(yScale));
+
+    // Draw circles for each data point
+    svg
+      .selectAll("circle")
+      .data(data)
+      .enter()
+      .append("circle")
+      .attr("cx", (d, i) => xScale(i + 1))
+      .attr("cy", (d) => yScale(d.time))
+      .attr("r", (d) => radiusScale(d.time))
+      .attr("fill", (d) => {
         return colorScale(d.type);
-    }).append("text")
-      .text(function(d) { return d.no; })
-      var circleGroups = svg.selectAll("g")
+      }).append("text")
+      .text(function (d) { return d.no; })
+    var circleGroups = svg.selectAll("g")
       .data(data)
       .enter()
       .append("g")
-      .attr("transform", function(d) {
-          return "translate(" + xScale(d.time) + "," + yScale(d.questionNumber) + ")";
+      .attr("transform", function (d) {
+        return "translate(" + xScale(d.time) + "," + yScale(d.questionNumber) + ")";
       });
-  // add circles to each group
-  circleGroups.append("circle")
-      .attr("r", function(d) { return sizeScale(d.time); })
-      .attr("fill", function(d) {
-          if (d.result == "correct") {
-              return "green";
-          } else if (d.result == "incorrect") {
-              return "red";
-          } else {
-              return "gray";
-          }
+    // add circles to each group
+    circleGroups.append("circle")
+      .attr("r", function (d) { return sizeScale(d.time); })
+      .attr("fill", function (d) {
+        if (d.result == "correct") {
+          return "green";
+        } else if (d.result == "incorrect") {
+          return "red";
+        } else {
+          return "gray";
+        }
       });
-  
-  // add labels to each group
-  circleGroups.append("text")
-      .text(function(d) { return "Q" + d.no; })
-      .attr("x", function(d) { return sizeScale(d.time) + 5; })
+
+    // add labels to each group
+    circleGroups.append("text")
+      .text(function (d) { return "Q" + d.no; })
+      .attr("x", function (d) { return sizeScale(d.time) + 5; })
       .attr("y", 5);
-}catch{}}
+  } catch { }
+}
 var Quarkz = {
   "copyright": "Mr Techtroid 2021-23",
-  "vno": "v0.4.2",
+  "vno": "v0.5.0",
   "author": "Mr Techtroid",
   "last-updated": "10/02/2023(IST)",
   "serverstatus": "firebase-online",
@@ -2738,7 +2754,6 @@ var testActionLogger = []
 var testReportAnswers = []
 var reQW;
 var analysedActions;
-window.onhashchange = locationHandler
+window.onhashchange = creMng
 initFirebaseAuth()
-defineEvents()
 sysaccess()

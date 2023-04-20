@@ -16,7 +16,7 @@ export function sysaccess() {
         return document.getElementById(ele)
     }
     function r(txt,st){
-        w("c-output").insertAdjacentHTML("beforeend","<div style = "+st+">"+txt+"</div>")
+        // w("c-output").insertAdjacentHTML("beforeend","<div style = "+st+">"+txt+"</div>")
     }
     function init(){
         r("Ariel","color:pink;align-text:center;")
@@ -30,7 +30,7 @@ export function sysaccess() {
     var clog = console
     console = {}
     console = {log:function(logtxt){r("",logtxt)},error:function(logtxt){r("",logtxt)}}
-    w("c-exec").addEventListener("click",x(w("c-input").value))
+    // w("c-exec").addEventListener("click",x(w("c-input").value))
     const cs = console
     // console = {}
     init()

@@ -12,10 +12,17 @@ and certain other noncommercial uses permitted by copyright law.
 For permission requests, please contact [Mr Techtroid] at mrtechtroid@outlook.com . 
 */
 :root {
-  --bgcolor: #122235;
+  --bgcolor: rgb(18, 34, 53);
   --bgimage: radial-gradient(at 47% 33%, hsl(0.00, 0%, 0%) 0, transparent 59%), radial-gradient(at 82% 65%, hsl(218.00, 39%, 11%) 0, transparent 55%);
   --yellow: rgb(228, 228, 3);
-  --black: rgb(0, 0, 0);
+  --black: rgb(0,0,0);
+  --white: rgb(255, 255, 255);
+  --red: red;
+  --clr1:  rgba(17, 25, 40, 0.75);
+  --clr2: rgba(255, 255, 255, 0.125);
+  --clr3: rgb(0, 4, 255);
+  --clr4: rgb(0, 225, 255);
+  --clr5: grey;
 }
 
 html {
@@ -29,7 +36,7 @@ body {
   font-size: 3vh;
   background-color: var(--bgcolor);
   background-image: var(--bgimage);
-  color: white;
+  color: var(--white);
 }
 
 /* Overlay */
@@ -47,16 +54,12 @@ body {
 }
 
 #overlay_div {
-  color: white;
+  color: var(--white);
   top: 50%;
   left: 50%;
   position: absolute;
   transform: translate(-50%, -50%);
   -ms-transform: translate(-50%, -50%);
-}
-
-#login {
-  justify-content: center;
 }
 
 .in_t {
@@ -85,11 +88,11 @@ body {
   margin: auto;
   font-size: 14px;
   text-decoration: none;
-  color: white;
+  color: var(--white);
 }
 
 .lgn_c_1 a {
-  color: white;
+  color: var(--white);
 }
 
 #bgrep_frame {
@@ -112,7 +115,7 @@ body {
   border: none;
   border-bottom: 3px solid var(--yellow);
   outline: none;
-  color: white;
+  color: var(--white);
 }
 
 /* Watermark Div */
@@ -148,9 +151,9 @@ body {
   flex-direction: column;
   backdrop-filter: blur(17px) saturate(180%);
   -webkit-backdrop-filter: blur(17px) saturate(180%);
-  background-color: rgba(17, 25, 40, 0.75);
+  background-color: var(--clr1);
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.125);
+  border: 1px solid var(--clr2);
   border-radius: 10px;
   padding: 4vw;
 }
@@ -163,7 +166,7 @@ body {
   align-items: center;
   flex-direction: column;
   max-width: 250px;
-  border-right: 3px solid white;
+  border-right: 3px solid var(--white);
 }
 
 .full_page {
@@ -171,18 +174,17 @@ body {
   height: 89vh;
   backdrop-filter: blur(17px) saturate(180%);
   -webkit-backdrop-filter: blur(17px) saturate(180%);
-  background-color: rgba(17, 25, 40, 0.75);
+  background-color: var(--clr1);
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.125);
+  border: 1px solid var(--clr2);
   overflow: hidden;
   margin: 5px;
-  color: white;
-  display: none !important;
-
+  color: var(--white);
+  /* display: none !important; */
 }
 
 .note-editable {
-  color: white;
+  color: var(--white);
 }
 
 ._open {
@@ -255,7 +257,7 @@ body {
   content: 'C';
   bottom: 2px;
   right: 8px;
-  color: rgb(0, 4, 255);
+  color: var(--clr3);
   background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAAXNSR0IB2cksfwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAEVQTFRFAAAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/kkg1QAAABd0Uk5TADBff7+vIBCP/9+gcECQ8IDQwGDvULDg0L2uAAAAj0lEQVR4nO2SUQ+CMAyENymMDzeGDPn/P9UFCWpS6rOJ97Skt7trrs798ePwl0akbbqTcejZIV79PsA1ppTGzKQRbuS0S40aIUJ6uSmEzGzld/5dQEMCNfqBCcz5d0IBLfpHBjtkgGJ7zCy2Rwf9IXfXGHUPeRZdFrUsFzMM0krtO564rHk7h9XYJ9R72B4PdY4Ess6OA7IAAAAASUVORK5CYII=')
 }
 
@@ -270,7 +272,7 @@ body {
   content: 'X';
   bottom: 2px;
   right: 8px;
-  color: rgb(0, 4, 255);
+  color: var(--clr3);
   background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAAXNSR0IB2cksfwAAAAlwSFlzAAALEwAACxMBAJqcGAAAADNQTFRFAAAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA6Y43EAAAABF0Uk5TACB/MMD/z9DwgHBg4LAQUL+CKjl9AAAAgUlEQVR4nO3ROxKAIAwE0ACuAn7vf1oFImORtXfGbUjB5JEg8ue7cd4HLYP3zrgxYNRqwmC2iEi1SIhWA5EMFCQAmTyjIQToCAUUmTnQEHCgIngDpEzYJmG5Jlz6uqxMWPu6bCBu97oIsMvzTwygHBSpQMmFWKMqIBU5OKDI27o1J0mhAtutD+wYAAAAAElFTkSuQmCC')
 }
 
@@ -279,7 +281,7 @@ body {
   content: 'U';
   bottom: 2px;
   right: 8px;
-  color: rgb(0, 4, 255);
+  color: var(--clr3);
   background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAAXNSR0IB2cksfwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAEJQTFRFAAAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA60NphwAAABZ0Uk5TAGB/QMD/gJDQsHDPECAwUO/wv5+voBP21iAAAABkSURBVHic7ZHLCoAgFAWv6THLR9nj/3+1BI0WZ9UucDYOMsIBRTo/Rg2a6AsDS7QHX4KxqaPBBNMUmElg4asFgH2Weq4tEElwj/CpnMtKJ4ikDGz74QEXaCDhRCGzhY2odX19AdugAyeYRe6mAAAAAElFTkSuQmCC')
 }
 
@@ -305,7 +307,7 @@ body {
 }
 
 .progressbar_tr {
-  background-color: rgb(0, 225, 255);
+  background-color: var(--clr4);
   border-radius: 13px;
   padding: 3px;
   width: 90vw;
@@ -328,7 +330,7 @@ body {
   padding-right: 10px;
   text-decoration: none;
   background-color: #2d333a;
-  color: white;
+  color: var(--white);
   border: none;
   border-radius: 30px 30px 30px 30px;
 }
@@ -368,19 +370,19 @@ body {
 
 .t_stron {
   font-size: small;
-  color: grey;
+  color: var(--clr5);
 }
 
 #tmt_frame {
   filter: invert(.9) saturate(0.5) hue-rotate(145deg);
-  background-color: black;
-  color: white;
+  background-color: var(--black);
+  color: var(--white);
   border: 0;
 }
 
 .t_endon {
   font-size: small;
-  color: grey;
+  color: var(--clr5);
 }
 
 .fqu_mcq_p,
@@ -392,7 +394,7 @@ body {
   width: 50vw;
   border-radius: 100px;
   margin: 6px;
-  color: white;
+  color: var(--white);
 }
 
 .tb_q_mcq_p {
@@ -402,14 +404,14 @@ body {
   width: 30vw;
   border-radius: 100px;
   margin: 6px;
-  color: white;
+  color: var(--white);
   padding-left: 8px;
 }
 
 .fqu_mcq {
   width: 100%;
-  background-color: black;
-  color: white;
+  background-color: var(--black);
+  color: var(--white);
   border: none;
   text-decoration: none;
 }
@@ -418,9 +420,9 @@ body {
 .fqu_i2,
 .tp_i1,
 .tp_i2 {
-  background-color: black;
+  background-color: var(--black);
   border-color: magenta;
-  color: white;
+  color: var(--white);
   padding: 2px;
   width: 30vw;
   height: 3vh;
@@ -449,7 +451,7 @@ body {
   font-size: 16px;
   border: none;
   outline: none;
-  color: white;
+  color: var(--white);
   padding: 14px 16px;
   background-color: inherit;
   font-family: inherit;
@@ -458,7 +460,7 @@ body {
 
 .navbar a:hover,
 .dropdown:hover .dropbtn {
-  background-color: red;
+  background-color: var(--red);
 }
 
 .dropdown-content {
@@ -473,7 +475,7 @@ body {
 
 .dropdown-content span {
   float: none;
-  color: black;
+  color: var(--black);
   padding: 12px 16px;
   text-decoration: none;
   display: block;
@@ -495,7 +497,7 @@ body {
   border: none;
   border-bottom: 3px solid lime;
   outline: none;
-  color: white;
+  color: var(--white);
 }
 
 ._in_aq,
@@ -506,7 +508,7 @@ body {
   border: none;
   border-bottom: 2px solid rgb(105, 114, 105);
   outline: none;
-  color: white;
+  color: var(--white);
 }
 
 ._in_aq {
@@ -621,7 +623,7 @@ body {
   height: 10vh;
   background-color: var(--bgcolor);
   text-align: center;
-  border: grey 2px solid;
+  border: var(--clr5) 2px solid;
 }
 
 @media screen {
@@ -681,7 +683,7 @@ body {
     background-image: none;
     margin: 0;
     background: url("../assets/Q_Print.png");
-    color: rgb(0, 0, 0);
+    color: var(--black);
     font-family: Nunito;
   }
 
@@ -699,18 +701,18 @@ body {
   }
 
   hr {
-    color: black;
-    background-color: black;
+    color: var(--black);
+    background-color: var(--black);
   }
 
-  #printable {
+  #output {
     backface-visibility: visible;
     background-color: transparent;
-    border: black 3px solid;
+    border: var(--black) 3px solid;
   }
 
   #eqb_instr {
-    color: black;
+    color: var(--black);
   }
 
   .qb_ttl,
@@ -743,12 +745,12 @@ body {
 
   .les_q,
   .les_expl {
-    color: black !important;
+    color: var(--black) !important;
   }
 
   .qbtp_q {
-    color: black !important;
-    border-bottom: black 1px solid;
+    color: var(--black) !important;
+    border-bottom: var(--black) 1px solid;
     font-size: 15px;
     position: relative;
   }
@@ -763,15 +765,11 @@ body {
 
   hr,
   li {
-    color: black;
+    color: var(--black);
   }
 
 }
 
-#aboutus {
-  text-align: center;
-  overflow-y: scroll;
-}
 
 .material-symbols-outlined {
   font-variation-settings:
@@ -827,7 +825,7 @@ body {
   border: none;
   outline: none;
   background-color: rgba(25, 37, 58, 0.75);
-  color: white;
+  color: var(--white);
   cursor: pointer;
   padding: 10px;
   border-radius: 10px;
@@ -839,7 +837,7 @@ body {
 }
 
 .col-red {
-  color: red;
+  color: var(--red);
 }
 
 #tp_full_vid {
@@ -890,18 +888,18 @@ body {
   flex-direction: column;
   padding: 10px;
   overflow-y: scroll;
-  border: grey 1px solid;
+  border: var(--clr5) 1px solid;
   border-radius: 30px 0px 0px 30px;
   margin: 10px;
 }
 
 .tt_question hr {
-  background-color: grey;
+  background-color: var(--clr5);
 }
 
 #tt_question {
   height: 70vh;
-  border: grey 3px solid;
+  border: var(--clr5) 3px solid;
   overflow-y: scroll;
   /* min-width: 600px; */
 }
@@ -913,7 +911,7 @@ body {
   padding-left: 20px;
   padding-right: 20px;
   border-radius: 5px 5px 5px 5px;
-  border: grey 1px solid;
+  border: var(--clr5) 1px solid;
 }
 
 #testv1 {
@@ -957,17 +955,17 @@ body {
   height: 40vh;
   margin: 10px;
   overflow-y: scroll;
-  border: grey 1px solid;
+  border: var(--clr5) 1px solid;
 }
 
 .fto_small {
   font-size: 12px;
-  color: grey;
+  color: var(--clr5);
   margin: 5px
 }
 
 .t_gre {
-  background-color: #122235;
+  background-color: var(--bgcolor);
   border-radius: 5px 5px 5px 5px;
   height: 25px;
   width: 50px;
@@ -1007,7 +1005,7 @@ body {
 #volumebar::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  background: red;
+  background: var(--red);
 }
 
 /* Copyright: Quarkz! */
@@ -1050,7 +1048,7 @@ body {
 
 #prf_name {
   font-size: 5vh;
-  color: rgb(0, 0, 0);
+  color: var(--black);
   font-weight: bold;
 }
 
@@ -1128,21 +1126,21 @@ body {
 }
 
 circle text {
-  fill: #fff;
+  fill: var(--white);
 }
 
 #yt_progressBar div {
   height: 100%;
   width: 0;
-  background-color: #ffffff;
+  background-color: var(--white);
 }
 
 #volumebar::-moz-range-thumb {
-  background: red;
+  background: var(--red);
 }
 
 .material-icons:hover {
-  color: red
+  color: var(--red)
 }
 
 .material-icons {
@@ -1154,7 +1152,7 @@ circle text {
 }
 
 #tb_wy_btn:hover {
-  color: red;
+  color: var(--red);
 }
 
 .rpl {
@@ -1207,7 +1205,7 @@ circle text {
 }
 
 ::-webkit-scrollbar-track {
-  background: #122235;
+  background: var(--bgcolor);
 }
 
 ::-webkit-scrollbar-thumb {
@@ -1260,7 +1258,7 @@ circle text {
   width: 20vw;
   height: 5vh;
   border: 3px cyan solid;
-  color: white;
+  color: var(--white);
   margin: 3px;
 }
 
@@ -1302,14 +1300,14 @@ circle text {
   width: 50vw;
   border-radius: 100px;
   margin: 6px;
-  color: white;
+  color: var(--white);
 
 }
 
 .aq_mcq {
   width: 100%;
-  background-color: black;
-  color: white;
+  background-color: var(--black);
+  color: var(--white);
   border: none;
   text-decoration: none;
 }
@@ -1320,9 +1318,9 @@ circle text {
 .tp_i2,
 .tb_q_i1,
 .tb_q_i2 {
-  background-color: black;
+  background-color: var(--black);
   border-color: magenta;
-  color: white;
+  color: var(--white);
   padding: 2px;
   width: 30vw;
   height: 3vh;
@@ -1332,7 +1330,7 @@ circle text {
   width: 10vw;
   height: 5vh;
   border: 3px cyan solid;
-  color: white;
+  color: var(--white);
   margin: 3px;
 }
 
@@ -1386,7 +1384,7 @@ circle text {
   align-items: center;
   z-index: 3;
   width: 30vw;
-  color: white;
+  color: var(--white);
   border-radius: 0px 0px 12px 12px;
   display: flex;
   flex-direction: row;
@@ -1398,7 +1396,7 @@ circle text {
   flex-direction: column;
   overflow-y: scroll;
   min-height: 30vh;
-  border: grey solid 2px;
+  border: var(--clr5) solid 2px;
   width: 400px;
   border-radius: 10px 10px 10px 10px;
   align-items: center;
@@ -1426,9 +1424,9 @@ circle text {
   -webkit-appearance: none;
   width: 20px;
   height: 40px;
-  background: #fff;
+  background: var(--white);
   box-shadow: -200px 0 0 200px rgb(156, 189, 11);
-  border: 2px solid #999;
+  border: 2px solid var(--clr5);
 }
 
 .popup .close:hover {
@@ -1438,8 +1436,8 @@ circle text {
 .popup .content {
   max-height: 30%;
   overflow: auto;
-  color: black
+  color: var(--black)
 }
 .axis-label{
-  color:white
+  color:var(--white)
 }

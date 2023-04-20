@@ -569,10 +569,35 @@ of the author, except in the case of brief quotations embodied in critical revie
 and certain other noncommercial uses permitted by copyright law.
 
 For permission requests, please contact [Mr Techtroid] at mrtechtroid@outlook.com .
-*/ var _app = require("firebase/app");
+*/ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+var _app = require("firebase/app");
 var _auth = require("firebase/auth");
 var _firestore = require("firebase/firestore");
 var _storage = require("firebase/storage");
+var _about = require("../embeds/about");
+var _chapter = require("../embeds/chapter");
+var _cyb = require("../embeds/cyb");
+var _dashboard = require("../embeds/dashboard");
+var _downloads = require("../embeds/downloads");
+var _finishedTest = require("../embeds/finished_test");
+var _forum = require("../embeds/forum");
+var _functions = require("../embeds/functions");
+var _log = require("../embeds/log");
+var _login = require("../embeds/login");
+var _printable = require("../embeds/printable");
+var _profile = require("../embeds/profile");
+var _profileDefault = parcelHelpers.interopDefault(_profile);
+var _qbnkvid = require("../embeds/qbnkvid");
+var _register = require("../embeds/register");
+var _settings = require("../embeds/settings");
+var _sims = require("../embeds/sims");
+var _testInstructions = require("../embeds/test_instructions");
+var _tests = require("../embeds/tests");
+var _toc = require("../embeds/toc");
+var _topics = require("../embeds/topics");
+var _user = require("../embeds/user");
+var _usernotes = require("../embeds/usernotes");
+var _recorder = require("../js/recorder");
 var _d3 = require("d3");
 var _helper = require("../js/helper");
 var _reworkui = require("./reworkui");
@@ -592,77 +617,6 @@ const auth = (0, _auth.getAuth)();
     return (0, _auth.signInWithEmailAndPassword)(auth, email, password);
 }).catch((error)=>{});
 const storage = (0, _storage.getStorage)();
-// Helper Functions
-// Special Logging Function
-function log(title, msg, action, actionname, type) {
-    var no = Math.floor(Math.random() * 10000);
-    var html = `
-  <div id="msg_popup_` + no + `" class="overlay">
-  <div class="popup">
-      <center>
-          <h2 id="msg_popup_txt_` + no + `">Note</h2>
-      </center>
-      <a class="close"
-          onclick="document.getElementById('msg_popup_` + no + `').remove()">&times;</a>
-      <p id="msg_popup_content_` + no + `"></p>
-      <button class="tst_btn rpl" id="msg_action_` + no + `"></button>
-  </div>
-  </div>
-  `;
-    if (type == undefined || type == 1) (0, _helper.dE)("testv1").insertAdjacentHTML("beforeend", html);
-    else (0, _helper.dE)("quarkz_body").insertAdjacentHTML("beforeend", html);
-    (0, _helper.dE)("msg_popup_" + no).style.visibility = "visible";
-    (0, _helper.dE)("msg_popup_" + no).style.opacity = "1";
-    (0, _helper.dE)("msg_action_" + no).style.display = "none";
-    document.getElementById("msg_popup_txt_" + no).innerText = title;
-    document.getElementById("msg_popup_content_" + no).innerText = msg;
-    if (action == undefined) action = function() {};
-    else (0, _helper.dE)("msg_action_" + no).style.display = "block";
-    if (actionname == undefined) actionname = "";
-    (0, _helper.dE)("msg_action_" + no).onclick = action;
-    (0, _helper.dE)("msg_action_" + no).innerText = actionname;
-    return "msg_popup_" + no;
-}
-// Merge The Contents of Two Array's
-const mergeById = (a1, a2)=>a1.map((itm)=>({
-            ...a2.find((item)=>item.qid === itm.qid && item),
-            ...itm
-        }));
-// Video Creator - https://www.educative.io/edpresso/how-to-create-a-screen-recorder-in-javascript
-let mediaRecorder;
-async function recordScreen() {
-    return await navigator.mediaDevices.getDisplayMedia({
-        audio: true,
-        video: {
-            mediaSource: "screen"
-        }
-    });
-}
-function createRecorder(stream, mimeType) {
-    let recordedChunks = [];
-    const mediaRecorder = new MediaRecorder(stream);
-    mediaRecorder.ondataavailable = function(e) {
-        if (e.data.size > 0) recordedChunks.push(e.data);
-    };
-    mediaRecorder.onstop = function() {
-        saveFile(recordedChunks);
-        recordedChunks = [];
-    };
-    mediaRecorder.start(200);
-    return mediaRecorder;
-}
-function saveFile(recordedChunks) {
-    const blob = new Blob(recordedChunks, {
-        type: "video/webm"
-    });
-    let filename = window.prompt("Enter file name"), downloadLink = document.createElement("a");
-    downloadLink.href = URL.createObjectURL(blob);
-    downloadLink.download = `${filename}.webm`;
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    URL.revokeObjectURL(blob); // clear from memory
-    document.body.removeChild(downloadLink);
-}
 // Login Page
 // Sign In A User
 async function signIn() {
@@ -671,7 +625,7 @@ async function signIn() {
     (0, _auth.signInWithEmailAndPassword)(auth, email1, password1).then((userCredential)=>{
         const user = userCredential.user;
         userdetails.email = email1;
-        locationHandler("dashboard", 1);
+        creMng("dashboard", 1);
     }).catch((error)=>{
         const errorCode = error.code;
         const errorMessage = error.message;
@@ -684,7 +638,8 @@ function signOutUser() {
     // Sign out of Firebase.
     (0, _auth.signOut)((0, _auth.getAuth)());
     userdetails = [];
-// locationHandler("login",1);
+    creMng("login", 1);
+    window.location.reload();
 }
 // Register A User
 function signUp() {
@@ -732,83 +687,326 @@ function signUp() {
 }
 // Location Handler 
 // Important: Handles All Locations
-function locationHandler(newlocation, n1) {
-    var iorole = adminrole == true || editorrole == true;
-    if (iorole) {
-        (0, _helper.dE)("adminonly").style.display = "flex";
-        (0, _helper.dE)("tp_pnt").style.display = "block";
-        (0, _helper.dE)("tp_edt").style.display = "block";
-        (0, _helper.dE)("sms_edit").style.display = "block";
-    } else {
-        (0, _helper.dE)("adminonly").style.display = "none";
-        (0, _helper.dE)("sms_edit").style.display = "none";
+function creMng(a, b) {
+    coreManager(a, b);
+}
+function renderBody(body, styles, s_class) {
+    (0, _helper.dE)("output").style = "";
+    (0, _helper.dE)("output").classList.remove("ovr-scroll");
+    (0, _helper.dE)("output").innerHTML = body;
+    if (s_class != undefined && s_class != "") (0, _helper.dE)("output").classList.add(s_class);
+    (0, _helper.dE)("output").style = styles;
+}
+function dashboardEvents() {
+    function simHand() {
+        changeLocationHash("simlist", 1);
     }
-    (0, _helper.dE)(handlebox).classList.remove("_open");
+    function cybHand() {
+        changeLocationHash("cyberhunt", 1);
+    }
+    function abtHand() {
+        changeLocationHash("about", 1);
+    }
+    function tmtHand() {
+        changeLocationHash("timetable", 1);
+    }
+    function prfHand() {
+        changeLocationHash("profile", 1);
+    }
+    function adiHand() {
+        changeLocationHash("functions", 1);
+    }
+    function tstinfHand() {
+        changeLocationHash("testinfo", 1);
+    }
+    function uscHand() {
+        changeLocationHash("users", 1);
+    }
+    function tpcHand() {
+        changeLocationHash("tpclist", 1);
+    }
+    function lvqHand() {
+        changeLocationHash("livequiz", 1);
+    }
+    function frmHand() {
+        changeLocationHash("forum", 1);
+    }
+    function qbaHand() {
+        changeLocationHash("qblist", 1);
+    }
+    function chpHand() {
+        changeLocationHash("chplist", 1);
+    }
+    var simbtn = (0, _helper.dE)("sim_btn").addEventListener("click", simHand);
+    var sgnout = (0, _helper.dE)("lgt_btn").addEventListener("click", signOutUser);
+    var tmtbtn = (0, _helper.dE)("tmt_btn").addEventListener("click", tmtHand);
+    var prfbtn = (0, _helper.dE)("prf_btn").addEventListener("click", prfHand);
+    var abtbtn = (0, _helper.dE)("abt_btn").addEventListener("click", abtHand);
+    var tmtbtn = (0, _helper.dE)("tmt_btn").addEventListener("click", tmtHand);
+    var prfbtn = (0, _helper.dE)("prf_btn").addEventListener("click", prfHand);
+    var abtbtn = (0, _helper.dE)("abt_btn").addEventListener("click", abtHand);
+    var tpcbtn = (0, _helper.dE)("tpc_btn").addEventListener("click", tpcHand);
+    var uscbtn = (0, _helper.dE)("usc_btn").addEventListener("click", uscHand);
+    var lvqbtn = (0, _helper.dE)("lvq_btn").addEventListener("click", lvqHand);
+    var frmbtn = (0, _helper.dE)("frm_btn").addEventListener("click", frmHand);
+    var adibtn = (0, _helper.dE)("adi_btn").addEventListener("click", adiHand);
+    var qbabtn = (0, _helper.dE)("qba_btn").addEventListener("click", qbaHand);
+    var cybbtn = (0, _helper.dE)("cyb_btn").addEventListener("click", cybHand);
+    var chp_btn = (0, _helper.dE)("chp_btn").addEventListener("click", chpHand);
+    var tstinfbtn = (0, _helper.dE)("tstinf_btn").addEventListener("click", tstinfHand);
+    var sgnout = (0, _helper.dE)("lgt_btn").addEventListener("click", signOutUser);
+    (0, _helper.dE)("dshd_uname").innerText = userinfo.email;
+    (0, _helper.dE)("dshd_name").innerText = userinfo.name;
+    (0, _helper.dE)("dshd_batch").innerText = userinfo.batchname;
+    if (userinfo.gen == "Male") {
+        (0, _helper.dE)("prf_tab_img").classList.remove("prf_male", "prf_female");
+        (0, _helper.dE)("prf_tab_img").classList.add("prf_male");
+    } else if (userinfo.gen == "Female") {
+        (0, _helper.dE)("prf_tab_img").classList.remove("prf_male", "prf_female");
+        (0, _helper.dE)("prf_tab_img").classList.add("prf_female");
+    }
+    renderExams();
+}
+function simEvents() {
+    function psims() {
+        getSimList("physics");
+    }
+    function csims() {
+        getSimList("chemistry");
+    }
+    function msims() {
+        getSimList("maths");
+    }
+    function bsims() {
+        getSimList("biology");
+    }
+    function cosims() {
+        getSimList("computer");
+    }
+    function ssims() {
+        getSimList("statistics");
+    }
+    function usims() {
+        getSimList("unfiled");
+    }
+    var p_sims = (0, _helper.dE)("psims").addEventListener("click", psims);
+    var c_sims = (0, _helper.dE)("csims").addEventListener("click", csims);
+    var m_sims = (0, _helper.dE)("msims").addEventListener("click", msims);
+    var b_sims = (0, _helper.dE)("bsims").addEventListener("click", bsims);
+    var co_sims = (0, _helper.dE)("cosims").addEventListener("click", cosims);
+    var s_sims = (0, _helper.dE)("ssims").addEventListener("click", ssims);
+    var u_sims = (0, _helper.dE)("usims").addEventListener("click", usims);
+}
+function chapterEvents() {
+    function pchb() {
+        renderCList("physics");
+    }
+    function cchb() {
+        renderCList("chemistry");
+    }
+    function mchb() {
+        renderCList("maths");
+    }
+    function bchb() {
+        renderCList("biology");
+    }
+    function cochb() {
+        renderCList("computer");
+    }
+    function schb() {
+        renderCList("statistics");
+    }
+    function uchb() {
+        renderCList("unfiled");
+    }
+    var p_chb = (0, _helper.dE)("pchb").addEventListener("click", pchb);
+    var c_chb = (0, _helper.dE)("cchb").addEventListener("click", cchb);
+    var m_chb = (0, _helper.dE)("mchb").addEventListener("click", mchb);
+    var b_chb = (0, _helper.dE)("bchb").addEventListener("click", bchb);
+    var co_chb = (0, _helper.dE)("cochb").addEventListener("click", cochb);
+    var s_chb = (0, _helper.dE)("schb").addEventListener("click", schb);
+    var u_chb = (0, _helper.dE)("uchb").addEventListener("click", uchb);
+}
+function testEvents() {
+    function tsave() {
+        testOperator("tts_answered");
+    }
+    function tclear() {
+        testOperator("tts_notanswer");
+    }
+    function treview() {
+        testOperator("tts_review");
+    }
+    function tansrev() {
+        testOperator("tts_ansreview");
+    }
+    function sTestHand() {
+        (0, _log.log)("Warning", "Are You Sure You Want To End The Test", submitTest, "Yes,Submit", 1);
+    }
+    var tt_save = (0, _helper.dE)("tt_save").addEventListener("click", tsave);
+    var tt_clear = (0, _helper.dE)("tt_clear").addEventListener("click", tclear);
+    var tt_review = (0, _helper.dE)("tt_review").addEventListener("click", treview);
+    var tt_ansreview = (0, _helper.dE)("tt_ansreview").addEventListener("click", tansrev);
+    var ttsub = (0, _helper.dE)("tt_sub").addEventListener("click", sTestHand);
+}
+function topicEvents() {
+    function prvHand() {
+        topicHandler(1);
+    }
+    function nxtHand() {
+        topicHandler(2);
+    }
+    var tpnxt = (0, _helper.dE)("tp_nxt").addEventListener("click", nxtHand);
+    var tpprv = (0, _helper.dE)("tp_prv").addEventListener("click", prvHand);
+    var tpedt = (0, _helper.dE)("tp_edt").addEventListener("click", editStuff);
+    var tpsbm = (0, _helper.dE)("tp_sbm").addEventListener("click", checkQuestion);
+    var tppnt = (0, _helper.dE)("tp_pnt").addEventListener("click", printStuff);
+}
+function edittopicEvents() {
+    function chItem() {
+        changeItem(1);
+    }
+    var tmode = (0, _helper.dE)("aq_mode").addEventListener("change", changeItem);
+    var ttype = (0, _helper.dE)("aq_type").addEventListener("change", changeItem);
+    var aqao = (0, _helper.dE)("aq_ao").addEventListener("click", addMCQ);
+    var aqro = (0, _helper.dE)("aq_ro").addEventListener("click", removeMCQ);
+    var aqre = (0, _helper.dE)("aq_re").addEventListener("click", removeEntry);
+    var tppnt = (0, _helper.dE)("aq_export").addEventListener("click", printStuff);
+}
+function testlistEvents() {
+    function actHand() {
+        renderTestList("active");
+    }
+    function upcHand() {
+        renderTestList("upcoming");
+    }
+    function finHand() {
+        renderTestList("finished");
+    }
+    var tiact = (0, _helper.dE)("ti_act").addEventListener("click", actHand);
+    var tiupc = (0, _helper.dE)("ti_upc").addEventListener("click", upcHand);
+    var tifin = (0, _helper.dE)("ti_fin").addEventListener("click", finHand);
+}
+function userNotesEvents() {
+    var unsave = (0, _helper.dE)("un_save").addEventListener("click", unotes1);
+    var unprint = (0, _helper.dE)("un_print").addEventListener("click", unotes2);
+    var un_rendermode = (0, _helper.dE)("un_rendermode").addEventListener("change", notesUIHandler);
+    var un_viewership = (0, _helper.dE)("un_viewership").addEventListener("change", notesUIHandler);
+    (0, _helper.dE)("un_print").addEventListener("click", function() {
+        (0, _helper.dE)("un_preview").style.display = "none";
+        (0, _helper.dE)("un_preview").innerHTML = "<h1 style = 'text-align:center;margin:0px'>" + (0, _helper.dE)("un_title").value + "</h1>" + getHTML("un_editable");
+        window.idElementPrint((0, _helper.dE)("un_preview"), userinfo.name);
+    });
+}
+function dshHand() {
+    changeLocationHash("dashboard", 1);
+}
+var dshbtn = (0, _helper.dE)("dsh_btn").addEventListener("click", dshHand);
+function printableEvents() {
+    document.getElementById("pe_tst_type_1").addEventListener("change", updateUI);
+    document.getElementById("pe_tst_type_2").addEventListener("change", updateUI);
+    document.getElementById("tsinf_btn").addEventListener("change", updateUI);
+    document.getElementById("tans_btn").addEventListener("click", function() {
+        for(var i = 0; i < document.getElementsByClassName("q_ans_1").length; i++)document.getElementsByClassName("q_ans_1")[i].style.display = "flex";
+    });
+    document.getElementById("tansexpl_btn").addEventListener("click", function() {
+        for(var i = 0; i < document.getElementsByClassName("q_ans_1").length; i++)document.getElementsByClassName("q_ans_1")[i].style.display = "flex";
+        for(var i = 0; i < document.getElementsByClassName("q_ans_expl").length; i++)document.getElementsByClassName("q_ans_expl")[i].style.display = "flex";
+    });
+    document.getElementById("tremove_btn").addEventListener("click", function() {
+        for(var i = 0; i < document.getElementsByClassName("q_ans_1").length; i++)document.getElementsByClassName("q_ans_1")[i].style.display = "none";
+        for(var i = 0; i < document.getElementsByClassName("q_ans_expl").length; i++)document.getElementsByClassName("q_ans_expl")[i].style.display = "none";
+    });
+}
+function coreManager(newlocation, n1) {
     if (n1 == 1) window.location.hash = "#/" + newlocation;
     handlebox = newlocation;
     location1 = window.location.hash.split("#/")[1];
     switch(location1){
         case "profile":
             handlebox = "profile";
+            renderBody((0, _profile.page_profile), "", "");
+            profileDetails();
             break;
         case "about":
             handlebox = "aboutus";
+            renderBody((0, _about.page_about), "text-align: center;overflow-y: scroll;", "");
+            function lglHand() {
+                changeLocationHash("legal", 1);
+            }
+            (0, _helper.dE)("lgl_btn").addEventListener("click", lglHand);
             break;
         case "login":
             handlebox = "login";
+            renderBody((0, _login.page_login), "justify-content: center;", "");
+            (0, _helper.dE)("sgn_in").addEventListener("click", signIn);
+            function regHand() {
+                changeLocationHash("register", 1);
+            }
+            (0, _helper.dE)("reg_in").addEventListener("click", regHand);
             break;
         case "dashboard":
             handlebox = "dashboard";
+            renderBody((0, _dashboard.page_dashboard), "display: flex;flex-direction: row;", "");
+            dashboardEvents();
             break;
         case "timetable":
             handlebox = "schedule";
+            renderBody((0, _dashboard.page_schedule), "", "");
+            iframeLoadScreen();
+            (0, _helper.dE)("tmt_frame").src = userinfo.timetableurl;
             break;
         case "logout":
             (0, _auth.signOut)();
             break;
         case "mainsformulas":
             handlebox = "mainsformulas";
-            renderDownloadPage(1);
+            renderBody((0, _downloads.page_jee_main), "", "");
             break;
         case "downloads":
             handlebox = "downloads";
-            renderDownloadPage(2);
-            break;
-        case "livequiz":
-            handlebox = "livequiz";
+            renderBody((0, _downloads.page_downloads), "", "");
             break;
         case "register":
             handlebox = "register";
+            renderBody((0, _register.page_register), "", "");
+            (0, _helper.dE)("rg_in").addEventListener("click", rgbtn);
             break;
         case "testinfo":
             handlebox = "testinfo";
+            renderBody((0, _tests.page_test_list), "", "");
             renderTestList("active");
             break;
         case "legal":
             handlebox = "legal";
+            renderBody((0, _toc.page_toc), "", "");
             break;
         case "appinfo":
             handlebox = "appinfo";
+            renderBody((0, _dashboard.page_app_info), "", "");
             renderAppInfo();
             break;
         case "forum":
             handlebox = "forum";
-            break;
-        case "testing":
-            handlebox = "testing";
+            renderBody((0, _forum.page_forum), "", "");
+            var fmsend = (0, _helper.dE)("fm_send").addEventListener("click", sndMsg);
+            gtMsg();
+            getPinned();
             break;
         case "bugreport":
             handlebox = "bugreport";
+            renderBody((0, _dashboard.page_bug_report), "", "");
             break;
         case "simlist":
             handlebox = "simlist";
+            renderBody((0, _sims.page_list_sims), "", "");
+            simEvents();
             getSimList();
             break;
         case "testend":
             handlebox = "test_end";
-            break;
-        case "add/question":
-            handlebox = "fu_question";
+            renderBody((0, _tests.page_test_end), "", "");
+            (0, _helper.dE)("te_title").innerText = "The Test Has Ended";
             break;
         case "add/lesson":
             handlebox = "fu_lesson";
@@ -817,9 +1015,6 @@ function locationHandler(newlocation, n1) {
         case "add/tpc":
             handlebox = "fu_topic";
             newTopic();
-            break;
-        case "add/images":
-            handlebox = "fu_images";
             break;
         case "add/qubank":
             handlebox = "fu_topic";
@@ -839,116 +1034,183 @@ function locationHandler(newlocation, n1) {
             break;
         case "settings":
             handlebox = "settings";
+            renderBody((0, _settings.page_settings), "", "");
+            (0, _helper.dE)("pass_rst_btn").addEventListener("click", requestPasschange);
             break;
-        // case "list/batch": handlebox = "fu_topic"; newBatch(); break;
         case "chplist":
             handlebox = "chapterlist";
+            renderBody((0, _chapter.page_list_chapter), "", "");
+            chapterEvents();
             renderCList();
             break;
         default:
             handlebox = "error_page";
+            renderBody((0, _dashboard.error_page), "", "");
             break;
     }
-    if (location1.includes("instructions")) handlebox = "test_instructions";
+    var iorole = adminrole == true || editorrole == true;
+    if (location1.includes("instructions")) {
+        handlebox = "test_instructions";
+        renderBody((0, _testInstructions.page_test_instructions), "", "");
+    }
     if (location1.includes("cyberhunt")) {
         handlebox = "cyberhunt";
+        renderBody((0, _cyb.page_cyberhunt), "", "");
         getCyberhunt();
     }
     if (location1.includes("notes") && !location1.includes("usernotes")) {
         handlebox = "notes";
+        renderBody((0, _dashboard.page_notes), "", "");
         getPDF();
     }
     if (location1.includes("sims")) {
         handlebox = "simulations";
+        renderBody((0, _sims.page_sims), "", "");
+        iframeLoadScreen();
         getSimulation();
     }
     if (location1.includes("chapter")) {
         handlebox = "chapter";
+        renderBody((0, _chapter.page_chapter), "", "");
         getChapterEList();
     }
     if (location1.includes("qbanks")) {
         handlebox = "topic";
+        renderBody((0, _topics.page_topic), "height:max-content;", "");
+        topicEvents();
         getTopic(2);
     }
     if (location1.includes("usernotes")) {
         handlebox = "usernotes";
+        renderBody((0, _usernotes.page_usernotes), "flex-direction: row;", "");
+        userNotesEvents();
         getUserNotes();
     }
     if (location1.includes("qbnk_vid")) {
         handlebox = "qbnk_vid";
+        renderBody((0, _qbnkvid.page_qbnkvid), "height:90vh;position: relative;", "");
         (0, _helper.dE)("qbnk_vid_btn").style.display = "block";
+        (0, _helper.dE)("qbnk_vid_btn").addEventListener("click", prepareVideo);
+        (0, _helper.dE)("qbnk_vid_btn_e").addEventListener("click", qbnkend);
+        function qbnkend() {
+            (0, _helper.dE)("watermark").style.display = "flex";
+            (0, _helper.fullEle)((0, _helper.dE)("qbnk_vid"));
+        }
     }
     if (location1.includes("attempt")) {
         handlebox = "testv1";
+        renderBody((0, _tests.page_test_v1), "", "");
+        testEvents();
         getTestInfo();
     }
     if (location1.includes("finished")) {
         handlebox = "finishedtestinfo";
+        renderBody((0, _finishedTest.page_finished_test), "overflow-y: scroll;", "");
         getSimpleTestReport();
     }
     if (location1.includes("testreport")) {
         handlebox = "testv1";
+        renderBody((0, _tests.page_test_v1), "", "");
         getTestReport();
     }
     if (location1.includes("printable/qbank") && iorole == true) {
         handlebox = "printable";
+        renderBody((0, _printable.page_printable), "height:max-content;", "");
+        printableEvents();
+        var shfbtn = (0, _helper.dE)("shf_btn").addEventListener("click", shuffleQBank);
         printQBank(1);
     }
-    if (location1.includes("ARIEL") && iorole == true) handlebox = "Ariel";
+    if (location1.includes("ARIEL") && iorole == true) {
+        handlebox = "Ariel";
+        renderBody((0, _dashboard.page_ariel), "", "");
+    }
     if (location1.includes("printable/tests") && iorole == true) {
         handlebox = "printable";
+        renderBody((0, _printable.page_printable), "height:max-content;", "");
+        printableEvents();
+        var shfbtn = (0, _helper.dE)("shf_btn").addEventListener("click", shuffleQBank);
         printQBank(3);
     }
     if (location1 == "functions" && iorole == true) {
         handlebox = "functions";
+        renderBody((0, _functions.page_functions), "", "");
         changeItem();
     }
     if (location1.includes("users") && iorole == true) {
         handlebox = "users";
+        renderBody((0, _user.page_edit_user), "", "");
         userUpdate();
     }
     if (location1.includes("topic")) {
         handlebox = "topic";
+        renderBody((0, _topics.page_topic), "height: max-content;", "");
+        topicEvents();
         getTopic(1);
     }
     if (location1.includes("printable/topic") && iorole == true) {
         handlebox = "printable";
+        renderBody((0, _printable.page_printable), "height:max-content;", "");
         printQBank(2);
-    }
-    if (location1.includes("livequiz")) {
-        handlebox = "livequiz";
-        lquizinit();
     }
     if (location1.includes("edit_sim") && iorole == true) {
         handlebox = "fu_simulation";
+        renderBody((0, _sims.page_edit_sims), "", "ovr-scroll");
+        (0, _helper.dE)("aq_sims_save").addEventListener("click", updateSimulationWeb);
         prepareSimulation();
     }
     if (location1.includes("edit_lesson") && iorole == true) {
         handlebox = "fu_simulation";
+        renderBody((0, _sims.page_edit_sims), "", "ovr-scroll");
         prepareLesson();
     }
     if (location1.includes("edit_tpc") && iorole == true) {
         handlebox = "fu_topic";
+        renderBody((0, _topics.page_edit_topic), "", "ovr-scroll");
+        (0, _helper.dE)("aq_tpc_save").addEventListener("click", function() {
+            updateTopicQBank(1);
+        });
+        edittopicEvents();
         prepareTopicQBank(1);
     }
     if (location1.includes("edit_test") && iorole == true) {
         handlebox = "fu_topic";
+        renderBody((0, _topics.page_edit_topic), "", "ovr-scroll");
+        (0, _helper.dE)("aq_tst_save").addEventListener("click", function() {
+            updateTopicQBank(3);
+        });
+        edittopicEvents();
         prepareTopicQBank(3);
     }
     if (location1.includes("edit_qubank") && iorole == true) {
         handlebox = "fu_topic";
+        renderBody((0, _topics.page_edit_topic), "", "ovr-scroll");
+        (0, _helper.dE)("aq_qbc_save").addEventListener("click", function() {
+            updateTopicQBank(2);
+        });
+        edittopicEvents();
         prepareTopicQBank(2);
     }
     if (location1.includes("edit_exams") && iorole == true) {
         handlebox = "fu_topic";
+        renderBody((0, _topics.page_edit_topic), "", "ovr-scroll");
+        (0, _helper.dE)("aq_exam_save").addEventListener("click", function() {
+            updateTopicQBank(4);
+        });
+        edittopicEvents();
         prepareTopicQBank(4);
     }
-    // if (location1.includes("redirect"))
     if (userrole == false || userrole == null || userrole == undefined) {
         if (location1 == "login" || location1 == "register" || location1.includes("notes") || location1 == "legal" || location1 == "about" || location1 == "bugreport" || location1 == "appinfo" || location1 == "mainsformulas" || location1 == "downloads") ;
         else handlebox = "error_page";
     }
-    (0, _helper.dE)(handlebox).classList.add("_open");
+    if (iorole) {
+        if (window.location.hash.includes("dashboard")) (0, _helper.dE)("adminonly").style.display = "flex";
+        if (window.location.hash.includes("topic") || window.location.hash.includes("qbanks")) {
+            (0, _helper.dE)("tp_pnt").style.display = "block";
+            (0, _helper.dE)("tp_edt").style.display = "block";
+        }
+        if (window.location.hash.includes("sims")) (0, _helper.dE)("sms_edit").style.display = "block";
+    }
     stpVid();
     editqllist = [];
     if (location1 == "forum") gtMsg(1);
@@ -975,7 +1237,7 @@ async function newSimulation() {
             provider: "",
             url: ""
         });
-        locationHandler("edit_sim/" + docRef.id, 1);
+        creMng("edit_sim/" + docRef.id, 1);
     } catch  {}
 }
 // Prepares The Simulation Editor
@@ -1040,7 +1302,7 @@ async function getSimulation() {
         (0, _helper.dE)("sms_prov").innerText = docJSON.provider;
         (0, _helper.dE)("sim_frame").src = docJSON.url;
     } else {
-        locationHandler("error_page", 1);
+        creMng("error_page", 1);
         throw new Error;
     }
 }
@@ -1052,7 +1314,7 @@ async function getSimID(sim_name) {
     querySnapshot.forEach((doc)=>{
         docID = doc.id;
     });
-    locationHandler("sims/" + docID, 1);
+    creMng("sims/" + docID, 1);
 }
 // Helper Function To Get Simulation Name
 function simClicker() {
@@ -1068,7 +1330,7 @@ async function getSimList(type) {
             var docJSON = docSnap.data();
             simlist = docJSON;
         } else {
-            locationHandler("error_page", 1);
+            creMng("error_page", 1);
             throw new Error;
         }
     }
@@ -1133,7 +1395,7 @@ async function newBatch() {
         var docRef2 = await (0, _firestore.setDoc)((0, _firestore.doc)(db, "batch", docRef.id, "info", "updates"), {
             u: []
         });
-        locationHandler("edit_batch/" + docRef.id, 1);
+        creMng("edit_batch/" + docRef.id, 1);
     } catch  {}
 }
 async function prepareBatch() {}
@@ -1148,6 +1410,16 @@ async function unotes1() {
     });
 }
 function unotes2() {}
+function iframeLoadScreen() {
+    const iframe = document.querySelector("iframe");
+    var iload = "";
+    iframe.addEventListener("loadstart", ()=>{
+        iload = (0, _log.log)("Loading", "Content Is Loading. Please Wait");
+    });
+    iframe.addEventListener("load", ()=>{
+        document.getElementById(iload).remove();
+    });
+}
 async function getUserNotes() {
     try {
         notesUIHandler();
@@ -1168,10 +1440,11 @@ async function getUserNotes() {
                 title: "Notes Title"
             })
         });
-        locationHandler("usernotes/" + docRef.id, 1);
+        creMng("usernotes/" + docRef.id, 1);
     } else if (window.location.hash.includes("usernotes/delete")) await (0, _firestore.deleteDoc)((0, _firestore.doc)(db, "usernotes", window.location.hash.split("usernotes/delete/")[1]));
-    else if (window.location.hash == "#/usernotes/") ;
-    else {
+    else if (window.location.hash == "#/usernotes/") getUserNotesList();
+    else if (window.location.hash.includes("usernotes")) {
+        getUserNotesList();
         var docRef = (0, _firestore.doc)(db, "usernotes", window.location.hash.split("usernotes/")[1]);
         var docSnap = await (0, _firestore.getDoc)(docRef);
         if (docSnap.exists()) {
@@ -1217,7 +1490,7 @@ async function getPDF() {
                 (0, _helper.dE)("nt_id").src = "https://docs.google.com/gview?url=" + encodeURI("https://firebasestorage.googleapis.com/v0/b/quarkz.appspot.com/o/public%2F404.pdf?alt=media&token=8cc8f23a-6e24-41d6-984b-6d2cc9b89d11") + "&embedded=true";
                 break;
             case "storage/unauthorized":
-                log("Unauthorised", "You dont have necessary permissions to The file you requested.");
+                (0, _log.log)("Unauthorised", "You dont have necessary permissions to The file you requested.");
                 break;
         }
     });
@@ -1297,11 +1570,8 @@ async function getPinned() {
         (0, _helper.dE)("pinnedtxt").innerText = docRef.message;
     }
 }
-var fmsend = (0, _helper.dE)("fm_send").addEventListener("click", sndMsg);
 var forum_length = 1;
 var forum_d = "afterbegin";
-gtMsg();
-getPinned();
 // ----------------------
 // QBANK VIDEO
 // Slide Controller For QBANK Video
@@ -1372,10 +1642,10 @@ async function prepareVideo() {
             (0, _helper.dE)("qbnk_vid_end").style.display = "none";
             (0, _helper.dE)("watermark").style.display = "none";
             let qllist = docJSON.qllist;
-            let stream = await recordScreen();
+            let stream = await (0, _recorder.recordScreen)();
             let mimeType = "video/mp4";
             (0, _helper.fullEle)((0, _helper.dE)("qbnk_vid"));
-            mediaRecorder = createRecorder(stream, mimeType);
+            mediaRecorder = (0, _recorder.createRecorder)(stream, mimeType);
             var ji = 0;
             var ti = 0;
             var jno = 0;
@@ -1391,7 +1661,7 @@ async function prepareVideo() {
                 } else if (jno == qllist.length - 1) {
                     (0, _helper.dE)("qbnk_vid_end").style.display = "flex";
                     setTimeout(function() {
-                        mediaRecorder.stop();
+                        (0, _recorder.mediaRecorder).stop();
                         (0, _helper.dE)("qbnk_vid_btn").style.display = "block";
                     }, 5000);
                     clearInterval(iou);
@@ -1648,7 +1918,7 @@ async function newTopic() {
             chname: "",
             subject: ""
         });
-        locationHandler("edit_tpc/" + docRef.id, 1);
+        creMng("edit_tpc/" + docRef.id, 1);
     } catch  {}
 }
 async function newQBank() {
@@ -1661,7 +1931,7 @@ async function newQBank() {
             chname: "",
             subject: ""
         });
-        locationHandler("edit_qubank/" + docRef.id, 1);
+        creMng("edit_qubank/" + docRef.id, 1);
     } catch  {}
 }
 async function prepareTopicQBank(iun) {
@@ -1762,7 +2032,7 @@ async function prepareTopicQBank(iun) {
                     var docJSON3 = docSnap3.data();
                     a = docJSON3.questions;
                 }
-                editqllist = mergeById(q, a);
+                editqllist = (0, _helper.mergeById)(q, a);
                 renderEditQLList(0);
             } else if (iun == 4) {
                 var docJSON = docSnap.data();
@@ -1852,7 +2122,7 @@ async function updateTopicQBank(iun) {
                 questions: q
             });
         } catch (error) {
-            log(error);
+            (0, _log.log)(error);
         }
         try {
             const docRef = await (0, _firestore.updateDoc)((0, _firestore.doc)(db, col, id, "questions", "answers"), {
@@ -1888,7 +2158,7 @@ async function getTopic(type) {
     var docSnap = await (0, _firestore.getDoc)(docRef);
     if (docSnap.exists()) var docJSON = docSnap.data();
     else {
-        locationHandler("error_page", 1);
+        creMng("error_page", 1);
         throw new Error;
     }
     topicJSON = {};
@@ -1961,7 +2231,7 @@ async function printQBank(type) {
         qnos = docJSON.qllist;
         qbanktitle.innerText = docJSON.name;
     } else {
-        locationHandler("error_page", 1);
+        creMng("error_page", 1);
         throw new Error;
     }
     var qnos, qtitle, qtype, qimg;
@@ -2014,27 +2284,6 @@ async function printQBank(type) {
         }
     }
     (0, _helper.dE)("printable").insertAdjacentHTML("beforeend", "<br></br>");
-}
-function renderDownloadPage(type) {
-    if (type == 1) (0, _helper.dE)("mainsformulas").innerHTML = `
-    <span style="font-size: 5vh;color:yellow" id="fm_title">Mains Formula Sheet</span>
-    <hr color="white" width="100%">
-    <div style="overflow-y: scroll;height:50vh;" class="flex_type">
-    <span class="tlinks rpl" onclick = "window.location.hash = '/notes/PHYFORMULAS'">Physics Formula Sheet</span>
-    <span class="tlinks rpl" onclick = "window.location.hash = '/notes/MATHFORMULAS'">Maths Formula Sheet</span>
-    <span class="tlinks rpl" onclick = "window.location.hash = '/notes/PCHEMNOTES'">Physical Chemistry Formula Sheet</span>
-    <span class="tlinks rpl" onclick = "window.location.hash = '/notes/OCHEMNOTES'">Organic Chemistry Formula Sheet</span>
-    <span class="tlinks rpl" onclick = "window.location.hash = '/notes/ICHEMNOTES'">Inorganic Chemistry Formula Sheet</span>
-    </div>
-    <span style="font-size: 8px;">All PDF's Are Owned by their Respective Owners</span>
-    `;
-    else if (type == 2) (0, _helper.dE)("downloads").innerHTML = `
-    <span style="font-size: 5vh;color:yellow" id="fm_title">Downloads</span>
-    <hr color="white" width="100%">
-    <div style="overflow-y: scroll;height:50vh;" class="flex_type">
-      
-    </div>
-    `;
 }
 async function lessonRenderer(docJSON) {
     (0, _helper.dE)("tp_question").style.display = "none";
@@ -2142,7 +2391,7 @@ function removeMCQ() {
 function initFirebaseAuth() {
     // Listen to auth states.
     (0, _auth.onAuthStateChanged)((0, _auth.getAuth)(), authStateObserver);
-// locationHandler("dashboard", 1)
+// creMng("dashboard", 1)
 }
 function shuffleQBank() {
     var ol = (0, _helper.dE)("eqb_add");
@@ -2150,27 +2399,51 @@ function shuffleQBank() {
 }
 function requestPasschange() {
     (0, _auth.sendPasswordResetEmail)(auth, userinfo.email).then(()=>{
-        log("Success", "Password Reset Email sent.");
+        (0, _log.log)("Success", "Password Reset Email sent.");
     }).catch((error)=>{
         const errorCode = error.code;
         const errorMessage = error.message;
-        log("Failure", errorMessage);
+        (0, _log.log)("Failure", errorMessage);
     // ..
     });
 }
-async function authStateObserver(user) {
-    // var uname = dE("prf_uname")
+async function profileDetails() {
     var upic = (0, _helper.dE)("prf_pphoto");
     var name = (0, _helper.dE)("prf_name");
     var phone = (0, _helper.dE)("prf_phone");
     var email1 = (0, _helper.dE)("prf_email");
-    // var course = dE("prf_course")
     var stclass = (0, _helper.dE)("prf_class");
     var batch = (0, _helper.dE)("prf_batch");
     var gender = (0, _helper.dE)("prf_gender");
     var crton = (0, _helper.dE)("prf_crton");
     var tmtifr = (0, _helper.dE)("tmt_frame");
-    var spoints = (0, _helper.dE)("spoints");
+    var spoints1 = (0, _helper.dE)("spoints");
+    var courseno, batchno, calenid;
+    name.textContent = userinfo.name;
+    phone.textContent = userinfo.mblno;
+    email1.textContent = userinfo.email;
+    stclass.textContent = userinfo.class;
+    crton.textContent = new Date(userinfo.sgndon.seconds * 1000).toDateString();
+    gender.textContent = userinfo.gen;
+    batchno = userinfo.batch;
+    courseno = userinfo.course;
+    spoints1.textContent = userinfo.spoints;
+    userinfo.usernotes = userinfo.usernotes;
+    if (userinfo.gen == "Male") {
+        (0, _helper.dE)("prf_tab_t_t_img").classList.remove("prf_male", "prf_female");
+        (0, _helper.dE)("prf_tab_t_t_img").classList.add("prf_male");
+    } else if (userinfo.gen == "Female") {
+        (0, _helper.dE)("prf_tab_t_t_img").classList.remove("prf_male", "prf_female");
+        (0, _helper.dE)("prf_tab_t_t_img").classList.add("prf_female");
+    }
+}
+function renderExams() {
+    for(let i = 0; i < userinfo.examslist.examinfo.length; i++){
+        var f = userinfo.examslist.examinfo[i];
+        (0, _helper.dE)("db_exam_list").insertAdjacentHTML("beforeend", `<div class = "tlinks_min rpl"><span style="font-size: 16px;" onclick = "examlog('` + f.name + `','` + f.date + `','` + f.info + `','` + f.syllabus + `')">` + f.name + `</span></div>`);
+    }
+}
+async function authStateObserver(user) {
     var courseno, batchno, calenid;
     if (user) {
         var docRef = (0, _firestore.doc)(db, "users", user.uid);
@@ -2179,52 +2452,28 @@ async function authStateObserver(user) {
             var docJSON = docSnap.data();
             userinfo = docJSON;
             userinfo.uuid = user.uid;
-            // uname.textContent = docJSON.email
-            (0, _helper.dE)("dshd_uname").innerText = docJSON.email;
-            (0, _helper.dE)("dshd_name").innerText = docJSON.name;
-            name.textContent = docJSON.name;
-            phone.textContent = docJSON.mblno;
-            email1.textContent = docJSON.email;
-            stclass.textContent = docJSON.class;
-            crton.textContent = new Date(docJSON.sgndon.seconds * 1000).toDateString();
-            gender.textContent = docJSON.gen;
-            batchno = docJSON.batch;
-            courseno = docJSON.course;
-            spoints.textContent = docJSON.spoints;
-            userrole = docJSON.roles["user"];
-            editorrole = docJSON.roles["editor"];
-            adminrole = docJSON.roles["admin"];
-            userinfo.usernotes = docJSON.usernotes;
+            batchno = userinfo.batch;
+            userrole = userinfo.roles["user"];
+            editorrole = userinfo.roles["editor"];
+            adminrole = userinfo.roles["admin"];
+            (0, _helper.dE)("spoints").innerText = userinfo.spoints;
             if (docJSON.usernotes == undefined) userinfo.usernotes = [];
         }
         if (docJSON.deleted == true) {
-            log("Warning", "User Account Has Been Deleted");
+            (0, _log.log)("Warning", "User Account Has Been Deleted");
             signOutUser();
-        }
-        if (docJSON.gen == "Male") {
-            (0, _helper.dE)("prf_tab_img").classList.remove("prf_male", "prf_female");
-            (0, _helper.dE)("prf_tab_img").classList.add("prf_male");
-            (0, _helper.dE)("prf_tab_t_t_img").classList.remove("prf_male", "prf_female");
-            (0, _helper.dE)("prf_tab_t_t_img").classList.add("prf_male");
-        } else if (docJSON.gen == "Female") {
-            (0, _helper.dE)("prf_tab_img").classList.remove("prf_male", "prf_female");
-            (0, _helper.dE)("prf_tab_img").classList.add("prf_female");
-            (0, _helper.dE)("prf_tab_t_t_img").classList.remove("prf_male", "prf_female");
-            (0, _helper.dE)("prf_tab_t_t_img").classList.add("prf_female");
         }
         try {
             var docRef = (0, _firestore.doc)(db, "batch", batchno);
             var docSnap = await (0, _firestore.getDoc)(docRef);
             if (docSnap.exists()) {
                 var docJSON = docSnap.data();
-                batch.textContent = docJSON.name;
-                (0, _helper.dE)("dshd_batch").innerText = docJSON.name;
-                calenid = docJSON.timetable;
+                userinfo.batchname = docJSON.name;
+                userinfo.timetable = docJSON.timetable;
                 getTestList(batchno, user.uid);
-                var iframeurl = "https://calendar.google.com/calendar/embed??height=600&wkst=2&bgcolor=%23ffffff&ctz=Asia%2FKolkata&showTitle=0&showCalendars=0&showTabs=0&showPrint=0&showDate=1&src=" + calenid + "%40group.calendar.google.com&amp;ctz=Asia%2FKolkata";
-                tmtifr.src = iframeurl;
+                userinfo.timetableurl = "https://calendar.google.com/calendar/embed??height=600&wkst=2&bgcolor=%23ffffff&ctz=Asia%2FKolkata&showTitle=0&showCalendars=0&showTabs=0&showPrint=0&showDate=1&src=" + docJSON.timetable + "%40group.calendar.google.com&amp;ctz=Asia%2FKolkata";
                 if (docJSON.delon.seconds <= parseInt(Date.now() / 1000)) {
-                    log("Warning", "This Batch Has Been Deleted");
+                    (0, _log.log)("Warning", "This Batch Has Been Deleted");
                     signOutUser();
                     window.reload();
                     throw new Error("DENIED");
@@ -2236,12 +2485,9 @@ async function authStateObserver(user) {
                 });
             }
         } catch  {}
-        (0, _helper.dE)("lg_uname").value = "";
-        (0, _helper.dE)("lg_pass").value = "";
         spoints.style.display = "block";
         (0, _helper.dE)("dsh_btn").style.display = "block";
         if (window.location.hash == "" || window.location.hash == null || window.location.hash == undefined) {
-            // locationHandler("dashboard", 1);
             window.location.hash = "#/dashboard";
             autosignin = 1;
         }
@@ -2249,29 +2495,17 @@ async function authStateObserver(user) {
         var docSnap = await (0, _firestore.getDoc)(docRef);
         if (docSnap.exists()) {
             var docJSON = docSnap.data();
-            (0, _helper.dE)("db_exam_list").innerHTML = "";
-            if (docJSON.warning != "") log("Notice", docJSON.warning, function() {
+            userinfo.examslist = docJSON;
+            if (docJSON.warning != "") (0, _log.log)("Notice", docJSON.warning, function() {
                 window.location.hash = "#/usernotes/releasenotes";
             }, "Release Notes");
-            for(var i = 0; i < docJSON.examinfo.length; i++){
-                var f = docJSON.examinfo[i];
-                (0, _helper.dE)("db_exam_list").insertAdjacentHTML("beforeend", `<div class = "tlinks_min rpl"><span style="font-size: 16px;" onclick = "examlog('` + f.name + `','` + f.date + `','` + f.info + `','` + f.syllabus + `')">` + f.name + `</span></div>`);
-            }
         }
-        locationHandler(window.location.hash.split("#/")[1], 1);
-        getUserNotesList();
+        creMng(window.location.hash.split("#/")[1], 1);
     } else {
-        // uname.textContent = ""
-        name.textContent = "";
-        phone.textContent = "";
-        email1.textContent = "";
-        stclass.textContent = "";
         spoints.textContent = "";
         spoints.style.display = "none";
         (0, _helper.dE)("dsh_btn").style.display = "none";
-        (0, _helper.dE)("tp_pnt").style.display = "none";
-        (0, _helper.dE)("tp_edt").style.display = "none";
-        locationHandler("login", 1);
+        creMng("login", 1);
         if (autosignin == 1) document.location.reload();
     // 
     }
@@ -2346,7 +2580,7 @@ function editStuff() {
 }
 function changeLocationHash(ele, v) {
     window.location.hash = "#/" + ele;
-    if (ele == "dashboard") locationHandler("dashboard", 1);
+    if (ele == "dashboard") creMng("dashboard", 1);
 }
 async function lquizinit() {
     lquizcode = location1.split("livequiz")[1];
@@ -2420,7 +2654,7 @@ async function newTest() {
             finished: [],
             leaderboard: []
         });
-        locationHandler("edit_tests/" + docRef.id, 1);
+        creMng("edit_tests/" + docRef.id, 1);
     } catch  {}
 }
 function renderTestList(type) {
@@ -2459,7 +2693,7 @@ async function getSimpleTestReport() {
             }
         }
         if (attempted == 0) {
-            locationHandler("testend", 1);
+            creMng("testend", 1);
             (0, _helper.dE)("te_title").innerText = "You Have NOT Attempted This Test";
         } else try {
             try {
@@ -2556,7 +2790,7 @@ async function getSimpleTestReport() {
                 questionGraph("fto_draw", data);
             } catch  {
                 (0, _helper.dE)("te_title").innerText = "ERROR";
-                locationHandler("testend", 1);
+                creMng("testend", 1);
                 return 0;
             }
         } catch  {}
@@ -2692,10 +2926,10 @@ async function getTestReport() {
             }
         }
         if (attempted == 0) {
-            locationHandler("testend", 1);
+            creMng("testend", 1);
             (0, _helper.dE)("te_title").innerText = "You Have NOT Attempted This Test";
         } else if (Date.now() / 1000 <= testInfo.endon.seconds && testInfo.noresult == false) {
-            locationHandler("testend", 1);
+            creMng("testend", 1);
             (0, _helper.dE)("te_title").innerText = "Detailed Test Reports will be available after deadline";
         } else {
             try {
@@ -2719,7 +2953,7 @@ async function getTestReport() {
                 if (docSnap.exists()) testReportAnswers = docSnap.data();
             } catch  {
                 (0, _helper.dE)("te_title").innerText = "ERROR";
-                locationHandler("testend", 1);
+                creMng("testend", 1);
                 return 0;
             }
             inittestHandler();
@@ -2741,7 +2975,7 @@ async function getTestInfo() {
         docSnap = await (0, _firestore.getDoc)(docRef);
         if (docSnap.exists()) {
             for (var ele of docSnap.data().finished)if (auth.currentUser.uid == ele) {
-                locationHandler("testend", 1);
+                creMng("testend", 1);
                 (0, _helper.dE)("te_title").innerText = "You Have Already Attempted This Test";
                 return 0;
             }
@@ -2753,7 +2987,7 @@ async function getTestInfo() {
         if (docSnap.exists()) testQuestionList = docSnap.data();
     } catch  {
         (0, _helper.dE)("te_title").innerText = "The Test Hasnt Started Yet";
-        locationHandler("testend", 1);
+        creMng("testend", 1);
         return 0;
     }
     docRef = (0, _firestore.doc)(db, "tests", testid, "responses", auth.currentUser.uid);
@@ -2814,7 +3048,7 @@ async function getTestInfo() {
         submitTest();
     };
     window.onhashchange = function(e) {
-        locationHandler();
+        creMng();
         submitTest();
     };
     (0, _helper.dE)("tt_testname").innerText = testInfo.title;
@@ -2839,7 +3073,7 @@ async function computeResult(type) {
     var gty = "";
     if (window.location.hash.includes("/attempt/")) {
         testid = window.location.hash.split("#/attempt/")[1];
-        gty = log("Warning", "Submitting Tests Answers: Please Do Not Close The Tab.");
+        gty = (0, _log.log)("Warning", "Submitting Tests Answers: Please Do Not Close The Tab.");
     } else if (window.location.hash.includes("/finished/")) testid = window.location.hash.split("#/finished/")[1];
     else if (window.location.hash.includes("/testreport/")) testid = window.location.hash.split("#/testreport/")[1];
     var docRef = (0, _firestore.doc)(db, "tests", testid, "responses", auth.currentUser.uid);
@@ -2948,7 +3182,7 @@ async function computeResult(type) {
     };
     if (type == 1) {
         if (!(0, _helper.areObjectsEqual)(tFinal, fg)) {
-            log("NOTICE", "Please Wait, Marks Are Being Updated");
+            (0, _log.log)("NOTICE", "Please Wait, Marks Are Being Updated");
             await (0, _firestore.updateDoc)((0, _firestore.doc)(db, "tests", testid, "responses", auth.currentUser.uid), {
                 info: tFinal
             });
@@ -2959,7 +3193,7 @@ async function computeResult(type) {
                     "name": userinfo.name
                 })
             });
-            locationHandler();
+            creMng();
         }
     } else if (type == 0) {
         await (0, _firestore.updateDoc)((0, _firestore.doc)(db, "tests", testid, "responses", auth.currentUser.uid), {
@@ -2972,7 +3206,7 @@ async function computeResult(type) {
                 "name": userinfo.name
             })
         });
-        locationHandler("testend", 1);
+        creMng("testend", 1);
     }
     document.getElementById(gty).style.visibility = "hidden";
     document.getElementById(gty).style.opacity = "0";
@@ -3143,7 +3377,7 @@ function inittestHandler() {
 }
 async function testOperator(type) {
     if (!window.location.hash.includes("attempt")) {
-        log("Error", "Performing Test Operations in Test Reports Is Prohibited");
+        (0, _log.log)("Error", "Performing Test Operations in Test Reports Is Prohibited");
         return 1;
     }
     var aqid = "answers." + activequestionid;
@@ -3205,7 +3439,7 @@ async function testOperator(type) {
 }
 async function submitTest() {
     if (!window.location.hash.includes("attempt")) {
-        log("Error", "Performing Test Operations in Test Reports Is Prohibited");
+        (0, _log.log)("Error", "Performing Test Operations in Test Reports Is Prohibited");
         return 1;
     }
     var it = new Date();
@@ -3221,7 +3455,7 @@ async function submitTest() {
     });
     var testid = window.location.hash.split("#/attempt/")[1];
     window.onbeforeunload = function() {};
-    window.onhashchange = locationHandler;
+    window.onhashchange = creMng;
     await (0, _firestore.updateDoc)((0, _firestore.doc)(db, "tests", testid, "responses", auth.currentUser.uid), {
         endon: (0, _firestore.serverTimestamp)(),
         actions: testActionLogger,
@@ -3249,11 +3483,10 @@ window.onbeforeunload = function(event) {
     updatePoints();
 };
 function internetStatus(type) {
-    if (type == 0) log("WARNING", "You Are Currently Offline.");
+    if (type == 0) (0, _log.log)("WARNING", "You Are Currently Offline.");
 }
 window.addEventListener("online", ()=>internetStatus(1));
 window.addEventListener("offline", ()=>internetStatus(0));
-(0, _helper.dE)("te_title").innerText = "The Test Has Ended";
 function notesUIHandler() {
     if ((0, _helper.dE)("un_rendermode").value == "preview") {
         (0, _helper.dE)("un_preview").style.display = "block";
@@ -3267,223 +3500,44 @@ function notesUIHandler() {
         (0, _helper.dE)("uno" + window.location.hash.split("usernotes/")[1]).style.backgroundColor = (0, _helper.dE)("un_colorpicker").value;
     } catch  {}
 }
-function defineEvents() {
-    function chItem() {
-        changeItem(1);
+function rgbtn() {
+    let mobileNo = document.querySelector("#rg_mbleno").value;
+    let email1 = document.querySelector("#rg_uname").value;
+    let password1 = document.querySelector("#rg_pass").value;
+    let confirmPassword = document.querySelector("#rg_pass1").value;
+    let name = document.querySelector("#rg_name").value;
+    let dob = document.querySelector("#rg_dob").value;
+    let selectedClass = document.querySelector("#rg_class").value;
+    let selectedGender = document.querySelector("#rg_gender").value;
+    // Check if all fields are filled
+    if (mobileNo && email1 && password1 && confirmPassword && name && dob && selectedClass && selectedGender) {
+        // Check if mobile number is in correct format
+        const mobileNoRegex = /^\+91\d{10}$/;
+        if (!mobileNo.match(mobileNoRegex)) {
+            (0, _log.log)("Warning", "Mobile number should be in the format +91XXXXXXXXXX");
+            return;
+        }
+        // Check if email is in correct format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email1.match(emailRegex)) {
+            (0, _log.log)("Warning", "Please enter a valid email address");
+            return;
+        }
+        // Check if password meets the criteria (at least 8 characters long)
+        if (password1.length < 8) {
+            (0, _log.log)("Warning", "Password should be at least 8 characters long");
+            return;
+        }
+        // Check if password and confirm password match
+        if (password1 !== confirmPassword) {
+            (0, _log.log)("Warning", "Passwords do not match");
+            return;
+        }
+    } else {
+        (0, _log.log)("Warning", "Please fill in all fields");
+        return;
     }
-    function simHand() {
-        changeLocationHash("simlist", 1);
-    }
-    function cybHand() {
-        changeLocationHash("cyberhunt", 1);
-    }
-    function abtHand() {
-        changeLocationHash("about", 1);
-    }
-    function tmtHand() {
-        changeLocationHash("timetable", 1);
-    }
-    function regHand() {
-        changeLocationHash("register", 1);
-    }
-    function prfHand() {
-        changeLocationHash("profile", 1);
-    }
-    function dshHand() {
-        changeLocationHash("dashboard", 1);
-    }
-    function adiHand() {
-        changeLocationHash("functions", 1);
-    }
-    function tstinfHand() {
-        changeLocationHash("testinfo", 1);
-    }
-    function uscHand() {
-        changeLocationHash("users", 1);
-    }
-    function tpcHand() {
-        changeLocationHash("tpclist", 1);
-    }
-    function lvqHand() {
-        changeLocationHash("livequiz", 1);
-    }
-    function frmHand() {
-        changeLocationHash("forum", 1);
-    }
-    function lglHand() {
-        changeLocationHash("legal", 1);
-    }
-    function qbaHand() {
-        changeLocationHash("qblist", 1);
-    }
-    function chpHand() {
-        changeLocationHash("chplist", 1);
-    }
-    function sTestHand() {
-        log("Warning", "Are You Sure You Want To End The Test", submitTest, "Yes,Submit", 1);
-    }
-    function prvHand() {
-        topicHandler(1);
-    }
-    function nxtHand() {
-        topicHandler(2);
-    }
-    function actHand() {
-        renderTestList("active");
-    }
-    function upcHand() {
-        renderTestList("upcoming");
-    }
-    function finHand() {
-        renderTestList("finished");
-    }
-    function qbnkend() {
-        (0, _helper.dE)("watermark").style.display = "flex";
-        (0, _helper.fullEle)((0, _helper.dE)("qbnk_vid"));
-    }
-    function qbnkstr() {
-        prepareVideo();
-    }
-    function tsave() {
-        testOperator("tts_answered");
-    }
-    function tclear() {
-        testOperator("tts_notanswer");
-    }
-    function treview() {
-        testOperator("tts_review");
-    }
-    function tansrev() {
-        testOperator("tts_ansreview");
-    }
-    function psims() {
-        getSimList("physics");
-    }
-    function csims() {
-        getSimList("chemistry");
-    }
-    function msims() {
-        getSimList("maths");
-    }
-    function bsims() {
-        getSimList("biology");
-    }
-    function cosims() {
-        getSimList("computer");
-    }
-    function ssims() {
-        getSimList("statistics");
-    }
-    function usims() {
-        getSimList("unfiled");
-    }
-    function pchb() {
-        renderCList("physics");
-    }
-    function cchb() {
-        renderCList("chemistry");
-    }
-    function mchb() {
-        renderCList("maths");
-    }
-    function bchb() {
-        renderCList("biology");
-    }
-    function cochb() {
-        renderCList("computer");
-    }
-    function schb() {
-        renderCList("statistics");
-    }
-    function uchb() {
-        renderCList("unfiled");
-    }
-    function uQL() {
-        updateTopicQBank(1);
-    }
-    function uQL2() {
-        updateTopicQBank(2);
-    }
-    function uQL3() {
-        updateTopicQBank(3);
-    }
-    function uQL4() {
-        updateTopicQBank(4);
-    }
-    function rgbtn() {
-        log("Note", "By Clicking on 'Accept And Register' you agree that you accept all Terms And Conditions and Privacy Policy of Quarkz!", signUp, "Accept And Register");
-    }
-    var simbtn = (0, _helper.dE)("sim_btn").addEventListener("click", simHand);
-    var sgnbtn = (0, _helper.dE)("sgn_in").addEventListener("click", signIn);
-    // var sgngglbtn = dE("sgn_in_google").addEventListener("click", signInwithGoogle);
-    var regbtn = (0, _helper.dE)("reg_in").addEventListener("click", regHand);
-    var rgbtn = (0, _helper.dE)("rg_in").addEventListener("click", rgbtn);
-    var sgnout = (0, _helper.dE)("lgt_btn").addEventListener("click", signOutUser);
-    var tmtbtn = (0, _helper.dE)("tmt_btn").addEventListener("click", tmtHand);
-    var prfbtn = (0, _helper.dE)("prf_btn").addEventListener("click", prfHand);
-    var abtbtn = (0, _helper.dE)("abt_btn").addEventListener("click", abtHand);
-    var shfbtn = (0, _helper.dE)("shf_btn").addEventListener("click", shuffleQBank);
-    var aqao = (0, _helper.dE)("aq_ao").addEventListener("click", addMCQ);
-    var aqro = (0, _helper.dE)("aq_ro").addEventListener("click", removeMCQ);
-    var aqre = (0, _helper.dE)("aq_re").addEventListener("click", removeEntry);
-    var tmode = (0, _helper.dE)("aq_mode").addEventListener("change", changeItem);
-    var ttype = (0, _helper.dE)("aq_type").addEventListener("change", changeItem);
-    var dshbtn = (0, _helper.dE)("dsh_btn").addEventListener("click", dshHand);
-    var adibtn = (0, _helper.dE)("adi_btn").addEventListener("click", adiHand);
-    var aqsave = (0, _helper.dE)("aq_tpc_save").addEventListener("click", uQL);
-    var aqsave = (0, _helper.dE)("aq_qbc_save").addEventListener("click", uQL2);
-    var aqsave = (0, _helper.dE)("aq_tst_save").addEventListener("click", uQL3);
-    var aqsave = (0, _helper.dE)("aq_exam_save").addEventListener("click", uQL4);
-    var unsave = (0, _helper.dE)("un_save").addEventListener("click", unotes1);
-    var unprint = (0, _helper.dE)("un_print").addEventListener("click", unotes2);
-    var tstinfbtn = (0, _helper.dE)("tstinf_btn").addEventListener("click", tstinfHand);
-    var tpcbtn = (0, _helper.dE)("tpc_btn").addEventListener("click", tpcHand);
-    var uscbtn = (0, _helper.dE)("usc_btn").addEventListener("click", uscHand);
-    var lvqbtn = (0, _helper.dE)("lvq_btn").addEventListener("click", lvqHand);
-    var frmbtn = (0, _helper.dE)("frm_btn").addEventListener("click", frmHand);
-    var tpnxt = (0, _helper.dE)("tp_nxt").addEventListener("click", nxtHand);
-    var tpprv = (0, _helper.dE)("tp_prv").addEventListener("click", prvHand);
-    var tpsbm = (0, _helper.dE)("tp_sbm").addEventListener("click", checkQuestion);
-    var lglbtn = (0, _helper.dE)("lgl_btn").addEventListener("click", lglHand);
-    var qbabtn = (0, _helper.dE)("qba_btn").addEventListener("click", qbaHand);
-    var tppnt = (0, _helper.dE)("tp_pnt").addEventListener("click", printStuff);
-    var tppnt = (0, _helper.dE)("aq_export").addEventListener("click", printStuff);
-    var tpedt = (0, _helper.dE)("tp_edt").addEventListener("click", editStuff);
-    var cybbtn = (0, _helper.dE)("cyb_btn").addEventListener("click", cybHand);
-    var tiact = (0, _helper.dE)("ti_act").addEventListener("click", actHand);
-    var tiupc = (0, _helper.dE)("ti_upc").addEventListener("click", upcHand);
-    var tifin = (0, _helper.dE)("ti_fin").addEventListener("click", finHand);
-    var tt_save = (0, _helper.dE)("tt_save").addEventListener("click", tsave);
-    var tt_clear = (0, _helper.dE)("tt_clear").addEventListener("click", tclear);
-    var tt_review = (0, _helper.dE)("tt_review").addEventListener("click", treview);
-    var tt_ansreview = (0, _helper.dE)("tt_ansreview").addEventListener("click", tansrev);
-    var p_sims = (0, _helper.dE)("psims").addEventListener("click", psims);
-    var c_sims = (0, _helper.dE)("csims").addEventListener("click", csims);
-    var m_sims = (0, _helper.dE)("msims").addEventListener("click", msims);
-    var b_sims = (0, _helper.dE)("bsims").addEventListener("click", bsims);
-    var co_sims = (0, _helper.dE)("cosims").addEventListener("click", cosims);
-    var s_sims = (0, _helper.dE)("ssims").addEventListener("click", ssims);
-    var u_sims = (0, _helper.dE)("usims").addEventListener("click", usims);
-    var p_chb = (0, _helper.dE)("pchb").addEventListener("click", pchb);
-    var c_chb = (0, _helper.dE)("cchb").addEventListener("click", cchb);
-    var m_chb = (0, _helper.dE)("mchb").addEventListener("click", mchb);
-    var b_chb = (0, _helper.dE)("bchb").addEventListener("click", bchb);
-    var co_chb = (0, _helper.dE)("cochb").addEventListener("click", cochb);
-    var s_chb = (0, _helper.dE)("schb").addEventListener("click", schb);
-    var u_chb = (0, _helper.dE)("uchb").addEventListener("click", uchb);
-    var ttsub = (0, _helper.dE)("tt_sub").addEventListener("click", sTestHand);
-    var chp_btn = (0, _helper.dE)("chp_btn").addEventListener("click", chpHand);
-    var pass_rst_btn = (0, _helper.dE)("pass_rst_btn").addEventListener("click", requestPasschange);
-    var aq_sims_save = (0, _helper.dE)("aq_sims_save").addEventListener("click", updateSimulationWeb);
-    var un_rendermode = (0, _helper.dE)("un_rendermode").addEventListener("change", notesUIHandler);
-    var un_viewership = (0, _helper.dE)("un_viewership").addEventListener("change", notesUIHandler);
-    (0, _helper.dE)("un_print").addEventListener("click", function() {
-        (0, _helper.dE)("un_preview").style.display = "none";
-        (0, _helper.dE)("un_preview").innerHTML = "<h1 style = 'text-align:center;margin:0px'>" + (0, _helper.dE)("un_title").value + "</h1>" + getHTML("un_editable");
-        window.idElementPrint((0, _helper.dE)("un_preview"), userinfo.name);
-    });
-    (0, _helper.dE)("qbnk_vid_btn_e").addEventListener("click", qbnkend);
-    (0, _helper.dE)("qbnk_vid_btn").addEventListener("click", qbnkstr);
+    (0, _log.log)("Note", "By Clicking on 'Accept And Register' you agree that you accept all Terms And Conditions and Privacy Policy of Quarkz!", signUp, "Accept And Register");
 }
 function plyVid() {
     window.player.playVideo();
@@ -3491,13 +3545,30 @@ function plyVid() {
 function stpVid() {
     try {
         window.player.stopVideo();
+        if (!window.location.hash.includes("topic")) window.player = undefined;
     } catch  {}
 }
 function pauVid() {
     window.player.pauseVideo();
 }
 function loadVid(videoId) {
-    window.player.loadVideoById(videoId);
+    var vid_width = 0.8 * window.innerWidth || 0.8 * document.documentElement.clientWidth || 0.8 * document.body.clientWidth;
+    if (player == undefined || (0, _helper.dE)("player").tagName == "div") window.player = new YT.Player("player", {
+        height: "500",
+        width: vid_width,
+        origin: window.location.origin,
+        videoId: videoId,
+        playerVars: {
+            "playsinline": 1,
+            "controls": 0,
+            "modestbranding": 1
+        },
+        events: {
+            "onReady": onPlayerReady,
+            "onStateChange": onPlayerStateChange
+        }
+    });
+    else window.player.loadVideoById(videoId);
 }
 function renderAppInfo() {
     (0, _helper.dE)("ren_appinf").textContent = JSON.stringify(Quarkz, undefined, 2);
@@ -3661,7 +3732,7 @@ function questionGraph(ipd, data) {
 }
 var Quarkz = {
     "copyright": "Mr Techtroid 2021-23",
-    "vno": "v0.4.2",
+    "vno": "v0.5.0",
     "author": "Mr Techtroid",
     "last-updated": "10/02/2023(IST)",
     "serverstatus": "firebase-online"
@@ -3691,12 +3762,11 @@ var testActionLogger = [];
 var testReportAnswers = [];
 var reQW;
 var analysedActions;
-window.onhashchange = locationHandler;
+window.onhashchange = creMng;
 initFirebaseAuth();
-defineEvents();
 (0, _reworkui.sysaccess)();
 
-},{"firebase/app":"aM3Fo","firebase/auth":"79vzg","firebase/firestore":"8A4BC","firebase/storage":"8WX7E","d3":"17XFv","../js/helper":"lVRAz","./reworkui":"66uq8"}],"aM3Fo":[function(require,module,exports) {
+},{"firebase/app":"aM3Fo","firebase/auth":"79vzg","firebase/firestore":"8A4BC","firebase/storage":"8WX7E","d3":"17XFv","../js/helper":"lVRAz","./reworkui":"66uq8","../embeds/about":"gCJDO","../embeds/chapter":"fMnHP","../embeds/cyb":"6uKbY","../embeds/dashboard":"hkEZ0","../embeds/downloads":"g2MAL","../embeds/finished_test":"3VUaP","../embeds/forum":"bKen7","../embeds/functions":"kxrBw","../embeds/log":"l4cy5","../embeds/login":"6nKCl","../embeds/printable":"95h6E","../embeds/profile":"2MtJU","../embeds/qbnkvid":"chYH6","../embeds/register":"kcVux","../embeds/settings":"fvpoO","../embeds/sims":"7kmTm","../embeds/test_instructions":"7hktz","../embeds/tests":"7y3N8","../embeds/toc":"kt253","../embeds/topics":"eSIhy","../embeds/user":"enRwb","../embeds/usernotes":"71ul5","../js/recorder":"56dox","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"aM3Fo":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _app = require("@firebase/app");
@@ -63639,6 +63709,7 @@ parcelHelpers.export(exports, "areObjectsEqual", ()=>areObjectsEqual);
 parcelHelpers.export(exports, "getServerTime", ()=>getServerTime);
 // Make A Element Full Screen
 parcelHelpers.export(exports, "fullEle", ()=>fullEle);
+parcelHelpers.export(exports, "mergeById", ()=>mergeById);
 // Get Elements With ID in Short Form
 parcelHelpers.export(exports, "dE", ()=>dE);
 // Sort An Object based on a parameter.
@@ -63705,6 +63776,10 @@ function fullEle(ele) {
     else if (ele.webkitRequestFullscreen) /* Chrome, Safari and Opera */ ele.webkitRequestFullscreen();
     else if (ele.msRequestFullscreen) /* IE/Edge */ ele.msRequestFullscreen();
 }
+const mergeById = (a1, a2)=>a1.map((itm)=>({
+            ...a2.find((item)=>item.qid === itm.qid && item),
+            ...itm
+        }));
 function dE(ele) {
     return document.getElementById(ele);
 }
@@ -63743,7 +63818,8 @@ exports.default = {
     dE,
     sortObj,
     sortObjv2,
-    renderMarkedMath
+    renderMarkedMath,
+    mergeById
 };
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"66uq8":[function(require,module,exports) {
@@ -63767,7 +63843,7 @@ function sysaccess() {
         return document.getElementById(ele);
     }
     function r(txt, st) {
-        w("c-output").insertAdjacentHTML("beforeend", "<div style = " + st + ">" + txt + "</div>");
+    // w("c-output").insertAdjacentHTML("beforeend","<div style = "+st+">"+txt+"</div>")
     }
     function init() {
         r("Ariel", "color:pink;align-text:center;");
@@ -63786,11 +63862,1227 @@ function sysaccess() {
             r("", logtxt);
         }
     };
-    w("c-exec").addEventListener("click", x(w("c-input").value));
+    // w("c-exec").addEventListener("click",x(w("c-input").value))
     const cs = console;
     // console = {}
     init();
 }
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"gCJDO":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_about", ()=>page_about);
+let page_about = `
+<span class="in_t">About</span>
+        <img id="abt_tab_t_t_img" alt="MTT Logo" src="https://avatars1.githubusercontent.com/u/64828294?s=460&amp;v=4">
+        <div id="abt_tab_t_hold">
+            <span id="abt_name">Mr Techtroid</span>
+            <span class="abt_det">
+                <span id="abt_email">mrtechtroid@outlook.com</span>
+            </span>
+            <div style="font-size: 12px;width:400px;align-items: flex-end;">
+                <span>I Am Mr Techtroid The Main Developer Of <span class="sp_txt">Quarkz!</span></span>
+                <span>I Built This Website As A Way For Schools To Head Towards Online Learning</span>
+                <span>Its Built In A Way That It Is Easy For Both Teachers And Students To Use</span>
+                <span>Quarkz Is Currently Under Beta Version And Many Features Will Come In The Future</span>
+            </div>
+        </div>
+        <div id="abt_c_1">
+            <button id="lgl_btn" class="tst_btn rpl">Legal</button>
+            <button id="rbu_btn" class="tst_btn rpl" onclick="window.location = '/#/bugreport'">Report Bugs</button>
+            <button id="apinf_btn" class="tst_btn rpl" onclick="window.location = '/#/appinfo'">App Info</button>
+            <a id="contq_btn"
+                href="https://docs.google.com/forms/d/e/1FAIpQLSfLZ2_GUDv6EYRR3kz53BYtsP3SaTIMfCo8az-xPzUi1nb91A/viewform"
+                class="tst_btn rpl" target="_blank">Contact Us</a>
+        </div>
+`;
+exports.default = {
+    page_about
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"fMnHP":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_list_chapter", ()=>page_list_chapter);
+parcelHelpers.export(exports, "page_edit_chapter", ()=>page_edit_chapter);
+parcelHelpers.export(exports, "page_chapter", ()=>page_chapter);
+let page_list_chapter = `
+<span class="in_t">Chapters</span>
+        <hr color="white" width="100%">
+        <div style="display: flex;flex-direction: row;flex-wrap: wrap;">
+            <button class="tst_btn rpl" id="pchb">Physics</button>
+            <button class="tst_btn rpl" id="cchb">Chemistry</button>
+            <button class="tst_btn rpl" id="mchb">Maths</button>
+            <button class="tst_btn rpl" id="bchb">Biology</button>
+            <button class="tst_btn rpl" id="cochb">Computer</button>
+            <button class="tst_btn rpl" id="schb">Statistics</button>
+            <button class="tst_btn rpl" id="uchb">Unfiled</button>
+        </div>
+        <div id="qb_cont_2" style="overflow-y: scroll;height:50vh;" class="flex_type">
+        </div>`;
+let page_edit_chapter = `
+<span class="in_t" class="">Edit Chapters</span>
+        <input type="text" id="chp_chapname" class="_in_aq" placeholder="Chapter Name">
+        <span class="in_t" class="">Question Bank</span>
+        <div id = "chp_qbank">
+        </div>
+        <span class="in_t" class="">Topics</span>
+        <div id = "chp_qbank">
+        </div>`;
+let page_chapter = `
+<span class="in_t" id="chp_chaptername">Topic</span><button class="tst_btn rpl" id="chp_edit">Edit</button>
+        <div class = "flex_type" style="flex-direction: row;flex-wrap: wrap;">
+            <div id="chpt_topics" class = "db_class">
+                <span style="font-size: 25px;color:yellow">Topics</span>
+                <div id="chp_tpc_list" style="overflow-y: scroll;height:60vh;" class="flex_type"></div>
+            </div>
+            <div id="chpt_qbanks" class = "db_class">
+                <span style="font-size: 25px;color:yellow">Question Banks</span>
+                <div id="chp_qbk_list" style="overflow-y: scroll;height:60vh;" class="flex_type"></div>
+            </div>
+        </div>`;
+exports.default = {
+    page_chapter,
+    page_edit_chapter,
+    page_list_chapter
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"6uKbY":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_cyberhunt", ()=>page_cyberhunt);
+let page_cyberhunt = `<div id="cyberhunt" class="full_page flex_type">
+        <div id="cyb_code" class="flex_type">
+            <span class="in_t">Join Cyberhunt!</span>
+            <hr color="white" width="100%">
+            <span>Do You Want To Join A Cyberhunt?Enter The Cyberhunt Code Below:</span>
+            <input id="cyb_cd_in" class="_in_aq" placeholder="i2a01pmzshn1">
+            <button class="tst_btn rpl" id="cyb_cd_sbm"
+                onclick="if (document.getElementById('cyb_cd_in').value != ''){window.location.hash = '/cyberhunt/'+document.getElementById('cyb_cd_in').value}">Submit</button>
+            <span>Joined Cyberhunts</span>
+            <div id="cyb_joined"
+                style="overflow-y: scroll;display: flex;flex-direction: column;height: 30vh;width: 40vw;border: 3px greenyellow solid;padding-left: 6px;">
+            </div>
+        </div>
+        <div id="cyb_edit">
+
+        </div>
+        <div id="cyb_viewer" class="flex_type" style="width:100%;height:100%">
+            <div
+                style="display:flex;flex-direction:column;justify-content: left;width:100%;margin-left:5vw;margin-top:10px;">
+                <span style="font-size: 16px;">Welcome to</span>
+                <span id="cyb_v_name" style="font-size: 30px">CyberHunt Name</span>
+                <span id="cyb_v_status" style="font-size: 18px">started on XX:XX</span>
+                <span id="cyb_v_crtby" style="font-size: 15px">By Mr Techtroid</span>
+            </div>
+            <span style="font-size: 16px;">Participants List</span>
+            <div id="cyb_v_plist"
+                style="display:flex;flex-direction:row;flex-wrap:wrap;border: solid grey 2px;border-radius: 10px 10px 10px;width:90%;height:40vh;padding:10px;overflow-y: scroll;">
+                <div class="cyb_v_plist_p"
+                    style="display: flex;flex-direction: column;width:100px;height:50px;border: solid grey 2px;border-radius: 10px 10px 10px;text-align: center;">
+                    <span>Mr Techtroid</span>
+                </div>
+            </div>
+        </div>
+
+    </div>`;
+exports.default = {
+    page_cyberhunt
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"hkEZ0":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_dashboard", ()=>page_dashboard);
+parcelHelpers.export(exports, "page_bug_report", ()=>page_bug_report);
+parcelHelpers.export(exports, "page_app_info", ()=>page_app_info);
+parcelHelpers.export(exports, "page_schedule", ()=>page_schedule);
+parcelHelpers.export(exports, "error_page", ()=>error_page);
+parcelHelpers.export(exports, "page_notes", ()=>page_notes);
+parcelHelpers.export(exports, "page_ariel", ()=>page_ariel);
+let page_dashboard = `
+<div id="sidebar">
+            <div id="options_tab"
+                style="display: flex;flex-direction: row;align-items:center;height:50px;justify-content: space-evenly;width: 25vw;max-width: 250px;">
+                <span class="material-symbols-outlined rpl" onclick="window.location = '#/settings'">settings</span>
+                <span class="material-symbols-outlined rpl" id="abt_btn">info</span>
+                <span class="material-symbols-outlined rpl" onclick="window.location = '#/update'">notifications</span>
+                <span class="material-symbols-outlined rpl" id="prf_btn">account_circle</span>
+                <span class="material-symbols-outlined rpl" id="lgt_btn">logout</span>
+            </div>
+            <hr style="width: 100%;">
+            <div id="profile_tab"
+                style="display: flex;flex-direction: column;align-items: center;height:170px;max-width: 250px;">
+                <div id="prf_tab_img" style="width: 100px;height:100px;object-fit: cover;margin:5px;"></div>
+                <span style="color:rgb(0, 255, 221)" id="dshd_name">NAME</span>
+                <span style="color:rgb(104, 104, 92);font-size: small;" id="dshd_uname">@username</span>
+                <span style="color:rgb(251, 255, 0)" id="dshd_batch">BATCH</span>
+            </div>
+            <hr style="width: 100%;">
+            <div class="flex_type"
+                style="flex-direction: column;align-items: center;overflow-y: scroll;width: 30vw;height:250px;max-width: 250px;">
+                <div class="dshbox_v2 " id="tmt_btn">Time Table</div>
+                <div class="dshbox_v2" id="chp_btn">Chapters</div>
+                <div class="dshbox_v2" id="tstinf_btn">Test Infos</div>
+                <div class="dshbox_v2" id="usn_btn" onclick="window.location.hash = '/usernotes/'">Your Notes</div>
+                <div class="dshbox_v2" id="tpc_btn" style="display: none;">Topics</div>
+                <div class="dshbox_v2" id="lvq_btn" style="display:none">Live Quiz</div>
+                <div class="dshbox_v2" id="frm_btn">Forum</div>
+                <div class="dshbox_v2" id="qba_btn" style="display: none;">Question Bank</div>
+                <div class="dshbox_v2" id="sim_btn">Simulations</div>
+                <div class="dshbox_v2" id="cyb_btn">Cyberhunts</div>
+                <div id="adminonly" style="display:none;flex-direction:column;">
+                    <div class="dshbox_v2" id="adi_btn">Admin Functions</div>
+                    <div class="dshbox_v2" id="usc_btn">Users</div>
+                </div>
+            </div>
+            <hr style="width: 100%;">
+            <span style="font-size: small;">© 2021-23 Quarkz!</span>
+        </div>
+        <div
+            style="display: flex;flex-direction: row;flex-wrap: wrap;margin-left: 10px;align-items: flex-start;height:100%;margin-top: 15px;justify-content: space-evenly;overflow-y: scroll;">
+            <div id="db_exam_info" class = "db_class" style="max-height: 30vh;">
+                <span style="font-size: 25px;color:yellow">Exam Info</span>
+                <div id="db_exam_list"></div>
+            </div>
+            <div id="db_social_media" class = "db_class">
+                <span style="font-size: 25px;color:yellow">We're on Social Media</span>
+                <span style="font-size: 14px;color:grey;margin-left: 10px;">Follow us, & share with your friends. It motivates us to keep
+                    working hard for you to bring new features. </span>
+                <img style="width:50px;" alt="Youtube Logo" class="rpl"
+                    onclick="window.open('https://www.youtube.com/@quarkz./', '_blank');"
+                    src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAABaCAMAAABHRa6wAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAACcFBMVEUAAAD/Ly//BQX/AAD/ExP/MDD/LS3/LCz/PDz/Z2f/X1//EhL/CAj/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/CAj/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/R0f/Q0P/Wlr/QED/Vlb/PT3/UlL/PDz/UFD/Ojr/Tk7/OTn/TEz/ODj/S0v/Nzf/Skr/Nzf/SUn/Njb/SEj/Njb/SEj/Njb/R0f/NTX/R0f/NTX/R0f/NTX/Rkb/NTX/NTX/AAD/AAD/AAD/CAj/Hh7/HBz/HBz/Gxv/Gxv/Ghr/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/HR3/AAD/AQH/BQX/wcH/EBD/////jY3/X1//7+//MzP/x8f/DQ3/mZn/Zmb/9vb/Ojr/0ND/EhL/oqL/dXX/+vr/QkL/1dX/GRn/qKj/fHz/SUn/3Nz/Hh7/sbH/paX/S0s8CEr+AAAAsHRSTlMAAAAAAAAAAAAAAAAABhMhKzdCUVlkbnqHjpidpqi3us7C1tnP3uLl7uzn18W2saV8ZVtQRjYBHDxaq8HT5vP98uivXkAiBidyrN3ksnkvCpenGaG5VfWCqhXb+kNxs8bp9ESQjLjN8OP5AQ4JIBYxJkE4VUhlVnJlgHSOgJiKoZOpnrKftKu9r8LA9/bYAQ4bJC88R1BYYnB6goqQlZykp7WzvL69xcrJzNrZxqmjGt/aNR4AAAABYktHRLUzDlpLAAAAB3RJTUUH5wEdCycyRsErbAAAAv5JREFUaN7dmudXE1EQxR8bu0KiKCSgggFi1KhRUexKVEQFxV6xYa/Yu2LBrkjvKE0CtmcZe+/df8nNCgfhgLi7z9xznE/58ub+srtvd97MZewP4SNJBl8/o6lzF/+u3QICzZag4O49eoaE9rKGhUfYbLbe9j5y2PvKPyPC+1kdoSH9BwwMDrKYnQGDBg+JHGoy+vkaJMmHqQtpWNTwEYGWkaNGjxk7juuP8dFWh8vinDBxUoyhRe3JsVOmCtBsNqbFxU9vnmJGwr/Uro+Zs5r+97O9I++JOU1cBZP35D0R2Vh/rnf1OXc21Pf3tj7n8b/rG72v3+AuGOYhAHj9kzgfos8X1Om3wuhzvrAWIBYFkFALsAgFsFhS9GNQ+pwbFYAlOIBEBcCMA1iqACzDASz31CqtV+AAlHeRAajPPZVBFBJgJXYT/NoGiUiAJBlgFRJgtQzgQgJYZYA1ahfdFgiwtg1ru07tojt374kjaMfar1e9iOi+MIANrIP6RSTHA0EAG9kmbQD08JEQgM1si0YAosdPBABsZcmaAYie6gfYxrbrACB6phdgB9upC4Cev9AHsIvt1gdA9PKVHoA9bK9eAKLXOgD2sf36AYjeaAY4wA6KAKC37zQCHGKHhQAQvf+gCeAISxEEQPRRC8BRdkwYANEn9bmOsxMCAYg+q82Vyk4KBaAvX9XlOsVOiwUg+qYq1xnxAETfVeQ6+x8CqL0F8IdQ7Db8oTZXKv5FlCIMQOOrGP4xgn+O4QUJvCSDF6Xwshx+MEnWASDkaAY/nMKP5/AGBbxFA29Swdt0+EYlvFULb1bD2/XwgQV8ZAMfWsHHdvjBJXx0Cx9ew8f3eAMD3MIBN7HgbTxwIxPeyoU3s+HtfHhDI97SqVwFrKm1jsJj63VaXI6w6HMiRM/bLzjikv7O1tsofCSp48W0S+kZmVnZObl5+QWFRcUll6+UlpVXVF6tcrura67JUVPtdlddr6woLyu9cbOkuKiwID8vNyc7KzMj/VZap5aMzT8BRpXwJFof0ooAAAAldEVYdGRhdGU6Y3JlYXRlADIwMjMtMDEtMjlUMTE6Mzk6NTArMDA6MDCGz66vAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDIzLTAxLTI5VDExOjM5OjUwKzAwOjAw95IWEwAAACB0RVh0c29mdHdhcmUAaHR0cHM6Ly9pbWFnZW1hZ2ljay5vcme8zx2dAAAAGHRFWHRUaHVtYjo6RG9jdW1lbnQ6OlBhZ2VzADGn/7svAAAAF3RFWHRUaHVtYjo6SW1hZ2U6OkhlaWdodAA5MDwVcVIAAAAXdEVYdFRodW1iOjpJbWFnZTo6V2lkdGgAMTI40I0R3QAAABl0RVh0VGh1bWI6Ok1pbWV0eXBlAGltYWdlL3BuZz+yVk4AAAARdEVYdFRodW1iOjpTaXplADE1NDVC02RgawAAABZ0RVh0VGh1bWI6OlVSSQBmaWxlOi8vUE5HOqYqZyIAAAAASUVORK5CYII=">
+            </div>
+            <div id="db_study_resources" class = "db_class">
+                <span style="font-size: 25px;color:yellow">Additional Study Resources</span>
+                <div class="tlinks_min rpl" onclick="window.location.hash = '/mainsformulas'"><span
+                        style="font-size: 16px;">JEE Mains Formula Sheets</span></div>
+                <div class="tlinks_min rpl" onclick="window.location.hash = '/downloads'"><span
+                        style="font-size: 16px;">FREE PDF Downloads</span></div>
+            </div>
+        </div>`;
+let page_bug_report = `
+<iframe id="bgrep_frame"
+            src="https://docs.google.com/forms/d/e/1FAIpQLSeo2JZDaBApBiTeXmAnkVX60hSuJGHJkd9jsF9ePg0iM9ufjA/viewform?embedded=true"
+            frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>`;
+let page_app_info = `
+<span class="in_t">App Info</span>
+        <pre id="ren_appinf"></pre>`;
+let page_schedule = `
+<span class="in_t">Schedule</span>
+        <iframe id="tmt_frame" width="100%" height="90%" frameborder="0" scrolling="no"></iframe>`;
+let error_page = `
+<span class="in_t">404</span>
+        <hr color="white" width="100%">
+        <span style="font-size: 3vh;">You don't have access to this page.</span>
+        <a class="tst_btn rpl" href="/#/dashboard">Go To Dashboard</a>`;
+let page_notes = `
+<div style="position: fixed;">
+            <embed id="nt_id" style="width: 95vw;height: 90vh;">
+            <div id = "nt_nocontrol">Quarkz!</div>
+        </div>`;
+let page_ariel = `
+<div id="c-output"
+            style="color:yellow;overflow-y: scroll;display: flex;flex-direction: column;height: 80vh;width: 90vw;border: 3px greenyellow solid;padding-left: 6px;">
+
+        </div>
+        <div>
+            <input type="text" id="c-input" class="_in_aq" placeholder="Command">
+            <button class="tst_btn rpl" id="c-exec">Execute</button>
+        </div>`;
+exports.default = {
+    page_app_info,
+    page_ariel,
+    page_bug_report,
+    page_dashboard,
+    page_notes,
+    page_schedule,
+    error_page
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"g2MAL":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_jee_main", ()=>page_jee_main);
+parcelHelpers.export(exports, "page_downloads", ()=>page_downloads);
+let page_jee_main = `
+    <span style="font-size: 5vh;color:yellow" id="fm_title">Mains Formula Sheet</span>
+    <hr color="white" width="100%">
+    <div style="overflow-y: scroll;height:50vh;" class="flex_type">
+    <span class="tlinks rpl" onclick = "window.location.hash = '/notes/PHYFORMULAS'">Physics Formula Sheet</span>
+    <span class="tlinks rpl" onclick = "window.location.hash = '/notes/MATHFORMULAS'">Maths Formula Sheet</span>
+    <span class="tlinks rpl" onclick = "window.location.hash = '/notes/PCHEMNOTES'">Physical Chemistry Formula Sheet</span>
+    <span class="tlinks rpl" onclick = "window.location.hash = '/notes/OCHEMNOTES'">Organic Chemistry Formula Sheet</span>
+    <span class="tlinks rpl" onclick = "window.location.hash = '/notes/ICHEMNOTES'">Inorganic Chemistry Formula Sheet</span>
+    </div>
+    <span style="font-size: 8px;">All PDF's Are Owned by their Respective Owners</span>
+`;
+let page_downloads = `
+<span style="font-size: 5vh;color:yellow" id="fm_title">Downloads</span>
+    <hr color="white" width="100%">
+    <div style="overflow-y: scroll;height:50vh;" class="flex_type">
+      
+    </div>
+`;
+exports.default = {
+    page_jee_main,
+    page_downloads
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"3VUaP":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_finished_test", ()=>page_finished_test);
+let page_finished_test = `
+<span style="font-size: 5vh;color:yellow" id="fti_title">Test Name</span>
+        <hr color="white" width="100%">
+        <div id="fto_overview" style="display: flex;flex-direction: row;flex-wrap:wrap">
+            <div class="fto_box">
+                <div class="fto_box_title">TOTAL MARKS</div>
+                <div class="fto_box_content" id="fto_total">100/100</div>
+            </div>
+            <div class="fto_box">
+                <div class="fto_box_title">CORRECT</div>
+                <div class="fto_box_content"><span id="fto_correct">45</span><span class="fto_small">marks</span></div>
+            </div>
+            <div class="fto_box">
+                <div class="fto_box_title">INCORRECT</div>
+                <div class="fto_box_content"><span id="fto_incorrect">45</span><span class="fto_small">marks</span>
+                </div>
+            </div>
+            <div class="fto_box">
+                <div class="fto_box_title">UNANSWERED</div>
+                <div class="fto_box_content"><span id="fto_unanswered">45</span><span class="fto_small">marks</span>
+                </div>
+            </div>
+            <div class="fto_box">
+                <div class="fto_box_title">RANK</div>
+                <div class="fto_box_content" id="fto_rank">5</div>
+            </div>
+        </div>
+        <hr color="white" width="100%">
+        <div id="fto_overview" style="display: flex;flex-direction: row;flex-wrap:wrap">
+            <button class="tst_btn rpl" id="fto_detail"
+                onclick='window.location.hash = "#/testreport/" + window.location.hash.split("#/finished/")[1]'>Detailed
+                View</button>
+        </div>
+        <div style="display:flex;flex-direction:row;flex-wrap:wrap;">
+            <div style="display:flex;flex-direction:column;flex-wrap:wrap;">
+                <span style="font-size: 3vh;">Section Wise Scores</span>
+                <div id="fto_percents" style="display: flex;flex-direction: column;"></div>
+                <div>Legend: <span style="color:green">Correct</span>&nbsp;<span
+                        style="color:red">Incorrect</span>&nbsp;<span style="color:orange">Unattempted</span></div>
+            </div>
+            <div style="margin-left:20px;display:flex;flex-direction:column;">
+                <span style="font-size: 3vh;">Leaderboard</span>
+                <div id="fto_leaderboard"></div>
+            </div>
+        </div>
+        <div style="display:flex;flex-direction:column;flex-wrap:wrap;">
+            <span style="font-size: 3vh;">Section Wise Time Spent</span>
+            <div id="fto_time" style="display: flex;flex-direction: column;"></div>
+            <div>Legend: <span style="color:green">Correct</span>&nbsp;<span
+                    style="color:red">Incorrect</span>&nbsp;<span style="color:orange">Unattempted</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;flex-wrap:wrap;">
+            <span style="font-size: 3vh;">Time Spent Per Question</span>
+            <div id="fto_draw" style="display: flex;flex-direction: column;"></div>
+        </div>`;
+exports.default = {
+    page_finished_test
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"bKen7":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_forum", ()=>page_forum);
+let page_forum = `
+<span style="font-size: 5vh;color:yellow" id="fm_title">Forum</span>
+        <hr width="100%" color="white">
+        <div style="border:hotpink 3px solid;width:80%;">
+            <div id='pinned_msg'
+                style="background-color: rgb(38, 44, 31);color:rgb(21, 209, 209);overflow-y: scroll;height:30px;">Pinned
+                Message:<span id='pinnedtxt'>1</span></div>
+            <div id="forum_live" style="height:60vh;overflow-y: scroll;display: flex;flex-direction: column;">
+            </div>
+        </div>
+
+        <div>
+            <input type="text" id="fm_message" class="_in_aq" placeholder="Message">
+            <button class="tst_btn rpl" id="fm_send">Send</button>
+        </div>
+`;
+exports.default = {
+    page_forum
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"kxrBw":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_functions", ()=>page_functions);
+let page_functions = `
+<span class="in_t" class="">Functions</span>
+        <div class = "flex_type" style = "flex-direction: row;flex-wrap: wrap;">
+            <div id="fc_topics" class = "db_class">
+                <span style="font-size: 25px;color:yellow">Chapters/Topics</span>
+                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/add/tpc'">Add Topics</div>
+            </div>
+            <div id="fc_sims" class = "db_class">
+                <span style="font-size: 25px;color:yellow">Question Banks/Sims</span>
+                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/add/simulation'">Add Simulations</div>
+                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/add/qubank'">Add Question Bank</div>
+            </div>
+            <div id="fc_tests" class = "db_class">
+                <span style="font-size: 25px;color:yellow">Tests</span>
+                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/add/tests'">Add Test</div>
+                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/update/tests'">Update Test</div>
+            </div>
+            <div id="fc_batch" class = "db_class">
+                <span style="font-size: 25px;color:yellow">Batches</span>
+                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/add/batch'">Add New Batch</div>
+                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/list/batch'">Update Batches</div>
+                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/update/batch'">Update Batches</div>
+            </div>
+            <div id="fc_misc" class = "db_class">
+                <span style="font-size: 25px;color:yellow">Misc</span>
+                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/edit_exams'">Edit Exams</div>
+            </div>
+        </div>
+`;
+exports.default = {
+    page_functions
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"l4cy5":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "log", ()=>log);
+function log(title, msg, action, actionname, type) {
+    var no = Math.floor(Math.random() * 10000);
+    var html = `
+    <div id="msg_popup_` + no + `" class="overlay">
+    <div class="popup">
+        <center>
+            <h2 id="msg_popup_txt_` + no + `">Note</h2>
+        </center>
+        <a class="close"
+            onclick="document.getElementById('msg_popup_` + no + `').remove()">&times;</a>
+        <p id="msg_popup_content_` + no + `"></p>
+        <button class="tst_btn rpl" id="msg_action_` + no + `"></button>
+    </div>
+    </div>
+    `;
+    if (type == 1) dE("testv1").insertAdjacentHTML("beforeend", html);
+    else dE("quarkz_body").insertAdjacentHTML("beforeend", html);
+    dE("msg_popup_" + no).style.visibility = "visible";
+    dE("msg_popup_" + no).style.opacity = "1";
+    dE("msg_action_" + no).style.display = "none";
+    document.getElementById("msg_popup_txt_" + no).innerText = title;
+    document.getElementById("msg_popup_content_" + no).innerText = msg;
+    if (action == undefined) action = function() {};
+    else dE("msg_action_" + no).style.display = "block";
+    if (actionname == undefined) actionname = "";
+    dE("msg_action_" + no).onclick = action;
+    dE("msg_action_" + no).innerText = actionname;
+    return "msg_popup_" + no;
+}
+exports.default = {
+    log
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"6nKCl":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_login", ()=>page_login);
+let page_login = `
+<div id="lgn_bx">
+    <span class="in_t">Welcome to Quarkz</span>
+    <input type="text" id="lg_uname" class="text_bx_1" placeholder="Username">
+    <input type="password" id="lg_pass" class="text_bx_1" placeholder="Password">
+    <div>
+        <button class="tst_btn rpl" id="sgn_in">Sign In</button>
+        <button class="tst_btn rpl" id="reg_in">Register</button>
+    </div>
+    <span id="lgn_err" class="err_txt">ERROR:Wrong Username Or Password</span>
+    <span class="lgn_c_1"><a href="/#/about">About</a>&nbsp;&nbsp;<a href="/#/legal">Legal</a>&nbsp;&nbsp;<a
+            href="/#/bugreport">Report A Bug</a>
+    </span>
+    <span class="lgn_c_1">
+        <a href="/#/mainsformulas">Formula Sheets</a>&nbsp;&nbsp;
+        <a href="/#/downloads">Downloads</a>
+    </span>
+</div>
+`;
+exports.default = {
+    page_login
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"95h6E":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_printable", ()=>page_printable);
+let page_printable = `
+<span class=" in_t no-print">Export</span>
+        <hr color="white" width="100%" class="no-print">
+        <span class="no-print"><button class="tst_btn rpl no-print" onclick="print()">Print</button><button
+                class="tst_btn rpl no-print" id="shf_btn">Shuffle</button><button class="tst_btn rpl no-print"
+                id="tsinf_btn">Update Bank
+                Info</button><button class="tst_btn rpl no-print" id="tans_btn">Answers</button><button
+                class="tst_btn rpl no-print" id="tansexpl_btn">Explanation And Answers</button><button
+                class="tst_btn rpl no-print" id="tremove_btn">Remove
+                All</button></span>
+        <hr color="white" width="100%">
+        <span class="in_t_3" id="qb_title">ERROR</span>
+        <hr color="white" width="100%">
+        <div id="pe_tst_info" class="flex_type no-print">
+            <span>Test<input id="pe_tst_type_1" type="checkbox"></span>
+            <span id="">General Instructions<input id="pe_tst_type_2" type="checkbox"></span>
+            <textarea type="answer" id="pe_gi_ins" class="_in_aq" placeholder="General Instructions"></textarea>
+            <div id="pe_tst_mrk">
+                <span>MCQ:<input type="number" id="pe_mcq_pno" class="_in_pq" value="3"><input type="number"
+                        id="pe_mcq_nno" class="_in_pq" value="-1"></span>
+                <span>MCQ Multiple:<input type="number" id="pe_mcmul_pno" class="_in_pq" value="3"><input type="number"
+                        id="pe_mcmul_nno" class="_in_pq" value="-1"></span>
+                <span>Numerical:<input type="number" id="pe_num_pno" class="_in_pq" value="4"><input type="number"
+                        id="pe_num_nno" class="_in_pq" value="0"></span>
+                <span>True Or False:<input type="number" id="pe_taf_pno" class="_in_pq" value="1"><input type="number"
+                        id="pe_taf_fno" class="_in_pq" value="0"></span>
+                <span>Explain:<input type="number" id="pe_exp_pno" class="_in_pq" value="4"><input type="number"
+                        id="pe_exp_nno" class="_in_pq" value="0"></span>
+                <span>Matrix<input type="number" id="pe_mat_pno" class="_in_pq" value="12"><input type="number"
+                        id="pe_mat_nno" class="_in_pq" value="-4"></span>
+            </div>
+        </div>
+        <div id="eqb_instr"><span style="color: green;">General
+                Instructions:&nbsp;&nbsp;</span><span id="equ_gi"></span>
+            <hr color="white" width="100%">
+        </div>
+
+        <div id="eqb_add" type="1">
+        </div>
+
+`;
+exports.default = {
+    page_printable
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"2MtJU":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_profile", ()=>page_profile);
+let page_profile = `
+<div id="prf_tab_t">
+            <div id="prf_tab_t_t">
+                <div id="prf_tab_t_t_img"></div>
+                <div id="prf_tab_t_hold">
+                    <span id="prf_name"></span>
+                    <span class="prf_det">
+                        <span id="prf_email"></span>&nbsp;•&nbsp;<span id="prf_gender"></span>
+                    </span>
+                    <span class="prf_det">
+                        <span id="prf_phone"></span>&nbsp;•&nbsp;<span id="prf_class"></span>
+                    </span>
+                    <span class="prf_det">
+                        <span id="prf_batch"></span>&nbsp;•&nbsp;<span id="prf_crton"></span>
+                    </span>
+                </div>
+            </div>
+        </div>
+`;
+exports.default = {
+    page_profile
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"chYH6":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_qbnkvid", ()=>page_qbnkvid);
+let page_qbnkvid = `
+<button id="qbnk_vid_btn" class="tst_btn rpl">Start</button>
+        <button id="qbnk_vid_btn_e" class="tst_btn rpl" style="display: none;">Stop</button>
+        <span style="font-size: 5vh;color:yellow;font-family: Nunito;" id="tb_q_title">Topic Name</span>
+        <hr width="100%" color="white">
+        <div class="div-qbnk">Quarkz!</div>
+        <img alt="Quarkz Logo" src="assets/Quarkz-T.png"
+            style="position:absolute;height:100px;width: 100px;top:0;left:0;z-index: 1;">
+        <div id="qbnk_vid_q" style="display: flex;flex-direction: column;align-items: center;z-index: 2;">
+            <div class="div-qbnk1"><span>Pause The Video If You Need More Time.Each Question Will Be Shown For 10
+                    Seconds.</span><span id="qbnk_timer" style="font-size: 80px;color:rgb(0, 255, 255)">0</span></div>
+            <span style="width: 60vw;"><span id="tb_q_qno" style="color: coral;"></span>
+                <div id="tb_q_qtext" style="width:100%;height:max-content;min-height: 12vh;">Question</div>
+            </span>
+            <div id="tb_q_ans_hold">
+                <input type="answer" id="tb_q_answer" class="_in_aq" placeholder="Answer">
+                <div id="tb_q_mcq_con" class="flex_type">
+                </div>
+                <div id="tb_q_matrix">
+                    <table>
+                        <tr>
+                            <td><span class="tb_q_i1"></span><span class="tb_q_i2"></span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="tb_q_i1"></span><span class="tb_q_i2"></span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="tb_q_i1"></span><span class="tb_q_i2"></span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="tb_q_i1"></span><span class="tb_q_i2"></span></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div id="qbnk_vid_ans" style="display: flex;flex-direction: column;align-items: center;">
+            <span style="font-size: 5vh;color:yellow;">Answer</span>
+            <div id="tb_q_hint" style="width:80%;height:max-content;min-height: 12vh;"></div>
+            <div id="tb_q_ans" style="height:max-content;min-height: 12vh;"></div>
+            <div id="tb_q_expl" style="width:80%;height:max-content;min-height: 12vh;"></div>
+        </div>
+        <div id="qbnk_vid_title"
+            style="display:flex;flex-direction: column;align-items: center;justify-content: center;height:60vh">
+            <span style="font-size: 15vh;color:yellow;font-family: Nunito;" id="qb_vid_ti"></span>
+        </div>
+        <div id="qbnk_vid_end" style="display:flex;flex-direction: column;align-items: center;justify-content: center;">
+            <span style="font-size: 5vh;color:yellow">Thanks For Watching</span>
+            <span style="font-size: 3vh;color:yellow">Subscribe To Quarkz! For More Such Videos</span>
+
+        </div>`;
+exports.default = {
+    page_qbnkvid
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"kcVux":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_register", ()=>page_register);
+let page_register = `
+<span class="in_t">Register</span>
+        <input type="tel" id="rg_mbleno" class="_in_reg" placeholder="Mobile No">
+        <input type="text" id="rg_uname" class="_in_reg" placeholder="Email Address">
+        <input type="password" id="rg_pass" class="_in_reg" placeholder="Password">
+        <input type="password" id="rg_pass1" class="_in_reg" placeholder="Confirm Password">
+        <input type="text" id="rg_name" class="_in_reg" placeholder="Name">
+        <label for="class">Class</label>
+        <input name = "rg_dob" type="date" id="rg_dob" class="_in_reg">
+        <label for="class">Class</label>
+        <select name="class" id="rg_class">
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+            <option value="11">11</option>
+            <option value="12">12</option>
+        </select>
+        <label for="gender">Gender</label>
+        <select name="gender" id="rg_gender">
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+        </select>
+
+        <button class="tst_btn rpl" id="rg_in">Register</button>
+
+`;
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"fvpoO":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_settings", ()=>page_settings);
+let page_settings = `
+<span class="in_t">Settings</span>
+        <hr color="white" width="100%">
+        <div class = "flex_type" style = "flex-direction: row;flex-wrap: wrap;">
+            <div id="st_accinfo" class = "db_class">
+                <span style="font-size: 25px;color:yellow">Account Info</span>
+                <button id="pass_rst_btn" class="tst_btn rpl">Reset/Change Password</button>
+            </div>
+            <div id="st_notif" class = "db_class">
+                <span style="font-size: 25px;color:yellow">Notifications</span>
+                <button id="pass_rst_btn" class="tst_btn rpl">Reset/Change Password</button>
+            </div>
+        </div>`;
+exports.default = {
+    page_settings
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"7kmTm":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_edit_sims", ()=>page_edit_sims);
+parcelHelpers.export(exports, "page_sims", ()=>page_sims);
+parcelHelpers.export(exports, "page_list_sims", ()=>page_list_sims);
+let page_edit_sims = `
+<span class="in_t" class="">Add/Edit Simulation</span>
+        <input type="text" id="aq_simname" class="_in_aq" placeholder="Simulation Name">
+        <input type="url" id="aq_simurl" class="_in_aq" placeholder="Simulation URL">
+        <input type="text" id="aq_simprov" class="_in_aq" placeholder="Simulation Provider">
+        <input type="text" id="aq_simlicense" class="_in_aq" placeholder="Simulation License">
+        <select name="type" id="aq_simsubj" class="_in_aq col-red">
+            <option value="physics">Physics</option>
+            <option value="chemistry">Chemistry</option>
+            <option value="maths">Maths</option>
+            <option value="biology">Biology</option>
+            <option value="computer">Computer</option>
+            <option value="statistics">Statistics</option>
+            <option value="unfiled">Unfiled</option>
+        </select>
+        <button class="tst_btn rpl" id="aq_sims_save">Save</button>
+
+`;
+let page_sims = `
+<span class="in_t">Simulations</span>
+        <hr color="white" width="100%">
+        <div style="display: flex;flex-direction: row;flex-wrap: wrap;"><span class="in_t" id="sms_name">Sim
+                Name</span><button class="tst_btn rpl" id="sms_edit" style="display: none;"
+                onclick='window.location.hash = "#/edit_sim/" + window.location.hash.split("#/sims/")[1]'>Edit
+                Sim</button></div>
+        <div>
+            <iframe id="sim_frame" frameborder="0"
+                style="width:80vw;height:70vh;background-color: black;color:white;scroll-behavior: smooth;"></iframe>
+        </div>
+        <div>
+            <span style="font-size: 2vh;">Provided By</span>
+            <span style="font-size: 2vh;" id="sms_prov">Sim Name</span>
+        </div>`;
+let page_list_sims = `
+<span class="in_t">Simulations List</span>
+        <hr color="white" width="100%">
+        <div style="display: flex;flex-direction: row;flex-wrap: wrap;">
+            <button class="tst_btn rpl" id="psims">Physics</button>
+            <button class="tst_btn rpl" id="csims">Chemistry</button>
+            <button class="tst_btn rpl" id="msims">Maths</button>
+            <button class="tst_btn rpl" id="bsims">Biology</button>
+            <button class="tst_btn rpl" id="cosims">Computer</button>
+            <button class="tst_btn rpl" id="ssims">Statistics</button>
+            <button class="tst_btn rpl" id="usims">Unfiled</button>
+        </div>
+        <div id="sim_cont" style="overflow-y: scroll;height:50vh;" class="flex_type">
+        </div>`;
+exports.default = {
+    page_edit_sims,
+    page_list_sims,
+    page_sims
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"7hktz":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_test_instructions", ()=>page_test_instructions);
+let page_test_instructions = `
+<span class="in_t">Test Instructions</span>
+        <hr color="white" width="100%">
+        <div style="width:80vw;overflow-y: scroll;border:yellow 3px solid;display: flex;flex-direction: column;">
+            <span style="font-size:5vh;text-align: center;">Please Read The Instructions And Terms Carefully</span>
+            <span style="font-size:18px;">General Instructions:</span>
+            <ol style="font-size: 14px;">
+                <li>The Exam Must Be Completed In 1 Sitting. You Will Be Able To Open This Test Window Only Once. </li>
+                <li>Read Every Question Carefully And Select Your Answer and Try To Answer As Many Questions As Possible
+                    In The Exam.</li>
+                <li>The Questions Palette displayed on the right side of screen will show the status of each question
+                    using one of the following symbols:</li>
+                <div>
+                    <div style="margin:9px"><span class="tts_notvisit">12</span>You have not visited the question yet.
+                    </div>
+                    <div style="margin:9px"><span class="tts_notanswer">21</span>You have not answered the question.
+                    </div>
+                    <div style="margin:9px"><span class="tts_answered">45</span>You have answered the question.</div>
+                    <div style="margin:9px"><span class="tts_review">30</span>You have NOT answered the question, but
+                        have marked the question for review.</div>
+                    <div style="margin:9px"><span class="tts_ansreview">37</span>The question(s) "Answered and Marked
+                        for Review" will be considered for evalution.</div>
+                </div>
+                <li>When the timer reaches zero, the examination will end by itself. You will not be required to end or
+                    submit your examination.</li>
+                <li>Make Sure To Have A Good Internet Connection. Loss in Internet Connectivity may prevent submission
+                    of answers. </li>
+                <li>DO NOT TRY TO Minimise The Full Screen Mode Of The Exam. You Will Recieive 1 Warning For Doing So
+                    After Which Your Test Will End</li>
+            </ol>
+            <span style="font-size:18px;">Navigating to a Question:</span>
+            <ol style="font-size:14px;">
+                <li>To view/answer a question, do the following: Click on the question number in the Question Palette at
+                    the right of your screen to go to that numbered question directly. Note that using this option does
+                    NOT save your answer to the current question.</li>
+            </ol>
+            <span style="font-size:18px;">Answering a Question:</span>
+            <ol style="font-size:14px;">
+                Procedure for answering a multiple choice type question:
+                <li>To select you answer, click on the button of one of the options.</li>
+                <li>To deselect your chosen answer, click on the button of the chosen option again or click on the Clear
+                    Response button</li>
+                <li>To change your chosen answer, click on the button of another option</li>
+                <li>To save your answer, you MUST click on the Save button.</li>
+                <li>To mark the question for review, click on the Mark for Review button.</li>
+                <li>To change your answer to a question that has already been answered, first select that question for
+                    answering and then follow the procedure for answering that type of question.</li>
+            </ol>
+            <span style="font-size:18px;">Navigating through sections:</span>
+            <ol style="font-size:14px;">
+                <li>All Questions are Visible in the Question Pallete along under the respective sections/subjects</li>
+            </ol>
+            <span style="font-size:18px;">Terms And Conditions:</span>
+            <span style="font-size:14px;">By Clicking On Start I Agree On All Terms And Conditions:</span>
+            <ol style="font-size:14px;">
+                <li>I have read and understood all the instructions. </li>
+                <li>I agree that all computer hardware allotted to me are in proper working condition. </li>
+                <li>I declare that i am not in possession of / not wearing / not carrying any prohibited gadget like
+                    mobile phone,bluetooth devices etc. /any prohibited material with me into the Examination Hall.</li>
+                <li>I also agree that I will not tamper with any software/technologies/devices alloted to me while
+                    attempting
+                    this test.
+                </li>
+                <li>I agree that in case of not adhering to the instructions, I shall be liable to be debarred from this
+                    Test and/or to disciplinary action, which may include ban from future Test / Examinations</li>
+            </ol>
+            <span style="font-size:5vh;text-align: center;">👍 All The Best! 👍</span>
+            <button class="tst_btn rpl" id="tin_start"
+                onclick='window.location.hash = "#/attempt/" + window.location.hash.split("#/instructions/")[1]'>Start</button>
+        </div>
+`;
+exports.default = {
+    page_test_instructions
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"7y3N8":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_test_list", ()=>page_test_list);
+parcelHelpers.export(exports, "page_test_v1", ()=>page_test_v1);
+parcelHelpers.export(exports, "page_test_end", ()=>page_test_end);
+let page_test_list = `
+<span class="in_t">Tests</span>
+        <hr color="white" width="100%">
+        <div><button class="tst_btn rpl" id="ti_act">Active Tests</button><button class="tst_btn rpl"
+                id="ti_fin">Finished Tests</button><button class="tst_btn rpl" id="ti_upc">Upcoming Tests</button></div>
+        <div id="testlinks">
+        </div>`;
+let page_test_v1 = `
+<div style="border: grey 2px dashed;flex-direction: row;margin:10px;" class="flex_type">
+            <div style="display: flex;flex-direction: column;width: 60vw;height:80vh;margin:10px;min-width: 300px;">
+                <div id="tt_extrabx" style="display: flex;flex-direction:row;height: 40px;margin:10px;">
+                    <span id="tt_timeleft">00:00:00</span>
+                    <span id="tt_marksaward"></span>
+                    <span id="tt_timespent" style="margin-left:5px;"></span>
+                    <span id="tt_testname" style="width: 100%;text-align: right;margin-left: 5px;">TEST
+                        NAME</span>
+                    <button id="tt_sub" class="tst_btn rpl">Submit</button>
+                </div>
+                <div id="tt_question">
+                    <div style="font-size: larger;">Question <span id="tt_qno">12</span></div>
+                    <hr>
+                    <div id="tt_qtitle">Who Is The President Of India?</div>
+                    <hr>
+                </div>
+                <div id="tt_footer" style="display:flex;">
+                    <button class="tst_btn rpl" id="tt_save">Save</button>
+                    <button class="tst_btn rpl" id="tt_clear">Clear</button>
+                    <button class="tst_btn rpl" id="tt_review">Mark For Review</button>
+                    <button class="tst_btn rpl" id="tt_ansreview">Save And Mark For Review</button>
+                </div>
+            </div>
+            <div>
+                <div id="tt_infobx">
+                    <div style="margin:9px"><span class="tts_notvisit">12</span>Not Visited</div>
+                    <div style="margin:9px"><span class="tts_notanswer">21</span>Not Answered</div>
+                    <div style="margin:9px"><span class="tts_answered">45</span>Answered</div>
+                    <div style="margin:9px"><span class="tts_review">30</span>Review</div>
+                    <div style="margin:9px"><span class="tts_ansreview">37</span>Review And Answered</div>
+                </div>
+                <div id="tt_qnobx">
+                    <div>
+                        <div id="tw_Physics"><span>Physics</span>
+                            <div id="tw_Physics_c"></div>
+                        </div>
+                        <div id="tw_Chemistry"><span>Chemistry</span>
+                            <div id="tw_Chemistry_c"></div>
+                        </div>
+                        <div id="tw_Math"><span>Math</span>
+                            <div id="tw_Math_c"></div>
+                        </div>
+                        <div id="tw_Computer"><span>Computer</span>
+                            <div id="tw_Computer_c"></div>
+                        </div>
+                        <div id="tw_Biology"><span>Biology</span>
+                            <div id="tw_Biology_c"></div>
+                        </div>
+                        <div id="tw_Statistics"><span>Statistics</span>
+                            <div id="tw_Statistics_c"></div>
+                        </div>
+                        <div id="tw_Unfiled"><span>Unfiled</span>
+                            <div id="tw_Unfiled_c"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+let page_test_end = `
+<span class="in_t" id="te_title">The Test Has Ended</span>
+        <span style="font-size:3vh;">Your Results Will Be Released After<span id="te_endtime"></span></span>
+        <a class="tst_btn rpl" href="/#/dashboard">Go To Dashboard</a>
+        <hr color="white" width="100%">`;
+exports.default = {
+    page_test_end,
+    page_test_list,
+    page_test_v1
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"kt253":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_toc", ()=>page_toc);
+let page_toc = `
+<span class="in_t">Terms And Conditions</span>
+        <span class="sp_txt">Copyright 2021-23 Quarkz By Mr Techtroid</span>
+        <span class="in_t_2">Last Updated: 04 April 2023(IST)</span>
+<div id="lgl_container">
+    <ol>
+        <h3>A. Acceptance of Terms and Conditions</h3>
+        <li>By using the Quarkz website, you acknowledge and agree to the terms and conditions set forth below. If you do not agree to these terms and conditions, you should not use the Quarkz website.</li>
+        <h3>B. Account Information And User Generated Content</h3>
+        <li>By creating an account on the Quarkz website, you agree to provide accurate and complete information about yourself as requested in the registration form. You also agree to keep your account information up-to-date and secure. </li>
+        <li>All user-generated content on the Quarkz website, including but not limited to quizzes, tests, assignments, notes, and forum posts, may be accessed by Quarkz admins or authorized moderators. When you request account deletion, no user-generated data will be deleted. Instead, the account will be unlinked from our authentication services. However, this data will continue to be accessible to ONLY Quarkz admins.
+        <h3>C. Account Information And User Generated Content</h3>
+        <li>Any content uploaded, published, submitted, or posted by you on the Quarkz platform, including without limitation, text, graphics, images, videos, and audio, will be owned by you, but we are also granted a worldwide, non-exclusive, royalty-free, sublicensable, and transferable license to use, reproduce, distribute, share, display, publish, retain, make available online, and/or electronically transmit such user-generated content as well as technical information collected. You represent and warrant that you have all necessary rights to grant us this license.</li>
+        <h3>D. Code of Conduct</h3>
+        <li>You agree to use the Quarkz website in a lawful and ethical manner. You agree not to engage in any activity that could damage, disable, overburden, or impair the website, or interfere with any other user's access to the website. You agree not to post or transmit any content that is obscene, defamatory, libelous, abusive, discriminatory, or otherwise offensive. You agree not to harass or bully other users on the website.</li>
+        <h3>E. Termination of Access</h3>
+        <li>We reserve the right to terminate access to the Quarkz website, or any part thereof, to any user at any time, without prior notice, for any reason, including without limitation, for a violation of these terms and conditions.</li>
+        <h3>F. Age Restrictions</h3>
+        <li>By creating an account on the Quarkz website, you represent and warrant that you are 13 years of age or older. If you are under 13 years of age, you must obtain permission from your guardians or parents to use the Quarkz website. We do not knowingly collect any personal information from users under 13 years of age. If we become aware that we have collected personal information from a user under 13 years of age, we will take steps to delete that information.</li>
+        <h3>G. Free Use Disclaimer</h3>
+        <li>The Quarkz website may contain copyrighted material that has not been specifically authorized by the copyright owner. Such material is made available for educational purposes under the "fair use" provision of the Copyright Act. Quarkz respects the intellectual property rights of others, and we ask that our users do the same.</li>
+        <li>Copyright Disclaimer under section 107 of the Copyright Act 1976, allowance is made for “fair use”
+            for purposes such as criticism, comment, news reporting, teaching, scholarship, education and
+            research. </li>
+        <h3>H. Licensing And Assets</h3>
+        <li>All codes, graphics, assets, files, and information located on the Quarkz website <span class="sp_txt">quarkz.netlify.app</span> or any of our storage services, such as Firebase, are part of Quarkz. Any usage, reproduction of any of the same without prior consent of owner Mr. Techtroid or Quarkz team is prohibited. </li>
+        <li>YouTube videos used on this website belong to their respective channel owners. Usage of questions and notes are from fair use under education, teaching, and research categories. Simulations used on this website belong to the respective providers.</li>
+        <li>If You Feel Any Content is violating your Copyright and want it to be removed from this site, contact us at the contact us page. We will make sure that we will remove the content in 24 Hours.</li>
+        <h3>I. User Conduct</h3>
+        <li>When using Quarkz, you agree to abide by all applicable laws and regulations, as well as our community guidelines. You also agree to respect the rights and dignity of others and not engage in any conduct that is discriminatory, harassing, or harmful in any way. Any violation of these rules may result in the termination of your account and may also lead to legal action.
+        <h3>J. Indemnification</h3>
+        <li>You agree to indemnify and hold Quarkz, its affiliates, licensors, and their respective directors, officers, agents, and employees, harmless from and against any and all claims, losses, liabilities, damages, costs, and expenses, including reasonable attorneys' fees, arising out of or related to your use of our website, your violation of these Terms and Conditions, or any unauthorized use of your account.</li>
+        <h3>K. Disclaimer of Warranties</h3>
+        <li>Quarkz does not warrant that the site will be error-free, uninterrupted, or secure. You acknowledge and agree that your use of the site is at your own risk. Quarkz makes no representations or warranties of any kind, express or implied, regarding the accuracy, completeness, reliability, suitability, or availability of the site or the information, products, services, or related graphics contained on the site for any purpose. To the fullest extent permitted by law, Quarkz disclaims all warranties, including but not limited to warranties of title, non-infringement, merchantability, and fitness for a particular purpose.</li>
+        <h3>L. Limitation of Liability</h3>
+        <li>In no event shall Quarkz be liable for any direct, indirect, incidental, special, or consequential damages arising out of or in any way connected with your use of or inability to use the site, or for any information, products, services, or related graphics obtained through the site, even if Quarkz has been advised of the possibility of such damages. Some jurisdictions do not allow the exclusion or limitation of liability for incidental or consequential damages, so the above limitation may not apply to you.</li>
+        <h3>M. Governing Law and Jurisdiction</h3>
+        <li>These Terms and Conditions shall be governed by and construed in accordance with the laws of India, without giving effect to any principles of conflicts of law. You agree that any dispute arising from or relating to these Terms and Conditions or your use of the site shall be brought exclusively in the courts located in India, and you hereby consent to the personal jurisdiction and venue of such courts.</li>
+        <h3>N. Termination</h3>
+        <li>We may terminate your access to the site, without cause or notice, which may result in the forfeiture and destruction of all information associated with your account. All provisions of these Terms and Conditions that by their nature should survive termination shall survive termination, including, without limitation, ownership provisions, warranty disclaimers, indemnity, and limitations of liability.</li>
+        <h3>O. Entire Agreement</h3>
+        <li>These Terms and Conditions constitute the entire agreement between you and Quarkz and supersedes all prior or contemporaneous agreements, representations, warranties, and understandings, whether written or oral, relating to the site.</li>
+        <h3>P. Contact Us</h3>
+        <li>If you have any questions or comments about these Terms and Conditions or our website, please contact us through our "Contact Us" page.</li>
+    </ol>
+</div>`;
+exports.default = {
+    page_toc
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"eSIhy":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_edit_topic", ()=>page_edit_topic);
+parcelHelpers.export(exports, "page_topic", ()=>page_topic);
+let page_edit_topic = `
+<span class="in_t" class="" id="fu_topic_title">Add/Edit Topic</span>
+        <div id="aq_basic" style="flex-direction: column;">
+            <input type="text" id="aq_tpcname" class="_in_aq" placeholder="Tests/Topic/Question Bank Name">
+            <select name="type" id="aq_tpclevel" class="_in_aq col-red">
+                <option value="jee">JEE</option>
+                <option value="neet">NEET</option>
+                <option value="foundation">Foundation</option>
+            </select>
+            <input type="text" id="aq_tpc_chapterid" class="_in_aq" placeholder="Chapter ID">
+            <select name="type" id="aq_tpc_subj" class="_in_aq col-red">
+                <option value="physics">Physics</option>
+                <option value="chemistry">Chemistry</option>
+                <option value="maths">Maths</option>
+                <option value="biology">Biology</option>
+                <option value="computer">Computer</option>
+                <option value="statistics">Statistics</option>
+                <option value="unfiled">Unfiled</option>
+            </select>
+        </div>
+        <div id="aq_test_extra" style="flex-direction: column;">
+            <input type="text" id="aq_tst_batches" class="_in_aq" placeholder="Batch ID">
+            <input type="datetime-local" id="aq_tst_stron" class="_in_aq">
+            <input type="datetime-local" id="aq_tst_endon" class="_in_aq">
+            <input type="text" id="aq_tst_syllabi" class="_in_aq" placeholder="Syllabus">
+            <input type="number" id="aq_tst_timealotted" class="_in_aq" placeholder="Time Alloted">
+        </div>
+        <div id="lqadd" style="display: flex;flex-direction: row;margin:10px;height: 50vh;">
+            <div id="question_list"
+                style="border: 2px lime solid;width: 15vw;height:50vh;display: flex;flex-direction: column;align-items: center;text-align: center;font-size: 3vh;overflow-y: scroll;"
+                class="title-notes"></span>
+            </div>
+            <div
+                style="border: 2px lime solid;width:75vw;display: flex;flex-direction: column;overflow-y: scroll;height:50vh;">
+                <select name="type" id="aq_mode" class="_in_aq col-red">
+                    <option value="question">Question</option>
+                    <option value="lesson">Lesson</option>
+                    <option value="exam">Exam</option>
+                </select>
+                <div class="flex_type" id="aq_exams">
+                    <input type="text" id="aq_examname" class="_in_aq" placeholder="Exam Names">
+                    <input type="text" id="aq_examdate" class="_in_aq" placeholder="Exam Dates">
+                    <input type="text" id="aq_examinfo" class="_in_aq" placeholder="Exam Info Link">
+                    <input type="text" id="aq_examsyllabus" class="_in_aq" placeholder="Syllabus Link">
+                </div>
+                <div class="flex_type" id="aq_all" style="align-items: unset;" id="aq_uiad">
+                    <div class="summernote" id="aq_qtext">Question</div>
+                    <input type="text" id="aq_answer" class="_in_aq" placeholder="Answer">
+                    <input type="url" id="aq_yurl" class="_in_aq" placeholder="Youtube ID">
+                    <div class="summernote" id="aq_expl">Explanation</div>
+                    <textarea type="answer" id="aq_hint" class="_in_aq" style="resize: none;overflow-y: scroll;"
+                        placeholder="Hint"></textarea>
+                    <input type="number" id="aq_posmrks" class="_in_aq" placeholder="Marks For Correct">
+                    <input type="number" id="aq_negmrks" class="_in_aq" placeholder="Marks For Incorrect">
+                    <select name="type" id="aq_section" class="_in_aq col-red">
+                        <option value="Physics">Physics</option>
+                        <option value="Chemistry">Chemistry</option>
+                        <option value="Math">Math</option>
+                        <option value="Biology">Biology</option>
+                        <option value="Computer">Computer</option>
+                        <option value="Statistics">Statistics</option>
+                        <option value="Unfiled">Unfiled</option>
+                    </select>
+                </div>
+                <div id="aq_ans_hold">
+                    <select name="type" id="aq_type" class="_in_aq col-red">
+                        <option value="mcq">MCQ</option>
+                        <option value="mcq_multiple">MCQ Multiple</option>
+                        <option value="matrix">Matrix</option>
+                        <option value="numerical">Numerical</option>
+                        <option value="explain">Explain</option>
+                        <option value="fill">Fill In The Blanks</option>
+                    </select>
+                    <div id="aq_mcq_con" class="flex_type">
+                        <div class="aq_mcq_p" onclick="changeColor(this)"><input class="aq_mcq"></div>
+                        <div class="aq_mcq_p" onclick="changeColor(this)"><input class="aq_mcq"></div>
+                        <div class="aq_mcq_p" onclick="changeColor(this)"><input class="aq_mcq"></div>
+                        <div class="aq_mcq_p" onclick="changeColor(this)"><input class="aq_mcq"></div>
+                    </div>
+                    <div id="aq_matrix">
+                        <table>
+                            <tr>
+                                <td><input class="aq_i1"><input class="aq_i2"></td>
+                            </tr>
+                            <tr>
+                                <td><input class="aq_i1"><input class="aq_i2"></td>
+                            </tr>
+                            <tr>
+                                <td><input class="aq_i1"><input class="aq_i2"></td>
+                            </tr>
+                            <tr>
+                                <td><input class="aq_i1"><input class="aq_i2"></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <button class="tst_btn rpl" id="aq_ao">Add Option</button>
+                    <button class="tst_btn rpl" id="aq_ro">Remove Option</button>
+                </div>
+                <button class="tst_btn rpl" id="aq_re">Remove Entry</button>
+            </div>
+        </div>
+        <button class="tst_btn rpl" id="aq_tpc_save">Save/Update Topic</button>
+        <button class="tst_btn rpl" id="aq_qbc_save">Save/Update QBank</button>
+        <button class="tst_btn rpl" id="aq_tst_save">Save/Update Test</button>
+        <button class="tst_btn rpl" id="aq_exam_save">Save/Update Exams</button>
+        <button class="tst_btn rpl" id="aq_export">Export</button>
+
+`;
+let page_topic = `
+<span style="font-size: 5vh;color:yellow" id="tp_title">Topic Name</span>
+        <hr width="100%" color="white">
+        <div class="flex_type" style="flex-direction: row;flex-wrap: wrap;">
+            <span style="font-size: 3vh;color:yellow" id="tp_lsno">Lesson Name</span>
+            <button class="tst_btn rpl" id="tp_nxt">Next</button>
+            <button class="tst_btn rpl" id="tp_prv">Previous</button>
+            <button class="tst_btn rpl" id="tp_pnt" style="display: none;">Export</button>
+            <button class="tst_btn rpl" id="tp_edt" style="display: none;">Edit</button>
+        </div>
+        <hr width="100%" color="white">
+        <div id="tp_lesson" style="width: 80%;">
+            <div id="tp_full_vid">
+                <!-- <iframe id = "video" style = "width:80%; height: 450px; border-style: solid; ;border-width: 10px;" hidden = "True"  allow = "autoplay"></iframe> -->
+                <div style="pointer-events: none;width:100%;">
+                    <div>
+                        <div id="player" style="width: 100%;"></div>
+                    </div>
+                    <div id="yt_progressBar" style="width:100%;">
+                        <div id="yt_progressBar_in"></div>
+                    </div>
+                </div>
+                <div id="toolbar"
+                    style="border:3px solid grey; border-radius: 10px 10px 10px 10px;padding-left: 5px;padding-right: 5px;">
+                    <span class="material-icons" id="tp_bw_btn" onclick="player.seekTo(player.getCurrentTime()-10)"
+                        title="-10 Seconds">fast_rewind</span>
+                    <span class="material-icons" id="tp_pl_btn" title="Play"
+                        onclick="player.playVideo()">play_arrow</span>
+                    <span class="material-icons" id="tb_pa_btn" title="Pause" onclick="player.pauseVideo()">pause</span>
+                    <span class="material-icons" onclick="player.stopVideo()" id="tb_st_btn" title="Stop">stop</span>
+                    <span class="material-icons" id="tb_fw_btn" onclick="player.seekTo(player.getCurrentTime()+10)"
+                        title="+10 Seconds">fast_forward</span>
+                    <span id="mute" class="material-icons" id="tb_um_btn" onclick="volumetype()"
+                        title="Mute/Unmute">volume_up</span>
+                    <span id="mute" class="material-icons" id="tb_um_btn" title="Mute/Unmute"
+                        onclick="fullscreen()">fit_screen</span>
+                    <span class="material-symbols-outlined" id="tb_wy_btn" onclick="window.open(player.getVideoUrl())"
+                        title="Watch On Youtube">youtube_activity</span>
+                    <input type="range" min="0" max="100" value="50" id="tb_vl_br" style="background-color: grey;"
+                        onchange="volumechange()" oninput="volumechange()">
+                </div>
+            </div>
+            <div>
+                <div id="tp_expl" style="height:max-content;min-height: 12vh;text-align: left;">Explanation</div>
+                <img id="tp_lsimg">
+            </div>
+        </div>
+
+        <div id="tp_question" style="width: 80%;align-items: center;display: flex;flex-direction: column;">
+            <div id="tp_qtext" style="width:80%;height:max-content;min-height: 12vh;">Question</div>
+            <div id="tp_ans_hold">
+                <input type="answer" id="tp_answer" class="_in_aq" placeholder="Answer">
+                <div id="tp_mcq_con" class="flex_type">
+                </div>
+                <div id="tp_matrix">
+                    <table>
+                        <tr>
+                            <td><span class="tp_i1"></span><span class="tp_i2"></span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="tp_i1"></span><span class="tp_i2"></span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="tp_i1"></span><span class="tp_i2"></span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="tp_i1"></span><span class="tp_i2"></span></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div>
+                <button class="tst_btn rpl" id="tp_sbm">Submit</button>
+                <div id="tp_status"></div>
+            </div>
+            <div id="tp_hint" style="display: none;">Hint</div>
+            <div id="tp_e_answer" style="display: none;">Answer</div>
+            <div id="tp_a_expl" style="display: none;">Explanation</div>
+        </div>`;
+exports.default = {
+    page_edit_topic,
+    page_topic
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"enRwb":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_edit_user", ()=>page_edit_user);
+let page_edit_user = `
+<span class="in_t">Users</span>
+        <hr color="white" width="100%">
+        <div
+            style="border:orangered 3px solid;border-radius: 30px;display: flex;flex-direction: column;align-items: center;width:80%;">
+            <span style="font-size:3vh;color:yellow;width:80%;">Add Users</span><iframe
+                href="index.html#/register"></iframe>
+        </div>
+        <hr color="white" width="50%">
+        <input type="answer" id="us_user" class="_in_aq" placeholder="username">
+
+`;
+exports.default = {
+    page_edit_user
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"71ul5":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_usernotes", ()=>page_usernotes);
+let page_usernotes = `
+<div id="un_list" style="border:3px solid grey;width:25vw;height:90%"></div>
+        <div id="un_render" style="width:77vw;height:100%">
+            <div id="un_tools" style="width:100%;display: flex;flex-direction: row;flex-wrap: wrap;">
+                <select id="un_rendermode" class="_in_aq" style="width: 100px;color:red;"
+                    value="edit">
+                    <option value="edit">edit</option>
+                    <option value="preview">preview</option>
+                </select>
+                <select id="un_viewership" class="_in_aq" style="width: 100px;color:red;">
+                    <option value="private">private</option>
+                    <option value="public_view">public(view_only)</option>
+                    <option value="public">public</option>
+                </select>
+                <input id="un_title" type="text" class="_in_aq" style="width:20vw;" value="Notes Title">
+                <button id="un_save" class="rpl tst_btn" style="height: 30px;">Save</button>
+                <button id="un_print" class="rpl tst_btn" style="height: 30px;">Print</button>
+                <input id="un_colorpicker" type="color" name="favcolor" value="#ff0000"
+                    style="width:5vw;height:30px;background-color: transparent;border:none" onchange="notesUIHandler()">
+            </div>
+            <div id="un_edit" style="height:90%;width:100%">
+                <div class="summernote" id="un_editable" style="height:90%">Notes</div>
+            </div>
+            <div id="un_preview" style="height:90%;width:100%;overflow:scroll">
+            </div>
+            <iframe style="display: none;" id="un_print_iframe"></iframe>
+        </div>
+`;
+exports.default = {
+    page_usernotes
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"56dox":[function(require,module,exports) {
+// Video Creator - https://www.educative.io/edpresso/how-to-create-a-screen-recorder-in-javascript
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "mediaRecorder", ()=>mediaRecorder);
+parcelHelpers.export(exports, "recordScreen", ()=>recordScreen);
+parcelHelpers.export(exports, "createRecorder", ()=>createRecorder);
+parcelHelpers.export(exports, "saveFile", ()=>saveFile);
+let mediaRecorder;
+async function recordScreen() {
+    return await navigator.mediaDevices.getDisplayMedia({
+        audio: true,
+        video: {
+            mediaSource: "screen"
+        }
+    });
+}
+function createRecorder(stream, mimeType) {
+    let recordedChunks = [];
+    const mediaRecorder = new MediaRecorder(stream);
+    mediaRecorder.ondataavailable = function(e) {
+        if (e.data.size > 0) recordedChunks.push(e.data);
+    };
+    mediaRecorder.onstop = function() {
+        saveFile(recordedChunks);
+        recordedChunks = [];
+    };
+    mediaRecorder.start(200);
+    return mediaRecorder;
+}
+function saveFile(recordedChunks) {
+    const blob = new Blob(recordedChunks, {
+        type: "video/webm"
+    });
+    let filename = window.prompt("Enter file name"), downloadLink = document.createElement("a");
+    downloadLink.href = URL.createObjectURL(blob);
+    downloadLink.download = `${filename}.webm`;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    URL.revokeObjectURL(blob); // clear from memory
+    document.body.removeChild(downloadLink);
+}
+exports.default = {
+    mediaRecorder,
+    saveFile,
+    createRecorder,
+    recordScreen
+};
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["9tRox","1SICI"], "1SICI", "parcelRequire43c0")
 

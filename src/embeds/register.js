@@ -1,0 +1,28 @@
+export let page_register = `
+<span class="in_t">Register</span>
+        <input type="tel" id="rg_mbleno" class="_in_reg" placeholder="Mobile No">
+        <input type="text" id="rg_uname" class="_in_reg" placeholder="Email Address">
+        <input type="password" id="rg_pass" class="_in_reg" placeholder="Password">
+        <input type="password" id="rg_pass1" class="_in_reg" placeholder="Confirm Password">
+        <input type="text" id="rg_name" class="_in_reg" placeholder="Name">
+        <label for="class">Class</label>
+        <input name = "rg_dob" type="date" id="rg_dob" class="_in_reg">
+        <label for="class">Class</label>
+        <select name="class" id="rg_class">
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+            <option value="11">11</option>
+            <option value="12">12</option>
+        </select>
+        <label for="gender">Gender</label>
+        <select name="gender" id="rg_gender">
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+        </select>
+
+        <button class="tst_btn rpl" id="rg_in">Register</button>
+
+`

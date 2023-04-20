@@ -13,7 +13,6 @@ For permission requests, please contact [Mr Techtroid] at mrtechtroid@outlook.co
 */ function changeColor(ele) {
     c = ele.firstChild;
     if (ele.target !== this) {
-        console.log(ele, c);
         if (document.getElementById("aq_type").value == "mcq") {
             for(var i = 0; i < document.getElementsByClassName("aq_mcq").length; i++){
                 document.getElementsByClassName("aq_mcq")[i].classList.remove("aq_mcq_ans");
@@ -37,37 +36,8 @@ firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 var player;
 var video_id = "4nOn9YLp7AE";
 var refer = window.location.search;
-document.getElementById("tans_btn").addEventListener("click", function() {
-    for(var i = 0; i < document.getElementsByClassName("q_ans_1").length; i++)document.getElementsByClassName("q_ans_1")[i].style.display = "flex";
-});
-document.getElementById("tansexpl_btn").addEventListener("click", function() {
-    for(var i = 0; i < document.getElementsByClassName("q_ans_1").length; i++)document.getElementsByClassName("q_ans_1")[i].style.display = "flex";
-    for(var i = 0; i < document.getElementsByClassName("q_ans_expl").length; i++)document.getElementsByClassName("q_ans_expl")[i].style.display = "flex";
-});
-document.getElementById("tremove_btn").addEventListener("click", function() {
-    for(var i = 0; i < document.getElementsByClassName("q_ans_1").length; i++)document.getElementsByClassName("q_ans_1")[i].style.display = "none";
-    for(var i = 0; i < document.getElementsByClassName("q_ans_expl").length; i++)document.getElementsByClassName("q_ans_expl")[i].style.display = "none";
-});
 function watchonYT(vidID) {
     window.location = "https://youtube.com/watch?v=" + vidID;
-}
-var vid_width = 0.8 * window.innerWidth || 0.8 * document.documentElement.clientWidth || 0.8 * document.body.clientWidth;
-function onYouTubeIframeAPIReady() {
-    player = new YT.Player("player", {
-        height: "500",
-        width: vid_width,
-        origin: window.location.origin,
-        videoId: video_id,
-        playerVars: {
-            "playsinline": 1,
-            "controls": 0,
-            "modestbranding": 1
-        },
-        events: {
-            "onReady": onPlayerReady,
-            "onStateChange": onPlayerStateChange
-        }
-    });
 }
 function onPlayerReady(event) {
     //   event.target.playVideo();
@@ -148,35 +118,29 @@ function mcqchose(ele) {
 if (screen.width < "300px") document.getElementById("overlay").style.display = "block";
 function updateUI() {
     if (document.getElementById("pe_tst_type_2").checked) document.getElementById("equ_gi").innerText = document.getElementById("pe_gi_ins").value;
-    if (document.getElementById("pe_tst_type_1").checked) {
-        console.log("hello");
-        document.querySelectorAll(".qb_q_ty").forEach(function(e) {
-            switch(e.innerText){
-                case "(mcq)":
-                    e.innerText = e.innerText + "(" + document.getElementById("pe_mcq_pno").value + "," + document.getElementById("pe_mcq_nno").value + ")";
-                    break;
-                case "(mcq_multiple)":
-                    e.innerText = e.innerText + "(" + document.getElementById("pe_mcmul_pno").value + "," + document.getElementById("pe_mcmul_nno").value + ")";
-                    break;
-                case "(numerical)":
-                    e.innerText = e.innerText + "(" + document.getElementById("pe_num_pno").value + "," + document.getElementById("pe_num_nno").value + ")";
-                    break;
-                case "(taf)":
-                    e.innerText = e.innerText + "(" + document.getElementById("pe_taf_pno").value + "," + document.getElementById("pe_taf_nno").value + ")";
-                    break;
-                case "(explain)":
-                    e.innerText = e.innerText + "(" + document.getElementById("pe_exp_pno").value + "," + document.getElementById("pe_exp_nno").value + ")";
-                    break;
-                case "(matrix)":
-                    e.innerText = e.innerText + "(" + document.getElementById("pe_mat_pno").value + "," + document.getElementById("pe_mat_nno").value + ")";
-                    break;
-            }
-        });
-    }
+    if (document.getElementById("pe_tst_type_1").checked) document.querySelectorAll(".qb_q_ty").forEach(function(e) {
+        switch(e.innerText){
+            case "(mcq)":
+                e.innerText = e.innerText + "(" + document.getElementById("pe_mcq_pno").value + "," + document.getElementById("pe_mcq_nno").value + ")";
+                break;
+            case "(mcq_multiple)":
+                e.innerText = e.innerText + "(" + document.getElementById("pe_mcmul_pno").value + "," + document.getElementById("pe_mcmul_nno").value + ")";
+                break;
+            case "(numerical)":
+                e.innerText = e.innerText + "(" + document.getElementById("pe_num_pno").value + "," + document.getElementById("pe_num_nno").value + ")";
+                break;
+            case "(taf)":
+                e.innerText = e.innerText + "(" + document.getElementById("pe_taf_pno").value + "," + document.getElementById("pe_taf_nno").value + ")";
+                break;
+            case "(explain)":
+                e.innerText = e.innerText + "(" + document.getElementById("pe_exp_pno").value + "," + document.getElementById("pe_exp_nno").value + ")";
+                break;
+            case "(matrix)":
+                e.innerText = e.innerText + "(" + document.getElementById("pe_mat_pno").value + "," + document.getElementById("pe_mat_nno").value + ")";
+                break;
+        }
+    });
 }
-document.getElementById("pe_tst_type_1").addEventListener("change", updateUI);
-document.getElementById("pe_tst_type_2").addEventListener("change", updateUI);
-document.getElementById("tsinf_btn").addEventListener("change", updateUI);
 function dE(id) {
     return document.getElementById(id);
 }
