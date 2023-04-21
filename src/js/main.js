@@ -26,7 +26,7 @@ import { page_functions } from "../embeds/functions";
 import { log } from "../embeds/log";
 import { page_login } from "../embeds/login";
 import { page_printable } from "../embeds/printable";
-import profile, { page_profile } from "../embeds/profile";
+import { page_profile } from "../embeds/profile";
 import { page_qbnkvid } from "../embeds/qbnkvid";
 import { page_register } from "../embeds/register";
 import { page_settings } from "../embeds/settings";
@@ -37,8 +37,6 @@ import { page_toc } from '../embeds/toc'
 import { page_topic, page_edit_topic } from "../embeds/topics";
 import { page_edit_user } from "../embeds/user";
 import { page_usernotes } from "../embeds/usernotes"
-
-
 import { saveFile, createRecorder, recordScreen } from "../js/recorder"
 import * as d3 from 'd3';
 import { sd, sha256, makeid, mobileCheck, areObjectsEqual, areEqual, getServerTime, fullEle, dE, sortObj, sortObjv2, renderMarkedMath, mergeById } from '../js/helper'
@@ -2133,9 +2131,7 @@ async function getTestInfo() {
   }
   dE("tt_testname").innerText = testInfo.title
   dE("dsh_btn").style.display = "none"
-  dE("tp_pnt").style.display = "none"
-  dE("tp_pnt").style.display = "none";
-  var tbox = dE("testv1")
+  var tbox = dE("output")
   try { fullEle(tbox) } catch { }
   inittestHandler()
 }

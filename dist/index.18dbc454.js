@@ -569,8 +569,7 @@ of the author, except in the case of brief quotations embodied in critical revie
 and certain other noncommercial uses permitted by copyright law.
 
 For permission requests, please contact [Mr Techtroid] at mrtechtroid@outlook.com .
-*/ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-var _app = require("firebase/app");
+*/ var _app = require("firebase/app");
 var _auth = require("firebase/auth");
 var _firestore = require("firebase/firestore");
 var _storage = require("firebase/storage");
@@ -586,7 +585,6 @@ var _log = require("../embeds/log");
 var _login = require("../embeds/login");
 var _printable = require("../embeds/printable");
 var _profile = require("../embeds/profile");
-var _profileDefault = parcelHelpers.interopDefault(_profile);
 var _qbnkvid = require("../embeds/qbnkvid");
 var _register = require("../embeds/register");
 var _settings = require("../embeds/settings");
@@ -1626,6 +1624,7 @@ function vidSlideController(docJSON) {
     renderMathInElement((0, _helper.dE)("tp_ans_hold"));
     renderMathInElement((0, _helper.dE)("tp_qtext"));
 }
+let mediaRecorder;
 // Prepares Slides Controller
 async function prepareVideo() {
     (0, _helper.dE)("qbnk_vid_btn").style.display = "none";
@@ -1661,7 +1660,7 @@ async function prepareVideo() {
                 } else if (jno == qllist.length - 1) {
                     (0, _helper.dE)("qbnk_vid_end").style.display = "flex";
                     setTimeout(function() {
-                        (0, _recorder.mediaRecorder).stop();
+                        mediaRecorder.stop();
                         (0, _helper.dE)("qbnk_vid_btn").style.display = "block";
                     }, 5000);
                     clearInterval(iou);
@@ -3053,9 +3052,7 @@ async function getTestInfo() {
     };
     (0, _helper.dE)("tt_testname").innerText = testInfo.title;
     (0, _helper.dE)("dsh_btn").style.display = "none";
-    (0, _helper.dE)("tp_pnt").style.display = "none";
-    (0, _helper.dE)("tp_pnt").style.display = "none";
-    var tbox = (0, _helper.dE)("testv1");
+    var tbox = (0, _helper.dE)("output");
     try {
         (0, _helper.fullEle)(tbox);
     } catch  {}
@@ -3766,7 +3763,7 @@ window.onhashchange = creMng;
 initFirebaseAuth();
 (0, _reworkui.sysaccess)();
 
-},{"firebase/app":"aM3Fo","firebase/auth":"79vzg","firebase/firestore":"8A4BC","firebase/storage":"8WX7E","d3":"17XFv","../js/helper":"lVRAz","./reworkui":"66uq8","../embeds/about":"gCJDO","../embeds/chapter":"fMnHP","../embeds/cyb":"6uKbY","../embeds/dashboard":"hkEZ0","../embeds/downloads":"g2MAL","../embeds/finished_test":"3VUaP","../embeds/forum":"bKen7","../embeds/functions":"kxrBw","../embeds/log":"l4cy5","../embeds/login":"6nKCl","../embeds/printable":"95h6E","../embeds/profile":"2MtJU","../embeds/qbnkvid":"chYH6","../embeds/register":"kcVux","../embeds/settings":"fvpoO","../embeds/sims":"7kmTm","../embeds/test_instructions":"7hktz","../embeds/tests":"7y3N8","../embeds/toc":"kt253","../embeds/topics":"eSIhy","../embeds/user":"enRwb","../embeds/usernotes":"71ul5","../js/recorder":"56dox","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"aM3Fo":[function(require,module,exports) {
+},{"firebase/app":"aM3Fo","firebase/auth":"79vzg","firebase/firestore":"8A4BC","firebase/storage":"8WX7E","d3":"17XFv","../js/helper":"lVRAz","./reworkui":"66uq8","../embeds/about":"gCJDO","../embeds/chapter":"fMnHP","../embeds/cyb":"6uKbY","../embeds/dashboard":"hkEZ0","../embeds/downloads":"g2MAL","../embeds/finished_test":"3VUaP","../embeds/forum":"bKen7","../embeds/functions":"kxrBw","../embeds/log":"l4cy5","../embeds/login":"6nKCl","../embeds/printable":"95h6E","../embeds/profile":"2MtJU","../embeds/qbnkvid":"chYH6","../embeds/register":"kcVux","../embeds/settings":"fvpoO","../embeds/sims":"7kmTm","../embeds/test_instructions":"7hktz","../embeds/tests":"7y3N8","../embeds/toc":"kt253","../embeds/topics":"eSIhy","../embeds/user":"enRwb","../embeds/usernotes":"71ul5","../js/recorder":"56dox"}],"aM3Fo":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _app = require("@firebase/app");
@@ -5040,8 +5037,8 @@ parcelHelpers.export(exports, "validateCallback", ()=>validateCallback);
 parcelHelpers.export(exports, "validateContextObject", ()=>validateContextObject);
 parcelHelpers.export(exports, "validateIndexedDBOpenable", ()=>validateIndexedDBOpenable);
 parcelHelpers.export(exports, "validateNamespace", ()=>validateNamespace);
-var global = arguments[3];
 var process = require("d8acfab35ed80fa1");
+var global = arguments[3];
 const CONSTANTS = {
     /**
      * @define {boolean} Whether this is the client Node.js SDK.
@@ -64272,7 +64269,7 @@ function log(title, msg, action, actionname, type) {
     </div>
     </div>
     `;
-    if (type == 1) dE("testv1").insertAdjacentHTML("beforeend", html);
+    if (type == 1) dE("output").insertAdjacentHTML("beforeend", html);
     else dE("quarkz_body").insertAdjacentHTML("beforeend", html);
     dE("msg_popup_" + no).style.visibility = "visible";
     dE("msg_popup_" + no).style.opacity = "1";
@@ -65039,11 +65036,9 @@ exports.default = {
 // Video Creator - https://www.educative.io/edpresso/how-to-create-a-screen-recorder-in-javascript
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "mediaRecorder", ()=>mediaRecorder);
 parcelHelpers.export(exports, "recordScreen", ()=>recordScreen);
 parcelHelpers.export(exports, "createRecorder", ()=>createRecorder);
 parcelHelpers.export(exports, "saveFile", ()=>saveFile);
-let mediaRecorder;
 async function recordScreen() {
     return await navigator.mediaDevices.getDisplayMedia({
         audio: true,
@@ -65078,7 +65073,6 @@ function saveFile(recordedChunks) {
     document.body.removeChild(downloadLink);
 }
 exports.default = {
-    mediaRecorder,
     saveFile,
     createRecorder,
     recordScreen

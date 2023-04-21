@@ -14,7 +14,7 @@ export function log(title, msg, action, actionname, type) {
     </div>
     `
     if (type == 1) {
-      dE("testv1").insertAdjacentHTML("beforeend", html)
+      dE("output").insertAdjacentHTML("beforeend", html)
     } else {
       dE("quarkz_body").insertAdjacentHTML("beforeend", html)
     }
