@@ -339,7 +339,7 @@ body {
   background-color: #7e8fa5;
 }
 
-.tlinks {
+.tlinks,.tlinks-2 {
   height: max-content;
   border: yellow 1px solid;
   padding: 10px;
@@ -350,7 +350,15 @@ body {
   flex-direction: column;
   justify-content: left;
 }
-
+.tlinks-2{
+  flex-direction: row !important;
+}
+#sms_prov::before{
+  content: "("
+}
+#sms_prov::after{
+  content: ")"
+}
 .tlinks_min {
   height: max-content;
   border: yellow 1px solid;

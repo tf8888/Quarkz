@@ -860,6 +860,10 @@ function topicEvents() {
     var tpsbm = (0, _helper.dE)("tp_sbm").addEventListener("click", checkQuestion);
     var tppnt = (0, _helper.dE)("tp_pnt").addEventListener("click", printStuff);
 }
+function editexamEvents() {
+    var aqre = (0, _helper.dE)("aq_re").addEventListener("click", removeEntry);
+    var tmode = (0, _helper.dE)("aq_mode").addEventListener("change", changeItem);
+}
 function edittopicEvents() {
     function chItem() {
         changeItem(1);
@@ -920,6 +924,10 @@ function coreManager(newlocation, n1) {
     if (n1 == 1) window.location.hash = "#/" + newlocation;
     handlebox = newlocation;
     location1 = window.location.hash.split("#/")[1];
+    if (userrole == false || userrole == null || userrole == undefined) {
+        if (location1 == "login" || location1 == "register" || location1.includes("notes") || location1 == "legal" || location1 == "about" || location1 == "bugreport" || location1 == "appinfo" || location1 == "mainsformulas" || location1 == "downloads") ;
+        else location1 = "error_page";
+    }
     switch(location1){
         case "profile":
             handlebox = "profile";
@@ -955,15 +963,15 @@ function coreManager(newlocation, n1) {
             (0, _helper.dE)("tmt_frame").src = userinfo.timetableurl;
             break;
         case "logout":
-            (0, _auth.signOut)();
+            signOutUser();
             break;
         case "mainsformulas":
             handlebox = "mainsformulas";
-            renderBody((0, _downloads.page_jee_main), "", "");
+            renderBody((0, _downloads.downloads_render)((0, _downloads.download_links_list), "formulasheet"), "", "");
             break;
         case "downloads":
             handlebox = "downloads";
-            renderBody((0, _downloads.page_downloads), "", "");
+            renderBody((0, _downloads.downloads_render)((0, _downloads.download_links_list), "downloads"), "", "");
             break;
         case "register":
             handlebox = "register";
@@ -1009,6 +1017,11 @@ function coreManager(newlocation, n1) {
         case "add/lesson":
             handlebox = "fu_lesson";
             newLesson();
+            break;
+        case "updates":
+            handlebox = "update";
+            renderBody((0, _dashboard.page_updates), "height: max-content;", "");
+            getUpdate();
             break;
         case "add/tpc":
             handlebox = "fu_topic";
@@ -1197,10 +1210,6 @@ function coreManager(newlocation, n1) {
         edittopicEvents();
         prepareTopicQBank(4);
     }
-    if (userrole == false || userrole == null || userrole == undefined) {
-        if (location1 == "login" || location1 == "register" || location1.includes("notes") || location1 == "legal" || location1 == "about" || location1 == "bugreport" || location1 == "appinfo" || location1 == "mainsformulas" || location1 == "downloads") ;
-        else handlebox = "error_page";
-    }
     if (iorole) {
         if (window.location.hash.includes("dashboard")) (0, _helper.dE)("adminonly").style.display = "flex";
         if (window.location.hash.includes("topic") || window.location.hash.includes("qbanks")) {
@@ -1222,6 +1231,12 @@ function coreManager(newlocation, n1) {
     testResponseList = [];
     testInfo = [];
     activequestionid = "";
+}
+async function getUpdate() {
+    let docSnap = await (0, _firestore.getDoc)((0, _firestore.doc)(db, "usernotes", "releasenotes"));
+    if (docSnap.exists()) (0, _helper.dE)("rel_list").innerHTML = docSnap.data().notes;
+    let docSnap2 = await (0, _firestore.getDoc)((0, _firestore.doc)(db, "usernotes", "updates"));
+    if (docSnap2.exists()) (0, _helper.dE)("updt_list").innerHTML = docSnap2.data().notes;
 }
 // -----------------------
 // SIMULATIONS
@@ -1933,6 +1948,14 @@ async function newQBank() {
         creMng("edit_qubank/" + docRef.id, 1);
     } catch  {}
 }
+async function prepareEditExam() {
+    let docSnap = await (0, _firestore.getDoc)((0, _firestore.doc)(db, "quarkz", "exams"));
+    if (docSnap.exists()) {
+        var docJSON = docSnap.data();
+        editqllist = docJSON.examinfo;
+        renderEditQLList(0);
+    }
+}
 async function prepareTopicQBank(iun) {
     var col, id;
     (0, _helper.dE)("aq_basic").style.display = "flex";
@@ -2019,6 +2042,7 @@ async function prepareTopicQBank(iun) {
                 (0, _helper.dE)("aq_tst_endon").value = dateparser(docJSON.endon.seconds * 1000);
                 (0, _helper.dE)("aq_tst_timealotted").value = docJSON.timeallotted;
                 (0, _helper.dE)("aq_tst_syllabi").value = docJSON.syllabus;
+                setHTML("aq_add_test_instr", docJSON.instructions);
                 let docSnap2 = await (0, _firestore.getDoc)((0, _firestore.doc)(db, "tests", id, "questions", "questions"));
                 let docSnap3 = await (0, _firestore.getDoc)((0, _firestore.doc)(db, "tests", id, "questions", "answers"));
                 let q = [];
@@ -2085,6 +2109,7 @@ async function updateTopicQBank(iun) {
                 title: (0, _helper.dE)("aq_tpcname").value,
                 timeallotted: (0, _helper.dE)("aq_tst_timealotted").value,
                 syllabus: (0, _helper.dE)("aq_tst_syllabi").value,
+                instructions: getHTML("aq_add_test_instr"),
                 strton: fgio,
                 endon: fgio2,
                 batch: wer
@@ -2275,7 +2300,10 @@ async function printQBank(type) {
             qtitle = docJSON.title;
             qtype = docJSON.type;
             qimg = docJSON.img;
-            var inhtml = '<div class = "les_q"><div id = "' + ele.id + '"><div style = "font-size:3vh;">' + qtitle + '</div><hr color="white" width="100%"></div>';
+            var src_url;
+            if (docJSON.y_url == "") src_url = "";
+            else src_url = "https://api.qrserver.com/v1/create-qr-code/?size=50x50&data=https://www.youtube.com/watch?v=" + docJSON.y_url;
+            var inhtml = '<div class = "les_q"><div id = "' + ele.id + '"><div style = "display:flex;flex-direction:row;justify-content: space-between;"><div style = "font-size:18px;">' + qtitle + '</div><img style = "float:right" src="' + src_url + '"></div><hr color="white" width="100%"></div>';
             (0, _helper.dE)("eqb_add").insertAdjacentHTML("beforeend", inhtml);
             var expl = '<div class = "les_expl" style = "">' + docJSON.expl + '</div><hr color="white" width="100%">';
             (0, _helper.dE)(ele.id).insertAdjacentHTML("beforeend", expl);
@@ -2438,10 +2466,13 @@ async function profileDetails() {
 }
 function renderExams() {
     for(let i = 0; i < userinfo.examslist.examinfo.length; i++){
-        var f = userinfo.examslist.examinfo[i];
-        (0, _helper.dE)("db_exam_list").insertAdjacentHTML("beforeend", `<div class = "tlinks_min rpl"><span style="font-size: 16px;" onclick = "examlog('` + f.name + `','` + f.date + `','` + f.info + `','` + f.syllabus + `')">` + f.name + `</span></div>`);
+        var ioef = userinfo.examslist.examinfo[i];
+        var iti = "exam" + Math.floor(Math.random() * 100000);
+        (0, _helper.dE)("db_exam_list").insertAdjacentHTML("beforeend", `<div class = "tlinks_min rpl" id = ` + iti + ` onclick = 'log("` + ioef.name + `","` + ioef.date + `","` + ioef.info + `","` + ioef.syllabus + `",` + 3 + `)'><span style="font-size: 16px;">` + ioef.name + `</span></div>`);
+        (0, _helper.dE)(iti).addEventListener("click", function() {});
     }
 }
+window.log = (0, _log.log);
 async function authStateObserver(user) {
     var courseno, batchno, calenid;
     if (user) {
@@ -2496,7 +2527,7 @@ async function authStateObserver(user) {
             var docJSON = docSnap.data();
             userinfo.examslist = docJSON;
             if (docJSON.warning != "") (0, _log.log)("Notice", docJSON.warning, function() {
-                window.location.hash = "#/usernotes/releasenotes";
+                window.location.hash = "#/updates";
             }, "Release Notes");
         }
         creMng(window.location.hash.split("#/")[1], 1);
@@ -3643,6 +3674,78 @@ $(document).ready(function() {
             ]
         ]
     });
+    $("#aq_add_test_instr").summernote({
+        toolbar: [
+            [
+                "style",
+                [
+                    "style"
+                ]
+            ],
+            [
+                "font",
+                [
+                    "bold",
+                    "italic",
+                    "underline",
+                    "clear"
+                ]
+            ],
+            [
+                "fontname",
+                [
+                    "fontname"
+                ]
+            ],
+            [
+                "color",
+                [
+                    "color"
+                ]
+            ],
+            [
+                "para",
+                [
+                    "ul",
+                    "ol",
+                    "paragraph"
+                ]
+            ],
+            [
+                "height",
+                [
+                    "height"
+                ]
+            ],
+            [
+                "table",
+                [
+                    "table"
+                ]
+            ],
+            [
+                "insert",
+                [
+                    "link",
+                    "picture",
+                    "hr"
+                ]
+            ],
+            [
+                "view",
+                [
+                    "fullscreen",
+                    "codeview"
+                ]
+            ],
+            [
+                "help",
+                [
+                    "help"
+                ]
+            ]
+        ]
+    });
 });
 function getHTML(id) {
     return $("#" + id).summernote("code");
@@ -3729,9 +3832,9 @@ function questionGraph(ipd, data) {
 }
 var Quarkz = {
     "copyright": "Mr Techtroid 2021-23",
-    "vno": "v0.5.0",
+    "vno": "v0.5.1",
     "author": "Mr Techtroid",
-    "last-updated": "10/02/2023(IST)",
+    "last-updated": "05/06/2023(IST)",
     "serverstatus": "firebase-online"
 };
 var handlebox = "login";
@@ -3760,8 +3863,22 @@ var testReportAnswers = [];
 var reQW;
 var analysedActions;
 window.onhashchange = creMng;
-initFirebaseAuth();
-(0, _reworkui.sysaccess)();
+const bc = new BroadcastChannel("Quarkz!");
+let isFirstTab = true;
+bc.postMessage(`QZCODE-ASK`);
+setTimeout(()=>{
+    if (isFirstTab) {
+        initFirebaseAuth();
+        (0, _reworkui.sysaccess)();
+    }
+}, 200);
+bc.onmessage = (event)=>{
+    if (event.data === `QZCODE-ASK`) bc.postMessage(`QZCODE-NOTFIRST`);
+    if (event.data === `QZCODE-NOTFIRST`) {
+        isFirstTab = false;
+        renderBody("Quarkz! is Open in Another Tab/Window! You can only use Quarkz! in one tab/window.", "", "");
+    }
+};
 
 },{"firebase/app":"aM3Fo","firebase/auth":"79vzg","firebase/firestore":"8A4BC","firebase/storage":"8WX7E","d3":"17XFv","../js/helper":"lVRAz","./reworkui":"66uq8","../embeds/about":"gCJDO","../embeds/chapter":"fMnHP","../embeds/cyb":"6uKbY","../embeds/dashboard":"hkEZ0","../embeds/downloads":"g2MAL","../embeds/finished_test":"3VUaP","../embeds/forum":"bKen7","../embeds/functions":"kxrBw","../embeds/log":"l4cy5","../embeds/login":"6nKCl","../embeds/printable":"95h6E","../embeds/profile":"2MtJU","../embeds/qbnkvid":"chYH6","../embeds/register":"kcVux","../embeds/settings":"fvpoO","../embeds/sims":"7kmTm","../embeds/test_instructions":"7hktz","../embeds/tests":"7y3N8","../embeds/toc":"kt253","../embeds/topics":"eSIhy","../embeds/user":"enRwb","../embeds/usernotes":"71ul5","../js/recorder":"56dox"}],"aM3Fo":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
@@ -63997,13 +64114,15 @@ parcelHelpers.export(exports, "page_schedule", ()=>page_schedule);
 parcelHelpers.export(exports, "error_page", ()=>error_page);
 parcelHelpers.export(exports, "page_notes", ()=>page_notes);
 parcelHelpers.export(exports, "page_ariel", ()=>page_ariel);
+parcelHelpers.export(exports, "page_edit_exams", ()=>page_edit_exams);
+parcelHelpers.export(exports, "page_updates", ()=>page_updates);
 let page_dashboard = `
 <div id="sidebar">
             <div id="options_tab"
                 style="display: flex;flex-direction: row;align-items:center;height:50px;justify-content: space-evenly;width: 25vw;max-width: 250px;">
                 <span class="material-symbols-outlined rpl" onclick="window.location = '#/settings'">settings</span>
                 <span class="material-symbols-outlined rpl" id="abt_btn">info</span>
-                <span class="material-symbols-outlined rpl" onclick="window.location = '#/update'">notifications</span>
+                <span class="material-symbols-outlined rpl" onclick="window.location = '#/updates'">notifications</span>
                 <span class="material-symbols-outlined rpl" id="prf_btn">account_circle</span>
                 <span class="material-symbols-outlined rpl" id="lgt_btn">logout</span>
             </div>
@@ -64087,6 +64206,42 @@ let page_ariel = `
             <input type="text" id="c-input" class="_in_aq" placeholder="Command">
             <button class="tst_btn rpl" id="c-exec">Execute</button>
         </div>`;
+let page_edit_exams = `
+<div id="lqadd" style="display: flex;flex-direction: row;margin:10px;height: 50vh;">
+            <div id="question_list"
+                style="border: 2px lime solid;width: 15vw;height:50vh;display: flex;flex-direction: column;align-items: center;text-align: center;font-size: 3vh;overflow-y: scroll;"
+                class="title-notes"></span>
+            </div>
+            <div
+                style="border: 2px lime solid;width:75vw;display: flex;flex-direction: column;overflow-y: scroll;height:50vh;">
+                <select name="type" id="aq_mode" class="_in_aq col-red" value = "exam">
+                    <option value="exam">Exam</option>
+                </select>
+                <div class="flex_type" id="aq_exams">
+                    <input type="text" id="aq_examname" class="_in_aq" placeholder="Exam Names">
+                    <input type="text" id="aq_examdate" class="_in_aq" placeholder="Exam Dates">
+                    <input type="text" id="aq_examinfo" class="_in_aq" placeholder="Exam Info Link">
+                    <input type="text" id="aq_examsyllabus" class="_in_aq" placeholder="Syllabus Link">
+                </div>
+                <button class="tst_btn rpl" id="aq_re">Remove Entry</button>
+            </div>
+        </div>
+        <button class="tst_btn rpl" id="aq_exam_save">Save/Update Exams</button>
+`;
+let page_updates = `
+<div class = "flex_type" style="flex-direction: row;flex-wrap: wrap;">
+            <div class = "db_class">
+                <span style="font-size: 25px;color:yellow">Release Notes</span>
+                <div id="rel_list" style="overflow-y: scroll;height:80vh; width: 100%; display: block;" class="flex_type"></div>
+            </div>
+            <div class = "db_class">
+                <span style="font-size: 25px;color:yellow">Updates</span>
+                <div id="updt_list" style="overflow-y: scroll;height:80vh; width: 100%; display: block;" class="flex_type"></div>
+            </div>
+        </div>
+
+
+`;
 exports.default = {
     page_app_info,
     page_ariel,
@@ -64094,7 +64249,9 @@ exports.default = {
     page_dashboard,
     page_notes,
     page_schedule,
-    error_page
+    error_page,
+    page_edit_exams,
+    page_updates
 };
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"g2MAL":[function(require,module,exports) {
@@ -64102,6 +64259,8 @@ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "page_jee_main", ()=>page_jee_main);
 parcelHelpers.export(exports, "page_downloads", ()=>page_downloads);
+parcelHelpers.export(exports, "downloads_render", ()=>downloads_render);
+parcelHelpers.export(exports, "download_links_list", ()=>download_links_list);
 let page_jee_main = `
     <span style="font-size: 5vh;color:yellow" id="fm_title">Mains Formula Sheet</span>
     <hr color="white" width="100%">
@@ -64121,9 +64280,84 @@ let page_downloads = `
       
     </div>
 `;
+function downloads_render(download_links_list, rendertype) {
+    var jee_html = "";
+    if (rendertype == "formulasheet") jee_html += `<span style="font-size: 5vh;color:yellow" id="fm_title">Mains Formula Sheet</span>`;
+    else jee_html += `<span style="font-size: 5vh;color:yellow" id="fm_title">Downloads</span>`;
+    jee_html += `
+    <hr color="white" width="100%">
+    <div style="overflow-y: scroll;height:50vh;" class="flex_type">`;
+    for(var i = 0; i < download_links_list.length; i++)if (download_links_list[i].type2 == rendertype) {
+        if (download_links_list[i].url == "") jee_html += `<span class="tlinks-2 rpl " onclick = "window.location.hash = '` + download_links_list[i].hashurl + `'"><span class="material-symbols-outlined">` + download_links_list[i].type + `</span>&nbsp;&nbsp;` + download_links_list[i].title + `</span>`;
+        else jee_html += `<span class="tlinks-2 rpl " onclick = "window.open('` + download_links_list[i].url + `','_blank')"><span class="material-symbols-outlined">` + download_links_list[i].type + `</span>&nbsp;&nbsp;` + download_links_list[i].title + `</span>`;
+    }
+    jee_html += ` </div>
+    <span style="font-size: 8px;">All PDF's Marked As <span style="font-size: 8px;" class="material-symbols-outlined">quiet_time_active</span> Are Owned by their Respective Owners</span>`;
+    return jee_html;
+}
+let download_links_list = [
+    {
+        hashurl: "/notes/PHYFORMULAS",
+        title: "Physics Formula Sheet",
+        url: "",
+        type: "quiet_time_active",
+        type2: "formulasheet"
+    },
+    {
+        hashurl: "/notes/MATHFORMULAS",
+        title: "Maths Formula Sheet",
+        url: "",
+        type: "quiet_time_active",
+        type2: "formulasheet"
+    },
+    {
+        hashurl: "/notes/PCHEMNOTES",
+        title: "Physical Chemistry Formula Sheet",
+        url: "",
+        type: "quiet_time_active",
+        type2: "formulasheet"
+    },
+    {
+        hashurl: "/notes/OCHEMNOTES",
+        title: "Organic Chemistry Sheet",
+        url: "",
+        type: "quiet_time_active",
+        type2: "formulasheet"
+    },
+    {
+        hashurl: "/notes/ICHEMNOTES",
+        title: "Inorganic Chemistry Sheet",
+        url: "",
+        type: "quiet_time_active",
+        type2: "formulasheet"
+    },
+    {
+        hashurl: "",
+        title: "Full Chemistry Modules",
+        url: "https://drive.google.com/file/d/1PKwlLjqXESAewAOHFi866uUb72XjooQH/view",
+        type: "quiet_time_active",
+        type2: "downloads"
+    },
+    {
+        hashurl: "",
+        title: "Full Maths Modules",
+        url: "https://drive.google.com/file/d/1_TLdj5e8SG8VFvKu-asEy7RAq4_T85YB/view",
+        type: "quiet_time_active",
+        type2: "downloads"
+    },
+    {
+        hashurl: "",
+        title: "Full Physics Modules",
+        url: "https://drive.google.com/file/d/10NWV6viuY2eru-y1j9MSXmhbl7bZKyOD/view",
+        type: "quiet_time_active",
+        type2: "downloads"
+    }
+];
 exports.default = {
     page_jee_main,
-    page_downloads
+    page_downloads,
+    download_links_list,
+    downloads_render
 };
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"3VUaP":[function(require,module,exports) {
@@ -64270,9 +64504,26 @@ function log(title, msg, action, actionname, type) {
     </div>
     `;
     if (type == 1) dE("output").insertAdjacentHTML("beforeend", html);
-    else dE("quarkz_body").insertAdjacentHTML("beforeend", html);
+    else if (type == 3) {
+        var html = `
+    <div id="msg_popup_` + no + `" class="overlay">
+    <div class="popup">
+        <center>
+            <h2 id="msg_popup_txt_` + no + `">` + title + `</h2>
+        </center>
+        <a class="close"
+            onclick="document.getElementById('msg_popup_` + no + `').remove()">&times;</a>
+        <p id="msg_popup_content_` + no + `">` + msg + `</p>
+        <button class="tst_btn rpl" id="msg_info_` + no + `" onclick = "window.open('` + action + `', '_blank');">Info</button>
+        <button class="tst_btn rpl" id="msg_syllabus_` + no + `" onclick = "window.open('` + actionname + `', '_blank');">Syllabus</button>
+    </div>
+    </div>
+    `;
+        dE("quarkz_body").insertAdjacentHTML("beforeend", html);
+    } else dE("quarkz_body").insertAdjacentHTML("beforeend", html);
     dE("msg_popup_" + no).style.visibility = "visible";
     dE("msg_popup_" + no).style.opacity = "1";
+    if (type == 3) return;
     dE("msg_action_" + no).style.display = "none";
     document.getElementById("msg_popup_txt_" + no).innerText = title;
     document.getElementById("msg_popup_content_" + no).innerText = msg;
@@ -64455,14 +64706,15 @@ parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "page_register", ()=>page_register);
 let page_register = `
 <span class="in_t">Register</span>
-        <input type="tel" id="rg_mbleno" class="_in_reg" placeholder="Mobile No">
-        <input type="text" id="rg_uname" class="_in_reg" placeholder="Email Address">
-        <input type="password" id="rg_pass" class="_in_reg" placeholder="Password">
-        <input type="password" id="rg_pass1" class="_in_reg" placeholder="Confirm Password">
+        <div class = "db_class">
+        <span style="font-size: 25px;color:yellow">Personal Info</span>
         <input type="text" id="rg_name" class="_in_reg" placeholder="Name">
-        <label for="class">Class</label>
+        <div style = "display:flex;flex-direction:row">
+        <label for="rg_dob">Date:&nbsp;&nbsp;</label>
         <input name = "rg_dob" type="date" id="rg_dob" class="_in_reg">
-        <label for="class">Class</label>
+        </div>
+        <div style = "display:flex;flex-direction:row">
+        <label for="class">Class:&nbsp;&nbsp;</label>
         <select name="class" id="rg_class">
             <option value="6">6</option>
             <option value="7">7</option>
@@ -64472,12 +64724,22 @@ let page_register = `
             <option value="11">11</option>
             <option value="12">12</option>
         </select>
-        <label for="gender">Gender</label>
+        </div>
+        <div style = "display:flex;flex-direction:row">
+        <label for="gender">Gender:&nbsp;&nbsp;</label>
         <select name="gender" id="rg_gender">
             <option value="Male">Male</option>
             <option value="Female">Female</option>
         </select>
-
+        </div>
+        </div>
+        <div class = "db_class">
+        <span style="font-size: 25px;color:yellow">Account Info</span>
+        <input type="tel" id="rg_mbleno" class="_in_reg" placeholder="Mobile No">
+        <input type="text" id="rg_uname" class="_in_reg" placeholder="Email Address">
+        <input type="password" id="rg_pass" class="_in_reg" placeholder="Password">
+        <input type="password" id="rg_pass1" class="_in_reg" placeholder="Confirm Password">
+        </div>
         <button class="tst_btn rpl" id="rg_in">Register</button>
 
 `;
@@ -64496,7 +64758,7 @@ let page_settings = `
             </div>
             <div id="st_notif" class = "db_class">
                 <span style="font-size: 25px;color:yellow">Notifications</span>
-                <button id="pass_rst_btn" class="tst_btn rpl">Reset/Change Password</button>
+                <button id="pass_rst_btn" class="tst_btn rpl" disabled>Enable Notifications</button>
             </div>
         </div>`;
 exports.default = {
@@ -64531,17 +64793,14 @@ let page_sims = `
 <span class="in_t">Simulations</span>
         <hr color="white" width="100%">
         <div style="display: flex;flex-direction: row;flex-wrap: wrap;"><span class="in_t" id="sms_name">Sim
-                Name</span><button class="tst_btn rpl" id="sms_edit" style="display: none;"
+                Name</span><span style="font-size: 2vh;" id="sms_prov">Sim Name</span><button class="tst_btn rpl" id="sms_edit" style="display: none;"
                 onclick='window.location.hash = "#/edit_sim/" + window.location.hash.split("#/sims/")[1]'>Edit
                 Sim</button></div>
         <div>
             <iframe id="sim_frame" frameborder="0"
                 style="width:80vw;height:70vh;background-color: black;color:white;scroll-behavior: smooth;"></iframe>
         </div>
-        <div>
-            <span style="font-size: 2vh;">Provided By</span>
-            <span style="font-size: 2vh;" id="sms_prov">Sim Name</span>
-        </div>`;
+        `;
 let page_list_sims = `
 <span class="in_t">Simulations List</span>
         <hr color="white" width="100%">
@@ -64809,6 +65068,7 @@ let page_edit_topic = `
             <input type="datetime-local" id="aq_tst_endon" class="_in_aq">
             <input type="text" id="aq_tst_syllabi" class="_in_aq" placeholder="Syllabus">
             <input type="number" id="aq_tst_timealotted" class="_in_aq" placeholder="Time Alloted">
+            <div class="summernote" id="aq_add_test_instr">Additional Test Instructions</div>
         </div>
         <div id="lqadd" style="display: flex;flex-direction: row;margin:10px;height: 50vh;">
             <div id="question_list"

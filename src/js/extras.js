@@ -200,3 +200,7 @@ function examlog(examname, dates, examinfo, syllabus) {
   dE("exam_einfo").href = examinfo
   dE("exam_syl").href = syllabus
 }
+
+window.beforeunload = function(e){
+  if (localStorage.getItem("isFirstTab") == `true`){localStorage.removeItem("isFirstTab")}
+}

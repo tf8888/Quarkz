@@ -4,7 +4,7 @@ export let page_dashboard = `
                 style="display: flex;flex-direction: row;align-items:center;height:50px;justify-content: space-evenly;width: 25vw;max-width: 250px;">
                 <span class="material-symbols-outlined rpl" onclick="window.location = '#/settings'">settings</span>
                 <span class="material-symbols-outlined rpl" id="abt_btn">info</span>
-                <span class="material-symbols-outlined rpl" onclick="window.location = '#/update'">notifications</span>
+                <span class="material-symbols-outlined rpl" onclick="window.location = '#/updates'">notifications</span>
                 <span class="material-symbols-outlined rpl" id="prf_btn">account_circle</span>
                 <span class="material-symbols-outlined rpl" id="lgt_btn">logout</span>
             </div>
@@ -94,4 +94,41 @@ export let page_ariel = `
             <input type="text" id="c-input" class="_in_aq" placeholder="Command">
             <button class="tst_btn rpl" id="c-exec">Execute</button>
         </div>`
-export default {page_app_info,page_ariel,page_bug_report,page_dashboard,page_notes,page_schedule,error_page}
+
+export let page_edit_exams = `
+<div id="lqadd" style="display: flex;flex-direction: row;margin:10px;height: 50vh;">
+            <div id="question_list"
+                style="border: 2px lime solid;width: 15vw;height:50vh;display: flex;flex-direction: column;align-items: center;text-align: center;font-size: 3vh;overflow-y: scroll;"
+                class="title-notes"></span>
+            </div>
+            <div
+                style="border: 2px lime solid;width:75vw;display: flex;flex-direction: column;overflow-y: scroll;height:50vh;">
+                <select name="type" id="aq_mode" class="_in_aq col-red" value = "exam">
+                    <option value="exam">Exam</option>
+                </select>
+                <div class="flex_type" id="aq_exams">
+                    <input type="text" id="aq_examname" class="_in_aq" placeholder="Exam Names">
+                    <input type="text" id="aq_examdate" class="_in_aq" placeholder="Exam Dates">
+                    <input type="text" id="aq_examinfo" class="_in_aq" placeholder="Exam Info Link">
+                    <input type="text" id="aq_examsyllabus" class="_in_aq" placeholder="Syllabus Link">
+                </div>
+                <button class="tst_btn rpl" id="aq_re">Remove Entry</button>
+            </div>
+        </div>
+        <button class="tst_btn rpl" id="aq_exam_save">Save/Update Exams</button>
+`
+export let page_updates = `
+<div class = "flex_type" style="flex-direction: row;flex-wrap: wrap;">
+            <div class = "db_class">
+                <span style="font-size: 25px;color:yellow">Release Notes</span>
+                <div id="rel_list" style="overflow-y: scroll;height:80vh; width: 100%; display: block;" class="flex_type"></div>
+            </div>
+            <div class = "db_class">
+                <span style="font-size: 25px;color:yellow">Updates</span>
+                <div id="updt_list" style="overflow-y: scroll;height:80vh; width: 100%; display: block;" class="flex_type"></div>
+            </div>
+        </div>
+
+
+`
+export default {page_app_info,page_ariel,page_bug_report,page_dashboard,page_notes,page_schedule,error_page,page_edit_exams,page_updates}

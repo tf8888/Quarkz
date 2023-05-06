@@ -24,6 +24,7 @@ export let page_edit_topic = `
             <input type="datetime-local" id="aq_tst_endon" class="_in_aq">
             <input type="text" id="aq_tst_syllabi" class="_in_aq" placeholder="Syllabus">
             <input type="number" id="aq_tst_timealotted" class="_in_aq" placeholder="Time Alloted">
+            <div class="summernote" id="aq_add_test_instr">Additional Test Instructions</div>
         </div>
         <div id="lqadd" style="display: flex;flex-direction: row;margin:10px;height: 50vh;">
             <div id="question_list"

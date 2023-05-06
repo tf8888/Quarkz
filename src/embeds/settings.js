@@ -8,7 +8,7 @@ export let page_settings = `
             </div>
             <div id="st_notif" class = "db_class">
                 <span style="font-size: 25px;color:yellow">Notifications</span>
-                <button id="pass_rst_btn" class="tst_btn rpl">Reset/Change Password</button>
+                <button id="pass_rst_btn" class="tst_btn rpl" disabled>Enable Notifications</button>
             </div>
         </div>`
 

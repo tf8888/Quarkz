@@ -18,8 +18,8 @@ import { getStorage, ref, uploadBytesResumable, getDownloadURL, } from 'firebase
 import { page_about } from "../embeds/about";
 import { page_chapter, page_edit_chapter, page_list_chapter } from "../embeds/chapter"
 import { page_cyberhunt } from "../embeds/cyb";
-import { page_app_info, page_ariel, page_bug_report, page_dashboard, page_notes, page_schedule, error_page } from "../embeds/dashboard";
-import { page_downloads,page_jee_main } from "../embeds/downloads";
+import { page_app_info, page_ariel, page_bug_report, page_dashboard, page_notes,page_updates, page_schedule, error_page,page_edit_exams } from "../embeds/dashboard";
+import { page_downloads,page_jee_main,download_links_list,downloads_render } from "../embeds/downloads";
 import { page_finished_test } from "../embeds/finished_test";
 import { page_forum } from "../embeds/forum";
 import { page_functions } from "../embeds/functions";
@@ -249,6 +249,10 @@ function topicEvents(){
   var tpsbm = dE("tp_sbm").addEventListener("click", checkQuestion)
   var tppnt = dE("tp_pnt").addEventListener("click", printStuff)
 }
+function editexamEvents(){
+  var aqre = dE("aq_re").addEventListener("click", removeEntry);
+  var tmode = dE("aq_mode").addEventListener("change", changeItem)
+}
 function edittopicEvents(){
   function chItem() { changeItem(1) }
   var tmode = dE("aq_mode").addEventListener("change", changeItem)
@@ -309,15 +313,22 @@ function coreManager(newlocation, n1) {
   if (n1 == 1) { window.location.hash = "#/" + newlocation }
   handlebox = newlocation
   location1 = window.location.hash.split("#/")[1]
+  if (userrole == false || userrole == null || userrole == undefined) {
+    if (location1 == "login" || location1 == "register" || location1.includes("notes") || location1 == "legal" || location1 == "about" || location1 == "bugreport" || location1 == "appinfo" || location1 == "mainsformulas" || location1 == "downloads") {
+
+    } else {
+      location1 = "error_page"
+    }
+  }
   switch (location1) {
     case "profile": { handlebox = "profile"; renderBody(page_profile, "", "");profileDetails(); break; }
     case "about": handlebox = "aboutus"; renderBody(page_about, "text-align: center;overflow-y: scroll;", ""); function lglHand() { changeLocationHash("legal", 1) };dE("lgl_btn").addEventListener("click", lglHand);break;
     case "login": handlebox = "login"; renderBody(page_login, "justify-content: center;", ""); dE("sgn_in").addEventListener("click", signIn);function regHand() { changeLocationHash("register", 1) };dE("reg_in").addEventListener("click", regHand);break;
     case "dashboard": handlebox = "dashboard"; renderBody(page_dashboard, "display: flex;flex-direction: row;", ""); dashboardEvents(); break;
     case "timetable": handlebox = "schedule"; renderBody(page_schedule, "", ""); iframeLoadScreen(); dE("tmt_frame").src = userinfo.timetableurl;break;
-    case "logout": signOut(); break;
-    case "mainsformulas": handlebox = "mainsformulas"; renderBody(page_jee_main, "", ""); break;
-    case "downloads": handlebox = "downloads"; renderBody(page_downloads, "", ""); break;
+    case "logout": signOutUser(); break;
+    case "mainsformulas": handlebox = "mainsformulas"; renderBody(downloads_render(download_links_list,"formulasheet"), "", ""); break;
+    case "downloads": handlebox = "downloads"; renderBody(downloads_render(download_links_list,"downloads"), "", ""); break;
     case "register": handlebox = "register"; renderBody(page_register, "", "");dE("rg_in").addEventListener("click", rgbtn); break;
     case "testinfo": handlebox = "testinfo"; renderBody(page_test_list, "", ""); renderTestList("active"); break;
     case "legal": handlebox = "legal"; renderBody(page_toc, "", ""); break;
@@ -327,6 +338,7 @@ function coreManager(newlocation, n1) {
     case "simlist": handlebox = "simlist"; renderBody(page_list_sims, "", "");simEvents(); getSimList(); break;
     case "testend": handlebox = "test_end"; renderBody(page_test_end, "", "");dE("te_title").innerText = "The Test Has Ended"; break;
     case "add/lesson": handlebox = "fu_lesson"; newLesson(); break;
+    case "updates": handlebox = "update";  renderBody(page_updates,"height: max-content;","");getUpdate();break;
     case "add/tpc": handlebox = "fu_topic"; newTopic(); break;
     case "add/qubank": handlebox = "fu_topic"; newQBank(); break;
     case "add/simulation": handlebox = "fu_simulation"; newSimulation(); break;
@@ -361,13 +373,6 @@ function coreManager(newlocation, n1) {
   if (location1.includes("edit_test") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll");dE("aq_tst_save").addEventListener("click", function(){updateTopicQBank(3)});edittopicEvents(); prepareTopicQBank(3) }
   if (location1.includes("edit_qubank") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll");dE("aq_qbc_save").addEventListener("click", function(){updateTopicQBank(2)});edittopicEvents(); prepareTopicQBank(2) }
   if (location1.includes("edit_exams") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll");dE("aq_exam_save").addEventListener("click", function(){updateTopicQBank(4)});edittopicEvents(); prepareTopicQBank(4) }
-  if (userrole == false || userrole == null || userrole == undefined) {
-    if (location1 == "login" || location1 == "register" || location1.includes("notes") || location1 == "legal" || location1 == "about" || location1 == "bugreport" || location1 == "appinfo" || location1 == "mainsformulas" || location1 == "downloads") {
-
-    } else {
-      handlebox = "error_page"
-    }
-  }
   if (iorole) {
     if (window.location.hash.includes("dashboard")) {
       dE("adminonly").style.display = "flex";
@@ -384,6 +389,16 @@ function coreManager(newlocation, n1) {
   // console.log({ userinfo, topicJSON, topicJSONno, editorrole, adminrole, userrole, simlist, chapterlist, userdetails, curr_qlno, curr_qlid, editqllist, autosignin, testList, activeTestList, upcomingTestList, finishedTestList, testInfo, testQuestionList, testResponseList, activequestionid })
   testQuestionList = []; testResponseList = []; testInfo = []; activequestionid = ""
 
+}
+async function getUpdate(){
+  let docSnap = await getDoc(doc(db, 'usernotes', 'releasenotes'))
+  if (docSnap.exists()) {
+    dE("rel_list").innerHTML = docSnap.data().notes
+  }
+  let docSnap2 = await getDoc(doc(db, 'usernotes', 'updates'))
+  if (docSnap2.exists()) {
+    dE("updt_list").innerHTML = docSnap2.data().notes
+  }
 }
 // -----------------------
 // SIMULATIONS
@@ -1061,6 +1076,14 @@ async function newQBank() {
   } catch {
   }
 }
+async function prepareEditExam(){
+  let docSnap = await getDoc(doc(db, "quarkz", "exams"))
+  if (docSnap.exists()) {
+    var docJSON = docSnap.data();
+    editqllist = docJSON.examinfo
+    renderEditQLList(0)
+  }
+}
 async function prepareTopicQBank(iun) {
   var col, id;
   dE("aq_basic").style.display = "flex"
@@ -1147,6 +1170,7 @@ async function prepareTopicQBank(iun) {
         dE("aq_tst_endon").value = dateparser(docJSON.endon.seconds * 1000)
         dE("aq_tst_timealotted").value = docJSON.timeallotted
         dE("aq_tst_syllabi").value = docJSON.syllabus
+        setHTML("aq_add_test_instr",docJSON.instructions)
         let docSnap2 = await getDoc(doc(db, "tests", id, "questions", "questions"))
         let docSnap3 = await getDoc(doc(db, "tests", id, "questions", "answers"))
         let q = []
@@ -1216,6 +1240,7 @@ async function updateTopicQBank(iun) {
         title: dE("aq_tpcname").value,
         timeallotted: dE("aq_tst_timealotted").value,
         syllabus: dE("aq_tst_syllabi").value,
+        instructions: getHTML("aq_add_test_instr"),
         strton: fgio,
         endon: fgio2,
         batch: wer,
@@ -1387,7 +1412,13 @@ async function printQBank(type) {
       qtitle = docJSON.title;
       qtype = docJSON.type;
       qimg = docJSON.img;
-      var inhtml = '<div class = "les_q"><div id = "' + ele.id + '"><div style = "font-size:3vh;">' + qtitle + '</div><hr color="white" width="100%"></div>'
+      var src_url;
+      if (docJSON.y_url == ""){
+        src_url = ""
+      }else{
+        src_url = "https://api.qrserver.com/v1/create-qr-code/?size=50x50&data=https://www.youtube.com/watch?v="+docJSON.y_url
+      }
+      var inhtml = '<div class = "les_q"><div id = "' + ele.id + '"><div style = "display:flex;flex-direction:row;justify-content: space-between;"><div style = "font-size:18px;">' + qtitle + '</div><img style = "float:right" src="'+src_url+'"></div><hr color="white" width="100%"></div>'
       dE("eqb_add").insertAdjacentHTML('beforeend', inhtml);
       var expl = '<div class = "les_expl" style = "">' + docJSON.expl + '</div><hr color="white" width="100%">'
       dE(ele.id).insertAdjacentHTML('beforeend', expl)
@@ -1550,10 +1581,13 @@ async function profileDetails() {
 }
 function renderExams() {
   for (let i = 0; i < userinfo.examslist.examinfo.length; i++) {
-    var f = userinfo.examslist.examinfo[i]
-    dE("db_exam_list").insertAdjacentHTML("beforeend", `<div class = "tlinks_min rpl"><span style="font-size: 16px;" onclick = "examlog('` + f.name + `','` + f.date + `','` + f.info + `','` + f.syllabus + `')">` + f.name + `</span></div>`)
+    var ioef = userinfo.examslist.examinfo[i]
+    var iti = "exam"+Math.floor(Math.random()*100000)
+    dE("db_exam_list").insertAdjacentHTML("beforeend", `<div class = "tlinks_min rpl" id = `+iti+` onclick = 'log("`+ioef.name+`","`+ioef.date+`","`+ioef.info+`","`+ioef.syllabus+`",`+3+`)'><span style="font-size: 16px;">` + ioef.name + `</span></div>`)
+    dE(iti).addEventListener("click",function(){ })
   }
 }
+window.log = log
 async function authStateObserver(user) {
   var courseno, batchno, calenid;
   if (user) {
@@ -1606,7 +1640,7 @@ async function authStateObserver(user) {
       var docJSON = docSnap.data();
       userinfo.examslist = docJSON
       if (docJSON.warning != "") {
-        log("Notice", docJSON.warning, function () { window.location.hash = "#/usernotes/releasenotes" }, "Release Notes")
+        log("Notice", docJSON.warning, function () { window.location.hash = "#/updates" }, "Release Notes")
       }
     }
     creMng(window.location.hash.split("#/")[1], 1)
@@ -2609,6 +2643,20 @@ $(document).ready(function () {
       ['help', ['help']]
     ],
   });
+  $('#aq_add_test_instr').summernote({
+    toolbar: [
+      ['style', ['style']],
+      ['font', ['bold', 'italic', 'underline', 'clear']],
+      ['fontname', ['fontname']],
+      ['color', ['color']],
+      ['para', ['ul', 'ol', 'paragraph']],
+      ['height', ['height']],
+      ['table', ['table']],
+      ['insert', ['link', 'picture', 'hr']],
+      ['view', ['fullscreen', 'codeview']],
+      ['help', ['help']]
+    ],
+  });
 });
 function getHTML(id) {
   return $("#" + id).summernote('code')
@@ -2720,9 +2768,9 @@ function questionGraph(ipd, data) {
 }
 var Quarkz = {
   "copyright": "Mr Techtroid 2021-23",
-  "vno": "v0.5.0",
+  "vno": "v0.5.1",
   "author": "Mr Techtroid",
-  "last-updated": "10/02/2023(IST)",
+  "last-updated": "05/06/2023(IST)",
   "serverstatus": "firebase-online",
 }
 var handlebox = "login";
@@ -2751,5 +2799,22 @@ var testReportAnswers = []
 var reQW;
 var analysedActions;
 window.onhashchange = creMng
-initFirebaseAuth()
-sysaccess()
+
+const bc = new BroadcastChannel("Quarkz!");
+let isFirstTab = true;
+bc.postMessage(`QZCODE-ASK`);
+setTimeout(() => {
+  if (isFirstTab) {
+    initFirebaseAuth()
+    sysaccess()
+  }
+}, 200);
+bc.onmessage = (event) => {
+  if (event.data === `QZCODE-ASK`) {
+    bc.postMessage(`QZCODE-NOTFIRST`);
+  }
+  if (event.data === `QZCODE-NOTFIRST`) {
+    isFirstTab = false;
+    renderBody("Quarkz! is Open in Another Tab/Window! You can only use Quarkz! in one tab/window.","","")
+  }
+};

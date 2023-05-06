@@ -20,17 +20,14 @@ export let page_sims = `
 <span class="in_t">Simulations</span>
         <hr color="white" width="100%">
         <div style="display: flex;flex-direction: row;flex-wrap: wrap;"><span class="in_t" id="sms_name">Sim
-                Name</span><button class="tst_btn rpl" id="sms_edit" style="display: none;"
+                Name</span><span style="font-size: 2vh;" id="sms_prov">Sim Name</span><button class="tst_btn rpl" id="sms_edit" style="display: none;"
                 onclick='window.location.hash = "#/edit_sim/" + window.location.hash.split("#/sims/")[1]'>Edit
                 Sim</button></div>
         <div>
             <iframe id="sim_frame" frameborder="0"
                 style="width:80vw;height:70vh;background-color: black;color:white;scroll-behavior: smooth;"></iframe>
         </div>
-        <div>
-            <span style="font-size: 2vh;">Provided By</span>
-            <span style="font-size: 2vh;" id="sms_prov">Sim Name</span>
-        </div>`
+        `
 
 export let page_list_sims = `
 <span class="in_t">Simulations List</span>
