@@ -11,7 +11,7 @@ export let page_dashboard = `
             <hr style="width: 100%;">
             <div id="profile_tab"
                 style="display: flex;flex-direction: column;align-items: center;height:170px;max-width: 250px;">
-                <div id="prf_tab_img" style="width: 100px;height:100px;object-fit: cover;margin:5px;"></div>
+                <img id="prf_tab_img" style="width: 100px;height:100px;object-fit: cover;margin:5px;border:2px solid #06d85f;border-radius:30px;"></img>
                 <span style="color:rgb(0, 255, 221)" id="dshd_name">NAME</span>
                 <span style="color:rgb(104, 104, 92);font-size: small;" id="dshd_uname">@username</span>
                 <span style="color:rgb(251, 255, 0)" id="dshd_batch">BATCH</span>
@@ -131,4 +131,18 @@ export let page_updates = `
 
 
 `
-export default {page_app_info,page_ariel,page_bug_report,page_dashboard,page_notes,page_schedule,error_page,page_edit_exams,page_updates}
+export let page_uploads = `
+<div class = "db_class">
+<span style="font-size: 25px;color:yellow">Upload Files</span>
+        <label for="file" style= "background-color: indigo;color: white;padding: 0.5rem;font-family: sans-serif;border-radius: 0.3rem;cursor: pointer;margin-top: 1rem;" class = "rpl">Choose File To Upload</label>
+        <input type="file" id="file" style="width: 50vw;height: 30px;margin: auto;" hidden>
+        <span id="file_progress"></span>
+        <span id="file_status"></span>
+        <input id="file_link" type="url" class = "_in_aq" style = "width:25vw;" placeholder = "Short URL"  disabled>
+        <input id="file_link_long" type="url" class = "_in_aq" style = "width:25vw;" placeholder = "Long URL" disabled>
+        <span style="font-size: 10px;">Note: File Names Will Be Modified to the following format:</span>
+        <span style="font-size: 10px;">{IP ADDRESS}-{DATE}-{ORIGNAL FILE NAME}</span>
+        <span style="font-size: 10px;">Max File Upload Size: 50mb</span>
+    </div>
+`
+export default {page_app_info,page_ariel,page_bug_report,page_dashboard,page_notes,page_schedule,error_page,page_edit_exams,page_updates,page_uploads }

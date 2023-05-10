@@ -1335,4 +1335,14 @@ circle text {
   color: var(--white);
 }
 
+.star {
+  color: #ddd;
+  cursor: pointer;
+  font-size: 40px;
+}
+
+.star.selected, .star.hovered, .star:hover {
+  color: #fd0;
+}
+
 /*# sourceMappingURL=index.34df27b5.css.map */

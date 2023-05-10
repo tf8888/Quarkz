@@ -1449,3 +1449,13 @@ circle text {
 .axis-label{
   color:var(--white)
 }
+.star {
+  color: #ddd;
+  cursor: pointer;
+  font-size: 40px;
+}
+
+.star.selected,.star.hovered,
+.star:hover {
+  color: #ffdd00;
+}

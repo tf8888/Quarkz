@@ -3,7 +3,7 @@ export let page_test_instructions = `
         <hr color="white" width="100%">
         <div style="width:80vw;overflow-y: scroll;border:yellow 3px solid;display: flex;flex-direction: column;">
             <span style="font-size:5vh;text-align: center;">Please Read The Instructions And Terms Carefully</span>
-            <span style="font-size:18px;">General Instructions:</span>
+            <span style="font-size:18px;color:yellow;">General Instructions:</span>
             <ol style="font-size: 14px;">
                 <li>The Exam Must Be Completed In 1 Sitting. You Will Be Able To Open This Test Window Only Once. </li>
                 <li>Read Every Question Carefully And Select Your Answer and Try To Answer As Many Questions As Possible
@@ -28,13 +28,15 @@ export let page_test_instructions = `
                 <li>DO NOT TRY TO Minimise The Full Screen Mode Of The Exam. You Will Recieive 1 Warning For Doing So
                     After Which Your Test Will End</li>
             </ol>
-            <span style="font-size:18px;">Navigating to a Question:</span>
+            <hr style = "width:95%">
+            <span style="font-size:18px;color:yellow;">Navigating to a Question:</span>
             <ol style="font-size:14px;">
                 <li>To view/answer a question, do the following: Click on the question number in the Question Palette at
                     the right of your screen to go to that numbered question directly. Note that using this option does
                     NOT save your answer to the current question.</li>
             </ol>
-            <span style="font-size:18px;">Answering a Question:</span>
+            <hr style = "width:95%">
+            <span style="font-size:18px;color:yellow;">Answering a Question:</span>
             <ol style="font-size:14px;">
                 Procedure for answering a multiple choice type question:
                 <li>To select you answer, click on the button of one of the options.</li>
@@ -46,12 +48,18 @@ export let page_test_instructions = `
                 <li>To change your answer to a question that has already been answered, first select that question for
                     answering and then follow the procedure for answering that type of question.</li>
             </ol>
-            <span style="font-size:18px;">Navigating through sections:</span>
+            <hr style = "width:95%">
+            <span style="font-size:18px;color:yellow;">Navigating through sections:</span>
             <ol style="font-size:14px;">
                 <li>All Questions are Visible in the Question Pallete along under the respective sections/subjects</li>
             </ol>
-            <span style="font-size:18px;">Terms And Conditions:</span>
-            <span style="font-size:14px;">By Clicking On Start I Agree On All Terms And Conditions:</span>
+            <hr style = "width:95%">
+            <span style="font-size:18px;color:yellow;">Test Specific Instructions:</span>
+            <div id = "tsi" style="font-size:14px;">
+            </div>
+            <hr style = "width:95%">
+            <span style="font-size:18px;color:yellow;">Terms And Conditions:</span>
+            <span style="font-size:14px;">By Checking on "I Agree" you Agree to All Terms And Conditions:</span>
             <ol style="font-size:14px;">
                 <li>I have read and understood all the instructions. </li>
                 <li>I agree that all computer hardware allotted to me are in proper working condition. </li>
@@ -64,9 +72,10 @@ export let page_test_instructions = `
                 <li>I agree that in case of not adhering to the instructions, I shall be liable to be debarred from this
                     Test and/or to disciplinary action, which may include ban from future Test / Examinations</li>
             </ol>
+            <div style = "font-size:25px;color:lime;"><input type="checkbox" id = "agree_in" name = "agree_in"><label for="agree_in">I Agree</label></div>
             <span style="font-size:5vh;text-align: center;">👍 All The Best! 👍</span>
-            <button class="tst_btn rpl" id="tin_start"
-                onclick='window.location.hash = "#/attempt/" + window.location.hash.split("#/instructions/")[1]'>Start</button>
+            <button class="tst_btn rpl" id="tin_start" 
+                onclick='window.location.hash = "#/attempt/" + window.location.hash.split("#/instructions/")[1]' disabled>Start</button>
         </div>
 `
 export default {page_test_instructions} 

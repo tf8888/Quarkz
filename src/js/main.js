@@ -18,8 +18,8 @@ import { getStorage, ref, uploadBytesResumable, getDownloadURL, } from 'firebase
 import { page_about } from "../embeds/about";
 import { page_chapter, page_edit_chapter, page_list_chapter } from "../embeds/chapter"
 import { page_cyberhunt } from "../embeds/cyb";
-import { page_app_info, page_ariel, page_bug_report, page_dashboard, page_notes,page_updates, page_schedule, error_page,page_edit_exams } from "../embeds/dashboard";
-import { page_downloads,page_jee_main,download_links_list,downloads_render } from "../embeds/downloads";
+import { page_app_info, page_ariel, page_bug_report, page_dashboard, page_notes, page_updates, page_schedule, error_page, page_edit_exams, page_uploads } from "../embeds/dashboard";
+import { page_downloads, page_jee_main, download_links_list, downloads_render } from "../embeds/downloads";
 import { page_finished_test } from "../embeds/finished_test";
 import { page_forum } from "../embeds/forum";
 import { page_functions } from "../embeds/functions";
@@ -62,7 +62,39 @@ setPersistence(auth, browserLocalPersistence)
   });
 
 const storage = getStorage();
-
+function getInitials(name) {
+  let initials = '';
+  const words = name.split(' ');
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i];
+    if (word.length > 0) {
+      initials += word[0].toUpperCase();
+    }
+  }
+  return initials;
+}
+function getAvatarURL(name,gen,ver){
+  // Import the crypto module for hashing
+  const crypto = require('crypto');
+  // Hash the seed string using SHA-256 algorithm
+  const hash = crypto.createHash('sha256').update(name).digest('hex');
+  // Take the first 6 digits of the hash and convert to number
+  const num = parseInt(hash.slice(0, 6), 16);
+  // Return the 6-digit number
+  if (ver == undefined || ver == ""){ver == "v2"}
+  let initials = getInitials(name);
+  if (ver == "v1"){
+    return "https://ui-avatars.com/api/?background=random&size=100&bold=true&name="+getInitials(userinfo.name)
+  }else if (ver == "v2"){
+    if (gen == "Male"){
+      return "https://api.dicebear.com/5.x/avataaars/svg?top%5B%5D=dreads01,dreads02,eyepatch,frizzle,shortCurly,shortFlat,shortRound,shortWaved,sides,theCaesar,theCaesarAndSidePart,turban&seed="+initials+num.toString()
+    }else{
+      return "https://api.dicebear.com/5.x/avataaars/svg?facialHairProbability=0&top%5B%5D=bigHair,bob,bun,curly,curvy,dreads,frida,fro,hijab,longButNotTooLong,miaWallace,shaggy,shaggyMullet,shavedSides,straightAndStrand,straight01,straight02&seed="+initials+num.toString()
+    }
+  }else if (ver == "v3"){
+    return "https://api.dicebear.com/6.x/bottts/svg?seed=" + initials+num.toString()
+  }
+}
 // Login Page
 // Sign In A User
 async function signIn() {
@@ -86,7 +118,7 @@ function signOutUser() {
   // Sign out of Firebase.
   signOut(getAuth());
   userdetails = []
-  creMng("login",1);
+  creMng("login", 1);
   window.location.reload()
 }
 // Register A User
@@ -186,13 +218,8 @@ function dashboardEvents() {
   dE("dshd_uname").innerText = userinfo.email
   dE("dshd_name").innerText = userinfo.name
   dE("dshd_batch").innerText = userinfo.batchname
-  if (userinfo.gen == "Male") {
-    dE("prf_tab_img").classList.remove("prf_male", "prf_female")
-    dE("prf_tab_img").classList.add("prf_male")
-  } else if (userinfo.gen == "Female") {
-    dE("prf_tab_img").classList.remove("prf_male", "prf_female")
-    dE("prf_tab_img").classList.add("prf_female")
-  }
+
+  dE("prf_tab_img").src = getAvatarURL(userinfo.name,userinfo.gen,localStorage.getItem("prf_type"))
   renderExams()
 }
 function simEvents() {
@@ -228,7 +255,7 @@ function chapterEvents() {
   var s_chb = dE("schb").addEventListener("click", schb)
   var u_chb = dE("uchb").addEventListener("click", uchb)
 }
-function testEvents(){
+function testEvents() {
   function tsave() { testOperator("tts_answered") }
   function tclear() { testOperator("tts_notanswer") }
   function treview() { testOperator("tts_review") }
@@ -240,7 +267,7 @@ function testEvents(){
   var tt_ansreview = dE("tt_ansreview").addEventListener("click", tansrev)
   var ttsub = dE("tt_sub").addEventListener("click", sTestHand)
 }
-function topicEvents(){
+function topicEvents() {
   function prvHand() { topicHandler(1) }
   function nxtHand() { topicHandler(2) }
   var tpnxt = dE("tp_nxt").addEventListener("click", nxtHand)
@@ -249,11 +276,11 @@ function topicEvents(){
   var tpsbm = dE("tp_sbm").addEventListener("click", checkQuestion)
   var tppnt = dE("tp_pnt").addEventListener("click", printStuff)
 }
-function editexamEvents(){
+function editexamEvents() {
   var aqre = dE("aq_re").addEventListener("click", removeEntry);
   var tmode = dE("aq_mode").addEventListener("change", changeItem)
 }
-function edittopicEvents(){
+function edittopicEvents() {
   function chItem() { changeItem(1) }
   var tmode = dE("aq_mode").addEventListener("change", changeItem)
   var ttype = dE("aq_type").addEventListener("change", changeItem)
@@ -262,7 +289,7 @@ function edittopicEvents(){
   var aqre = dE("aq_re").addEventListener("click", removeEntry);
   var tppnt = dE("aq_export").addEventListener("click", printStuff)
 }
-function testlistEvents(){
+function testlistEvents() {
   function actHand() { renderTestList("active") }
   function upcHand() { renderTestList("upcoming") }
   function finHand() { renderTestList("finished") }
@@ -270,7 +297,7 @@ function testlistEvents(){
   var tiupc = dE("ti_upc").addEventListener("click", upcHand)
   var tifin = dE("ti_fin").addEventListener("click", finHand)
 }
-function userNotesEvents(){
+function userNotesEvents() {
   var unsave = dE("un_save").addEventListener("click", unotes1)
   var unprint = dE("un_print").addEventListener("click", unotes2)
   var un_rendermode = dE("un_rendermode").addEventListener("change", notesUIHandler)
@@ -283,100 +310,101 @@ function userNotesEvents(){
 }
 function dshHand() { changeLocationHash("dashboard", 1) }
 var dshbtn = dE("dsh_btn").addEventListener("click", dshHand);
-function printableEvents(){
-  document.getElementById("pe_tst_type_1").addEventListener('change',updateUI)
-document.getElementById("pe_tst_type_2").addEventListener('change',updateUI)
-document.getElementById("tsinf_btn").addEventListener('change',updateUI)
-document.getElementById("tans_btn").addEventListener("click",function(){
-  for (var i =0;i<document.getElementsByClassName("q_ans_1").length;i++){
-    document.getElementsByClassName("q_ans_1")[i].style.display = "flex"
-  }
-})
-document.getElementById("tansexpl_btn").addEventListener("click",function(){
-  for (var i =0;i<document.getElementsByClassName("q_ans_1").length;i++){
-    document.getElementsByClassName("q_ans_1")[i].style.display = "flex"
-  }
-  for (var i =0;i<document.getElementsByClassName("q_ans_expl").length;i++){
-    document.getElementsByClassName("q_ans_expl")[i].style.display = "flex"
-  }
-})
-document.getElementById("tremove_btn").addEventListener("click",function(){
-  for (var i =0;i<document.getElementsByClassName("q_ans_1").length;i++){
-    document.getElementsByClassName("q_ans_1")[i].style.display = "none"
-  }
-  for (var i =0;i<document.getElementsByClassName("q_ans_expl").length;i++){
-    document.getElementsByClassName("q_ans_expl")[i].style.display = "none"
-  }
-})
+function printableEvents() {
+  document.getElementById("pe_tst_type_1").addEventListener('change', updateUI)
+  document.getElementById("pe_tst_type_2").addEventListener('change', updateUI)
+  document.getElementById("tsinf_btn").addEventListener('change', updateUI)
+  document.getElementById("tans_btn").addEventListener("click", function () {
+    for (var i = 0; i < document.getElementsByClassName("q_ans_1").length; i++) {
+      document.getElementsByClassName("q_ans_1")[i].style.display = "flex"
+    }
+  })
+  document.getElementById("tansexpl_btn").addEventListener("click", function () {
+    for (var i = 0; i < document.getElementsByClassName("q_ans_1").length; i++) {
+      document.getElementsByClassName("q_ans_1")[i].style.display = "flex"
+    }
+    for (var i = 0; i < document.getElementsByClassName("q_ans_expl").length; i++) {
+      document.getElementsByClassName("q_ans_expl")[i].style.display = "flex"
+    }
+  })
+  document.getElementById("tremove_btn").addEventListener("click", function () {
+    for (var i = 0; i < document.getElementsByClassName("q_ans_1").length; i++) {
+      document.getElementsByClassName("q_ans_1")[i].style.display = "none"
+    }
+    for (var i = 0; i < document.getElementsByClassName("q_ans_expl").length; i++) {
+      document.getElementsByClassName("q_ans_expl")[i].style.display = "none"
+    }
+  })
 }
 function coreManager(newlocation, n1) {
   if (n1 == 1) { window.location.hash = "#/" + newlocation }
   handlebox = newlocation
   location1 = window.location.hash.split("#/")[1]
   if (userrole == false || userrole == null || userrole == undefined) {
-    if (location1 == "login" || location1 == "register" || location1.includes("notes") || location1 == "legal" || location1 == "about" || location1 == "bugreport" || location1 == "appinfo" || location1 == "mainsformulas" || location1 == "downloads") {
+    if (location1 == "login" || location1 == "register" || location1.includes("notes") || location1 == "legal" || location1 == "about" || location1 == "bugreport" || location1 == "appinfo" || location1 == "mainsformulas" || location1 == "downloads" || location1 == "uploads") {
 
     } else {
       location1 = "error_page"
     }
   }
   switch (location1) {
-    case "profile": { handlebox = "profile"; renderBody(page_profile, "", "");profileDetails(); break; }
-    case "about": handlebox = "aboutus"; renderBody(page_about, "text-align: center;overflow-y: scroll;", ""); function lglHand() { changeLocationHash("legal", 1) };dE("lgl_btn").addEventListener("click", lglHand);break;
-    case "login": handlebox = "login"; renderBody(page_login, "justify-content: center;", ""); dE("sgn_in").addEventListener("click", signIn);function regHand() { changeLocationHash("register", 1) };dE("reg_in").addEventListener("click", regHand);break;
+    case "profile": { handlebox = "profile"; renderBody(page_profile, "", ""); profileDetails(); break; }
+    case "about": handlebox = "aboutus"; renderBody(page_about, "text-align: center;overflow-y: scroll;", ""); function lglHand() { changeLocationHash("legal", 1) }; dE("lgl_btn").addEventListener("click", lglHand); break;
+    case "login": handlebox = "login"; renderBody(page_login, "justify-content: center;", ""); dE("sgn_in").addEventListener("click", signIn); function regHand() { changeLocationHash("register", 1) }; dE("reg_in").addEventListener("click", regHand); break;
     case "dashboard": handlebox = "dashboard"; renderBody(page_dashboard, "display: flex;flex-direction: row;", ""); dashboardEvents(); break;
-    case "timetable": handlebox = "schedule"; renderBody(page_schedule, "", ""); iframeLoadScreen(); dE("tmt_frame").src = userinfo.timetableurl;break;
+    case "timetable": handlebox = "schedule"; renderBody(page_schedule, "", ""); iframeLoadScreen(); dE("tmt_frame").src = userinfo.timetableurl; break;
     case "logout": signOutUser(); break;
-    case "mainsformulas": handlebox = "mainsformulas"; renderBody(downloads_render(download_links_list,"formulasheet"), "", ""); break;
-    case "downloads": handlebox = "downloads"; renderBody(downloads_render(download_links_list,"downloads"), "", ""); break;
-    case "register": handlebox = "register"; renderBody(page_register, "", "");dE("rg_in").addEventListener("click", rgbtn); break;
+    case "mainsformulas": handlebox = "mainsformulas"; renderBody(downloads_render(download_links_list, "formulasheet"), "", ""); break;
+    case "downloads": handlebox = "downloads"; renderBody(downloads_render(download_links_list, "downloads"), "", ""); break;
+    case "register": handlebox = "register"; renderBody(page_register, "", ""); dE("rg_in").addEventListener("click", rgbtn); break;
     case "testinfo": handlebox = "testinfo"; renderBody(page_test_list, "", ""); renderTestList("active"); break;
     case "legal": handlebox = "legal"; renderBody(page_toc, "", ""); break;
     case "appinfo": handlebox = "appinfo"; renderBody(page_app_info, "", ""); renderAppInfo(); break;
-    case "forum": handlebox = "forum"; renderBody(page_forum, "", "");var fmsend = dE("fm_send").addEventListener("click", sndMsg);gtMsg();getPinned(); break;
+    case "forum": handlebox = "forum"; renderBody(page_forum, "", ""); var fmsend = dE("fm_send").addEventListener("click", sndMsg); gtMsg(); getPinned(); break;
     case "bugreport": handlebox = "bugreport"; renderBody(page_bug_report, "", ""); break;
-    case "simlist": handlebox = "simlist"; renderBody(page_list_sims, "", "");simEvents(); getSimList(); break;
-    case "testend": handlebox = "test_end"; renderBody(page_test_end, "", "");dE("te_title").innerText = "The Test Has Ended"; break;
+    case "simlist": handlebox = "simlist"; renderBody(page_list_sims, "", ""); simEvents(); getSimList(); break;
+    case "testend": handlebox = "test_end"; renderBody(page_test_end, "", ""); dE("te_title").innerText = "The Test Has Ended"; break;
     case "add/lesson": handlebox = "fu_lesson"; newLesson(); break;
-    case "updates": handlebox = "update";  renderBody(page_updates,"height: max-content;","");getUpdate();break;
+    case "updates": handlebox = "update"; renderBody(page_updates, "height: max-content;", ""); getUpdate(); break;
     case "add/tpc": handlebox = "fu_topic"; newTopic(); break;
     case "add/qubank": handlebox = "fu_topic"; newQBank(); break;
     case "add/simulation": handlebox = "fu_simulation"; newSimulation(); break;
     case "add/tests": handlebox = "fu_topic"; newTest(); break;
     case "add/batch": handlebox = "fu_topic"; newBatch(); break;
-    case "settings": handlebox = "settings"; renderBody(page_settings, "", "");dE("pass_rst_btn").addEventListener("click", requestPasschange); break;
-    case "chplist": handlebox = "chapterlist"; renderBody(page_list_chapter, "", "");chapterEvents(); renderCList(); break;
+    case "uploads": handlebox = "uploadEvents"; renderBody(page_uploads, "", ""); uploadEvents(); break;
+    case "settings": handlebox = "settings"; renderBody(page_settings, "", ""); settingsEvents(); break;
+    case "chplist": handlebox = "chapterlist"; renderBody(page_list_chapter, "", ""); chapterEvents(); renderCList(); break;
     default: handlebox = "error_page"; renderBody(error_page, "", ""); break;
   }
   var iorole = adminrole == true || editorrole == true
-  if (location1.includes("instructions")) { handlebox = "test_instructions"; renderBody(page_test_instructions, "", ""); }
+  if (location1.includes("instructions")) { handlebox = "test_instructions"; renderBody(page_test_instructions, "", "");testInstructions(); }
   if (location1.includes("cyberhunt")) { handlebox = "cyberhunt"; renderBody(page_cyberhunt, "", ""); getCyberhunt() }
   if (location1.includes("notes") && !location1.includes("usernotes")) { handlebox = "notes"; renderBody(page_notes, "", ""); getPDF() }
-  if (location1.includes("sims")) { handlebox = "simulations"; renderBody(page_sims, "", "");iframeLoadScreen();  getSimulation(); }
+  if (location1.includes("sims")) { handlebox = "simulations"; renderBody(page_sims, "", ""); iframeLoadScreen(); getSimulation(); }
   if (location1.includes("chapter")) { handlebox = "chapter"; renderBody(page_chapter, "", ""); getChapterEList() }
-  if (location1.includes("qbanks")) { handlebox = "topic"; renderBody(page_topic, "height:max-content;", "");topicEvents(); getTopic(2); }
-  if (location1.includes("usernotes")) { handlebox = "usernotes"; renderBody(page_usernotes, "flex-direction: row;", "");userNotesEvents(); getUserNotes(); }
-  if (location1.includes("qbnk_vid")) { handlebox = "qbnk_vid"; renderBody(page_qbnkvid, "height:90vh;position: relative;", ""); dE("qbnk_vid_btn").style.display = "block";dE("qbnk_vid_btn").addEventListener("click", prepareVideo);dE("qbnk_vid_btn_e").addEventListener("click", qbnkend);function qbnkend() { dE("watermark").style.display = "flex"; fullEle(dE("qbnk_vid")) } }
-  if (location1.includes("attempt")) { handlebox = "testv1"; renderBody(page_test_v1, "", "");testEvents(); getTestInfo() }
+  if (location1.includes("qbanks")) { handlebox = "topic"; renderBody(page_topic, "height:max-content;", ""); topicEvents(); getTopic(2); }
+  if (location1.includes("usernotes")) { handlebox = "usernotes"; renderBody(page_usernotes, "flex-direction: row;", ""); userNotesEvents(); getUserNotes(); }
+  if (location1.includes("qbnk_vid")) { handlebox = "qbnk_vid"; renderBody(page_qbnkvid, "height:90vh;position: relative;", ""); dE("qbnk_vid_btn").style.display = "block"; dE("qbnk_vid_btn").addEventListener("click", prepareVideo); dE("qbnk_vid_btn_e").addEventListener("click", qbnkend); function qbnkend() { dE("watermark").style.display = "flex"; fullEle(dE("qbnk_vid")) } }
+  if (location1.includes("attempt")) { handlebox = "testv1"; renderBody(page_test_v1, "", ""); testEvents(); getTestInfo() }
   if (location1.includes("finished")) { handlebox = "finishedtestinfo"; renderBody(page_finished_test, "overflow-y: scroll;", ""); getSimpleTestReport() }
   if (location1.includes("testreport")) { handlebox = "testv1"; renderBody(page_test_v1, "", ""); getTestReport() }
-  if (location1.includes("printable/qbank") && iorole == true) { handlebox = "printable"; renderBody(page_printable, "height:max-content;", "");printableEvents();var shfbtn = dE("shf_btn").addEventListener("click", shuffleQBank); printQBank(1); }
+  if (location1.includes("printable/qbank") && iorole == true) { handlebox = "printable"; renderBody(page_printable, "height:max-content;", ""); printableEvents(); var shfbtn = dE("shf_btn").addEventListener("click", shuffleQBank); printQBank(1); }
   if (location1.includes("ARIEL") && iorole == true) { handlebox = "Ariel"; renderBody(page_ariel, "", ""); }
-  if (location1.includes("printable/tests") && iorole == true) { handlebox = "printable"; renderBody(page_printable, "height:max-content;", "");printableEvents();var shfbtn = dE("shf_btn").addEventListener("click", shuffleQBank); printQBank(3); }
+  if (location1.includes("printable/tests") && iorole == true) { handlebox = "printable"; renderBody(page_printable, "height:max-content;", ""); printableEvents(); var shfbtn = dE("shf_btn").addEventListener("click", shuffleQBank); printQBank(3); }
   if (location1 == "functions" && iorole == true) { handlebox = "functions"; renderBody(page_functions, "", ""); changeItem() }
   if (location1.includes("users") && iorole == true) { handlebox = "users"; renderBody(page_edit_user, "", ""); userUpdate() }
-  if (location1.includes("topic")) { handlebox = "topic"; renderBody(page_topic, "height: max-content;", "");topicEvents(); getTopic(1); }
+  if (location1.includes("topic")) { handlebox = "topic"; renderBody(page_topic, "height: max-content;", ""); topicEvents(); getTopic(1); }
   if (location1.includes("printable/topic") && iorole == true) { handlebox = "printable"; renderBody(page_printable, "height:max-content;", ""); printQBank(2); }
-  if (location1.includes("edit_sim") && iorole == true) { handlebox = "fu_simulation"; renderBody(page_edit_sims, "", "ovr-scroll");dE("aq_sims_save").addEventListener("click", updateSimulationWeb); prepareSimulation() }
+  if (location1.includes("edit_sim") && iorole == true) { handlebox = "fu_simulation"; renderBody(page_edit_sims, "", "ovr-scroll"); dE("aq_sims_save").addEventListener("click", updateSimulationWeb); prepareSimulation() }
   if (location1.includes("edit_lesson") && iorole == true) { handlebox = "fu_simulation"; renderBody(page_edit_sims, "", "ovr-scroll"); prepareLesson() }
-  if (location1.includes("edit_tpc") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll");dE("aq_tpc_save").addEventListener("click", function(){updateTopicQBank(1)});edittopicEvents(); prepareTopicQBank(1) }
-  if (location1.includes("edit_test") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll");dE("aq_tst_save").addEventListener("click", function(){updateTopicQBank(3)});edittopicEvents(); prepareTopicQBank(3) }
-  if (location1.includes("edit_qubank") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll");dE("aq_qbc_save").addEventListener("click", function(){updateTopicQBank(2)});edittopicEvents(); prepareTopicQBank(2) }
-  if (location1.includes("edit_exams") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll");dE("aq_exam_save").addEventListener("click", function(){updateTopicQBank(4)});edittopicEvents(); prepareTopicQBank(4) }
+  if (location1.includes("edit_tpc") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll"); dE("aq_tpc_save").addEventListener("click", function () { updateTopicQBank(1) }); edittopicEvents(); prepareTopicQBank(1) }
+  if (location1.includes("edit_test") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll"); dE("aq_tst_save").addEventListener("click", function () { updateTopicQBank(3) }); edittopicEvents(); prepareTopicQBank(3) }
+  if (location1.includes("edit_qubank") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll"); dE("aq_qbc_save").addEventListener("click", function () { updateTopicQBank(2) }); edittopicEvents(); prepareTopicQBank(2) }
+  if (location1.includes("edit_exams") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll"); dE("aq_exam_save").addEventListener("click", function () { updateTopicQBank(4) }); edittopicEvents(); prepareTopicQBank(4) }
   if (iorole) {
     if (window.location.hash.includes("dashboard")) {
       dE("adminonly").style.display = "flex";
-    } 
+    }
     if (window.location.hash.includes("topic") || window.location.hash.includes("qbanks")) {
       dE("tp_pnt").style.display = "block";
       dE("tp_edt").style.display = "block";
@@ -390,7 +418,22 @@ function coreManager(newlocation, n1) {
   testQuestionList = []; testResponseList = []; testInfo = []; activequestionid = ""
 
 }
-async function getUpdate(){
+async function testInstructions(){
+  let docSnap = await getDoc(doc(db, 'tests',  window.location.hash.split("#/instructions/")[1]))
+  if (docSnap.exists()) {
+    dE("tsi").innerHTML = docSnap.data().instructions
+  }else{
+    renderBody("This test either doesnt exist or you do not have access to this test.")
+  }
+  dE("agree_in").addEventListener("change",function(){
+    if (dE("agree_in").checked == true){
+      dE("tin_start").disabled = false
+    }else{
+      dE("tin_start").disabled = true
+    }
+  })
+}
+async function getUpdate() {
   let docSnap = await getDoc(doc(db, 'usernotes', 'releasenotes'))
   if (docSnap.exists()) {
     dE("rel_list").innerHTML = docSnap.data().notes
@@ -400,6 +443,160 @@ async function getUpdate(){
     dE("updt_list").innerHTML = docSnap2.data().notes
   }
 }
+window.ifcls = function () {
+  document.getElementById('tempIF_G').remove();
+}
+window.user_rate_value = 0;
+function uploadEvents() {
+  document.getElementById("file").addEventListener("change", async function () {
+    var details = await (await fetch('https://ipapi.co/json/')).json();
+    var file = document.getElementById("file").files[0];
+    const name = details.ip + "-" + new Date().getTime() + "-" + file.name;
+    const metadata = {
+      contentType: file.type,
+      ip: details.ip
+    };
+    const storageRef = ref(storage, 'uploads/' + details.ip.replaceAll(".", "_") + "/" + name);
+    // 'file' comes from the Blob or File API
+    const uploadTask = uploadBytesResumable(storageRef, file);
+    uploadTask.on('state_changed',
+      (snapshot) => {
+        // Observe state change events such as progress, pause, and resume
+        // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        document.getElementById("file_progress").innerText = 'Upload is ' + progress + '% done';
+        switch (snapshot.state) {
+          case 'paused':
+            document.getElementById("file_status").innerText = 'Upload is paused'
+            break;
+          case 'running':
+            document.getElementById("file_status").innerText = 'Upload is running';
+            break;
+        }
+      },
+      (error) => {
+        document.getElementById("file_status").innerText = 'Upload abandoned'
+        document.getElementById("file_progress").innerText = ""
+        // Handle unsuccessful uploads
+      },
+      () => {
+        // Handle successful uploads on complete
+        // For instance, get the download URL: https://firebasestorage.googleapis.com/...
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          document.getElementById("file_status").innerText = "Upload Complete. Copy The Link Below"
+          document.getElementById("file_progress").innerText = ""
+          document.getElementById("file_link_long").value = downloadURL
+          let xhr = new XMLHttpRequest();
+          xhr.open("POST", "https://firebasedynamiclinks.googleapis.com/v1/shortLinks?key=AIzaSyBxyMo6yQ20stBIOsHUgToNgm4PmCKxTX4");
+
+          xhr.setRequestHeader("Accept", "application/json");
+          xhr.setRequestHeader("Content-Type", "application/json");
+
+          xhr.onload = () => console.log(xhr.responseText);
+          xhr.onreadystatechange = async function () {
+            if (xhr.readyState === 4) {
+              console.log(xhr.response)
+              document.getElementById("file_link").value = JSON.parse(xhr.response).shortLink
+              const docRef = await addDoc(collection(db, "quarkz", "users", "uploads"), {
+                ipdetails: details,
+                ip: details.ip,
+                url: downloadURL,
+                shorturl: JSON.parse(xhr.response).shortLink,
+                name: name,
+                size: file.size,
+              });
+            }
+          }
+          let data = `{
+        "dynamicLinkInfo": {
+          "domainUriPrefix": "https://mttweb.page.link",
+          "link": "${downloadURL}",
+        }
+      }`;
+          xhr.send(data);
+
+        });
+      }
+    );
+  })
+}
+function settingsEvents() {
+  dE("pass_rst_btn").addEventListener("click", requestPasschange);
+  dE("sub_rat_btn").addEventListener("click", function () {
+    let data = "?entry.1743636787=" + window.user_rate_value + "&entry.1877359119=quarkz_rating&entry.2052323667=" + userinfo.uuid + "-" + document.getElementById("rate_comment").value
+    let f_url = "https://docs.google.com/forms/d/e/1FAIpQLSe5CGUovfJodcfga1bACu57FvE4REOjeAJYFqODeoTQAK0nvg/formResponse" + data
+    f_url = encodeURI(f_url)
+    let ifeq = document.createElement("iframe")
+    ifeq.id = "tempIF_G"
+    ifeq.width = "100px"
+    ifeq.height = "100px"
+    ifeq.style.display = "none"
+    ifeq.onload = "ifcls();"
+    ifeq.src = f_url
+    document.getElementsByTagName("body")[0].appendChild(ifeq);
+    ifeq.onload = "ifeq.remove();"
+    ifeq.addEventListener("load", ifcls(), false);
+    localStorage.setItem("rate_app", "true")
+    log("Thank You", "Thank You for your Valuable Feedback.")
+    dE("st_rateapp").style.display = "none"
+  });
+  if (localStorage.getItem("rate_app") == "true") {
+    dE("st_rateapp").style.display = "none";
+  }
+  const stars = document.querySelectorAll('.star');
+  // Add event listener to each star
+  stars.forEach((star) => {
+    star.addEventListener('click', (event) => {
+      window.user_rate_value = event.target.getAttribute('data-value');
+      updateStarColors();
+    });
+    star.addEventListener('mouseover', (event) => {
+      const value = event.target.getAttribute('data-value');
+      for (let i = 0; i < value; i++) {
+        stars[i].classList.add('hovered');
+      }
+    });
+    star.addEventListener('mouseout', () => {
+      stars.forEach((star) => {
+        star.classList.remove('hovered');
+      });
+    });
+  });
+
+  function updateStarColors() {
+    stars.forEach((star) => {
+      const value = star.getAttribute('data-value');
+      if (value <= window.user_rate_value) {
+        star.classList.add('selected');
+      } else {
+        star.classList.remove('selected');
+      }
+    });
+  }
+  dE("prf_typ_"+localStorage.getItem("prf_type").split("v")[1]).style.borderColor = "red"
+  dE("prf_typ_1").src = getAvatarURL(userinfo.name,userinfo.gen,"v1")
+  dE("prf_typ_2").src = getAvatarURL(userinfo.name,userinfo.gen,"v2")
+  dE("prf_typ_3").src = getAvatarURL(userinfo.name,userinfo.gen,"v3")
+  dE("prf_typ_1").addEventListener("click",function(){
+    dE("prf_typ_1").style.borderColor = "red"
+    dE("prf_typ_2").style.borderColor = "#06d85f"
+    dE("prf_typ_3").style.borderColor = "#06d85f"
+    localStorage.setItem("prf_type","v1")
+  })
+  dE("prf_typ_2").addEventListener("click",function(){
+    dE("prf_typ_1").style.borderColor = "#06d85f"
+    dE("prf_typ_2").style.borderColor = "red"
+    dE("prf_typ_3").style.borderColor = "#06d85f"
+    localStorage.setItem("prf_type","v2")
+  })
+  dE("prf_typ_3").addEventListener("click",function(){
+    dE("prf_typ_1").style.borderColor = "#06d85f"
+    dE("prf_typ_2").style.borderColor = "#06d85f"
+    dE("prf_typ_3").style.borderColor = "red"
+    localStorage.setItem("prf_type","v3")
+  })
+}
+if (localStorage.getItem("prf_type") == null){localStorage.setItem("prf_type","v2")}
 // -----------------------
 // SIMULATIONS
 // Creates A Blank Simulation
@@ -632,11 +829,11 @@ async function unotes1() {
 function unotes2() {
 
 }
-function iframeLoadScreen(){
+function iframeLoadScreen() {
   const iframe = document.querySelector('iframe');
   var iload = "";
   iframe.addEventListener('loadstart', () => {
-    iload = log("Loading", "Content Is Loading. Please Wait") 
+    iload = log("Loading", "Content Is Loading. Please Wait")
   });
   iframe.addEventListener('load', () => {
     document.getElementById(iload).remove()
@@ -661,7 +858,7 @@ async function getUserNotes() {
     await deleteDoc(doc(db, "usernotes", window.location.hash.split("usernotes/delete/")[1]));
   } else if (window.location.hash == "#/usernotes/") {
     getUserNotesList()
-  } else if (window.location.hash.includes("usernotes")){
+  } else if (window.location.hash.includes("usernotes")) {
     getUserNotesList()
     var docRef = doc(db, 'usernotes', window.location.hash.split("usernotes/")[1])
     var docSnap = await getDoc(docRef);
@@ -687,7 +884,7 @@ async function getUserNotes() {
       }
       notesUIHandler()
     }
-  }else{}
+  } else { }
 }
 function uNotesClicker() {
   window.location.hash = "#/usernotes/" + this.id.split("uno")[1]
@@ -742,11 +939,12 @@ async function sndMsg() {
   }
 }
 function displayMessage(id, time, name, text, userid) {
+  var sanitizedText = text.replace(/<[^>]+>/g, '');
   if (userid == "shh5oUIhRpdBkEKQ3GCZwoKE9u42") {
-    var d = "<div id = 'dM" + id + "'><span class = 'dmName'>" + name + "👑: </span><span class = 'dmText'>" + text + "</span><span class = 'dmtime'>" + time + "</span></div>"
+    var d = "<div id = 'dM" + id + "'><span class = 'dmName'>" + name + "👑: </span><span class = 'dmText'>" + sanitizedText + "</span><span class = 'dmtime'>" + time + "</span></div>"
     dE("forum_live").insertAdjacentHTML(forum_d, d)
   } else {
-    var d = "<div id = 'dM" + id + "'><span class = 'dmName'>" + name + ": </span><span class = 'dmText'>" + text + "</span><span class = 'dmtime'>" + time + "</span></div>"
+    var d = "<div id = 'dM" + id + "'><span class = 'dmName'>" + name + ": </span><span class = 'dmText'>" + sanitizedText + "</span><span class = 'dmtime'>" + time + "</span></div>"
     dE("forum_live").insertAdjacentHTML(forum_d, d)
   }
 }
@@ -831,7 +1029,7 @@ function vidSlideController(docJSON) {
   }
   renderMathInElement(dE('tp_ans_hold'));
   renderMathInElement(dE('tp_qtext'));
-}let mediaRecorder;
+} let mediaRecorder;
 // Prepares Slides Controller
 async function prepareVideo() {
   dE("qbnk_vid_btn").style.display = "none"
@@ -1076,7 +1274,7 @@ async function newQBank() {
   } catch {
   }
 }
-async function prepareEditExam(){
+async function prepareEditExam() {
   let docSnap = await getDoc(doc(db, "quarkz", "exams"))
   if (docSnap.exists()) {
     var docJSON = docSnap.data();
@@ -1170,7 +1368,7 @@ async function prepareTopicQBank(iun) {
         dE("aq_tst_endon").value = dateparser(docJSON.endon.seconds * 1000)
         dE("aq_tst_timealotted").value = docJSON.timeallotted
         dE("aq_tst_syllabi").value = docJSON.syllabus
-        setHTML("aq_add_test_instr",docJSON.instructions)
+        setHTML("aq_add_test_instr", docJSON.instructions)
         let docSnap2 = await getDoc(doc(db, "tests", id, "questions", "questions"))
         let docSnap3 = await getDoc(doc(db, "tests", id, "questions", "answers"))
         let q = []
@@ -1413,12 +1611,12 @@ async function printQBank(type) {
       qtype = docJSON.type;
       qimg = docJSON.img;
       var src_url;
-      if (docJSON.y_url == ""){
+      if (docJSON.y_url == "") {
         src_url = ""
-      }else{
-        src_url = "https://api.qrserver.com/v1/create-qr-code/?size=50x50&data=https://www.youtube.com/watch?v="+docJSON.y_url
+      } else {
+        src_url = "https://api.qrserver.com/v1/create-qr-code/?size=50x50&data=https://www.youtube.com/watch?v=" + docJSON.y_url
       }
-      var inhtml = '<div class = "les_q"><div id = "' + ele.id + '"><div style = "display:flex;flex-direction:row;justify-content: space-between;"><div style = "font-size:18px;">' + qtitle + '</div><img style = "float:right" src="'+src_url+'"></div><hr color="white" width="100%"></div>'
+      var inhtml = '<div class = "les_q"><div id = "' + ele.id + '"><div style = "display:flex;flex-direction:row;justify-content: space-between;"><div style = "font-size:18px;">' + qtitle + '</div><img style = "float:right" src="' + src_url + '"></div><hr color="white" width="100%"></div>'
       dE("eqb_add").insertAdjacentHTML('beforeend', inhtml);
       var expl = '<div class = "les_expl" style = "">' + docJSON.expl + '</div><hr color="white" width="100%">'
       dE(ele.id).insertAdjacentHTML('beforeend', expl)
@@ -1440,7 +1638,7 @@ async function lessonRenderer(docJSON) {
   dE("tp_expl").innerHTML = docJSON.expl
   // dE("tp_lsimg").src = docJSON.img
 }
-async function questionRenderer(docJSON, type) {
+async function questionRenderer(docJSON, totalq) {
   function iu(ele) { ele.style.display = "none" }
   function io(ele) { ele.style.display = "block" }
   function qif(ele) { ele.style.display = "flex" }
@@ -1448,7 +1646,7 @@ async function questionRenderer(docJSON, type) {
   var tpmcqcon = dE("tp_mcq_con")
   var tpmatrix = dE("tp_matrix")
   var tpanswer = dE("tp_answer")
-  dE("tp_lsno").innerText = "Question"
+  dE("tp_lsno").innerHTML = "Question<span style = 'font-size:12px'>&nbsp;X of ("+totalq+")</span>"
   dE("tp_question").style.display = "flex"
   dE("tp_lesson").style.display = "none"
   dE("tp_question").setAttribute("dataid", docJSON.id)
@@ -1489,17 +1687,24 @@ async function questionRenderer(docJSON, type) {
 async function topicHandler(type) {
   var pol;
   if (type == 1) { pol = -1 } else { pol = 1 }
-  if ((topicJSONno < topicJSON.qllist.length) && type == 2) {
+  if ((topicJSONno < topicJSON.qllist.length-1) && type == 2) {
     topicJSONno = topicJSONno + pol
   } else if (type == 1 && (topicJSONno > 0)) {
     topicJSONno = topicJSONno + pol
   }
+  if ((topicJSONno >= topicJSON.qllist.length) && type == 2){return}
   if (type == 3) { topicJSONno = 0 }
   var a = topicJSON.title
   dE("tp_title").innerText = a
   var tqQus = topicJSON.qllist[topicJSONno]
+  var totalq = 0;
+  for (var i =0;i<topicJSON.qllist.length;i++){
+    if (topicJSON.qllist[i].mode == "question"){
+      totalq++
+    }
+  }
   if (tqQus.mode == "lesson") { lessonRenderer(tqQus) }
-  else if (tqQus.mode == "question") { questionRenderer(tqQus) }
+  else if (tqQus.mode == "question") { questionRenderer(tqQus,totalq) }
   stpVid();
 }
 function addMCQ() {
@@ -1571,20 +1776,21 @@ async function profileDetails() {
   courseno = userinfo.course
   spoints.textContent = userinfo.spoints
   userinfo.usernotes = userinfo.usernotes
-  if (userinfo.gen == "Male") {
-    dE("prf_tab_t_t_img").classList.remove("prf_male", "prf_female")
-    dE("prf_tab_t_t_img").classList.add("prf_male")
-  } else if (userinfo.gen == "Female") {
-    dE("prf_tab_t_t_img").classList.remove("prf_male", "prf_female")
-    dE("prf_tab_t_t_img").classList.add("prf_female")
-  }
+  // if (userinfo.gen == "Male") {
+  //   dE("prf_tab_t_t_img").classList.remove("prf_male", "prf_female")
+  //   dE("prf_tab_t_t_img").classList.add("prf_male")
+  // } else if (userinfo.gen == "Female") {
+  //   dE("prf_tab_t_t_img").classList.remove("prf_male", "prf_female")
+  //   dE("prf_tab_t_t_img").classList.add("prf_female")
+  // }
+  dE("prf_tab_t_t_img").src = getAvatarURL(userinfo.name,userinfo.gen,localStorage.getItem("prf_type"))
 }
 function renderExams() {
   for (let i = 0; i < userinfo.examslist.examinfo.length; i++) {
     var ioef = userinfo.examslist.examinfo[i]
-    var iti = "exam"+Math.floor(Math.random()*100000)
-    dE("db_exam_list").insertAdjacentHTML("beforeend", `<div class = "tlinks_min rpl" id = `+iti+` onclick = 'log("`+ioef.name+`","`+ioef.date+`","`+ioef.info+`","`+ioef.syllabus+`",`+3+`)'><span style="font-size: 16px;">` + ioef.name + `</span></div>`)
-    dE(iti).addEventListener("click",function(){ })
+    var iti = "exam" + Math.floor(Math.random() * 100000)
+    dE("db_exam_list").insertAdjacentHTML("beforeend", `<div class = "tlinks_min rpl" id = ` + iti + ` onclick = 'log("` + ioef.name + `","` + ioef.date + `","` + ioef.info + `","` + ioef.syllabus + `",` + 3 + `)'><span style="font-size: 16px;">` + ioef.name + `</span></div>`)
+    dE(iti).addEventListener("click", function () { })
   }
 }
 window.log = log
@@ -2603,27 +2809,28 @@ function rgbtn() {
 
 
 function plyVid() { window.player.playVideo() }
-function stpVid() { try { window.player.stopVideo();if (!window.location.hash.includes("topic")){window.player = undefined} } catch { } }
+function stpVid() { try { window.player.stopVideo(); if (!window.location.hash.includes("topic")) { window.player = undefined } } catch { } }
 function pauVid() { window.player.pauseVideo() }
-function loadVid(videoId) { 
+function loadVid(videoId) {
   var vid_width = 0.8 * window.innerWidth || 0.8 * document.documentElement.clientWidth || 0.8 * document.body.clientWidth;
-  if (player == undefined || dE("player").tagName == "div"){
-  window.player = new YT.Player('player', {
-    height: '500',
-    width: vid_width,
-    origin: window.location.origin,
-    videoId: videoId,
-    playerVars: {
-      'playsinline': 1,
-      'controls': 0,
-      'modestbranding': 1,
-    },
-    events: {
-      'onReady': onPlayerReady,
-      'onStateChange': onPlayerStateChange
-    }
-  });
-}else{window.player.loadVideoById(videoId);} }
+  if (player == undefined || dE("player").tagName == "div") {
+    window.player = new YT.Player('player', {
+      height: '500',
+      width: vid_width,
+      origin: window.location.origin,
+      videoId: videoId,
+      playerVars: {
+        'playsinline': 1,
+        'controls': 0,
+        'modestbranding': 1,
+      },
+      events: {
+        'onReady': onPlayerReady,
+        'onStateChange': onPlayerStateChange
+      }
+    });
+  } else { window.player.loadVideoById(videoId); }
+}
 function renderAppInfo() {
   dE("ren_appinf").textContent = JSON.stringify(Quarkz, undefined, 2);
 }
@@ -2768,7 +2975,7 @@ function questionGraph(ipd, data) {
 }
 var Quarkz = {
   "copyright": "Mr Techtroid 2021-23",
-  "vno": "v0.5.1",
+  "vno": "v0.5.2",
   "author": "Mr Techtroid",
   "last-updated": "05/06/2023(IST)",
   "serverstatus": "firebase-online",
@@ -2815,6 +3022,6 @@ bc.onmessage = (event) => {
   }
   if (event.data === `QZCODE-NOTFIRST`) {
     isFirstTab = false;
-    renderBody("Quarkz! is Open in Another Tab/Window! You can only use Quarkz! in one tab/window.","","")
+    renderBody("Quarkz! is Open in Another Tab/Window! You can only use Quarkz! in one tab/window.", "", "")
   }
 };

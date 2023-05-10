@@ -108,10 +108,10 @@ export let page_edit_topic = `
 
 `
 export let page_topic = `
-<span style="font-size: 5vh;color:yellow" id="tp_title">Topic Name</span>
+<span style="font-size: 3vh;color:lime" id="tp_title">Topic Name</span>
+<span style="font-size: 4vh;color:yellow" id="tp_lsno">Lesson Name</span>
         <hr width="100%" color="white">
         <div class="flex_type" style="flex-direction: row;flex-wrap: wrap;">
-            <span style="font-size: 3vh;color:yellow" id="tp_lsno">Lesson Name</span>
             <button class="tst_btn rpl" id="tp_nxt">Next</button>
             <button class="tst_btn rpl" id="tp_prv">Previous</button>
             <button class="tst_btn rpl" id="tp_pnt" style="display: none;">Export</button>

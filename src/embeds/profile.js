@@ -1,7 +1,7 @@
 export let page_profile = `
 <div id="prf_tab_t">
             <div id="prf_tab_t_t">
-                <div id="prf_tab_t_t_img"></div>
+                <img style = "background-color:black;border:2px solid #06d85f;border-radius:30px;" id="prf_tab_t_t_img"></img>
                 <div id="prf_tab_t_hold">
                     <span id="prf_name"></span>
                     <span class="prf_det">

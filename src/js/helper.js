@@ -150,4 +150,6 @@ export function renderMarkedMath(eleid, toid) {
     dE(toid).innerHTML = v
     renderMathInElement(dE(toid));
 }
+
+  
 export default { sd, sha256, makeid,mobileCheck,areObjectsEqual,areEqual,getServerTime,fullEle,dE,sortObj,sortObjv2,renderMarkedMath,mergeById}

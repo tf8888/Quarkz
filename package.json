@@ -12,8 +12,12 @@
   "devDependencies": {
     "@parcel/packager-raw-url": "^2.8.3",
     "@parcel/transformer-webmanifest": "^2.8.3",
+    "buffer": "^5.7.1",
+    "crypto-browserify": "^3.12.0",
+    "events": "^3.3.0",
     "parcel": "latest",
-    "process": "^0.11.10"
+    "process": "^0.11.10",
+    "stream-browserify": "^3.0.0"
   },
   "description": "An Online Quiz And Education Platform Built With Vanilla Javascript. \r ## NOTE\r This Repository Is Protected Under Copyright Law. Using Any File or Parts of Files From this Repository for Any Use Without Prior Consent May Result In DMCA Strikes. \r ### Copyright © 2020-22 Mr Techtroid",
   "version": "0.5.1",

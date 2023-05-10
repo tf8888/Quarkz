@@ -9,6 +9,7 @@ const distFolder = path.join(__dirname, 'dist');
 // Define the files you want to copy
 const filesToCopy = [
   'print.css',
+  '404.html'
   // Add any additional files here
 ];
 
