@@ -23,7 +23,7 @@ import { page_downloads, page_jee_main, download_links_list, downloads_render } 
 import { page_finished_test } from "../embeds/finished_test";
 import { page_forum } from "../embeds/forum";
 import { page_functions } from "../embeds/functions";
-import { log } from "../embeds/log";
+import { log, qp_test,report_stuff } from "../embeds/log";
 import { page_login } from "../embeds/login";
 import { page_printable } from "../embeds/printable";
 import { page_profile } from "../embeds/profile";
@@ -39,8 +39,16 @@ import { page_edit_user } from "../embeds/user";
 import { page_usernotes } from "../embeds/usernotes"
 import { saveFile, createRecorder, recordScreen } from "../js/recorder"
 import * as d3 from 'd3';
-import { sd, sha256, makeid, mobileCheck, areObjectsEqual, areEqual, getServerTime, fullEle, dE, sortObj, sortObjv2, renderMarkedMath, mergeById } from '../js/helper'
+import { sd, sha256, makeid, mobileCheck, areObjectsEqual, areEqual, getServerTime, fullEle, dE, sortObj, sortObjv2, renderMarkedMath, mergeById, qCorrector,playSoundEffect,showLS } from '../js/helper'
 import { sysaccess } from "./reworkui";
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register(
+    new URL('../js/sw.js', import.meta.url),
+    { type: 'module' }
+  );
+}
+
 const firebaseConfig = {
   apiKey: "AIzaSyDN8T7Pmw5e-LzmC3nAHEqI0Uk7FF7y6fc",
   authDomain: "quarkz.firebaseapp.com",
@@ -73,7 +81,7 @@ function getInitials(name) {
   }
   return initials;
 }
-function getAvatarURL(name,gen,ver){
+function getAvatarURL(name, gen, ver) {
   // Import the crypto module for hashing
   const crypto = require('crypto');
   // Hash the seed string using SHA-256 algorithm
@@ -81,18 +89,18 @@ function getAvatarURL(name,gen,ver){
   // Take the first 6 digits of the hash and convert to number
   const num = parseInt(hash.slice(0, 6), 16);
   // Return the 6-digit number
-  if (ver == undefined || ver == ""){ver == "v2"}
+  if (ver == undefined || ver == "") { ver == "v2" }
   let initials = getInitials(name);
-  if (ver == "v1"){
-    return "https://ui-avatars.com/api/?background=random&size=100&bold=true&name="+getInitials(userinfo.name)
-  }else if (ver == "v2"){
-    if (gen == "Male"){
-      return "https://api.dicebear.com/5.x/avataaars/svg?top%5B%5D=dreads01,dreads02,eyepatch,frizzle,shortCurly,shortFlat,shortRound,shortWaved,sides,theCaesar,theCaesarAndSidePart,turban&seed="+initials+num.toString()
-    }else{
-      return "https://api.dicebear.com/5.x/avataaars/svg?facialHairProbability=0&top%5B%5D=bigHair,bob,bun,curly,curvy,dreads,frida,fro,hijab,longButNotTooLong,miaWallace,shaggy,shaggyMullet,shavedSides,straightAndStrand,straight01,straight02&seed="+initials+num.toString()
+  if (ver == "v1") {
+    return "https://ui-avatars.com/api/?background=random&size=100&bold=true&name=" + getInitials(userinfo.name)
+  } else if (ver == "v2") {
+    if (gen == "Male") {
+      return "https://api.dicebear.com/5.x/avataaars/svg?top%5B%5D=dreads01,dreads02,eyepatch,frizzle,shortCurly,shortFlat,shortRound,shortWaved,sides,theCaesar,theCaesarAndSidePart,turban&seed=" + initials + num.toString()
+    } else {
+      return "https://api.dicebear.com/5.x/avataaars/svg?facialHairProbability=0&top%5B%5D=bigHair,bob,bun,curly,curvy,dreads,frida,fro,hijab,longButNotTooLong,miaWallace,shaggy,shaggyMullet,shavedSides,straightAndStrand,straight01,straight02&seed=" + initials + num.toString()
     }
-  }else if (ver == "v3"){
-    return "https://api.dicebear.com/6.x/bottts/svg?seed=" + initials+num.toString()
+  } else if (ver == "v3") {
+    return "https://api.dicebear.com/6.x/bottts/svg?seed=" + initials + num.toString()
   }
 }
 // Login Page
@@ -219,7 +227,7 @@ function dashboardEvents() {
   dE("dshd_name").innerText = userinfo.name
   dE("dshd_batch").innerText = userinfo.batchname
 
-  dE("prf_tab_img").src = getAvatarURL(userinfo.name,userinfo.gen,localStorage.getItem("prf_type"))
+  dE("prf_tab_img").src = getAvatarURL(userinfo.name, userinfo.gen, localStorage.getItem("prf_type"))
   renderExams()
 }
 function simEvents() {
@@ -255,17 +263,57 @@ function chapterEvents() {
   var s_chb = dE("schb").addEventListener("click", schb)
   var u_chb = dE("uchb").addEventListener("click", uchb)
 }
+document.addEventListener('copy', function(e){
+  e.clipboardData.setData('text/plain', "It is forbidden to copy content from Quarkz!");
+  e.preventDefault();
+});
+function addTestEvents() {
+  function qpaper() {
+    let html = ``;
+    let counter = 1;
+    for (let ele of testQuestionList.questions) {
+      html += '<div class = "qb_q"><div class = "qb_ttl">Q ' + counter + ") " + ele.title + '<div id = "qb_q_ty" class = "qb_q_ty qb_qt_ty" >(' + ele.type + ')</div><div id = "qb_q_mrk" class = "qb_q_ty qb_qt_ty" >(' + ele.pm + '/' + ele.nm + ')</div></div></div><br><hr style="color:white"><br>'
+      counter++
+    }
+    qp_test("Question Paper", html)
+  }
+  function qinstr() {
+    function dateparser(var1) {
+      var now = new Date(var1);
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      return now.toISOString().slice(0, 16);
+    }
+    qp_test("", page_test_instructions)
+    dE("tsi").innerHTML = testInfo.instructions
+    dE("i_name").innerHTML = testInfo.title
+    dE("i_start").innerHTML = dateparser(testInfo.strton.seconds*1000)
+    dE("i_end").innerHTML = dateparser(testInfo.endon.seconds*1000)
+    dE("i_time").innerHTML = testInfo.timeallotted/60 + "&nbsp;Mins"
+    dE("i_syllabus").innerHTML = testInfo.syllabus
+    dE("i_total").innerHTML = testInfo.totalmarks
+    dE("i_qno").innerHTML = testInfo.questionnos
+    dE("agree_in").style.display = "none"
+    dE("tin_start").style.display = "none"
+    dE("ti_i").style.width = "95%"
+    dE("container").style.borderColor = "transparent"
+  }
+  var tt_qp = dE("tt_qp").addEventListener("click", qpaper)
+  var tt_instr = dE("tt_instr").addEventListener("click", qinstr)
+  var tprep = dE("tt_rep").addEventListener("click",report_stuff)
+}
 function testEvents() {
   function tsave() { testOperator("tts_answered") }
   function tclear() { testOperator("tts_notanswer") }
   function treview() { testOperator("tts_review") }
   function tansrev() { testOperator("tts_ansreview") }
+
   function sTestHand() { log("Warning", "Are You Sure You Want To End The Test", submitTest, "Yes,Submit", 1) }
   var tt_save = dE("tt_save").addEventListener("click", tsave)
   var tt_clear = dE("tt_clear").addEventListener("click", tclear)
   var tt_review = dE("tt_review").addEventListener("click", treview)
   var tt_ansreview = dE("tt_ansreview").addEventListener("click", tansrev)
   var ttsub = dE("tt_sub").addEventListener("click", sTestHand)
+  var tprep = dE("tt_rep").addEventListener("click",report_stuff)
 }
 function topicEvents() {
   function prvHand() { topicHandler(1) }
@@ -273,6 +321,7 @@ function topicEvents() {
   var tpnxt = dE("tp_nxt").addEventListener("click", nxtHand)
   var tpprv = dE("tp_prv").addEventListener("click", prvHand)
   var tpedt = dE("tp_edt").addEventListener("click", editStuff)
+  var tprep = dE("tp_rep").addEventListener("click",report_stuff)
   var tpsbm = dE("tp_sbm").addEventListener("click", checkQuestion)
   var tppnt = dE("tp_pnt").addEventListener("click", printStuff)
 }
@@ -311,8 +360,6 @@ function userNotesEvents() {
 function dshHand() { changeLocationHash("dashboard", 1) }
 var dshbtn = dE("dsh_btn").addEventListener("click", dshHand);
 function printableEvents() {
-  document.getElementById("pe_tst_type_1").addEventListener('change', updateUI)
-  document.getElementById("pe_tst_type_2").addEventListener('change', updateUI)
   document.getElementById("tsinf_btn").addEventListener('change', updateUI)
   document.getElementById("tans_btn").addEventListener("click", function () {
     for (var i = 0; i < document.getElementsByClassName("q_ans_1").length; i++) {
@@ -341,7 +388,7 @@ function coreManager(newlocation, n1) {
   handlebox = newlocation
   location1 = window.location.hash.split("#/")[1]
   if (userrole == false || userrole == null || userrole == undefined) {
-    if (location1 == "login" || location1 == "register" || location1.includes("notes") || location1 == "legal" || location1 == "about" || location1 == "bugreport" || location1 == "appinfo" || location1 == "mainsformulas" || location1 == "downloads" || location1 == "uploads") {
+    if (location1 == "login" || location1 == "register" || (location1.includes("notes") && !location1.includes("usernotes")) || location1 == "legal" || location1 == "about" || location1 == "bugreport" || location1 == "appinfo" || location1 == "mainsformulas" || location1 == "downloads" || location1 == "uploads") {
 
     } else {
       location1 = "error_page"
@@ -352,18 +399,18 @@ function coreManager(newlocation, n1) {
     case "about": handlebox = "aboutus"; renderBody(page_about, "text-align: center;overflow-y: scroll;", ""); function lglHand() { changeLocationHash("legal", 1) }; dE("lgl_btn").addEventListener("click", lglHand); break;
     case "login": handlebox = "login"; renderBody(page_login, "justify-content: center;", ""); dE("sgn_in").addEventListener("click", signIn); function regHand() { changeLocationHash("register", 1) }; dE("reg_in").addEventListener("click", regHand); break;
     case "dashboard": handlebox = "dashboard"; renderBody(page_dashboard, "display: flex;flex-direction: row;", ""); dashboardEvents(); break;
-    case "timetable": handlebox = "schedule"; renderBody(page_schedule, "", ""); iframeLoadScreen(); dE("tmt_frame").src = userinfo.timetableurl; break;
+    case "timetable": handlebox = "schedule"; renderBody(page_schedule, "", ""); showLS("s"); dE("tmt_frame").src = userinfo.timetableurl; break;
     case "logout": signOutUser(); break;
     case "mainsformulas": handlebox = "mainsformulas"; renderBody(downloads_render(download_links_list, "formulasheet"), "", ""); break;
     case "downloads": handlebox = "downloads"; renderBody(downloads_render(download_links_list, "downloads"), "", ""); break;
     case "register": handlebox = "register"; renderBody(page_register, "", ""); dE("rg_in").addEventListener("click", rgbtn); break;
-    case "testinfo": handlebox = "testinfo"; renderBody(page_test_list, "", ""); renderTestList("active"); break;
+    case "testinfo": handlebox = "testinfo"; renderBody(page_test_list, "height:max-content;", ""); testlistEvents(); renderTestList("active"); break;
     case "legal": handlebox = "legal"; renderBody(page_toc, "", ""); break;
     case "appinfo": handlebox = "appinfo"; renderBody(page_app_info, "", ""); renderAppInfo(); break;
     case "forum": handlebox = "forum"; renderBody(page_forum, "", ""); var fmsend = dE("fm_send").addEventListener("click", sndMsg); gtMsg(); getPinned(); break;
     case "bugreport": handlebox = "bugreport"; renderBody(page_bug_report, "", ""); break;
     case "simlist": handlebox = "simlist"; renderBody(page_list_sims, "", ""); simEvents(); getSimList(); break;
-    case "testend": handlebox = "test_end"; renderBody(page_test_end, "", ""); dE("te_title").innerText = "The Test Has Ended"; break;
+    case "testend": handlebox = "test_end"; renderBody(page_test_end, "", ""); break;
     case "add/lesson": handlebox = "fu_lesson"; newLesson(); break;
     case "updates": handlebox = "update"; renderBody(page_updates, "height: max-content;", ""); getUpdate(); break;
     case "add/tpc": handlebox = "fu_topic"; newTopic(); break;
@@ -372,22 +419,22 @@ function coreManager(newlocation, n1) {
     case "add/tests": handlebox = "fu_topic"; newTest(); break;
     case "add/batch": handlebox = "fu_topic"; newBatch(); break;
     case "uploads": handlebox = "uploadEvents"; renderBody(page_uploads, "", ""); uploadEvents(); break;
-    case "settings": handlebox = "settings"; renderBody(page_settings, "", ""); settingsEvents(); break;
+    case "settings": handlebox = "settings"; renderBody(page_settings, "height: max-content;", ""); settingsEvents(); break;
     case "chplist": handlebox = "chapterlist"; renderBody(page_list_chapter, "", ""); chapterEvents(); renderCList(); break;
     default: handlebox = "error_page"; renderBody(error_page, "", ""); break;
   }
   var iorole = adminrole == true || editorrole == true
-  if (location1.includes("instructions")) { handlebox = "test_instructions"; renderBody(page_test_instructions, "", "");testInstructions(); }
+  if (location1.includes("instructions")) { handlebox = "test_instructions"; renderBody(page_test_instructions, "", ""); testInstructions(); }
   if (location1.includes("cyberhunt")) { handlebox = "cyberhunt"; renderBody(page_cyberhunt, "", ""); getCyberhunt() }
   if (location1.includes("notes") && !location1.includes("usernotes")) { handlebox = "notes"; renderBody(page_notes, "", ""); getPDF() }
-  if (location1.includes("sims")) { handlebox = "simulations"; renderBody(page_sims, "", ""); iframeLoadScreen(); getSimulation(); }
+  if (location1.includes("sims")) { handlebox = "simulations"; renderBody(page_sims, "", ""); getSimulation(); }
   if (location1.includes("chapter")) { handlebox = "chapter"; renderBody(page_chapter, "", ""); getChapterEList() }
   if (location1.includes("qbanks")) { handlebox = "topic"; renderBody(page_topic, "height:max-content;", ""); topicEvents(); getTopic(2); }
   if (location1.includes("usernotes")) { handlebox = "usernotes"; renderBody(page_usernotes, "flex-direction: row;", ""); userNotesEvents(); getUserNotes(); }
   if (location1.includes("qbnk_vid")) { handlebox = "qbnk_vid"; renderBody(page_qbnkvid, "height:90vh;position: relative;", ""); dE("qbnk_vid_btn").style.display = "block"; dE("qbnk_vid_btn").addEventListener("click", prepareVideo); dE("qbnk_vid_btn_e").addEventListener("click", qbnkend); function qbnkend() { dE("watermark").style.display = "flex"; fullEle(dE("qbnk_vid")) } }
-  if (location1.includes("attempt")) { handlebox = "testv1"; renderBody(page_test_v1, "", ""); testEvents(); getTestInfo() }
+  if (location1.includes("attempt")) { handlebox = "testv1"; renderBody(page_test_v1, "height:max-content;", ""); testEvents(); addTestEvents(); getTestInfo() }
   if (location1.includes("finished")) { handlebox = "finishedtestinfo"; renderBody(page_finished_test, "overflow-y: scroll;", ""); getSimpleTestReport() }
-  if (location1.includes("testreport")) { handlebox = "testv1"; renderBody(page_test_v1, "", ""); getTestReport() }
+  if (location1.includes("testreport")) { handlebox = "testv1"; renderBody(page_test_v1, "height:max-content;", ""); getTestReport(); addTestEvents(); }
   if (location1.includes("printable/qbank") && iorole == true) { handlebox = "printable"; renderBody(page_printable, "height:max-content;", ""); printableEvents(); var shfbtn = dE("shf_btn").addEventListener("click", shuffleQBank); printQBank(1); }
   if (location1.includes("ARIEL") && iorole == true) { handlebox = "Ariel"; renderBody(page_ariel, "", ""); }
   if (location1.includes("printable/tests") && iorole == true) { handlebox = "printable"; renderBody(page_printable, "height:max-content;", ""); printableEvents(); var shfbtn = dE("shf_btn").addEventListener("click", shuffleQBank); printQBank(3); }
@@ -418,20 +465,38 @@ function coreManager(newlocation, n1) {
   testQuestionList = []; testResponseList = []; testInfo = []; activequestionid = ""
 
 }
-async function testInstructions(){
-  let docSnap = await getDoc(doc(db, 'tests',  window.location.hash.split("#/instructions/")[1]))
+async function testInstructions() {
+  let docSnap = await getDoc(doc(db, 'tests', window.location.hash.split("#/instructions/")[1]))
   if (docSnap.exists()) {
+    function dateparser(var1) {
+      var now = new Date(var1);
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      return now.toISOString().slice(0, 16);
+    }
+    dE("i_name").innerHTML = docSnap.data().title
+    dE("i_start").innerHTML = dateparser(docSnap.data().strton.seconds*1000)
+    dE("i_end").innerHTML = dateparser(docSnap.data().endon.seconds*1000)
+    dE("i_time").innerHTML = docSnap.data().timeallotted/60 + "&nbsp;Mins"
+    dE("i_syllabus").innerHTML = docSnap.data().syllabus
+    dE("i_total").innerHTML = docSnap.data().totalmarks
+    dE("i_qno").innerHTML = docSnap.data().questionnos
     dE("tsi").innerHTML = docSnap.data().instructions
-  }else{
+  } else {
     renderBody("This test either doesnt exist or you do not have access to this test.")
   }
-  dE("agree_in").addEventListener("change",function(){
-    if (dE("agree_in").checked == true){
+  dE("agree_in").addEventListener("change", function () {
+    if (dE("agree_in").checked == true) {
       dE("tin_start").disabled = false
-    }else{
+    } else {
       dE("tin_start").disabled = true
     }
   })
+  let time = parseInt(Date.now()/1000)
+  if (docSnap.data().strton.seconds > time) {
+    dE("agree_in").disabled = true;
+    dE("tin_start").disabled = true
+    dE("tin_start").innerText = "Test Has Not Started Yet."
+  }
 }
 async function getUpdate() {
   let docSnap = await getDoc(doc(db, 'usernotes', 'releasenotes'))
@@ -520,26 +585,41 @@ function uploadEvents() {
     );
   })
 }
-function settingsEvents() {
+async function reportHandler(){
+  dE("popup_report").addEventListener("click", async function () {
+    const checkboxes = document.querySelectorAll('input[name="problem[]"]:checked');
+    const values = Array.from(checkboxes).map(checkbox => checkbox.value);
+    try {
+      const docRef = await addDoc(collection(db, 'reports'), {
+        id: document.getElementById("report-tag").value,
+        uid: userinfo.uuid,
+        hash: window.location.hash.split("#/")[1],
+        issue: values.join(', '),
+        comments: document.getElementById("extra_comment").value,
+        type: "report",
+      })
+    } catch {
+    }
+    document.getElementById('msg_popup_report').remove()
+  })
+}
+async function settingsEvents() {
   dE("pass_rst_btn").addEventListener("click", requestPasschange);
-  dE("sub_rat_btn").addEventListener("click", function () {
-    let data = "?entry.1743636787=" + window.user_rate_value + "&entry.1877359119=quarkz_rating&entry.2052323667=" + userinfo.uuid + "-" + document.getElementById("rate_comment").value
-    let f_url = "https://docs.google.com/forms/d/e/1FAIpQLSe5CGUovfJodcfga1bACu57FvE4REOjeAJYFqODeoTQAK0nvg/formResponse" + data
-    f_url = encodeURI(f_url)
-    let ifeq = document.createElement("iframe")
-    ifeq.id = "tempIF_G"
-    ifeq.width = "100px"
-    ifeq.height = "100px"
-    ifeq.style.display = "none"
-    ifeq.onload = "ifcls();"
-    ifeq.src = f_url
-    document.getElementsByTagName("body")[0].appendChild(ifeq);
-    ifeq.onload = "ifeq.remove();"
-    ifeq.addEventListener("load", ifcls(), false);
+  dE("sub_rat_btn").addEventListener("click",async function(){
+    try {
+      const docRef = await addDoc(collection(db, 'reviews'), {
+        rating: window.user_rate_value,
+        uid: userinfo.uuid,
+        comments: document.getElementById("rate_comment").value,
+        type: "rating",
+      })
+    } catch {
+    }
     localStorage.setItem("rate_app", "true")
     log("Thank You", "Thank You for your Valuable Feedback.")
-    dE("st_rateapp").style.display = "none"
-  });
+    dE("st_rateapp").style.display = "none";
+  })
+  dE("st_rateapp").style.display = "flex"
   if (localStorage.getItem("rate_app") == "true") {
     dE("st_rateapp").style.display = "none";
   }
@@ -573,30 +653,30 @@ function settingsEvents() {
       }
     });
   }
-  dE("prf_typ_"+localStorage.getItem("prf_type").split("v")[1]).style.borderColor = "red"
-  dE("prf_typ_1").src = getAvatarURL(userinfo.name,userinfo.gen,"v1")
-  dE("prf_typ_2").src = getAvatarURL(userinfo.name,userinfo.gen,"v2")
-  dE("prf_typ_3").src = getAvatarURL(userinfo.name,userinfo.gen,"v3")
-  dE("prf_typ_1").addEventListener("click",function(){
+  dE("prf_typ_" + localStorage.getItem("prf_type").split("v")[1]).style.borderColor = "red"
+  dE("prf_typ_1").src = getAvatarURL(userinfo.name, userinfo.gen, "v1")
+  dE("prf_typ_2").src = getAvatarURL(userinfo.name, userinfo.gen, "v2")
+  dE("prf_typ_3").src = getAvatarURL(userinfo.name, userinfo.gen, "v3")
+  dE("prf_typ_1").addEventListener("click", function () {
     dE("prf_typ_1").style.borderColor = "red"
     dE("prf_typ_2").style.borderColor = "#06d85f"
     dE("prf_typ_3").style.borderColor = "#06d85f"
-    localStorage.setItem("prf_type","v1")
+    localStorage.setItem("prf_type", "v1")
   })
-  dE("prf_typ_2").addEventListener("click",function(){
+  dE("prf_typ_2").addEventListener("click", function () {
     dE("prf_typ_1").style.borderColor = "#06d85f"
     dE("prf_typ_2").style.borderColor = "red"
     dE("prf_typ_3").style.borderColor = "#06d85f"
-    localStorage.setItem("prf_type","v2")
+    localStorage.setItem("prf_type", "v2")
   })
-  dE("prf_typ_3").addEventListener("click",function(){
+  dE("prf_typ_3").addEventListener("click", function () {
     dE("prf_typ_1").style.borderColor = "#06d85f"
     dE("prf_typ_2").style.borderColor = "#06d85f"
     dE("prf_typ_3").style.borderColor = "red"
-    localStorage.setItem("prf_type","v3")
+    localStorage.setItem("prf_type", "v3")
   })
 }
-if (localStorage.getItem("prf_type") == null){localStorage.setItem("prf_type","v2")}
+if (localStorage.getItem("prf_type") == null) { localStorage.setItem("prf_type", "v2") }
 // -----------------------
 // SIMULATIONS
 // Creates A Blank Simulation
@@ -682,6 +762,7 @@ async function updateSimulationWeb() {
 }
 // Displays Simulation For End User
 async function getSimulation() {
+  showLS("s");
   var simid = window.location.hash.split("sims/")[1]
   var docRef = doc(db, 'sims', simid)
   var docSnap = await getDoc(docRef);
@@ -690,6 +771,7 @@ async function getSimulation() {
     dE("sms_name").innerText = docJSON.name
     dE("sms_prov").innerText = docJSON.provider
     dE("sim_frame").src = docJSON.url
+    dE("sim_frame").onload = showqLS("a");
   }
   else { creMng("error_page", 1); throw new Error }
 }
@@ -828,16 +910,6 @@ async function unotes1() {
 }
 function unotes2() {
 
-}
-function iframeLoadScreen() {
-  const iframe = document.querySelector('iframe');
-  var iload = "";
-  iframe.addEventListener('loadstart', () => {
-    iload = log("Loading", "Content Is Loading. Please Wait")
-  });
-  iframe.addEventListener('load', () => {
-    document.getElementById(iload).remove()
-  });
 }
 async function getUserNotes() {
   try { notesUIHandler() } catch { }
@@ -1000,7 +1072,7 @@ function vidSlideController(docJSON) {
   tpmcqcon.innerHTML = ""
   dE("tb_q_qtext").innerHTML = docJSON.title + "<span class = 'sp_txt'>(" + docJSON.type + ")</span>"
   // dE("tb_q_img").src = docJSON.img
-  if (docJSON.type == "mcq" || docJSON.type == "mcq_multiple") {
+  if (docJSON.type == "mcq" || docJSON.type == "mcq_multiple" || docJSON.type == "mcq_multiple_partial") {
     qif(tpmcqcon); iu(tpmatrix); iu(tpanswer)
     var qop = docJSON.op; var asi = "";
     for (let ele1 of qop) {
@@ -1112,12 +1184,12 @@ async function getCyberhunt() {
 // -----------------------
 // TOPIC/QBANK
 function addItemToQLLIst() {
-  var qans = [dE("aq_answer").value]
+  var qans = dE("aq_answer").value.split(",")
   var qtype = dE("aq_type").value
   var qop = [];
   var qop1 = [];
   var qop2 = [];
-  if (qtype == "mcq" || qtype == "mcq_multiple") {
+  if (qtype == "mcq" || qtype == "mcq_multiple" || qtype == "mcq_multiple_partial") {
     qans = []
     for (i = 0; i < document.getElementsByClassName("aq_mcq_ans").length; i++) {
       var a = document.getElementsByClassName("aq_mcq_ans")[i].value;
@@ -1166,7 +1238,7 @@ async function changeItem(t) {
   } else if (mode == "exams") {
     iu(qyurl); iu(qcont); iu(qtype); iu(qans); iu(qqall);
   }
-  if (qtype.value == "mcq" || qtype.value == "mcq_multiple") {
+  if (qtype.value == "mcq" || qtype.value == "mcq_multiple" || qtype.value == "mcq_multiple_partial") {
     qif(qmcq); iu(qmat); iu(qans)
   } else if (qtype.value == "matrix") {
     io(qmat); iu(qmcq); iu(qans)
@@ -1227,7 +1299,7 @@ function renderEditQLList(qno) {
   dE("aq_posmrks").value = op.pm
   dE("aq_negmrks").value = op.nm
   setHTML("aq_expl", op.expl)
-  if (op.type == "mcq" || op.type == "mcq_multiple") {
+  if (op.type == "mcq" || op.type == "mcq_multiple" || op.type == "mcq_multiple_partial") {
     dE("aq_mcq_con").innerHTML = ""
     for (var g = 0; g < op.op.length; g++) {
       addMCQ()
@@ -1240,7 +1312,7 @@ function renderEditQLList(qno) {
       }
     }
   } else if (op.type == "numerical" || op.type == "explain" || op.type == "fill" || op.type == "taf") {
-    dE("aq_answer").value = op.answer[0]
+    dE("aq_answer").value = op.answer.toString()
   }
   changeItem()
 }
@@ -1353,6 +1425,7 @@ async function prepareTopicQBank(iun) {
         dE("aq_tpc_chapterid").value = docJSON.chid
         editqllist = docJSON.qllist
         renderEditQLList(0)
+        renderEditQLList(1)
       } else if (iun == 3) {
         var docJSON = docSnap.data();
         dE("aq_tpcname").value = docJSON.title
@@ -1381,6 +1454,7 @@ async function prepareTopicQBank(iun) {
         var docJSON = docSnap.data();
         editqllist = docJSON.examinfo
         renderEditQLList(0)
+        renderEditQLList(1)
       }
 
     }
@@ -1431,6 +1505,13 @@ async function updateTopicQBank(iun) {
     }
   } else if (iun == 3) {
     try {
+      let qnos = 0
+      let marks = 0
+      for (var i = 0; i < editqllist.length; i++) {
+        var ele = editqllist[i]
+        marks += parseInt(ele.pm)
+        qnos += 1
+      }
       var fgio = new Date(dE("aq_tst_stron").value)
       var fgio2 = new Date(dE("aq_tst_endon").value)
       var wer = dE("aq_tst_batches").value.split(",")
@@ -1442,6 +1523,8 @@ async function updateTopicQBank(iun) {
         strton: fgio,
         endon: fgio2,
         batch: wer,
+        questionnos: qnos,
+        totalmarks: marks,
       })
     } catch {
     }
@@ -1450,7 +1533,7 @@ async function updateTopicQBank(iun) {
     for (var i = 0; i < editqllist.length; i++) {
       var ele = editqllist[i]
       q.push({ qid: ele.qid, mode: ele.mode, title: ele.title, type: ele.type, op: ele.op, op1: ele.op1, op2: ele.op2, section: ele.section, pm: ele.pm, nm: ele.nm })
-      a.push({ qid: ele.qid, hint: ele.hint, expl: ele.expl, answer: ele.answer, section: ele.section, pm: ele.pm, nm: ele.nm })
+      a.push({ qid: ele.qid, hint: ele.hint, expl: ele.expl, answer: ele.answer, section: ele.section, pm: ele.pm, nm: ele.nm, type: ele.type })
     }
     try {
       const docRef = await updateDoc(doc(db, col, id, "questions", "questions"), {
@@ -1524,6 +1607,7 @@ async function getChapterEList() {
     } catch { }
   }
 }
+console.warn = function(){}
 // Chapter Link Handler
 function chclicker() {
   window.location.hash = "#/chapter/" + atob(this.id.split("qb")[1])
@@ -1543,8 +1627,8 @@ function renderCList(type) {
 // Print Question Bank
 async function printQBank(type) {
   var fireID = "";
-  if (type == 1) { fireID = "qbank"; dE("pe_tst_info").style.display = "flex"; dE("eqb_instr").style.display = "none" }
-  else if (type == 2) { fireID = "topic"; dE("pe_tst_info").style.display = "none"; dE("eqb_instr").style.display = "none" }
+  if (type == 1) { fireID = "qbank"; }
+  else if (type == 2) { fireID = "topic";}
   else if (type == 3) { fireID = "tests" }
   else { fireID = "qbank" }
   var qbankno = window.location.hash.split("printable/" + fireID + "/")[1]
@@ -1570,14 +1654,14 @@ async function printQBank(type) {
       if (qimg == undefined) { qimg = "" }
       var expl = '<div class = "q_ans_expl" style = "font-weight:bold;color:green;font-size:10px;flex-direction:row;display:none;">Explaination:' + docJSON.expl + '</div>'
       var ans = "<div style = 'font-weight:bold;color:green;font-size:10px;flex-direction:row;display:none' class = 'q_ans_1'>Answer:";
-      var inhtml = '<div class = "qbtp_q"><div id = "' + ele.id + '">' + qtitle + '<div class = "qb_q_ty">(' + qtype + ')</div></div>'
+      var inhtml = '<div class = "qbtp_q"><div id = "' + ele.id + '">' + qtitle + '<div class = "qb_q_ty">(' + qtype + ')('+docJSON.pm+'/'+docJSON.nm+')</div></div>'
       dE("eqb_add").insertAdjacentHTML('beforeend', inhtml);
       if (qimg != "") {
         var iwo = '<div class = "qb_img"><img src = "' + qimg + '"></div>'
         dE(ele.id).insertAdjacentHTML('beforeend', iwo)
       }
       var asi = "";
-      if (qtype == "mcq" || qtype == "mcq_multiple") {
+      if (qtype == "mcq" || qtype == "mcq_multiple" || qtype == "mcq_multiple_partial") {
         var qop = docJSON.op;
         for (let ele1 of qop) {
           asi += "<div class = 'qb_mcq_opt'>" + ele1 + '</div>'
@@ -1623,7 +1707,7 @@ async function printQBank(type) {
       renderMathInElement(dE('eqb_add'));
     }
   }
-  dE("printable").insertAdjacentHTML('beforeend', '<br></br>')
+  dE("eqb_add").insertAdjacentHTML('beforeend', '<br></br>')
 }
 async function lessonRenderer(docJSON) {
   dE("tp_question").style.display = "none"
@@ -1636,6 +1720,7 @@ async function lessonRenderer(docJSON) {
   }
   dE("tp_lsno").innerText = docJSON.title
   dE("tp_expl").innerHTML = docJSON.expl
+  dE("report-tag").value = docJSON.id
   // dE("tp_lsimg").src = docJSON.img
 }
 async function questionRenderer(docJSON, totalq) {
@@ -1646,15 +1731,16 @@ async function questionRenderer(docJSON, totalq) {
   var tpmcqcon = dE("tp_mcq_con")
   var tpmatrix = dE("tp_matrix")
   var tpanswer = dE("tp_answer")
-  dE("tp_lsno").innerHTML = "Question<span style = 'font-size:12px'>&nbsp;X of ("+totalq+")</span>"
+  dE("tp_lsno").innerHTML = "Question<span style = 'font-size:12px'>&nbsp;X of (" + totalq + ")</span>"
   dE("tp_question").style.display = "flex"
   dE("tp_lesson").style.display = "none"
   dE("tp_question").setAttribute("dataid", docJSON.id)
   dE("tp_question").setAttribute("qtype", docJSON.type)
+  dE("report-tag").value = docJSON.id
   tpmcqcon.innerHTML = ""
   dE("tp_qtext").innerHTML = docJSON.title
   // dE("tp_img").src = ""
-  if (docJSON.type == "mcq" || docJSON.type == "mcq_multiple") {
+  if (docJSON.type == "mcq" || docJSON.type == "mcq_multiple" || docJSON.type == "mcq_multiple_partial") {
     qif(tpmcqcon); iu(tpmatrix); iu(tpanswer)
     var qop = docJSON.op; var asi = "";
     for (let ele1 of qop) {
@@ -1687,24 +1773,24 @@ async function questionRenderer(docJSON, totalq) {
 async function topicHandler(type) {
   var pol;
   if (type == 1) { pol = -1 } else { pol = 1 }
-  if ((topicJSONno < topicJSON.qllist.length-1) && type == 2) {
+  if ((topicJSONno < topicJSON.qllist.length - 1) && type == 2) {
     topicJSONno = topicJSONno + pol
   } else if (type == 1 && (topicJSONno > 0)) {
     topicJSONno = topicJSONno + pol
   }
-  if ((topicJSONno >= topicJSON.qllist.length) && type == 2){return}
+  if ((topicJSONno >= topicJSON.qllist.length) && type == 2) { return }
   if (type == 3) { topicJSONno = 0 }
   var a = topicJSON.title
   dE("tp_title").innerText = a
   var tqQus = topicJSON.qllist[topicJSONno]
   var totalq = 0;
-  for (var i =0;i<topicJSON.qllist.length;i++){
-    if (topicJSON.qllist[i].mode == "question"){
+  for (var i = 0; i < topicJSON.qllist.length; i++) {
+    if (topicJSON.qllist[i].mode == "question") {
       totalq++
     }
   }
   if (tqQus.mode == "lesson") { lessonRenderer(tqQus) }
-  else if (tqQus.mode == "question") { questionRenderer(tqQus,totalq) }
+  else if (tqQus.mode == "question") { questionRenderer(tqQus, totalq) }
   stpVid();
 }
 function addMCQ() {
@@ -1783,7 +1869,7 @@ async function profileDetails() {
   //   dE("prf_tab_t_t_img").classList.remove("prf_male", "prf_female")
   //   dE("prf_tab_t_t_img").classList.add("prf_female")
   // }
-  dE("prf_tab_t_t_img").src = getAvatarURL(userinfo.name,userinfo.gen,localStorage.getItem("prf_type"))
+  dE("prf_tab_t_t_img").src = getAvatarURL(userinfo.name, userinfo.gen, localStorage.getItem("prf_type"))
 }
 function renderExams() {
   for (let i = 0; i < userinfo.examslist.examinfo.length; i++) {
@@ -1845,6 +1931,7 @@ async function authStateObserver(user) {
     if (docSnap.exists()) {
       var docJSON = docSnap.data();
       userinfo.examslist = docJSON
+      if (docJSON.ratemyapp) { localStorage.setItem("rate_app", false) }
       if (docJSON.warning != "") {
         log("Notice", docJSON.warning, function () { window.location.hash = "#/updates" }, "Release Notes")
       }
@@ -1885,6 +1972,7 @@ function checkQuestion() {
   var answer
   var crranswer, explanation, hint
   var status = 0
+
   for (var i = 0; i < topicJSON.qllist.length; i++) {
     if (topicJSON.qllist[i].id == qid) {
       crranswer = topicJSON.qllist[i].answer
@@ -1893,26 +1981,33 @@ function checkQuestion() {
       break;
     }
   }
+
   if (type == "numerical" || type == "fill") {
-    answer = dE("tp_answer").value
-    if (crranswer == answer) {
+    answer = dE("tp_answer").value.split(",")
+    let c_status = qCorrector(type, crranswer, answer, 4, -1, 0)
+    if (c_status.type == "correct") {
       dE("tp_status").innerText = "Correct Answer";
+      playSoundEffect(2)
       status = 1
     } else {
       dE("tp_status").innerText = "Wrong Answer"
+      playSoundEffect(1)
       status = 0
     }
   }
-  if (type == "mcq" || type == "mcq_multiple" || type == "taf") {
+  if (type == "mcq" || type == "mcq_multiple" || type == "taf" || type == "mcq_multiple_partial") {
     answer = []
     for (var k = 0; k < document.getElementsByClassName("tp_mcq_p").length; k++) {
       if (document.getElementsByClassName("tp_mcq_p")[k].classList.contains("aq_mcq_ans")) { answer.push(document.getElementsByClassName("tp_mcq_p")[k].innerText) }
     }
-    if (areEqual(answer, crranswer)) {
+    let c_status = qCorrector(type, crranswer, answer, 4, -1, 0)
+    if (c_status.type == "correct") {
       dE("tp_status").innerText = "Correct Answer"
+      playSoundEffect(2)
       status = 1
     } else {
       dE("tp_status").innerText = "Wrong Answer"
+      playSoundEffect(1)
       status = 0
     }
   }
@@ -1956,37 +2051,12 @@ async function lquizinit() {
 }
 async function getTestList(batchid, userid) {
   if (testList != []) {
-    var docRef = doc(db, "batch", batchid, "info", "tests");
-    var docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      var docJSON = docSnap.data()
-      testList = docJSON.tests;
-    }
-  }
-  if (finishedTestList != []) {
-
-    const q = query(collection(db, "tests"), where("finished", "array-contains", userid), limit(5));
+    const q = query(collection(db, "tests"), where("batch", "array-contains", batchid));
     const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
-      var min = doc.data()
-      var docJSON = { title: min.title, testid: doc.id, finished: true, strton: min.strton, endon: min.endon }
-      finishedTestList.push(docJSON)
-      var a = 0
-      for (let ele of testList) {
-        if (ele.testid == docJSON.testid) {
-          testList[a].finished = true
-        } else { testList[a].finished = false }
-        a += 1
-      }
-    });
-  }
-  var localtime = parseInt(Date.now() / 1000)
-  for (var d = 0; d < testList.length; d++) {
-    if (localtime > testList[d].strton.seconds && localtime < testList[d].endon.seconds) {
-      activeTestList.push(testList[d])
-    } else if (localtime < testList[d].strton.seconds) {
-      upcomingTestList.push(testList[d])
-    }
+      var tfg = doc.data()
+      testList.push({ title: tfg.title, strton: tfg.strton.seconds, endon: tfg.endon.seconds, testid: doc.id })
+    })
   }
 }
 function testClicker() {
@@ -2025,16 +2095,29 @@ async function newTest() {
 }
 function renderTestList(type) {
   var renList;
+  activeTestList = []
+  upcomingTestList = []
+  finishedTestList = []
+  var localtime = parseInt(Date.now() / 1000)
+  for (var d = 0; d < testList.length; d++) {
+    if (localtime > testList[d].strton && localtime < testList[d].endon) {
+      activeTestList.push(testList[d])
+    } else if (localtime < testList[d].strton) {
+      upcomingTestList.push(testList[d])
+    } else if (localtime > testList[d].endon) {
+      finishedTestList.push(testList[d])
+    }
+  }
   if (type == "active") {
     renList = activeTestList
   } else if (type == "upcoming") { renList = upcomingTestList }
   else if (type == "finished") { renList = finishedTestList }
   dE("testlinks").innerHTML = ""
   for (var ele of renList) {
-    var strson = new Date(ele.strton.seconds * 1000)
-    var endson = new Date(ele.endon.seconds * 1000)
+    var strson = new Date(ele.strton * 1000)
+    var endson = new Date(ele.endon * 1000)
     var output = '<div class="tlinks" id = "' + ele.testid + '"><span class = "t_title">' + ele.title + '</span><span class = "t_stron">Starts At:' + strson + '</span><span class ="t_endon">Ends At:' + endson + '</div>'
-    if (type != "finished" && ele.finished == false) {
+    if (type != "finished") {
       dE("testlinks").insertAdjacentHTML('beforeend', output)
       dE(ele.testid).addEventListener('click', testClicker)
     } else {
@@ -2065,12 +2148,15 @@ async function getSimpleTestReport() {
       }
     }
     if (attempted == 0) {
-      creMng("testend", 1)
+      renderBody(page_test_end, "", "")
       dE("te_title").innerText = "You Have NOT Attempted This Test"
+      dE("te_msg").innerText = ""
+      return
     } else {
       if (0 && (Date.now() / 1000 <= testInfo.endon.seconds && testInfo.noresult == false)) {
-        creMng("testend", 1)
+        renderBody(page_test_end, "", "")
         dE("te_title").innerText = "Test Reports will be available after deadline"
+        dE("te_msg").innerText = ""
       } else {
         try {
           try { computeResult(1) } catch { }
@@ -2145,7 +2231,9 @@ async function getSimpleTestReport() {
           }
           catch {
             dE("te_title").innerText = "ERROR"
-            creMng("testend", 1)
+            renderBody(page_test_end, "", "")
+            dE("te_title").innerText = "You may see this ERROR since you may NOT have Attempted This Test"
+            dE("te_msg").innerText = ""
             return 0;
           }
         } catch { }
@@ -2250,12 +2338,15 @@ async function getTestReport() {
       }
     }
     if (attempted == 0) {
-      creMng("testend", 1)
+      renderBody(page_test_end, "", "")
       dE("te_title").innerText = "You Have NOT Attempted This Test"
+      dE("te_msg").innerText = ""
+      return
     } else {
       if (Date.now() / 1000 <= testInfo.endon.seconds && testInfo.noresult == false) {
-        creMng("testend", 1)
+        renderBody(page_test_end, "", "")
         dE("te_title").innerText = "Detailed Test Reports will be available after deadline"
+        dE("te_msg").innerText = ""
       } else {
         try {
           docRef = doc(db, "tests", testid, "questions", "questions");
@@ -2280,7 +2371,9 @@ async function getTestReport() {
         }
         catch {
           dE("te_title").innerText = "ERROR"
-          creMng("testend", 1)
+          renderBody(page_test_end, "", "")
+          dE("te_title").innerText = "You may see this ERROR since you may NOT have Attempted This Test"
+          dE("te_msg").innerText = ""
           return 0;
         }
         inittestHandler()
@@ -2304,8 +2397,9 @@ async function getTestInfo() {
     if (docSnap.exists()) {
       for (var ele of docSnap.data().finished) {
         if (auth.currentUser.uid == ele) {
-          creMng("testend", 1)
+          renderBody(page_test_end, "", "")
           dE("te_title").innerText = "You Have Already Attempted This Test"
+          dE("te_msg").innerText = "Test Results will be released after Deadline."
           return 0;
         }
       }
@@ -2319,8 +2413,9 @@ async function getTestInfo() {
     }
   }
   catch {
+    renderBody(page_test_end, "", "")
     dE("te_title").innerText = "The Test Hasnt Started Yet"
-    creMng("testend", 1)
+    dE("te_msg").innerText = ""
     return 0;
   }
   docRef = doc(db, "tests", testid, "responses", auth.currentUser.uid);
@@ -2422,16 +2517,17 @@ async function computeResult(type) {
         if (ele.ans == undefined) {
           ele.ans = []
         }
-        if (ele.ans.length == 0) {
+        let q_check = qCorrector(trA[i].type, trA[i].answer, ele.ans, trA[i].pm, trA[i].nm, 0)
+        if (q_check.type == "unattempted") {
           marksList.push({ qid: trA[i].qid, marks: 0, type: "unattempted" })
           u = u + parseFloat(trA[i].pm)
           subjectmarks[trA[i].section].unattempted += parseFloat(trA[i].pm)
           subjectmarks[trA[i].section].total += parseFloat(trA[i].pm)
         } else {
-          if (areEqual(trA[i].answer, ele.ans)) {
+          if (q_check.type == "correct") {
             marksList.push({ qid: trA[i].qid, marks: parseFloat(trA[i].pm), type: "correct" })
-            c = c + parseFloat(trA[i].pm)
-            subjectmarks[trA[i].section].correct += parseFloat(trA[i].pm)
+            c = c + parseFloat(q_check.marks)
+            subjectmarks[trA[i].section].correct += parseFloat(q_check.marks)
             subjectmarks[trA[i].section].total += parseFloat(trA[i].pm)
           } else {
             marksList.push({ qid: trA[i].qid, marks: parseFloat(trA[i].nm), type: "incorrect" })
@@ -2453,6 +2549,7 @@ async function computeResult(type) {
       })
       await updateDoc(doc(db, "tests", testid, "responses", "finished"), {
         leaderboard: arrayUnion({ "uid": userinfo.uuid, "marks": tFinal.usermarks, "name": userinfo.name }),
+        leaderboard: arrayRemove({ "uid": userinfo.uuid, "marks": fg.usermarks, "name": userinfo.name }),
       })
       creMng()
     }
@@ -2463,7 +2560,7 @@ async function computeResult(type) {
     await updateDoc(doc(db, "tests", testid, "responses", "finished"), {
       leaderboard: arrayUnion({ "uid": userinfo.uuid, "marks": tFinal.usermarks, "name": userinfo.name }),
     })
-    creMng("testend", 1)
+    renderBody(page_test_end, "", "")
   }
   document.getElementById(gty).style.visibility = 'hidden';
   document.getElementById(gty).style.opacity = '0'
@@ -2483,10 +2580,11 @@ function testqHandler(id, no) {
   activequestionid = id;
   if (window.location.hash.includes("/attempt/")) { testActionLogger.push({ type: "b", time: u, value: activequestionid }) }
   dE(activequestionid).style.border = "purple 3px solid";
+  dE("report-tag").value = activequestionid
   for (let ele of testQuestionList.questions) {
     if (id == ele.qid) {
       dE("tt_qtitle").innerHTML = ""
-      var inhtml = '<div class = "qb_q" id = "Q' + ele.qid + '"><div class = "qb_ttl">' + ele.title + '<div id = "qb_q_ty" class = "qb_q_ty qb_qt_ty" >(' + ele.type + ')</div></div></div>'
+      var inhtml = '<div class = "qb_q" id = "Q' + ele.qid + '"><div class = "qb_ttl">' + ele.title + '<div id = "qb_q_ty" class = "qb_q_ty qb_qt_ty" >(' + ele.type + ')</div><div id = "qb_q_mrk" class = "qb_q_ty qb_qt_ty" >(' + ele.pm + '/' + ele.nm + ')</div></div></div>'
       dE("tt_qtitle").insertAdjacentHTML('beforeend', inhtml);
       var asi = "";
       if (ele.type == "mcq") {
@@ -2496,7 +2594,7 @@ function testqHandler(id, no) {
         }
         var qrt = '<ol class = "qb_mcq" type = "A">' + asi + '</ol>'
       }
-      if (ele.type == "mcq_multiple") {
+      if (ele.type == "mcq_multiple" || ele.type == "mcq_multiple_partial") {
         var qop = ele.op;
         for (let ele1 of qop) {
           asi += '<li><input type="checkbox" class = "q_ans" value = "' + ele1 + '" name = "q_op">' + ele1 + '</input></li>'
@@ -2521,6 +2619,7 @@ function testqHandler(id, no) {
       switch (ele.type) {
         case "mcq": ANS = MCQ; break;
         case "mcq_multiple": ANS = MCQMULT; break;
+        case "mcq_multiple_partial": ANS = MCQMULT; break;
         case "taf": ANS = TF; break;
         // case "explain": ANS = EXPL
         case "numerical": ANS = NUM; break;
@@ -2551,7 +2650,7 @@ function testqHandler(id, no) {
         if (ele23.qid == id) {
           for (var i = 0; i < document.getElementsByClassName("q_ans").length; i++) {
             var ele32 = document.getElementsByClassName("q_ans")[i]
-            if (ele.type == "mcq" || ele.type == "mcq_multiple") {
+            if (ele.type == "mcq" || ele.type == "mcq_multiple" || ele.type == "mcq_multiple_partial") {
               if (ele23.ans == undefined) { ele23.ans = [] }
               for (let el433 of ele23.ans) {
                 if (ele32.value == el433) {
@@ -2566,13 +2665,22 @@ function testqHandler(id, no) {
             }
           }
           if (!window.location.hash.includes("attempt")) {
-            if (areEqual(ele23.ans, tyio)) {
-              dE("tt_marksaward").innerHTML = '<div style="color:lime">Correct(+4)</div>'
-            } else {
-              if (ele23.ans.length == 0) {
-                dE("tt_marksaward").innerHTML = '<div style="color:orange">Unanswered(0)</div>'
-              } else {
-                dE("tt_marksaward").innerHTML = '<div style="color:red">Incorrect(-1)</div>'
+            for (let ele of testReportAnswers.questions) {
+              if (id == ele.qid) {
+                for (let ele23 of testResponseList) {
+                  if (ele23.qid == id) {
+                    let q_check = qCorrector(ele.type, ele.answer, ele23.ans, ele.pm, ele.nm, 0)
+                    if (q_check.type == "unattempted") {
+                      dE("tt_marksaward").innerHTML = '<div style="color:orange">Unanswered(0)</div>'
+                    } else {
+                      if (q_check.type == "correct") {
+                        dE("tt_marksaward").innerHTML = '<div style="color:lime">Correct(' + q_check.marks + ')</div>'
+                      } else {
+                        dE("tt_marksaward").innerHTML = '<div style="color:red">Incorrect(' + q_check.marks + ')</div>'
+                      }
+                    }
+                  }
+                }
               }
             }
           }
@@ -2622,11 +2730,12 @@ function inittestHandler() {
           if (ele23.ans == undefined) {
             ele23.ans = []
           }
-          if (areEqual(ele23.ans, tyio)) {
-            dE(id).classList.add("t_crr")
+          let q_check = qCorrector(ele.type, ele.answer, ele23.ans, ele.pm, ele.nm, 0)
+          if (q_check.type == "unattempted") {
+            dE(id).classList.add("t_unat")
           } else {
-            if (ele23.ans.length == 0) {
-              dE(id).classList.add("t_unat")
+            if (q_check.type == "correct") {
+              dE(id).classList.add("t_crr")
             } else {
               dE(id).classList.add("t_incrr")
             }
@@ -2648,6 +2757,7 @@ async function testOperator(type) {
     log("Error", "Performing Test Operations in Test Reports Is Prohibited")
     return 1;
   }
+  showLS("s")
   var aqid = "answers." + activequestionid
   var testid = window.location.hash.split("#/attempt/")[1]
   var triu = dE("qb_q_ty").innerText.split("(")[1]
@@ -2660,7 +2770,7 @@ async function testOperator(type) {
       if (ele23.qid == activequestionid) {
         for (var i = 0; i < document.getElementsByClassName("q_ans").length; i++) {
           var ele32 = document.getElementsByClassName("q_ans")[i]
-          if (triu == "mcq" || triu == "mcq_multiple") {
+          if (triu == "mcq" || triu == "mcq_multiple" || triu == "mcq_multiple_partial") {
             for (var j = 0; j < ele23.ans.length; j++) {
               var ele44 = ele23.ans[j]
               if (ele32.value == ele44) {
@@ -2681,7 +2791,7 @@ async function testOperator(type) {
 
     for (var i = 0; i < document.getElementsByClassName("q_ans").length; i++) {
       var ele32 = document.getElementsByClassName("q_ans")[i]
-      if (triu == "mcq)" || triu == "mcq_multiple)") {
+      if (triu == "mcq)" || triu == "mcq_multiple)" || triu == "mcq_multiple_partial)") {
         if (ele32.checked == true) {
           ans.push(ele32.value)
         }
@@ -2707,7 +2817,7 @@ async function testOperator(type) {
   }
   dE(activequestionid).classList.remove("tts_notanswer", "tts_notvisit", "tts_answered", "tts_review", "tts_ansreview")
   dE(activequestionid).classList.add(type)
-
+  showLS("d")
 }
 async function submitTest() {
   if (!window.location.hash.includes("attempt")) {
@@ -2975,9 +3085,9 @@ function questionGraph(ipd, data) {
 }
 var Quarkz = {
   "copyright": "Mr Techtroid 2021-23",
-  "vno": "v0.5.2",
+  "vno": "v0.6.0",
   "author": "Mr Techtroid",
-  "last-updated": "05/06/2023(IST)",
+  "last-updated": "28/05/2023(IST)",
   "serverstatus": "firebase-online",
 }
 var handlebox = "login";
@@ -3023,5 +3133,8 @@ bc.onmessage = (event) => {
   if (event.data === `QZCODE-NOTFIRST`) {
     isFirstTab = false;
     renderBody("Quarkz! is Open in Another Tab/Window! You can only use Quarkz! in one tab/window.", "", "")
+  }
+  if (event.data == `QZCODE-REPORT`){
+    reportHandler()
   }
 };

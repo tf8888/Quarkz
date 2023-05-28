@@ -29,7 +29,7 @@ export function sysaccess() {
     }
     var clog = console
     console = {}
-    console = {log:function(logtxt){r("",logtxt)},error:function(logtxt){r("",logtxt)}}
+    console = {log:function(logtxt){r("",logtxt)},error:function(logtxt){r("",logtxt)},warn:function(logtxt){r("",logtxt)}}
     // w("c-exec").addEventListener("click",x(w("c-input").value))
     const cs = console
     // console = {}

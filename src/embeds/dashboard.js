@@ -28,7 +28,7 @@ export let page_dashboard = `
                 <div class="dshbox_v2" id="frm_btn">Forum</div>
                 <div class="dshbox_v2" id="qba_btn" style="display: none;">Question Bank</div>
                 <div class="dshbox_v2" id="sim_btn">Simulations</div>
-                <div class="dshbox_v2" id="cyb_btn">Cyberhunts</div>
+                <div class="dshbox_v2" id="cyb_btn" style="display:none">Cyberhunts</div>
                 <div id="adminonly" style="display:none;flex-direction:column;">
                     <div class="dshbox_v2" id="adi_btn">Admin Functions</div>
                     <div class="dshbox_v2" id="usc_btn">Users</div>
@@ -71,7 +71,7 @@ export let page_app_info = `
 
 export let page_schedule = `
 <span class="in_t">Schedule</span>
-        <iframe id="tmt_frame" width="100%" height="90%" frameborder="0" scrolling="no"></iframe>`
+        <iframe id="tmt_frame" width="100%" height="90%" frameborder="0" scrolling="no" onload = "showqLS('q')"></iframe>`
 
 export let error_page = `
 <span class="in_t">404</span>

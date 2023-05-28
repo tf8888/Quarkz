@@ -12,6 +12,7 @@ and certain other noncommercial uses permitted by copyright law.
 For permission requests, please contact [Mr Techtroid] at mrtechtroid@outlook.com . 
 */
 :root {
+  font-style: Nunito;
   --bgcolor: rgb(18, 34, 53);
   --bgimage: radial-gradient(at 47% 33%, hsl(0.00, 0%, 0%) 0, transparent 59%), radial-gradient(at 82% 65%, hsl(218.00, 39%, 11%) 0, transparent 55%);
   --yellow: rgb(228, 228, 3);
@@ -23,10 +24,27 @@ For permission requests, please contact [Mr Techtroid] at mrtechtroid@outlook.co
   --clr3: rgb(0, 4, 255);
   --clr4: rgb(0, 225, 255);
   --clr5: grey;
+  --clr6: orangered;
+  --clr7: rgb(105, 114, 105);
+  --clr8: rgb(168, 168, 173);
+  --clr9: rgb(5, 5, 32);
+  --clr10: lime;
+  --clr11:  rgb(17,25,40);
+  --clr14: rgba(37, 58, 191, 0.098);
+  --clr12: rgb(0,0,0,0.75);
+  --clr15: #06D85F;
+  --clr16: rgb(155, 137, 137);
+  --clr17: rgba(18, 48, 146, 0.5);
+  --clr18:rgb(80, 79, 79);
+  --clr19: rgb(250, 101, 2);
+  --clr20: rgba(47, 97, 184, 0.5);
+  --clr21: rgba(17, 25, 40);
+  --clr22:rgb(156, 189, 11);
 }
 
 html {
   scroll-behavior: smooth;
+  color-scheme: dark;
 }
 
 body {
@@ -172,6 +190,7 @@ body {
 .full_page {
   width: 97vw;
   height: 89vh;
+  /* height: max-content; */
   backdrop-filter: blur(17px) saturate(180%);
   -webkit-backdrop-filter: blur(17px) saturate(180%);
   background-color: var(--clr1);
@@ -225,18 +244,18 @@ body {
 
 .dimmed:after {
   content: " ";
-  z-index: 10;
+  z-index: 5;
   display: block;
   position: absolute;
   height: 100%;
   top: 0;
   left: 0;
   right: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--black);
 }
 
 .pro_table th {
-  border: orangered 3px solid;
+  border: var(--clr6) 3px solid;
   width: 20vh;
 }
 
@@ -341,7 +360,7 @@ body {
 
 .tlinks,.tlinks-2 {
   height: max-content;
-  border: yellow 1px solid;
+  border: var(--yellow) 1px solid;
   padding: 10px;
   width: 50vw;
   border-radius: 100px;
@@ -361,7 +380,7 @@ body {
 }
 .tlinks_min {
   height: max-content;
-  border: yellow 1px solid;
+  border: var(--yellow) 1px solid;
   padding: 10px;
   width: 350px;
   border-radius: 100px;
@@ -397,7 +416,7 @@ body {
 .tp_mcq_p,
 .lq_mcq {
   height: max-content;
-  border: yellow 1px solid;
+  border: var(--yellow) 1px solid;
   padding: 10px;
   width: 50vw;
   border-radius: 100px;
@@ -407,7 +426,7 @@ body {
 
 .tb_q_mcq_p {
   height: max-content;
-  border: yellow 1px solid;
+  border: var(--yellow) 1px solid;
   padding: 2px;
   width: 30vw;
   border-radius: 100px;
@@ -446,7 +465,7 @@ body {
 }
 
 .err_txt {
-  color: rgb(255, 0, 43);
+  color: var(--red);
 }
 
 .dropdown {
@@ -466,44 +485,12 @@ body {
   margin: 0;
 }
 
-.navbar a:hover,
-.dropdown:hover .dropbtn {
-  background-color: var(--red);
-}
-
-.dropdown-content {
-  display: none;
-  position: absolute;
-  right: 2vw;
-  background-color: #f9f9f9;
-  min-width: 160px;
-  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-  z-index: 1;
-}
-
-.dropdown-content span {
-  float: none;
-  color: var(--black);
-  padding: 12px 16px;
-  text-decoration: none;
-  display: block;
-  text-align: center;
-}
-
-.dropdown-content span:hover {
-  background-color: #ddd;
-}
-
-.dropdown:hover .dropdown-content {
-  display: block;
-}
-
 ._in_reg {
   font-size: 4vh;
   background-color: transparent;
   text-decoration: none;
   border: none;
-  border-bottom: 3px solid lime;
+  border-bottom: 3px solid var(--clr10);
   outline: none;
   color: var(--white);
 }
@@ -514,7 +501,7 @@ body {
   background-color: transparent;
   text-decoration: none;
   border: none;
-  border-bottom: 2px solid rgb(105, 114, 105);
+  border-bottom: 2px solid var(--clr7);
   outline: none;
   color: var(--white);
 }
@@ -622,7 +609,10 @@ body {
   width: 90%;
   font-size: 14px;
 }
-
+#output{
+  /* height: max-content; */
+  /* min-height: 86vh; */
+}
 #nt_nocontrol {
   position: absolute;
   right: 0px;
@@ -653,7 +643,7 @@ body {
     left: 50%;
     transform: translate(-50%, -50%);
     font-size: 100px;
-    color: rgb(168, 168, 173);
+    color: var(--clr8);
     z-index: 0;
 
   }
@@ -664,14 +654,14 @@ body {
     left: 50%;
     transform: translateY(50%);
     font-size: 15px;
-    color: rgb(5, 5, 32);
+    color: var(--clr9);
     z-index: 0;
   }
 
   body:before {
     content: "";
     position: absolute;
-    z-index: -1000;
+    z-index: -2;
     top: 0;
     bottom: 0;
     left: 0;
@@ -829,10 +819,10 @@ body {
 }
 
 #dsh_btn {
-  z-index: 99;
+  z-index: 2;
   border: none;
   outline: none;
-  background-color: rgba(25, 37, 58, 0.75);
+  background-color: var(--clr14);
   color: var(--white);
   cursor: pointer;
   padding: 10px;
@@ -855,12 +845,12 @@ body {
 }
 
 #dsh_btn:hover {
-  background-color: rgba(18, 48, 146, 0.5);
+  background-color: var(--clr17);
 }
 
 .dshbox {
   padding: 4vw;
-  border: lime 3px solid;
+  border: var(--clr10) 3px solid;
   border-radius: 30px;
   margin: 1vw;
 }
@@ -869,7 +859,7 @@ body {
   width: 60vw;
   height: 75vh;
   overflow-y: scroll;
-  border: solid 3px yellow;
+  border: solid 3px var(--yellow);
   text-align: left;
   font-size: 14px;
 }
@@ -878,7 +868,7 @@ body {
   width: 30vw;
   height: 55vh;
   overflow-y: scroll;
-  border: solid 3px yellow;
+  border: solid 3px var(--yellow);
   text-align: left;
   font-size: 14px;
 
@@ -900,7 +890,17 @@ body {
   border-radius: 30px 0px 0px 30px;
   margin: 10px;
 }
-
+#tt_chgbx {
+  width: 250px;
+  height: 40px;
+  display: flex;
+  flex-direction: row;
+  padding: 10px;
+  overflow-y: scroll;
+  border: var(--clr5) 1px solid;
+  border-radius: 30px 0px 0px 30px;
+  margin: 10px;
+}
 .tt_question hr {
   background-color: var(--clr5);
 }
@@ -1062,18 +1062,18 @@ body {
 
 #abt_name {
   font-size: 4vh;
-  color: rgb(255, 255, 255);
+  color: var(--white);
   font-weight: bold;
 }
 
 .prf_det {
   font-size: 2vh;
-  color: rgb(80, 79, 79)
+  color: var(--clr18)
 }
 
 .abt_det {
   font-size: 2vh;
-  color: rgb(155, 137, 137)
+  color: var(--clr16)
 }
 
 #prf_phone::before {
@@ -1102,18 +1102,9 @@ body {
   width: 100px;
 }
 
-.prf_male {
-  background: url("../assets/q_male.svg");
-  background-size: cover;
-}
-
-.prf_female {
-  background: url("../assets/q_female.svg");
-  background-size: cover;
-}
 
 #abt_tab_t_t_img {
-  border: #06D85F 2px solid;
+  border: var(--clr15) 2px solid;
   border-radius: 30px;
   width: 200px;
   height: 200px
@@ -1221,7 +1212,7 @@ circle text {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgb(250, 101, 2);
+  background: var(--clr19);
 }
 
 #tp_lesson:-webkit-full-screen,
@@ -1289,21 +1280,21 @@ circle text {
 .dshbox_v2 {
   padding: 4px;
   background-color: transparent;
-  border: yellow 1px solid;
+  border: var(--yellow) 1px solid;
   border-radius: 30px;
   margin: 5px;
   width: 160px;
 }
 
 .dshbox_v2:hover {
-  background-color: rgba(47, 97, 184, 0.5);
+  background-color: var(--clr20);
 }
 
 .aq_mcq_p,
 .tp_mcq_p,
 .lq_mcq {
   height: max-content;
-  border: yellow 1px solid;
+  border: var(--yellow) 1px solid;
   padding: 10px;
   width: 50vw;
   border-radius: 100px;
@@ -1348,10 +1339,11 @@ circle text {
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--clr12);
   transition: opacity 500ms;
   visibility: hidden;
   opacity: 0;
+  z-index:3;
 }
 
 .overlay:target {
@@ -1362,22 +1354,66 @@ circle text {
 .popup {
   margin: 70px auto;
   padding: 20px;
-  background: rgba(17, 25, 40);
-  ;
+  background: var(--clr11);
   border-radius: 5px;
   width: 30%;
   position: relative;
   transition: all 5s ease-in-out;
 }
-
+.it_popup {
+  margin: 50px auto;
+  padding: 20px;
+  background: var(--clr11);
+  border-radius: 5px;
+  width: 65vw;
+  height: 70vh;
+  position: relative;
+  transition: all 5s ease-in-out;
+}
+.it_popup #container {
+  width: 60vw;
+  height: 55vh;
+  overflow-y: scroll;
+  border: solid 3px var(--yellow);
+  text-align: left;
+  font-size: 14px;
+  background-image: url("../assets/QuarkzPrint_2.png");
+}
 .popup h2 {
   margin-top: 0;
-  color: rgb(233, 236, 10);
+  color: var(--yellow);
   font-family: Tahoma, Arial, sans-serif;
 }
+#i_name,#i_start,#i_end,#i_syllabus,#i_time,#i_total,#i_qno{
+  color:grey;
+}
+.disable-text-selection {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.loading-spinner {
+  border: 4px solid var(--yellow); /* Set the border color */
+  border-top: 4px solid var(--red); /* Set the top border color to create the spinning effect */
+  border-radius: 50%; /* Create a circular shape */
+  width: 40px; /* Set the width and height of the spinner */
+  height: 40px;
+  animation: spin 1s linear infinite; /* Apply the spinning animation */
+  display: none; /* Initially hide the spinner */
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform: translate(-50%, -50%);
+  
+}
 
+@keyframes spin {
+  0% { transform: rotate(0deg); } /* Rotate the spinner from 0 degrees */
+  100% { transform: rotate(360deg); } /* Rotate the spinner to 360 degrees */
+}
 /* Copyright: Quarkz! */
-.popup .close {
+.popup .close_btn,.it_popup .close_btn {
   position: absolute;
   top: 20px;
   right: 30px;
@@ -1385,9 +1421,11 @@ circle text {
   font-size: 30px;
   font-weight: bold;
   text-decoration: none;
-  color: rgb(233, 236, 10);
+  color: var(--white);
 }
-
+.popup .close_btn:hover,.it_popup .close_btn:hover {
+  color: var(--yellow);
+}
 #toolbar {
   align-items: center;
   z-index: 3;
@@ -1433,12 +1471,12 @@ circle text {
   width: 20px;
   height: 40px;
   background: var(--white);
-  box-shadow: -200px 0 0 200px rgb(156, 189, 11);
+  box-shadow: -200px 0 0 200px var(--clr22);
   border: 2px solid var(--clr5);
 }
 
 .popup .close:hover {
-  color: #06D85F;
+  color: var(--clr15);
 }
 
 .popup .content {
@@ -1449,6 +1487,8 @@ circle text {
 .axis-label{
   color:var(--white)
 }
+
+/* RateMyApp - Stars */
 .star {
   color: #ddd;
   cursor: pointer;

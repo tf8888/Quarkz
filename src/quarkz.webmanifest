@@ -3,9 +3,10 @@
     "background_color": "#122235",
     "display": "fullscreen",
     "scope": "/",
-    "start_url": "/#/login",
+    "start_url": "/",
     "name": "Quarkz!",
     "short_name": "Quarkz!",
+    "categories": ["edu app", "education", "jee","neet","learning","educational"],
     "description": "An Online Educational Learning App providing Courses For JEE,NEET Preparations.",
     "icons": [
         {

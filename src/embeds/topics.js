@@ -67,6 +67,7 @@ export let page_edit_topic = `
                     <select name="type" id="aq_type" class="_in_aq col-red">
                         <option value="mcq">MCQ</option>
                         <option value="mcq_multiple">MCQ Multiple</option>
+                        <option value="mcq_multiple_partial">MCQ Multiple(Partial)</option>
                         <option value="matrix">Matrix</option>
                         <option value="numerical">Numerical</option>
                         <option value="explain">Explain</option>
@@ -116,6 +117,7 @@ export let page_topic = `
             <button class="tst_btn rpl" id="tp_prv">Previous</button>
             <button class="tst_btn rpl" id="tp_pnt" style="display: none;">Export</button>
             <button class="tst_btn rpl" id="tp_edt" style="display: none;">Edit</button>
+            <button class="tst_btn rpl" id="tp_rep">Report</button>
         </div>
         <hr width="100%" color="white">
         <div id="tp_lesson" style="width: 80%;">

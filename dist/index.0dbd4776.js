@@ -166,6 +166,12 @@ function examlog(examname, dates, examinfo, syllabus) {
     dE("exam_einfo").href = examinfo;
     dE("exam_syl").href = syllabus;
 }
+function showqLS(type) {
+    // Get the loading spinner element
+    let loadingSpinner = document.getElementById("loading-spinner");
+    if (type == "s") loadingSpinner.style.display = "block";
+    else loadingSpinner.style.display = "none";
+}
 window.beforeunload = function(e) {
     if (localStorage.getItem("isFirstTab") == `true`) localStorage.removeItem("isFirstTab");
 };

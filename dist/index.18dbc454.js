@@ -599,6 +599,7 @@ var _recorder = require("../js/recorder");
 var _d3 = require("d3");
 var _helper = require("../js/helper");
 var _reworkui = require("./reworkui");
+if ("serviceWorker" in navigator) navigator.serviceWorker.register(require("611c740a5c685ec2"));
 const firebaseConfig = {
     apiKey: "AIzaSyDN8T7Pmw5e-LzmC3nAHEqI0Uk7FF7y6fc",
     authDomain: "quarkz.firebaseapp.com",
@@ -844,6 +845,44 @@ function chapterEvents() {
     var s_chb = (0, _helper.dE)("schb").addEventListener("click", schb);
     var u_chb = (0, _helper.dE)("uchb").addEventListener("click", uchb);
 }
+document.addEventListener("copy", function(e) {
+    e.clipboardData.setData("text/plain", "It is forbidden to copy content from Quarkz!");
+    e.preventDefault();
+});
+function addTestEvents() {
+    function qpaper() {
+        let html = ``;
+        let counter = 1;
+        for (let ele of testQuestionList.questions){
+            html += '<div class = "qb_q"><div class = "qb_ttl">Q ' + counter + ") " + ele.title + '<div id = "qb_q_ty" class = "qb_q_ty qb_qt_ty" >(' + ele.type + ')</div><div id = "qb_q_mrk" class = "qb_q_ty qb_qt_ty" >(' + ele.pm + "/" + ele.nm + ')</div></div></div><br><hr style="color:white"><br>';
+            counter++;
+        }
+        (0, _log.qp_test)("Question Paper", html);
+    }
+    function qinstr() {
+        function dateparser(var1) {
+            var now = new Date(var1);
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            return now.toISOString().slice(0, 16);
+        }
+        (0, _log.qp_test)("", (0, _testInstructions.page_test_instructions));
+        (0, _helper.dE)("tsi").innerHTML = testInfo.instructions;
+        (0, _helper.dE)("i_name").innerHTML = testInfo.title;
+        (0, _helper.dE)("i_start").innerHTML = dateparser(testInfo.strton.seconds * 1000);
+        (0, _helper.dE)("i_end").innerHTML = dateparser(testInfo.endon.seconds * 1000);
+        (0, _helper.dE)("i_time").innerHTML = testInfo.timeallotted / 60 + "&nbsp;Mins";
+        (0, _helper.dE)("i_syllabus").innerHTML = testInfo.syllabus;
+        (0, _helper.dE)("i_total").innerHTML = testInfo.totalmarks;
+        (0, _helper.dE)("i_qno").innerHTML = testInfo.questionnos;
+        (0, _helper.dE)("agree_in").style.display = "none";
+        (0, _helper.dE)("tin_start").style.display = "none";
+        (0, _helper.dE)("ti_i").style.width = "95%";
+        (0, _helper.dE)("container").style.borderColor = "transparent";
+    }
+    var tt_qp = (0, _helper.dE)("tt_qp").addEventListener("click", qpaper);
+    var tt_instr = (0, _helper.dE)("tt_instr").addEventListener("click", qinstr);
+    var tprep = (0, _helper.dE)("tt_rep").addEventListener("click", (0, _log.report_stuff));
+}
 function testEvents() {
     function tsave() {
         testOperator("tts_answered");
@@ -865,6 +904,7 @@ function testEvents() {
     var tt_review = (0, _helper.dE)("tt_review").addEventListener("click", treview);
     var tt_ansreview = (0, _helper.dE)("tt_ansreview").addEventListener("click", tansrev);
     var ttsub = (0, _helper.dE)("tt_sub").addEventListener("click", sTestHand);
+    var tprep = (0, _helper.dE)("tt_rep").addEventListener("click", (0, _log.report_stuff));
 }
 function topicEvents() {
     function prvHand() {
@@ -876,6 +916,7 @@ function topicEvents() {
     var tpnxt = (0, _helper.dE)("tp_nxt").addEventListener("click", nxtHand);
     var tpprv = (0, _helper.dE)("tp_prv").addEventListener("click", prvHand);
     var tpedt = (0, _helper.dE)("tp_edt").addEventListener("click", editStuff);
+    var tprep = (0, _helper.dE)("tp_rep").addEventListener("click", (0, _log.report_stuff));
     var tpsbm = (0, _helper.dE)("tp_sbm").addEventListener("click", checkQuestion);
     var tppnt = (0, _helper.dE)("tp_pnt").addEventListener("click", printStuff);
 }
@@ -924,8 +965,6 @@ function dshHand() {
 }
 var dshbtn = (0, _helper.dE)("dsh_btn").addEventListener("click", dshHand);
 function printableEvents() {
-    document.getElementById("pe_tst_type_1").addEventListener("change", updateUI);
-    document.getElementById("pe_tst_type_2").addEventListener("change", updateUI);
     document.getElementById("tsinf_btn").addEventListener("change", updateUI);
     document.getElementById("tans_btn").addEventListener("click", function() {
         for(var i = 0; i < document.getElementsByClassName("q_ans_1").length; i++)document.getElementsByClassName("q_ans_1")[i].style.display = "flex";
@@ -944,7 +983,7 @@ function coreManager(newlocation, n1) {
     handlebox = newlocation;
     location1 = window.location.hash.split("#/")[1];
     if (userrole == false || userrole == null || userrole == undefined) {
-        if (location1 == "login" || location1 == "register" || location1.includes("notes") || location1 == "legal" || location1 == "about" || location1 == "bugreport" || location1 == "appinfo" || location1 == "mainsformulas" || location1 == "downloads" || location1 == "uploads") ;
+        if (location1 == "login" || location1 == "register" || location1.includes("notes") && !location1.includes("usernotes") || location1 == "legal" || location1 == "about" || location1 == "bugreport" || location1 == "appinfo" || location1 == "mainsformulas" || location1 == "downloads" || location1 == "uploads") ;
         else location1 = "error_page";
     }
     switch(location1){
@@ -978,7 +1017,7 @@ function coreManager(newlocation, n1) {
         case "timetable":
             handlebox = "schedule";
             renderBody((0, _dashboard.page_schedule), "", "");
-            iframeLoadScreen();
+            (0, _helper.showLS)("s");
             (0, _helper.dE)("tmt_frame").src = userinfo.timetableurl;
             break;
         case "logout":
@@ -999,7 +1038,8 @@ function coreManager(newlocation, n1) {
             break;
         case "testinfo":
             handlebox = "testinfo";
-            renderBody((0, _tests.page_test_list), "", "");
+            renderBody((0, _tests.page_test_list), "height:max-content;", "");
+            testlistEvents();
             renderTestList("active");
             break;
         case "legal":
@@ -1031,7 +1071,6 @@ function coreManager(newlocation, n1) {
         case "testend":
             handlebox = "test_end";
             renderBody((0, _tests.page_test_end), "", "");
-            (0, _helper.dE)("te_title").innerText = "The Test Has Ended";
             break;
         case "add/lesson":
             handlebox = "fu_lesson";
@@ -1069,7 +1108,7 @@ function coreManager(newlocation, n1) {
             break;
         case "settings":
             handlebox = "settings";
-            renderBody((0, _settings.page_settings), "", "");
+            renderBody((0, _settings.page_settings), "height: max-content;", "");
             settingsEvents();
             break;
         case "chplist":
@@ -1102,7 +1141,6 @@ function coreManager(newlocation, n1) {
     if (location1.includes("sims")) {
         handlebox = "simulations";
         renderBody((0, _sims.page_sims), "", "");
-        iframeLoadScreen();
         getSimulation();
     }
     if (location1.includes("chapter")) {
@@ -1135,8 +1173,9 @@ function coreManager(newlocation, n1) {
     }
     if (location1.includes("attempt")) {
         handlebox = "testv1";
-        renderBody((0, _tests.page_test_v1), "", "");
+        renderBody((0, _tests.page_test_v1), "height:max-content;", "");
         testEvents();
+        addTestEvents();
         getTestInfo();
     }
     if (location1.includes("finished")) {
@@ -1146,8 +1185,9 @@ function coreManager(newlocation, n1) {
     }
     if (location1.includes("testreport")) {
         handlebox = "testv1";
-        renderBody((0, _tests.page_test_v1), "", "");
+        renderBody((0, _tests.page_test_v1), "height:max-content;", "");
         getTestReport();
+        addTestEvents();
     }
     if (location1.includes("printable/qbank") && iorole == true) {
         handlebox = "printable";
@@ -1259,12 +1299,31 @@ function coreManager(newlocation, n1) {
 }
 async function testInstructions() {
     let docSnap = await (0, _firestore.getDoc)((0, _firestore.doc)(db, "tests", window.location.hash.split("#/instructions/")[1]));
-    if (docSnap.exists()) (0, _helper.dE)("tsi").innerHTML = docSnap.data().instructions;
-    else renderBody("This test either doesnt exist or you do not have access to this test.");
+    if (docSnap.exists()) {
+        function dateparser(var1) {
+            var now = new Date(var1);
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            return now.toISOString().slice(0, 16);
+        }
+        (0, _helper.dE)("i_name").innerHTML = docSnap.data().title;
+        (0, _helper.dE)("i_start").innerHTML = dateparser(docSnap.data().strton.seconds * 1000);
+        (0, _helper.dE)("i_end").innerHTML = dateparser(docSnap.data().endon.seconds * 1000);
+        (0, _helper.dE)("i_time").innerHTML = docSnap.data().timeallotted / 60 + "&nbsp;Mins";
+        (0, _helper.dE)("i_syllabus").innerHTML = docSnap.data().syllabus;
+        (0, _helper.dE)("i_total").innerHTML = docSnap.data().totalmarks;
+        (0, _helper.dE)("i_qno").innerHTML = docSnap.data().questionnos;
+        (0, _helper.dE)("tsi").innerHTML = docSnap.data().instructions;
+    } else renderBody("This test either doesnt exist or you do not have access to this test.");
     (0, _helper.dE)("agree_in").addEventListener("change", function() {
         if ((0, _helper.dE)("agree_in").checked == true) (0, _helper.dE)("tin_start").disabled = false;
         else (0, _helper.dE)("tin_start").disabled = true;
     });
+    let time = parseInt(Date.now() / 1000);
+    if (docSnap.data().strton.seconds > time) {
+        (0, _helper.dE)("agree_in").disabled = true;
+        (0, _helper.dE)("tin_start").disabled = true;
+        (0, _helper.dE)("tin_start").innerText = "Test Has Not Started Yet.";
+    }
 }
 async function getUpdate() {
     let docSnap = await (0, _firestore.getDoc)((0, _firestore.doc)(db, "usernotes", "releasenotes"));
@@ -1342,26 +1401,39 @@ function uploadEvents() {
         });
     });
 }
-function settingsEvents() {
+async function reportHandler() {
+    (0, _helper.dE)("popup_report").addEventListener("click", async function() {
+        const checkboxes = document.querySelectorAll('input[name="problem[]"]:checked');
+        const values = Array.from(checkboxes).map((checkbox)=>checkbox.value);
+        try {
+            const docRef = await (0, _firestore.addDoc)((0, _firestore.collection)(db, "reports"), {
+                id: document.getElementById("report-tag").value,
+                uid: userinfo.uuid,
+                hash: window.location.hash.split("#/")[1],
+                issue: values.join(", "),
+                comments: document.getElementById("extra_comment").value,
+                type: "report"
+            });
+        } catch  {}
+        document.getElementById("msg_popup_report").remove();
+    });
+}
+async function settingsEvents() {
     (0, _helper.dE)("pass_rst_btn").addEventListener("click", requestPasschange);
-    (0, _helper.dE)("sub_rat_btn").addEventListener("click", function() {
-        let data = "?entry.1743636787=" + window.user_rate_value + "&entry.1877359119=quarkz_rating&entry.2052323667=" + userinfo.uuid + "-" + document.getElementById("rate_comment").value;
-        let f_url = "https://docs.google.com/forms/d/e/1FAIpQLSe5CGUovfJodcfga1bACu57FvE4REOjeAJYFqODeoTQAK0nvg/formResponse" + data;
-        f_url = encodeURI(f_url);
-        let ifeq = document.createElement("iframe");
-        ifeq.id = "tempIF_G";
-        ifeq.width = "100px";
-        ifeq.height = "100px";
-        ifeq.style.display = "none";
-        ifeq.onload = "ifcls();";
-        ifeq.src = f_url;
-        document.getElementsByTagName("body")[0].appendChild(ifeq);
-        ifeq.onload = "ifeq.remove();";
-        ifeq.addEventListener("load", ifcls(), false);
+    (0, _helper.dE)("sub_rat_btn").addEventListener("click", async function() {
+        try {
+            const docRef = await (0, _firestore.addDoc)((0, _firestore.collection)(db, "reviews"), {
+                rating: window.user_rate_value,
+                uid: userinfo.uuid,
+                comments: document.getElementById("rate_comment").value,
+                type: "rating"
+            });
+        } catch  {}
         localStorage.setItem("rate_app", "true");
         (0, _log.log)("Thank You", "Thank You for your Valuable Feedback.");
         (0, _helper.dE)("st_rateapp").style.display = "none";
     });
+    (0, _helper.dE)("st_rateapp").style.display = "flex";
     if (localStorage.getItem("rate_app") == "true") (0, _helper.dE)("st_rateapp").style.display = "none";
     const stars = document.querySelectorAll(".star");
     // Add event listener to each star
@@ -1479,6 +1551,7 @@ async function updateSimulationWeb() {
 }
 // Displays Simulation For End User
 async function getSimulation() {
+    (0, _helper.showLS)("s");
     var simid = window.location.hash.split("sims/")[1];
     var docRef = (0, _firestore.doc)(db, "sims", simid);
     var docSnap = await (0, _firestore.getDoc)(docRef);
@@ -1487,6 +1560,7 @@ async function getSimulation() {
         (0, _helper.dE)("sms_name").innerText = docJSON.name;
         (0, _helper.dE)("sms_prov").innerText = docJSON.provider;
         (0, _helper.dE)("sim_frame").src = docJSON.url;
+        (0, _helper.dE)("sim_frame").onload = showqLS("a");
     } else {
         creMng("error_page", 1);
         throw new Error;
@@ -1596,16 +1670,6 @@ async function unotes1() {
     });
 }
 function unotes2() {}
-function iframeLoadScreen() {
-    const iframe = document.querySelector("iframe");
-    var iload = "";
-    iframe.addEventListener("loadstart", ()=>{
-        iload = (0, _log.log)("Loading", "Content Is Loading. Please Wait");
-    });
-    iframe.addEventListener("load", ()=>{
-        document.getElementById(iload).remove();
-    });
-}
 async function getUserNotes() {
     try {
         notesUIHandler();
@@ -1778,7 +1842,7 @@ function vidSlideController(docJSON) {
     tpmcqcon.innerHTML = "";
     (0, _helper.dE)("tb_q_qtext").innerHTML = docJSON.title + "<span class = 'sp_txt'>(" + docJSON.type + ")</span>";
     // dE("tb_q_img").src = docJSON.img
-    if (docJSON.type == "mcq" || docJSON.type == "mcq_multiple") {
+    if (docJSON.type == "mcq" || docJSON.type == "mcq_multiple" || docJSON.type == "mcq_multiple_partial") {
         qif(tpmcqcon);
         iu(tpmatrix);
         iu(tpanswer);
@@ -1894,14 +1958,12 @@ async function getCyberhunt() {
 // -----------------------
 // TOPIC/QBANK
 function addItemToQLLIst() {
-    var qans = [
-        (0, _helper.dE)("aq_answer").value
-    ];
+    var qans = (0, _helper.dE)("aq_answer").value.split(",");
     var qtype = (0, _helper.dE)("aq_type").value;
     var qop = [];
     var qop1 = [];
     var qop2 = [];
-    if (qtype == "mcq" || qtype == "mcq_multiple") {
+    if (qtype == "mcq" || qtype == "mcq_multiple" || qtype == "mcq_multiple_partial") {
         qans = [];
         for(i = 0; i < document.getElementsByClassName("aq_mcq_ans").length; i++){
             var a = document.getElementsByClassName("aq_mcq_ans")[i].value;
@@ -1995,7 +2057,7 @@ async function changeItem(t) {
         iu(qans);
         iu(qqall);
     }
-    if (qtype.value == "mcq" || qtype.value == "mcq_multiple") {
+    if (qtype.value == "mcq" || qtype.value == "mcq_multiple" || qtype.value == "mcq_multiple_partial") {
         qif(qmcq);
         iu(qmat);
         iu(qans);
@@ -2083,7 +2145,7 @@ function renderEditQLList(qno) {
     (0, _helper.dE)("aq_posmrks").value = op.pm;
     (0, _helper.dE)("aq_negmrks").value = op.nm;
     setHTML("aq_expl", op.expl);
-    if (op.type == "mcq" || op.type == "mcq_multiple") {
+    if (op.type == "mcq" || op.type == "mcq_multiple" || op.type == "mcq_multiple_partial") {
         (0, _helper.dE)("aq_mcq_con").innerHTML = "";
         for(var g = 0; g < op.op.length; g++){
             addMCQ();
@@ -2093,7 +2155,7 @@ function renderEditQLList(qno) {
                 document.getElementsByClassName("aq_mcq_p")[g].style.borderColor = "lime";
             }
         }
-    } else if (op.type == "numerical" || op.type == "explain" || op.type == "fill" || op.type == "taf") (0, _helper.dE)("aq_answer").value = op.answer[0];
+    } else if (op.type == "numerical" || op.type == "explain" || op.type == "fill" || op.type == "taf") (0, _helper.dE)("aq_answer").value = op.answer.toString();
     changeItem();
 }
 async function newTopic() {
@@ -2201,6 +2263,7 @@ async function prepareTopicQBank(iun) {
                 (0, _helper.dE)("aq_tpc_chapterid").value = docJSON.chid;
                 editqllist = docJSON.qllist;
                 renderEditQLList(0);
+                renderEditQLList(1);
             } else if (iun == 3) {
                 var docJSON = docSnap.data();
                 (0, _helper.dE)("aq_tpcname").value = docJSON.title;
@@ -2235,6 +2298,7 @@ async function prepareTopicQBank(iun) {
                 var docJSON = docSnap.data();
                 editqllist = docJSON.examinfo;
                 renderEditQLList(0);
+                renderEditQLList(1);
             }
         }
     } catch  {}
@@ -2276,6 +2340,13 @@ async function updateTopicQBank(iun) {
     } catch  {}
     else if (iun == 3) {
         try {
+            let qnos = 0;
+            let marks = 0;
+            for(var i = 0; i < editqllist.length; i++){
+                var ele = editqllist[i];
+                marks += parseInt(ele.pm);
+                qnos += 1;
+            }
             var fgio = new Date((0, _helper.dE)("aq_tst_stron").value);
             var fgio2 = new Date((0, _helper.dE)("aq_tst_endon").value);
             var wer = (0, _helper.dE)("aq_tst_batches").value.split(",");
@@ -2286,7 +2357,9 @@ async function updateTopicQBank(iun) {
                 instructions: getHTML("aq_add_test_instr"),
                 strton: fgio,
                 endon: fgio2,
-                batch: wer
+                batch: wer,
+                questionnos: qnos,
+                totalmarks: marks
             });
         } catch  {}
         var q = [];
@@ -2312,7 +2385,8 @@ async function updateTopicQBank(iun) {
                 answer: ele.answer,
                 section: ele.section,
                 pm: ele.pm,
-                nm: ele.nm
+                nm: ele.nm,
+                type: ele.type
             });
         }
         try {
@@ -2391,6 +2465,7 @@ async function getChapterEList() {
         } catch  {}
     }
 }
+console.warn = function() {};
 // Chapter Link Handler
 function chclicker() {
     window.location.hash = "#/chapter/" + atob(this.id.split("qb")[1]);
@@ -2410,15 +2485,9 @@ function renderCList(type) {
 // Print Question Bank
 async function printQBank(type) {
     var fireID = "";
-    if (type == 1) {
-        fireID = "qbank";
-        (0, _helper.dE)("pe_tst_info").style.display = "flex";
-        (0, _helper.dE)("eqb_instr").style.display = "none";
-    } else if (type == 2) {
-        fireID = "topic";
-        (0, _helper.dE)("pe_tst_info").style.display = "none";
-        (0, _helper.dE)("eqb_instr").style.display = "none";
-    } else if (type == 3) fireID = "tests";
+    if (type == 1) fireID = "qbank";
+    else if (type == 2) fireID = "topic";
+    else if (type == 3) fireID = "tests";
     else fireID = "qbank";
     var qbankno = window.location.hash.split("printable/" + fireID + "/")[1];
     var qbanktitle = (0, _helper.dE)("qb_title");
@@ -2443,14 +2512,14 @@ async function printQBank(type) {
             if (qimg == undefined) qimg = "";
             var expl = '<div class = "q_ans_expl" style = "font-weight:bold;color:green;font-size:10px;flex-direction:row;display:none;">Explaination:' + docJSON.expl + "</div>";
             var ans = "<div style = 'font-weight:bold;color:green;font-size:10px;flex-direction:row;display:none' class = 'q_ans_1'>Answer:";
-            var inhtml = '<div class = "qbtp_q"><div id = "' + ele.id + '">' + qtitle + '<div class = "qb_q_ty">(' + qtype + ")</div></div>";
+            var inhtml = '<div class = "qbtp_q"><div id = "' + ele.id + '">' + qtitle + '<div class = "qb_q_ty">(' + qtype + ")(" + docJSON.pm + "/" + docJSON.nm + ")</div></div>";
             (0, _helper.dE)("eqb_add").insertAdjacentHTML("beforeend", inhtml);
             if (qimg != "") {
                 var iwo = '<div class = "qb_img"><img src = "' + qimg + '"></div>';
                 (0, _helper.dE)(ele.id).insertAdjacentHTML("beforeend", iwo);
             }
             var asi = "";
-            if (qtype == "mcq" || qtype == "mcq_multiple") {
+            if (qtype == "mcq" || qtype == "mcq_multiple" || qtype == "mcq_multiple_partial") {
                 var qop = docJSON.op;
                 for (let ele1 of qop)asi += "<div class = 'qb_mcq_opt'>" + ele1 + "</div>";
                 var qrt = '<div class = "qb_mcq_exp" type = "a">' + asi + "</div>";
@@ -2484,7 +2553,7 @@ async function printQBank(type) {
             renderMathInElement((0, _helper.dE)("eqb_add"));
         }
     }
-    (0, _helper.dE)("printable").insertAdjacentHTML("beforeend", "<br></br>");
+    (0, _helper.dE)("eqb_add").insertAdjacentHTML("beforeend", "<br></br>");
 }
 async function lessonRenderer(docJSON) {
     (0, _helper.dE)("tp_question").style.display = "none";
@@ -2496,6 +2565,7 @@ async function lessonRenderer(docJSON) {
     }
     (0, _helper.dE)("tp_lsno").innerText = docJSON.title;
     (0, _helper.dE)("tp_expl").innerHTML = docJSON.expl;
+    (0, _helper.dE)("report-tag").value = docJSON.id;
 // dE("tp_lsimg").src = docJSON.img
 }
 async function questionRenderer(docJSON, totalq) {
@@ -2520,10 +2590,11 @@ async function questionRenderer(docJSON, totalq) {
     (0, _helper.dE)("tp_lesson").style.display = "none";
     (0, _helper.dE)("tp_question").setAttribute("dataid", docJSON.id);
     (0, _helper.dE)("tp_question").setAttribute("qtype", docJSON.type);
+    (0, _helper.dE)("report-tag").value = docJSON.id;
     tpmcqcon.innerHTML = "";
     (0, _helper.dE)("tp_qtext").innerHTML = docJSON.title;
     // dE("tp_img").src = ""
-    if (docJSON.type == "mcq" || docJSON.type == "mcq_multiple") {
+    if (docJSON.type == "mcq" || docJSON.type == "mcq_multiple" || docJSON.type == "mcq_multiple_partial") {
         qif(tpmcqcon);
         iu(tpmatrix);
         iu(tpanswer);
@@ -2704,6 +2775,7 @@ async function authStateObserver(user) {
         if (docSnap.exists()) {
             var docJSON = docSnap.data();
             userinfo.examslist = docJSON;
+            if (docJSON.ratemyapp) localStorage.setItem("rate_app", false);
             if (docJSON.warning != "") (0, _log.log)("Notice", docJSON.warning, function() {
                 window.location.hash = "#/updates";
             }, "Release Notes");
@@ -2748,23 +2820,29 @@ function checkQuestion() {
         break;
     }
     if (type == "numerical" || type == "fill") {
-        answer = (0, _helper.dE)("tp_answer").value;
-        if (crranswer == answer) {
+        answer = (0, _helper.dE)("tp_answer").value.split(",");
+        let c_status = (0, _helper.qCorrector)(type, crranswer, answer, 4, -1, 0);
+        if (c_status.type == "correct") {
             (0, _helper.dE)("tp_status").innerText = "Correct Answer";
+            (0, _helper.playSoundEffect)(2);
             status = 1;
         } else {
             (0, _helper.dE)("tp_status").innerText = "Wrong Answer";
+            (0, _helper.playSoundEffect)(1);
             status = 0;
         }
     }
-    if (type == "mcq" || type == "mcq_multiple" || type == "taf") {
+    if (type == "mcq" || type == "mcq_multiple" || type == "taf" || type == "mcq_multiple_partial") {
         answer = [];
         for(var k = 0; k < document.getElementsByClassName("tp_mcq_p").length; k++)if (document.getElementsByClassName("tp_mcq_p")[k].classList.contains("aq_mcq_ans")) answer.push(document.getElementsByClassName("tp_mcq_p")[k].innerText);
-        if ((0, _helper.areEqual)(answer, crranswer)) {
+        let c_status = (0, _helper.qCorrector)(type, crranswer, answer, 4, -1, 0);
+        if (c_status.type == "correct") {
             (0, _helper.dE)("tp_status").innerText = "Correct Answer";
+            (0, _helper.playSoundEffect)(2);
             status = 1;
         } else {
             (0, _helper.dE)("tp_status").innerText = "Wrong Answer";
+            (0, _helper.playSoundEffect)(1);
             status = 0;
         }
     }
@@ -2799,38 +2877,17 @@ async function lquizinit() {
 }
 async function getTestList(batchid, userid) {
     if (testList != []) {
-        var docRef = (0, _firestore.doc)(db, "batch", batchid, "info", "tests");
-        var docSnap = await (0, _firestore.getDoc)(docRef);
-        if (docSnap.exists()) {
-            var docJSON = docSnap.data();
-            testList = docJSON.tests;
-        }
-    }
-    if (finishedTestList != []) {
-        const q = (0, _firestore.query)((0, _firestore.collection)(db, "tests"), (0, _firestore.where)("finished", "array-contains", userid), (0, _firestore.limit)(5));
+        const q = (0, _firestore.query)((0, _firestore.collection)(db, "tests"), (0, _firestore.where)("batch", "array-contains", batchid));
         const querySnapshot = await (0, _firestore.getDocs)(q);
         querySnapshot.forEach((doc)=>{
-            var min = doc.data();
-            var docJSON = {
-                title: min.title,
-                testid: doc.id,
-                finished: true,
-                strton: min.strton,
-                endon: min.endon
-            };
-            finishedTestList.push(docJSON);
-            var a = 0;
-            for (let ele of testList){
-                if (ele.testid == docJSON.testid) testList[a].finished = true;
-                else testList[a].finished = false;
-                a += 1;
-            }
+            var tfg = doc.data();
+            testList.push({
+                title: tfg.title,
+                strton: tfg.strton.seconds,
+                endon: tfg.endon.seconds,
+                testid: doc.id
+            });
         });
-    }
-    var localtime = parseInt(Date.now() / 1000);
-    for(var d = 0; d < testList.length; d++){
-        if (localtime > testList[d].strton.seconds && localtime < testList[d].endon.seconds) activeTestList.push(testList[d]);
-        else if (localtime < testList[d].strton.seconds) upcomingTestList.push(testList[d]);
     }
 }
 function testClicker() {
@@ -2867,15 +2924,24 @@ async function newTest() {
 }
 function renderTestList(type) {
     var renList;
+    activeTestList = [];
+    upcomingTestList = [];
+    finishedTestList = [];
+    var localtime = parseInt(Date.now() / 1000);
+    for(var d = 0; d < testList.length; d++){
+        if (localtime > testList[d].strton && localtime < testList[d].endon) activeTestList.push(testList[d]);
+        else if (localtime < testList[d].strton) upcomingTestList.push(testList[d]);
+        else if (localtime > testList[d].endon) finishedTestList.push(testList[d]);
+    }
     if (type == "active") renList = activeTestList;
     else if (type == "upcoming") renList = upcomingTestList;
     else if (type == "finished") renList = finishedTestList;
     (0, _helper.dE)("testlinks").innerHTML = "";
     for (var ele of renList){
-        var strson = new Date(ele.strton.seconds * 1000);
-        var endson = new Date(ele.endon.seconds * 1000);
+        var strson = new Date(ele.strton * 1000);
+        var endson = new Date(ele.endon * 1000);
         var output = '<div class="tlinks" id = "' + ele.testid + '"><span class = "t_title">' + ele.title + '</span><span class = "t_stron">Starts At:' + strson + '</span><span class ="t_endon">Ends At:' + endson + "</div>";
-        if (type != "finished" && ele.finished == false) {
+        if (type != "finished") {
             (0, _helper.dE)("testlinks").insertAdjacentHTML("beforeend", output);
             (0, _helper.dE)(ele.testid).addEventListener("click", testClicker);
         } else if (type == "finished") {
@@ -2901,8 +2967,10 @@ async function getSimpleTestReport() {
             }
         }
         if (attempted == 0) {
-            creMng("testend", 1);
+            renderBody((0, _tests.page_test_end), "", "");
             (0, _helper.dE)("te_title").innerText = "You Have NOT Attempted This Test";
+            (0, _helper.dE)("te_msg").innerText = "";
+            return;
         } else try {
             try {
                 computeResult(1);
@@ -2998,7 +3066,9 @@ async function getSimpleTestReport() {
                 questionGraph("fto_draw", data);
             } catch  {
                 (0, _helper.dE)("te_title").innerText = "ERROR";
-                creMng("testend", 1);
+                renderBody((0, _tests.page_test_end), "", "");
+                (0, _helper.dE)("te_title").innerText = "You may see this ERROR since you may NOT have Attempted This Test";
+                (0, _helper.dE)("te_msg").innerText = "";
                 return 0;
             }
         } catch  {}
@@ -3134,11 +3204,14 @@ async function getTestReport() {
             }
         }
         if (attempted == 0) {
-            creMng("testend", 1);
+            renderBody((0, _tests.page_test_end), "", "");
             (0, _helper.dE)("te_title").innerText = "You Have NOT Attempted This Test";
+            (0, _helper.dE)("te_msg").innerText = "";
+            return;
         } else if (Date.now() / 1000 <= testInfo.endon.seconds && testInfo.noresult == false) {
-            creMng("testend", 1);
+            renderBody((0, _tests.page_test_end), "", "");
             (0, _helper.dE)("te_title").innerText = "Detailed Test Reports will be available after deadline";
+            (0, _helper.dE)("te_msg").innerText = "";
         } else {
             try {
                 docRef = (0, _firestore.doc)(db, "tests", testid, "questions", "questions");
@@ -3161,7 +3234,9 @@ async function getTestReport() {
                 if (docSnap.exists()) testReportAnswers = docSnap.data();
             } catch  {
                 (0, _helper.dE)("te_title").innerText = "ERROR";
-                creMng("testend", 1);
+                renderBody((0, _tests.page_test_end), "", "");
+                (0, _helper.dE)("te_title").innerText = "You may see this ERROR since you may NOT have Attempted This Test";
+                (0, _helper.dE)("te_msg").innerText = "";
                 return 0;
             }
             inittestHandler();
@@ -3183,8 +3258,9 @@ async function getTestInfo() {
         docSnap = await (0, _firestore.getDoc)(docRef);
         if (docSnap.exists()) {
             for (var ele of docSnap.data().finished)if (auth.currentUser.uid == ele) {
-                creMng("testend", 1);
+                renderBody((0, _tests.page_test_end), "", "");
                 (0, _helper.dE)("te_title").innerText = "You Have Already Attempted This Test";
+                (0, _helper.dE)("te_msg").innerText = "Test Results will be released after Deadline.";
                 return 0;
             }
         }
@@ -3194,8 +3270,9 @@ async function getTestInfo() {
         docSnap = await (0, _firestore.getDoc)(docRef);
         if (docSnap.exists()) testQuestionList = docSnap.data();
     } catch  {
+        renderBody((0, _tests.page_test_end), "", "");
         (0, _helper.dE)("te_title").innerText = "The Test Hasnt Started Yet";
-        creMng("testend", 1);
+        (0, _helper.dE)("te_msg").innerText = "";
         return 0;
     }
     docRef = (0, _firestore.doc)(db, "tests", testid, "responses", auth.currentUser.uid);
@@ -3346,7 +3423,8 @@ async function computeResult(type) {
         for(var j = 0; j < trL.length; j++)if (trA[i].qid == trL[j].qid) {
             var ele = trL[j];
             if (ele.ans == undefined) ele.ans = [];
-            if (ele.ans.length == 0) {
+            let q_check = (0, _helper.qCorrector)(trA[i].type, trA[i].answer, ele.ans, trA[i].pm, trA[i].nm, 0);
+            if (q_check.type == "unattempted") {
                 marksList.push({
                     qid: trA[i].qid,
                     marks: 0,
@@ -3355,14 +3433,14 @@ async function computeResult(type) {
                 u = u + parseFloat(trA[i].pm);
                 subjectmarks[trA[i].section].unattempted += parseFloat(trA[i].pm);
                 subjectmarks[trA[i].section].total += parseFloat(trA[i].pm);
-            } else if ((0, _helper.areEqual)(trA[i].answer, ele.ans)) {
+            } else if (q_check.type == "correct") {
                 marksList.push({
                     qid: trA[i].qid,
                     marks: parseFloat(trA[i].pm),
                     type: "correct"
                 });
-                c = c + parseFloat(trA[i].pm);
-                subjectmarks[trA[i].section].correct += parseFloat(trA[i].pm);
+                c = c + parseFloat(q_check.marks);
+                subjectmarks[trA[i].section].correct += parseFloat(q_check.marks);
                 subjectmarks[trA[i].section].total += parseFloat(trA[i].pm);
             } else {
                 marksList.push({
@@ -3397,6 +3475,11 @@ async function computeResult(type) {
                     "uid": userinfo.uuid,
                     "marks": tFinal.usermarks,
                     "name": userinfo.name
+                }),
+                leaderboard: (0, _firestore.arrayRemove)({
+                    "uid": userinfo.uuid,
+                    "marks": fg.usermarks,
+                    "name": userinfo.name
                 })
             });
             creMng();
@@ -3412,7 +3495,7 @@ async function computeResult(type) {
                 "name": userinfo.name
             })
         });
-        creMng("testend", 1);
+        renderBody((0, _tests.page_test_end), "", "");
     }
     document.getElementById(gty).style.visibility = "hidden";
     document.getElementById(gty).style.opacity = "0";
@@ -3444,9 +3527,10 @@ function testqHandler(id, no) {
         value: activequestionid
     });
     (0, _helper.dE)(activequestionid).style.border = "purple 3px solid";
+    (0, _helper.dE)("report-tag").value = activequestionid;
     for (let ele of testQuestionList.questions)if (id == ele.qid) {
         (0, _helper.dE)("tt_qtitle").innerHTML = "";
-        var inhtml = '<div class = "qb_q" id = "Q' + ele.qid + '"><div class = "qb_ttl">' + ele.title + '<div id = "qb_q_ty" class = "qb_q_ty qb_qt_ty" >(' + ele.type + ")</div></div></div>";
+        var inhtml = '<div class = "qb_q" id = "Q' + ele.qid + '"><div class = "qb_ttl">' + ele.title + '<div id = "qb_q_ty" class = "qb_q_ty qb_qt_ty" >(' + ele.type + ')</div><div id = "qb_q_mrk" class = "qb_q_ty qb_qt_ty" >(' + ele.pm + "/" + ele.nm + ")</div></div></div>";
         (0, _helper.dE)("tt_qtitle").insertAdjacentHTML("beforeend", inhtml);
         var asi = "";
         if (ele.type == "mcq") {
@@ -3454,7 +3538,7 @@ function testqHandler(id, no) {
             for (let ele1 of qop)asi += '<li><input type="radio" class = "q_ans" value = "' + ele1 + '" name = "q_op">' + ele1 + "</input></li>";
             var qrt = '<ol class = "qb_mcq" type = "A">' + asi + "</ol>";
         }
-        if (ele.type == "mcq_multiple") {
+        if (ele.type == "mcq_multiple" || ele.type == "mcq_multiple_partial") {
             var qop = ele.op;
             for (let ele1 of qop)asi += '<li><input type="checkbox" class = "q_ans" value = "' + ele1 + '" name = "q_op">' + ele1 + "</input></li>";
             var qrt = '<ol class = "qb_mcq" type = "A">' + asi + "</ol>";
@@ -3475,6 +3559,9 @@ function testqHandler(id, no) {
                 ANS = MCQ;
                 break;
             case "mcq_multiple":
+                ANS = MCQMULT;
+                break;
+            case "mcq_multiple_partial":
                 ANS = MCQMULT;
                 break;
             case "taf":
@@ -3509,7 +3596,7 @@ function testqHandler(id, no) {
         for (let ele23 of testResponseList)if (ele23.qid == id) {
             for(var i = 0; i < document.getElementsByClassName("q_ans").length; i++){
                 var ele32 = document.getElementsByClassName("q_ans")[i];
-                if (ele.type == "mcq" || ele.type == "mcq_multiple") {
+                if (ele.type == "mcq" || ele.type == "mcq_multiple" || ele.type == "mcq_multiple_partial") {
                     if (ele23.ans == undefined) ele23.ans = [];
                     for (let el433 of ele23.ans)if (ele32.value == el433) {
                         ele32.checked = true;
@@ -3522,9 +3609,14 @@ function testqHandler(id, no) {
                 }
             }
             if (!window.location.hash.includes("attempt")) {
-                if ((0, _helper.areEqual)(ele23.ans, tyio)) (0, _helper.dE)("tt_marksaward").innerHTML = '<div style="color:lime">Correct(+4)</div>';
-                else if (ele23.ans.length == 0) (0, _helper.dE)("tt_marksaward").innerHTML = '<div style="color:orange">Unanswered(0)</div>';
-                else (0, _helper.dE)("tt_marksaward").innerHTML = '<div style="color:red">Incorrect(-1)</div>';
+                for (let ele of testReportAnswers.questions)if (id == ele.qid) {
+                    for (let ele23 of testResponseList)if (ele23.qid == id) {
+                        let q_check = (0, _helper.qCorrector)(ele.type, ele.answer, ele23.ans, ele.pm, ele.nm, 0);
+                        if (q_check.type == "unattempted") (0, _helper.dE)("tt_marksaward").innerHTML = '<div style="color:orange">Unanswered(0)</div>';
+                        else if (q_check.type == "correct") (0, _helper.dE)("tt_marksaward").innerHTML = '<div style="color:lime">Correct(' + q_check.marks + ")</div>";
+                        else (0, _helper.dE)("tt_marksaward").innerHTML = '<div style="color:red">Incorrect(' + q_check.marks + ")</div>";
+                    }
+                }
             }
         }
         // var fghut = 0;
@@ -3571,8 +3663,9 @@ function inittestHandler() {
             for (let ele of testReportAnswers.questions)if (id == ele.qid) {
                 var tyio = ele.answer;
                 if (ele23.ans == undefined) ele23.ans = [];
-                if ((0, _helper.areEqual)(ele23.ans, tyio)) (0, _helper.dE)(id).classList.add("t_crr");
-                else if (ele23.ans.length == 0) (0, _helper.dE)(id).classList.add("t_unat");
+                let q_check = (0, _helper.qCorrector)(ele.type, ele.answer, ele23.ans, ele.pm, ele.nm, 0);
+                if (q_check.type == "unattempted") (0, _helper.dE)(id).classList.add("t_unat");
+                else if (q_check.type == "correct") (0, _helper.dE)(id).classList.add("t_crr");
                 else (0, _helper.dE)(id).classList.add("t_incrr");
             }
         }
@@ -3586,6 +3679,7 @@ async function testOperator(type) {
         (0, _log.log)("Error", "Performing Test Operations in Test Reports Is Prohibited");
         return 1;
     }
+    (0, _helper.showLS)("s");
     var aqid = "answers." + activequestionid;
     var testid = window.location.hash.split("#/attempt/")[1];
     var triu = (0, _helper.dE)("qb_q_ty").innerText.split("(")[1];
@@ -3602,7 +3696,7 @@ async function testOperator(type) {
             if (ele23.qid == activequestionid) {
                 for(var i = 0; i < document.getElementsByClassName("q_ans").length; i++){
                     var ele32 = document.getElementsByClassName("q_ans")[i];
-                    if (triu == "mcq" || triu == "mcq_multiple") for(var j = 0; j < ele23.ans.length; j++){
+                    if (triu == "mcq" || triu == "mcq_multiple" || triu == "mcq_multiple_partial") for(var j = 0; j < ele23.ans.length; j++){
                         var ele44 = ele23.ans[j];
                         if (ele32.value == ele44) ele32.checked = false;
                     }
@@ -3616,7 +3710,7 @@ async function testOperator(type) {
         var ans = [];
         for(var i = 0; i < document.getElementsByClassName("q_ans").length; i++){
             var ele32 = document.getElementsByClassName("q_ans")[i];
-            if (triu == "mcq)" || triu == "mcq_multiple)") {
+            if (triu == "mcq)" || triu == "mcq_multiple)" || triu == "mcq_multiple_partial)") {
                 if (ele32.checked == true) ans.push(ele32.value);
             } else ans.push(ele32.value);
         }
@@ -3642,6 +3736,7 @@ async function testOperator(type) {
     }
     (0, _helper.dE)(activequestionid).classList.remove("tts_notanswer", "tts_notvisit", "tts_answered", "tts_review", "tts_ansreview");
     (0, _helper.dE)(activequestionid).classList.add(type);
+    (0, _helper.showLS)("d");
 }
 async function submitTest() {
     if (!window.location.hash.includes("attempt")) {
@@ -4010,9 +4105,9 @@ function questionGraph(ipd, data) {
 }
 var Quarkz = {
     "copyright": "Mr Techtroid 2021-23",
-    "vno": "v0.5.1",
+    "vno": "v0.6.0",
     "author": "Mr Techtroid",
-    "last-updated": "05/06/2023(IST)",
+    "last-updated": "28/05/2023(IST)",
     "serverstatus": "firebase-online"
 };
 var handlebox = "login";
@@ -4056,9 +4151,10 @@ bc.onmessage = (event)=>{
         isFirstTab = false;
         renderBody("Quarkz! is Open in Another Tab/Window! You can only use Quarkz! in one tab/window.", "", "");
     }
+    if (event.data == `QZCODE-REPORT`) reportHandler();
 };
 
-},{"firebase/app":"aM3Fo","firebase/auth":"79vzg","firebase/firestore":"8A4BC","firebase/storage":"8WX7E","d3":"17XFv","../js/helper":"lVRAz","./reworkui":"66uq8","../embeds/about":"gCJDO","../embeds/chapter":"fMnHP","../embeds/cyb":"6uKbY","../embeds/dashboard":"hkEZ0","../embeds/downloads":"g2MAL","../embeds/finished_test":"3VUaP","../embeds/forum":"bKen7","../embeds/functions":"kxrBw","../embeds/log":"l4cy5","../embeds/login":"6nKCl","../embeds/printable":"95h6E","../embeds/profile":"2MtJU","../embeds/qbnkvid":"chYH6","../embeds/register":"kcVux","../embeds/settings":"fvpoO","../embeds/sims":"7kmTm","../embeds/test_instructions":"7hktz","../embeds/tests":"7y3N8","../embeds/toc":"kt253","../embeds/topics":"eSIhy","../embeds/user":"enRwb","../embeds/usernotes":"71ul5","../js/recorder":"56dox","b15128b8ff66a42":"hagNj"}],"aM3Fo":[function(require,module,exports) {
+},{"firebase/app":"aM3Fo","firebase/auth":"79vzg","firebase/firestore":"8A4BC","firebase/storage":"8WX7E","../embeds/about":"gCJDO","../embeds/chapter":"fMnHP","../embeds/cyb":"6uKbY","../embeds/dashboard":"hkEZ0","../embeds/downloads":"g2MAL","../embeds/finished_test":"3VUaP","../embeds/forum":"bKen7","../embeds/functions":"kxrBw","../embeds/log":"l4cy5","../embeds/login":"6nKCl","../embeds/printable":"95h6E","../embeds/profile":"2MtJU","../embeds/qbnkvid":"chYH6","../embeds/register":"kcVux","../embeds/settings":"fvpoO","../embeds/sims":"7kmTm","../embeds/test_instructions":"7hktz","../embeds/tests":"7y3N8","../embeds/toc":"kt253","../embeds/topics":"eSIhy","../embeds/user":"enRwb","../embeds/usernotes":"71ul5","../js/recorder":"56dox","d3":"17XFv","../js/helper":"lVRAz","./reworkui":"66uq8","611c740a5c685ec2":"iujZH","b15128b8ff66a42":"hagNj"}],"aM3Fo":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _app = require("@firebase/app");
@@ -40614,7 +40710,1470 @@ function registerStorage() {
 }
 registerStorage();
 
-},{"@firebase/app":"3AcPV","@firebase/util":"ePiK6","@firebase/component":"bi1VB","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"17XFv":[function(require,module,exports) {
+},{"@firebase/app":"3AcPV","@firebase/util":"ePiK6","@firebase/component":"bi1VB","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"gCJDO":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_about", ()=>page_about);
+let page_about = `
+<span class="in_t">About</span>
+        <img id="abt_tab_t_t_img" alt="MTT Logo" src="https://avatars1.githubusercontent.com/u/64828294?s=460&amp;v=4">
+        <div id="abt_tab_t_hold">
+            <span id="abt_name">Mr Techtroid</span>
+            <span class="abt_det">
+                <span id="abt_email">mrtechtroid@outlook.com</span>
+            </span>
+            <div style="font-size: 12px;width:400px;align-items: flex-end;">
+                <span>I Am Mr Techtroid The Main Developer Of <span class="sp_txt">Quarkz!</span></span>
+                <span>I Built This Website As A Way For Schools To Head Towards Online Learning</span>
+                <span>Its Built In A Way That It Is Easy For Both Teachers And Students To Use</span>
+                <span>Quarkz Is Currently Under Beta Version And Many Features Will Come In The Future</span>
+            </div>
+        </div>
+        <div id="abt_c_1">
+            <button id="lgl_btn" class="tst_btn rpl">Legal</button>
+            <button id="rbu_btn" class="tst_btn rpl" onclick="window.location = '/#/bugreport'">Report Bugs</button>
+            <button id="apinf_btn" class="tst_btn rpl" onclick="window.location = '/#/appinfo'">App Info</button>
+            <a id="contq_btn"
+                href="https://docs.google.com/forms/d/e/1FAIpQLSfLZ2_GUDv6EYRR3kz53BYtsP3SaTIMfCo8az-xPzUi1nb91A/viewform"
+                class="tst_btn rpl" target="_blank">Contact Us</a>
+        </div>
+`;
+exports.default = {
+    page_about
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"fMnHP":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_list_chapter", ()=>page_list_chapter);
+parcelHelpers.export(exports, "page_edit_chapter", ()=>page_edit_chapter);
+parcelHelpers.export(exports, "page_chapter", ()=>page_chapter);
+let page_list_chapter = `
+<span class="in_t">Chapters</span>
+        <hr color="white" width="100%">
+        <div style="display: flex;flex-direction: row;flex-wrap: wrap;">
+            <button class="tst_btn rpl" id="pchb">Physics</button>
+            <button class="tst_btn rpl" id="cchb">Chemistry</button>
+            <button class="tst_btn rpl" id="mchb">Maths</button>
+            <button class="tst_btn rpl" id="bchb">Biology</button>
+            <button class="tst_btn rpl" id="cochb">Computer</button>
+            <button class="tst_btn rpl" id="schb">Statistics</button>
+            <button class="tst_btn rpl" id="uchb">Unfiled</button>
+        </div>
+        <div id="qb_cont_2" style="overflow-y: scroll;height:50vh;" class="flex_type">
+        </div>`;
+let page_edit_chapter = `
+<span class="in_t" class="">Edit Chapters</span>
+        <input type="text" id="chp_chapname" class="_in_aq" placeholder="Chapter Name">
+        <span class="in_t" class="">Question Bank</span>
+        <div id = "chp_qbank">
+        </div>
+        <span class="in_t" class="">Topics</span>
+        <div id = "chp_qbank">
+        </div>`;
+let page_chapter = `
+<span class="in_t" id="chp_chaptername">Topic</span><button class="tst_btn rpl" id="chp_edit">Edit</button>
+        <div class = "flex_type" style="flex-direction: row;flex-wrap: wrap;">
+            <div id="chpt_topics" class = "db_class">
+                <span style="font-size: 25px;color:yellow">Topics</span>
+                <div id="chp_tpc_list" style="overflow-y: scroll;height:60vh;" class="flex_type"></div>
+            </div>
+            <div id="chpt_qbanks" class = "db_class">
+                <span style="font-size: 25px;color:yellow">Question Banks</span>
+                <div id="chp_qbk_list" style="overflow-y: scroll;height:60vh;" class="flex_type"></div>
+            </div>
+        </div>`;
+exports.default = {
+    page_chapter,
+    page_edit_chapter,
+    page_list_chapter
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"6uKbY":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_cyberhunt", ()=>page_cyberhunt);
+let page_cyberhunt = `<div id="cyberhunt" class="full_page flex_type">
+        <div id="cyb_code" class="flex_type">
+            <span class="in_t">Join Cyberhunt!</span>
+            <hr color="white" width="100%">
+            <span>Do You Want To Join A Cyberhunt?Enter The Cyberhunt Code Below:</span>
+            <input id="cyb_cd_in" class="_in_aq" placeholder="i2a01pmzshn1">
+            <button class="tst_btn rpl" id="cyb_cd_sbm"
+                onclick="if (document.getElementById('cyb_cd_in').value != ''){window.location.hash = '/cyberhunt/'+document.getElementById('cyb_cd_in').value}">Submit</button>
+            <span>Joined Cyberhunts</span>
+            <div id="cyb_joined"
+                style="overflow-y: scroll;display: flex;flex-direction: column;height: 30vh;width: 40vw;border: 3px greenyellow solid;padding-left: 6px;">
+            </div>
+        </div>
+        <div id="cyb_edit">
+
+        </div>
+        <div id="cyb_viewer" class="flex_type" style="width:100%;height:100%">
+            <div
+                style="display:flex;flex-direction:column;justify-content: left;width:100%;margin-left:5vw;margin-top:10px;">
+                <span style="font-size: 16px;">Welcome to</span>
+                <span id="cyb_v_name" style="font-size: 30px">CyberHunt Name</span>
+                <span id="cyb_v_status" style="font-size: 18px">started on XX:XX</span>
+                <span id="cyb_v_crtby" style="font-size: 15px">By Mr Techtroid</span>
+            </div>
+            <span style="font-size: 16px;">Participants List</span>
+            <div id="cyb_v_plist"
+                style="display:flex;flex-direction:row;flex-wrap:wrap;border: solid grey 2px;border-radius: 10px 10px 10px;width:90%;height:40vh;padding:10px;overflow-y: scroll;">
+                <div class="cyb_v_plist_p"
+                    style="display: flex;flex-direction: column;width:100px;height:50px;border: solid grey 2px;border-radius: 10px 10px 10px;text-align: center;">
+                    <span>Mr Techtroid</span>
+                </div>
+            </div>
+        </div>
+
+    </div>`;
+exports.default = {
+    page_cyberhunt
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"hkEZ0":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_dashboard", ()=>page_dashboard);
+parcelHelpers.export(exports, "page_bug_report", ()=>page_bug_report);
+parcelHelpers.export(exports, "page_app_info", ()=>page_app_info);
+parcelHelpers.export(exports, "page_schedule", ()=>page_schedule);
+parcelHelpers.export(exports, "error_page", ()=>error_page);
+parcelHelpers.export(exports, "page_notes", ()=>page_notes);
+parcelHelpers.export(exports, "page_ariel", ()=>page_ariel);
+parcelHelpers.export(exports, "page_edit_exams", ()=>page_edit_exams);
+parcelHelpers.export(exports, "page_updates", ()=>page_updates);
+parcelHelpers.export(exports, "page_uploads", ()=>page_uploads);
+let page_dashboard = `
+<div id="sidebar">
+            <div id="options_tab"
+                style="display: flex;flex-direction: row;align-items:center;height:50px;justify-content: space-evenly;width: 25vw;max-width: 250px;">
+                <span class="material-symbols-outlined rpl" onclick="window.location = '#/settings'">settings</span>
+                <span class="material-symbols-outlined rpl" id="abt_btn">info</span>
+                <span class="material-symbols-outlined rpl" onclick="window.location = '#/updates'">notifications</span>
+                <span class="material-symbols-outlined rpl" id="prf_btn">account_circle</span>
+                <span class="material-symbols-outlined rpl" id="lgt_btn">logout</span>
+            </div>
+            <hr style="width: 100%;">
+            <div id="profile_tab"
+                style="display: flex;flex-direction: column;align-items: center;height:170px;max-width: 250px;">
+                <img id="prf_tab_img" style="width: 100px;height:100px;object-fit: cover;margin:5px;border:2px solid #06d85f;border-radius:30px;"></img>
+                <span style="color:rgb(0, 255, 221)" id="dshd_name">NAME</span>
+                <span style="color:rgb(104, 104, 92);font-size: small;" id="dshd_uname">@username</span>
+                <span style="color:rgb(251, 255, 0)" id="dshd_batch">BATCH</span>
+            </div>
+            <hr style="width: 100%;">
+            <div class="flex_type"
+                style="flex-direction: column;align-items: center;overflow-y: scroll;width: 30vw;height:250px;max-width: 250px;">
+                <div class="dshbox_v2 " id="tmt_btn">Time Table</div>
+                <div class="dshbox_v2" id="chp_btn">Chapters</div>
+                <div class="dshbox_v2" id="tstinf_btn">Test Infos</div>
+                <div class="dshbox_v2" id="usn_btn" onclick="window.location.hash = '/usernotes/'">Your Notes</div>
+                <div class="dshbox_v2" id="tpc_btn" style="display: none;">Topics</div>
+                <div class="dshbox_v2" id="lvq_btn" style="display:none">Live Quiz</div>
+                <div class="dshbox_v2" id="frm_btn">Forum</div>
+                <div class="dshbox_v2" id="qba_btn" style="display: none;">Question Bank</div>
+                <div class="dshbox_v2" id="sim_btn">Simulations</div>
+                <div class="dshbox_v2" id="cyb_btn" style="display:none">Cyberhunts</div>
+                <div id="adminonly" style="display:none;flex-direction:column;">
+                    <div class="dshbox_v2" id="adi_btn">Admin Functions</div>
+                    <div class="dshbox_v2" id="usc_btn">Users</div>
+                </div>
+            </div>
+            <hr style="width: 100%;">
+            <span style="font-size: small;">© 2021-23 Quarkz!</span>
+        </div>
+        <div
+            style="display: flex;flex-direction: row;flex-wrap: wrap;margin-left: 10px;align-items: flex-start;height:100%;margin-top: 15px;justify-content: space-evenly;overflow-y: scroll;">
+            <div id="db_exam_info" class = "db_class" style="max-height: 30vh;">
+                <span style="font-size: 25px;color:yellow">Exam Info</span>
+                <div id="db_exam_list"></div>
+            </div>
+            <div id="db_social_media" class = "db_class">
+                <span style="font-size: 25px;color:yellow">We're on Social Media</span>
+                <span style="font-size: 14px;color:grey;margin-left: 10px;">Follow us, & share with your friends. It motivates us to keep
+                    working hard for you to bring new features. </span>
+                <img style="width:50px;" alt="Youtube Logo" class="rpl"
+                    onclick="window.open('https://www.youtube.com/@quarkz./', '_blank');"
+                    src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAABaCAMAAABHRa6wAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAACcFBMVEUAAAD/Ly//BQX/AAD/ExP/MDD/LS3/LCz/PDz/Z2f/X1//EhL/CAj/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/CAj/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/R0f/Q0P/Wlr/QED/Vlb/PT3/UlL/PDz/UFD/Ojr/Tk7/OTn/TEz/ODj/S0v/Nzf/Skr/Nzf/SUn/Njb/SEj/Njb/SEj/Njb/R0f/NTX/R0f/NTX/R0f/NTX/Rkb/NTX/NTX/AAD/AAD/AAD/CAj/Hh7/HBz/HBz/Gxv/Gxv/Ghr/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/HR3/AAD/AQH/BQX/wcH/EBD/////jY3/X1//7+//MzP/x8f/DQ3/mZn/Zmb/9vb/Ojr/0ND/EhL/oqL/dXX/+vr/QkL/1dX/GRn/qKj/fHz/SUn/3Nz/Hh7/sbH/paX/S0s8CEr+AAAAsHRSTlMAAAAAAAAAAAAAAAAABhMhKzdCUVlkbnqHjpidpqi3us7C1tnP3uLl7uzn18W2saV8ZVtQRjYBHDxaq8HT5vP98uivXkAiBidyrN3ksnkvCpenGaG5VfWCqhXb+kNxs8bp9ESQjLjN8OP5AQ4JIBYxJkE4VUhlVnJlgHSOgJiKoZOpnrKftKu9r8LA9/bYAQ4bJC88R1BYYnB6goqQlZykp7WzvL69xcrJzNrZxqmjGt/aNR4AAAABYktHRLUzDlpLAAAAB3RJTUUH5wEdCycyRsErbAAAAv5JREFUaN7dmudXE1EQxR8bu0KiKCSgggFi1KhRUexKVEQFxV6xYa/Yu2LBrkjvKE0CtmcZe+/df8nNCgfhgLi7z9xznE/58ub+srtvd97MZewP4SNJBl8/o6lzF/+u3QICzZag4O49eoaE9rKGhUfYbLbe9j5y2PvKPyPC+1kdoSH9BwwMDrKYnQGDBg+JHGoy+vkaJMmHqQtpWNTwEYGWkaNGjxk7juuP8dFWh8vinDBxUoyhRe3JsVOmCtBsNqbFxU9vnmJGwr/Uro+Zs5r+97O9I++JOU1cBZP35D0R2Vh/rnf1OXc21Pf3tj7n8b/rG72v3+AuGOYhAHj9kzgfos8X1Om3wuhzvrAWIBYFkFALsAgFsFhS9GNQ+pwbFYAlOIBEBcCMA1iqACzDASz31CqtV+AAlHeRAajPPZVBFBJgJXYT/NoGiUiAJBlgFRJgtQzgQgJYZYA1ahfdFgiwtg1ru07tojt374kjaMfar1e9iOi+MIANrIP6RSTHA0EAG9kmbQD08JEQgM1si0YAosdPBABsZcmaAYie6gfYxrbrACB6phdgB9upC4Cev9AHsIvt1gdA9PKVHoA9bK9eAKLXOgD2sf36AYjeaAY4wA6KAKC37zQCHGKHhQAQvf+gCeAISxEEQPRRC8BRdkwYANEn9bmOsxMCAYg+q82Vyk4KBaAvX9XlOsVOiwUg+qYq1xnxAETfVeQ6+x8CqL0F8IdQ7Db8oTZXKv5FlCIMQOOrGP4xgn+O4QUJvCSDF6Xwshx+MEnWASDkaAY/nMKP5/AGBbxFA29Swdt0+EYlvFULb1bD2/XwgQV8ZAMfWsHHdvjBJXx0Cx9ew8f3eAMD3MIBN7HgbTxwIxPeyoU3s+HtfHhDI97SqVwFrKm1jsJj63VaXI6w6HMiRM/bLzjikv7O1tsofCSp48W0S+kZmVnZObl5+QWFRcUll6+UlpVXVF6tcrura67JUVPtdlddr6woLyu9cbOkuKiwID8vNyc7KzMj/VZap5aMzT8BRpXwJFof0ooAAAAldEVYdGRhdGU6Y3JlYXRlADIwMjMtMDEtMjlUMTE6Mzk6NTArMDA6MDCGz66vAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDIzLTAxLTI5VDExOjM5OjUwKzAwOjAw95IWEwAAACB0RVh0c29mdHdhcmUAaHR0cHM6Ly9pbWFnZW1hZ2ljay5vcme8zx2dAAAAGHRFWHRUaHVtYjo6RG9jdW1lbnQ6OlBhZ2VzADGn/7svAAAAF3RFWHRUaHVtYjo6SW1hZ2U6OkhlaWdodAA5MDwVcVIAAAAXdEVYdFRodW1iOjpJbWFnZTo6V2lkdGgAMTI40I0R3QAAABl0RVh0VGh1bWI6Ok1pbWV0eXBlAGltYWdlL3BuZz+yVk4AAAARdEVYdFRodW1iOjpTaXplADE1NDVC02RgawAAABZ0RVh0VGh1bWI6OlVSSQBmaWxlOi8vUE5HOqYqZyIAAAAASUVORK5CYII=">
+            </div>
+            <div id="db_study_resources" class = "db_class">
+                <span style="font-size: 25px;color:yellow">Additional Study Resources</span>
+                <div class="tlinks_min rpl" onclick="window.location.hash = '/mainsformulas'"><span
+                        style="font-size: 16px;">JEE Mains Formula Sheets</span></div>
+                <div class="tlinks_min rpl" onclick="window.location.hash = '/downloads'"><span
+                        style="font-size: 16px;">FREE PDF Downloads</span></div>
+            </div>
+        </div>`;
+let page_bug_report = `
+<iframe id="bgrep_frame"
+            src="https://docs.google.com/forms/d/e/1FAIpQLSeo2JZDaBApBiTeXmAnkVX60hSuJGHJkd9jsF9ePg0iM9ufjA/viewform?embedded=true"
+            frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>`;
+let page_app_info = `
+<span class="in_t">App Info</span>
+        <pre id="ren_appinf"></pre>`;
+let page_schedule = `
+<span class="in_t">Schedule</span>
+        <iframe id="tmt_frame" width="100%" height="90%" frameborder="0" scrolling="no" onload = "showqLS('q')"></iframe>`;
+let error_page = `
+<span class="in_t">404</span>
+        <hr color="white" width="100%">
+        <span style="font-size: 3vh;">You don't have access to this page.</span>
+        <a class="tst_btn rpl" href="/#/dashboard">Go To Dashboard</a>`;
+let page_notes = `
+<div style="position: fixed;">
+            <embed id="nt_id" style="width: 95vw;height: 90vh;">
+            <div id = "nt_nocontrol">Quarkz!</div>
+        </div>`;
+let page_ariel = `
+<div id="c-output"
+            style="color:yellow;overflow-y: scroll;display: flex;flex-direction: column;height: 80vh;width: 90vw;border: 3px greenyellow solid;padding-left: 6px;">
+
+        </div>
+        <div>
+            <input type="text" id="c-input" class="_in_aq" placeholder="Command">
+            <button class="tst_btn rpl" id="c-exec">Execute</button>
+        </div>`;
+let page_edit_exams = `
+<div id="lqadd" style="display: flex;flex-direction: row;margin:10px;height: 50vh;">
+            <div id="question_list"
+                style="border: 2px lime solid;width: 15vw;height:50vh;display: flex;flex-direction: column;align-items: center;text-align: center;font-size: 3vh;overflow-y: scroll;"
+                class="title-notes"></span>
+            </div>
+            <div
+                style="border: 2px lime solid;width:75vw;display: flex;flex-direction: column;overflow-y: scroll;height:50vh;">
+                <select name="type" id="aq_mode" class="_in_aq col-red" value = "exam">
+                    <option value="exam">Exam</option>
+                </select>
+                <div class="flex_type" id="aq_exams">
+                    <input type="text" id="aq_examname" class="_in_aq" placeholder="Exam Names">
+                    <input type="text" id="aq_examdate" class="_in_aq" placeholder="Exam Dates">
+                    <input type="text" id="aq_examinfo" class="_in_aq" placeholder="Exam Info Link">
+                    <input type="text" id="aq_examsyllabus" class="_in_aq" placeholder="Syllabus Link">
+                </div>
+                <button class="tst_btn rpl" id="aq_re">Remove Entry</button>
+            </div>
+        </div>
+        <button class="tst_btn rpl" id="aq_exam_save">Save/Update Exams</button>
+`;
+let page_updates = `
+<div class = "flex_type" style="flex-direction: row;flex-wrap: wrap;">
+            <div class = "db_class">
+                <span style="font-size: 25px;color:yellow">Release Notes</span>
+                <div id="rel_list" style="overflow-y: scroll;height:80vh; width: 100%; display: block;" class="flex_type"></div>
+            </div>
+            <div class = "db_class">
+                <span style="font-size: 25px;color:yellow">Updates</span>
+                <div id="updt_list" style="overflow-y: scroll;height:80vh; width: 100%; display: block;" class="flex_type"></div>
+            </div>
+        </div>
+
+
+`;
+let page_uploads = `
+<div class = "db_class">
+<span style="font-size: 25px;color:yellow">Upload Files</span>
+        <label for="file" style= "background-color: indigo;color: white;padding: 0.5rem;font-family: sans-serif;border-radius: 0.3rem;cursor: pointer;margin-top: 1rem;" class = "rpl">Choose File To Upload</label>
+        <input type="file" id="file" style="width: 50vw;height: 30px;margin: auto;" hidden>
+        <span id="file_progress"></span>
+        <span id="file_status"></span>
+        <input id="file_link" type="url" class = "_in_aq" style = "width:25vw;" placeholder = "Short URL"  disabled>
+        <input id="file_link_long" type="url" class = "_in_aq" style = "width:25vw;" placeholder = "Long URL" disabled>
+        <span style="font-size: 10px;">Note: File Names Will Be Modified to the following format:</span>
+        <span style="font-size: 10px;">{IP ADDRESS}-{DATE}-{ORIGNAL FILE NAME}</span>
+        <span style="font-size: 10px;">Max File Upload Size: 50mb</span>
+    </div>
+`;
+exports.default = {
+    page_app_info,
+    page_ariel,
+    page_bug_report,
+    page_dashboard,
+    page_notes,
+    page_schedule,
+    error_page,
+    page_edit_exams,
+    page_updates,
+    page_uploads
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"g2MAL":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_jee_main", ()=>page_jee_main);
+parcelHelpers.export(exports, "page_downloads", ()=>page_downloads);
+parcelHelpers.export(exports, "downloads_render", ()=>downloads_render);
+parcelHelpers.export(exports, "download_links_list", ()=>download_links_list);
+let page_jee_main = `
+    <span style="font-size: 5vh;color:yellow" id="fm_title">Mains Formula Sheet</span>
+    <hr color="white" width="100%">
+    <div style="overflow-y: scroll;height:50vh;" class="flex_type">
+    <span class="tlinks rpl" onclick = "window.location.hash = '/notes/PHYFORMULAS'">Physics Formula Sheet</span>
+    <span class="tlinks rpl" onclick = "window.location.hash = '/notes/MATHFORMULAS'">Maths Formula Sheet</span>
+    <span class="tlinks rpl" onclick = "window.location.hash = '/notes/PCHEMNOTES'">Physical Chemistry Formula Sheet</span>
+    <span class="tlinks rpl" onclick = "window.location.hash = '/notes/OCHEMNOTES'">Organic Chemistry Formula Sheet</span>
+    <span class="tlinks rpl" onclick = "window.location.hash = '/notes/ICHEMNOTES'">Inorganic Chemistry Formula Sheet</span>
+    </div>
+    <span style="font-size: 8px;">All PDF's Are Owned by their Respective Owners</span>
+`;
+let page_downloads = `
+<span style="font-size: 5vh;color:yellow" id="fm_title">Downloads</span>
+    <hr color="white" width="100%">
+    <div style="overflow-y: scroll;height:50vh;" class="flex_type">
+      
+    </div>
+`;
+function downloads_render(download_links_list, rendertype) {
+    var jee_html = "";
+    if (rendertype == "formulasheet") jee_html += `<span style="font-size: 5vh;color:yellow" id="fm_title">Mains Formula Sheet</span>`;
+    else jee_html += `<span style="font-size: 5vh;color:yellow" id="fm_title">Downloads</span>`;
+    jee_html += `
+    <hr color="white" width="100%">
+    <div style="overflow-y: scroll;height:50vh;" class="flex_type">`;
+    for(var i = 0; i < download_links_list.length; i++)if (download_links_list[i].type2 == rendertype) {
+        if (download_links_list[i].url == "") jee_html += `<span class="tlinks-2 rpl " onclick = "window.location.hash = '` + download_links_list[i].hashurl + `'"><span class="material-symbols-outlined">` + download_links_list[i].type + `</span>&nbsp;&nbsp;` + download_links_list[i].title + `</span>`;
+        else jee_html += `<span class="tlinks-2 rpl " onclick = "window.open('` + download_links_list[i].url + `','_blank')"><span class="material-symbols-outlined">` + download_links_list[i].type + `</span>&nbsp;&nbsp;` + download_links_list[i].title + `</span>`;
+    }
+    jee_html += ` </div>
+    <span style="font-size: 8px;">All PDF's Marked As <span style="font-size: 8px;" class="material-symbols-outlined">quiet_time_active</span> Are Owned by their Respective Owners</span>`;
+    return jee_html;
+}
+let download_links_list = [
+    {
+        hashurl: "/notes/PHYFORMULAS",
+        title: "Physics Formula Sheet",
+        url: "",
+        type: "quiet_time_active",
+        type2: "formulasheet"
+    },
+    {
+        hashurl: "/notes/MATHFORMULAS",
+        title: "Maths Formula Sheet",
+        url: "",
+        type: "quiet_time_active",
+        type2: "formulasheet"
+    },
+    {
+        hashurl: "/notes/PCHEMNOTES",
+        title: "Physical Chemistry Formula Sheet",
+        url: "",
+        type: "quiet_time_active",
+        type2: "formulasheet"
+    },
+    {
+        hashurl: "/notes/OCHEMNOTES",
+        title: "Organic Chemistry Sheet",
+        url: "",
+        type: "quiet_time_active",
+        type2: "formulasheet"
+    },
+    {
+        hashurl: "/notes/ICHEMNOTES",
+        title: "Inorganic Chemistry Sheet",
+        url: "",
+        type: "quiet_time_active",
+        type2: "formulasheet"
+    },
+    {
+        hashurl: "",
+        title: "Full Chemistry Modules",
+        url: "https://drive.google.com/file/d/1PKwlLjqXESAewAOHFi866uUb72XjooQH/view",
+        type: "quiet_time_active",
+        type2: "downloads"
+    },
+    {
+        hashurl: "",
+        title: "Full Maths Modules",
+        url: "https://drive.google.com/file/d/1_TLdj5e8SG8VFvKu-asEy7RAq4_T85YB/view",
+        type: "quiet_time_active",
+        type2: "downloads"
+    },
+    {
+        hashurl: "",
+        title: "Full Physics Modules",
+        url: "https://drive.google.com/file/d/10NWV6viuY2eru-y1j9MSXmhbl7bZKyOD/view",
+        type: "quiet_time_active",
+        type2: "downloads"
+    }
+];
+exports.default = {
+    page_jee_main,
+    page_downloads,
+    download_links_list,
+    downloads_render
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"3VUaP":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_finished_test", ()=>page_finished_test);
+let page_finished_test = `
+<span style="font-size: 5vh;color:yellow" id="fti_title">Test Name</span>
+        <hr color="white" width="100%">
+        <div id="fto_overview" style="display: flex;flex-direction: row;flex-wrap:wrap">
+            <div class="fto_box">
+                <div class="fto_box_title">TOTAL MARKS</div>
+                <div class="fto_box_content" id="fto_total">100/100</div>
+            </div>
+            <div class="fto_box">
+                <div class="fto_box_title">CORRECT</div>
+                <div class="fto_box_content"><span id="fto_correct">45</span><span class="fto_small">marks</span></div>
+            </div>
+            <div class="fto_box">
+                <div class="fto_box_title">INCORRECT</div>
+                <div class="fto_box_content"><span id="fto_incorrect">45</span><span class="fto_small">marks</span>
+                </div>
+            </div>
+            <div class="fto_box">
+                <div class="fto_box_title">UNANSWERED</div>
+                <div class="fto_box_content"><span id="fto_unanswered">45</span><span class="fto_small">marks</span>
+                </div>
+            </div>
+            <div class="fto_box">
+                <div class="fto_box_title">RANK</div>
+                <div class="fto_box_content" id="fto_rank">5</div>
+            </div>
+        </div>
+        <hr color="white" width="100%">
+        <div id="fto_overview" style="display: flex;flex-direction: row;flex-wrap:wrap">
+            <button class="tst_btn rpl" id="fto_detail"
+                onclick='window.location.hash = "#/testreport/" + window.location.hash.split("#/finished/")[1]'>Detailed
+                View</button>
+        </div>
+        <div style="display:flex;flex-direction:row;flex-wrap:wrap;">
+            <div style="display:flex;flex-direction:column;flex-wrap:wrap;">
+                <span style="font-size: 3vh;">Section Wise Scores</span>
+                <div id="fto_percents" style="display: flex;flex-direction: column;"></div>
+                <div>Legend: <span style="color:green">Correct</span>&nbsp;<span
+                        style="color:red">Incorrect</span>&nbsp;<span style="color:orange">Unattempted</span></div>
+            </div>
+            <div style="margin-left:20px;display:flex;flex-direction:column;">
+                <span style="font-size: 3vh;">Leaderboard</span>
+                <div id="fto_leaderboard"></div>
+            </div>
+        </div>
+        <div style="display:flex;flex-direction:column;flex-wrap:wrap;">
+            <span style="font-size: 3vh;">Section Wise Time Spent</span>
+            <div id="fto_time" style="display: flex;flex-direction: column;"></div>
+            <div>Legend: <span style="color:green">Correct</span>&nbsp;<span
+                    style="color:red">Incorrect</span>&nbsp;<span style="color:orange">Unattempted</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;flex-wrap:wrap;">
+            <span style="font-size: 3vh;">Time Spent Per Question</span>
+            <div id="fto_draw" style="display: flex;flex-direction: column;"></div>
+        </div>`;
+exports.default = {
+    page_finished_test
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"bKen7":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_forum", ()=>page_forum);
+let page_forum = `
+<span style="font-size: 5vh;color:yellow" id="fm_title">Forum</span>
+        <hr width="100%" color="white">
+        <div style="border:hotpink 3px solid;width:80%;">
+            <div id='pinned_msg'
+                style="background-color: rgb(38, 44, 31);color:rgb(21, 209, 209);overflow-y: scroll;height:30px;">Pinned
+                Message:<span id='pinnedtxt'>1</span></div>
+            <div id="forum_live" style="height:60vh;overflow-y: scroll;display: flex;flex-direction: column;">
+            </div>
+        </div>
+
+        <div>
+            <input type="text" id="fm_message" class="_in_aq" placeholder="Message">
+            <button class="tst_btn rpl" id="fm_send">Send</button>
+        </div>
+`;
+exports.default = {
+    page_forum
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"kxrBw":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_functions", ()=>page_functions);
+let page_functions = `
+<span class="in_t" class="">Functions</span>
+        <div class = "flex_type" style = "flex-direction: row;flex-wrap: wrap;">
+            <div id="fc_topics" class = "db_class">
+                <span style="font-size: 25px;color:yellow">Chapters/Topics</span>
+                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/add/tpc'">Add Topics</div>
+            </div>
+            <div id="fc_sims" class = "db_class">
+                <span style="font-size: 25px;color:yellow">Question Banks/Sims</span>
+                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/add/simulation'">Add Simulations</div>
+                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/add/qubank'">Add Question Bank</div>
+            </div>
+            <div id="fc_tests" class = "db_class">
+                <span style="font-size: 25px;color:yellow">Tests</span>
+                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/add/tests'">Add Test</div>
+                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/update/tests'">Update Test</div>
+            </div>
+            <div id="fc_batch" class = "db_class">
+                <span style="font-size: 25px;color:yellow">Batches</span>
+                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/add/batch'">Add New Batch</div>
+                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/list/batch'">Update Batches</div>
+                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/update/batch'">Update Batches</div>
+            </div>
+            <div id="fc_misc" class = "db_class">
+                <span style="font-size: 25px;color:yellow">Misc</span>
+                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/edit_exams'">Edit Exams</div>
+            </div>
+        </div>
+`;
+exports.default = {
+    page_functions
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"l4cy5":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "log", ()=>log);
+parcelHelpers.export(exports, "qp_test", ()=>qp_test);
+parcelHelpers.export(exports, "report_stuff", ()=>report_stuff);
+function log(title, msg, action, actionname, type) {
+    var no = Math.floor(Math.random() * 10000);
+    var html = `
+    <div id="msg_popup_` + no + `" class="overlay">
+    <div class="popup">
+        <center>
+            <h2 id="msg_popup_txt_` + no + `">Note</h2>
+        </center>
+        <a class="close_btn"
+            onclick="document.getElementById('msg_popup_` + no + `').remove()">&times;</a>
+        <p id="msg_popup_content_` + no + `"></p>
+        <button class="tst_btn rpl" id="msg_action_` + no + `"></button>
+    </div>
+    </div>
+    `;
+    if (type == 1) dE("output").insertAdjacentHTML("beforeend", html);
+    else if (type == 3) {
+        var html = `
+    <div id="msg_popup_` + no + `" class="overlay">
+    <div class="popup">
+        <center>
+            <h2 id="msg_popup_txt_` + no + `">` + title + `</h2>
+        </center>
+        <a class="close_btn"
+            onclick="document.getElementById('msg_popup_` + no + `').remove()">&times;</a>
+        <p id="msg_popup_content_` + no + `">` + msg + `</p>
+        <button class="tst_btn rpl" id="msg_info_` + no + `" onclick = "window.open('` + action + `', '_blank');">Info</button>
+        <button class="tst_btn rpl" id="msg_syllabus_` + no + `" onclick = "window.open('` + actionname + `', '_blank');">Syllabus</button>
+    </div>
+    </div>
+    `;
+        dE("quarkz_body").insertAdjacentHTML("beforeend", html);
+    } else dE("quarkz_body").insertAdjacentHTML("beforeend", html);
+    dE("msg_popup_" + no).style.visibility = "visible";
+    dE("msg_popup_" + no).style.opacity = "1";
+    if (type == 3) return;
+    dE("msg_action_" + no).style.display = "none";
+    document.getElementById("msg_popup_txt_" + no).innerText = title;
+    document.getElementById("msg_popup_content_" + no).innerText = msg;
+    if (action == undefined) action = function() {};
+    else dE("msg_action_" + no).style.display = "block";
+    if (actionname == undefined) actionname = "";
+    dE("msg_action_" + no).onclick = action;
+    dE("msg_action_" + no).innerText = actionname;
+    return "msg_popup_" + no;
+}
+function qp_test(title, item) {
+    var html = `
+  <div id="msg_popup_qp" class="overlay">
+    <div class="it_popup">
+        <center>
+            <h2 id="msg_popup_txt_qp">` + title + `</h2><a class="close_btn"
+            onclick="document.getElementById('msg_popup_qp').remove()">&times;</a>
+        </center>
+        <div id = "container">
+        ` + item + `
+        </div>
+    </div>
+    </div>
+  `;
+    dE("output").insertAdjacentHTML("beforeend", html);
+    dE("msg_popup_qp").style.visibility = "visible";
+    dE("msg_popup_qp").style.opacity = "1";
+}
+function report_stuff() {
+    var html = `
+  <div id="msg_popup_report" class="overlay">
+    <div class="it_popup">
+        <center>
+            <h2 id="msg_popup_txt_report">Report Error</h2><a class="close_btn"
+            onclick="document.getElementById('msg_popup_report').remove()">&times;</a>
+        </center>
+        <div>
+          <div>
+            <input type="checkbox" id="incorrect-answer-key" name="problem[]" value="incorrect-answer-key">
+            <label for="wrong-answer">Incorrect Answer Key</label>
+          </div>
+          <div>
+            <input type="checkbox" id="wrong-solution" name="problem[]" value="wrong-solution">
+            <label for="incomplete-answer">Wrong/Incomplete Solution</label>
+          </div>
+          <div>
+            <input type="checkbox" id="wrong-question" name="problem[]" value="wrong-question">
+            <label for="confusing-question">Wrong/Incomplete Question</label>
+          </div>
+          <div>
+            <input type="checkbox" id="wrong-explanation" name="problem[]" value="wrong-explanation">
+            <label for="confusing-explanation">Wrong Explanation</label>
+          </div>
+          <div>
+            <input type="checkbox" id="wrong-image" name="problem[]" value="wrong-image">
+            <label for="confusing-image">Wrong/Incomplete/No Image(s) or Video(s)</label>
+          </div>
+          <div>
+            <input type="checkbox" id="other-issue" name="problem[]" value="other-issue">
+            <label for="other-issue">Other Issue</label>
+          </div>
+          <textarea placeholder="(Optional)" style="height: 50px;resize: none;" id="extra_comment"></textarea>
+        </div>
+        <button class="tst_btn rpl" id = "popup_report">Report</button>
+    </div>
+    </div>
+  `;
+    dE("output").insertAdjacentHTML("beforeend", html);
+    dE("msg_popup_report").style.visibility = "visible";
+    dE("msg_popup_report").style.opacity = "1";
+    const bc = new BroadcastChannel("Quarkz!");
+    let isFirstTab = true;
+    bc.postMessage(`QZCODE-REPORT`);
+}
+exports.default = {
+    log,
+    qp_test,
+    report_stuff
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"6nKCl":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_login", ()=>page_login);
+let page_login = `
+<div id="lgn_bx">
+    <span class="in_t">Welcome to Quarkz</span>
+    <input type="text" id="lg_uname" class="text_bx_1" placeholder="Username">
+    <input type="password" id="lg_pass" class="text_bx_1" placeholder="Password">
+    <div>
+        <button class="tst_btn rpl" id="sgn_in">Sign In</button>
+        <button class="tst_btn rpl" id="reg_in">Register</button>
+    </div>
+    <span id="lgn_err" class="err_txt">ERROR:Wrong Username Or Password</span>
+    <span class="lgn_c_1"><a href="/#/about">About</a>&nbsp;&nbsp;<a href="/#/legal">Legal</a>&nbsp;&nbsp;<a
+            href="/#/bugreport">Report A Bug</a>
+    </span>
+    <span class="lgn_c_1">
+        <a href="/#/mainsformulas">Formula Sheets</a>&nbsp;&nbsp;
+        <a href="/#/downloads">Downloads</a>
+    </span>
+</div>
+`;
+exports.default = {
+    page_login
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"95h6E":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_printable", ()=>page_printable);
+let page_printable = `
+<span class=" in_t no-print">Export</span>
+        <hr color="white" width="100%" class="no-print">
+        <span class="no-print"><button class="tst_btn rpl no-print" onclick="print()">Print</button><button
+                class="tst_btn rpl no-print" id="shf_btn">Shuffle</button><button class="tst_btn rpl no-print"
+                id="tsinf_btn">Update Bank
+                Info</button><button class="tst_btn rpl no-print" id="tans_btn">Answers</button><button
+                class="tst_btn rpl no-print" id="tansexpl_btn">Explanation And Answers</button><button
+                class="tst_btn rpl no-print" id="tremove_btn">Remove
+                All</button></span>
+        <hr color="white" width="100%">
+        <span class="in_t_3" id="qb_title">ERROR</span>
+        <hr color="white" width="100%">
+        <div id="eqb_add" type="1">
+        </div>
+
+`;
+exports.default = {
+    page_printable
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"2MtJU":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_profile", ()=>page_profile);
+let page_profile = `
+<div id="prf_tab_t">
+            <div id="prf_tab_t_t">
+                <img style = "background-color:black;border:2px solid #06d85f;border-radius:30px;" id="prf_tab_t_t_img"></img>
+                <div id="prf_tab_t_hold">
+                    <span id="prf_name"></span>
+                    <span class="prf_det">
+                        <span id="prf_email"></span>&nbsp;•&nbsp;<span id="prf_gender"></span>
+                    </span>
+                    <span class="prf_det">
+                        <span id="prf_phone"></span>&nbsp;•&nbsp;<span id="prf_class"></span>
+                    </span>
+                    <span class="prf_det">
+                        <span id="prf_batch"></span>&nbsp;•&nbsp;<span id="prf_crton"></span>
+                    </span>
+                </div>
+            </div>
+        </div>
+`;
+exports.default = {
+    page_profile
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"chYH6":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_qbnkvid", ()=>page_qbnkvid);
+let page_qbnkvid = `
+<button id="qbnk_vid_btn" class="tst_btn rpl">Start</button>
+        <button id="qbnk_vid_btn_e" class="tst_btn rpl" style="display: none;">Stop</button>
+        <span style="font-size: 5vh;color:yellow;font-family: Nunito;" id="tb_q_title">Topic Name</span>
+        <hr width="100%" color="white">
+        <div class="div-qbnk">Quarkz!</div>
+        <img alt="Quarkz Logo" src="assets/Quarkz-T.png"
+            style="position:absolute;height:100px;width: 100px;top:0;left:0;z-index: 1;">
+        <div id="qbnk_vid_q" style="display: flex;flex-direction: column;align-items: center;z-index: 2;">
+            <div class="div-qbnk1"><span>Pause The Video If You Need More Time.Each Question Will Be Shown For 10
+                    Seconds.</span><span id="qbnk_timer" style="font-size: 80px;color:rgb(0, 255, 255)">0</span></div>
+            <span style="width: 60vw;"><span id="tb_q_qno" style="color: coral;"></span>
+                <div id="tb_q_qtext" style="width:100%;height:max-content;min-height: 12vh;">Question</div>
+            </span>
+            <div id="tb_q_ans_hold">
+                <input type="answer" id="tb_q_answer" class="_in_aq" placeholder="Answer">
+                <div id="tb_q_mcq_con" class="flex_type">
+                </div>
+                <div id="tb_q_matrix">
+                    <table>
+                        <tr>
+                            <td><span class="tb_q_i1"></span><span class="tb_q_i2"></span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="tb_q_i1"></span><span class="tb_q_i2"></span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="tb_q_i1"></span><span class="tb_q_i2"></span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="tb_q_i1"></span><span class="tb_q_i2"></span></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div id="qbnk_vid_ans" style="display: flex;flex-direction: column;align-items: center;">
+            <span style="font-size: 5vh;color:yellow;">Answer</span>
+            <div id="tb_q_hint" style="width:80%;height:max-content;min-height: 12vh;"></div>
+            <div id="tb_q_ans" style="height:max-content;min-height: 12vh;"></div>
+            <div id="tb_q_expl" style="width:80%;height:max-content;min-height: 12vh;"></div>
+        </div>
+        <div id="qbnk_vid_title"
+            style="display:flex;flex-direction: column;align-items: center;justify-content: center;height:60vh">
+            <span style="font-size: 15vh;color:yellow;font-family: Nunito;" id="qb_vid_ti"></span>
+        </div>
+        <div id="qbnk_vid_end" style="display:flex;flex-direction: column;align-items: center;justify-content: center;">
+            <span style="font-size: 5vh;color:yellow">Thanks For Watching</span>
+            <span style="font-size: 3vh;color:yellow">Subscribe To Quarkz! For More Such Videos</span>
+
+        </div>`;
+exports.default = {
+    page_qbnkvid
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"kcVux":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_register", ()=>page_register);
+let page_register = `
+<span class="in_t">Register</span>
+        <div class = "db_class">
+        <span style="font-size: 25px;color:yellow">Personal Info</span>
+        <input type="text" id="rg_name" class="_in_reg" placeholder="Name">
+        <div style = "display:flex;flex-direction:row">
+        <label for="rg_dob">Date:&nbsp;&nbsp;</label>
+        <input name = "rg_dob" type="date" id="rg_dob" class="_in_reg">
+        </div>
+        <div style = "display:flex;flex-direction:row">
+        <label for="class">Class:&nbsp;&nbsp;</label>
+        <select name="class" id="rg_class">
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+            <option value="11">11</option>
+            <option value="12">12</option>
+        </select>
+        </div>
+        <div style = "display:flex;flex-direction:row">
+        <label for="gender">Gender:&nbsp;&nbsp;</label>
+        <select name="gender" id="rg_gender">
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+        </select>
+        </div>
+        </div>
+        <div class = "db_class">
+        <span style="font-size: 25px;color:yellow">Account Info</span>
+        <input type="tel" id="rg_mbleno" class="_in_reg" placeholder="Mobile No">
+        <input type="text" id="rg_uname" class="_in_reg" placeholder="Email Address">
+        <input type="password" id="rg_pass" class="_in_reg" placeholder="Password">
+        <input type="password" id="rg_pass1" class="_in_reg" placeholder="Confirm Password">
+        </div>
+        <button class="tst_btn rpl" id="rg_in">Register</button>
+
+`;
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"fvpoO":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_settings", ()=>page_settings);
+let page_settings = `
+<span class="in_t">Settings</span>
+        <hr color="white" width="100%">
+        <div class = "flex_type" style = "flex-direction: row;flex-wrap: wrap;">
+            <div id="st_accinfo" class = "db_class">
+                <span style="font-size: 25px;color:yellow">Account Info</span>
+                <button id="pass_rst_btn" class="tst_btn rpl">Reset/Change Password</button>
+            </div>
+            <div id="st_notif" class = "db_class">
+                <span style="font-size: 25px;color:yellow">Notifications</span>
+                <button id="notif_btn" class="tst_btn rpl" disabled>Enable Notifications</button>
+            </div>
+            <div id="st_rateapp" class = "db_class">
+                <span style="font-size: 25px;color:yellow">Rate Our App!</span>
+                <div id="stars">
+                <span class="star" data-value="1">&#9733;</span>
+                <span class="star" data-value="2">&#9733;</span> 
+                <span class="star" data-value="3">&#9733;</span>
+                <span class="star" data-value="4">&#9733;</span>
+                <span class="star" data-value="5">&#9733;</span>
+                </div>
+                <textarea placeholder="This App was Very Useful!" style="height: 50px;resize: none;" id="rate_comment"></textarea>
+                <button id="sub_rat_btn" class="tst_btn rpl">Submit Rating</button>
+            </div>
+            <div id="st_prftype" class = "db_class">
+                <span style="font-size: 25px;color:yellow">Profile Picture Type</span>
+                <div style ="display:flex;flex-direction:row;flex-wrap:wrap;">
+                <img style = "border:2px solid #06d85f;border-radius:30px;width:100px;height:100px;" class = "prf_typ" id="prf_typ_1"></img>
+                <img style = "border:2px solid #06d85f;border-radius:30px;width:100px;height:100px;" class = "prf_typ" id="prf_typ_2"></img>
+                <img style = "border:2px solid #06d85f;border-radius:30px;width:100px;height:100px;" class = "prf_typ" id="prf_typ_3"></img>
+                </div>
+                <span style = "font-size:12px">Changing your Profile Picture only changes on this Browser. These Pictures are generated using Hashes/Initials of your Names.</span>
+            </div>
+        </div>`;
+exports.default = {
+    page_settings
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"7kmTm":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_edit_sims", ()=>page_edit_sims);
+parcelHelpers.export(exports, "page_sims", ()=>page_sims);
+parcelHelpers.export(exports, "page_list_sims", ()=>page_list_sims);
+let page_edit_sims = `
+<span class="in_t" class="">Add/Edit Simulation</span>
+        <input type="text" id="aq_simname" class="_in_aq" placeholder="Simulation Name">
+        <input type="url" id="aq_simurl" class="_in_aq" placeholder="Simulation URL">
+        <input type="text" id="aq_simprov" class="_in_aq" placeholder="Simulation Provider">
+        <input type="text" id="aq_simlicense" class="_in_aq" placeholder="Simulation License">
+        <select name="type" id="aq_simsubj" class="_in_aq col-red">
+            <option value="physics">Physics</option>
+            <option value="chemistry">Chemistry</option>
+            <option value="maths">Maths</option>
+            <option value="biology">Biology</option>
+            <option value="computer">Computer</option>
+            <option value="statistics">Statistics</option>
+            <option value="unfiled">Unfiled</option>
+        </select>
+        <button class="tst_btn rpl" id="aq_sims_save">Save</button>
+
+`;
+let page_sims = `
+<span class="in_t">Simulations</span>
+        <hr color="white" width="100%">
+        <div style="display: flex;flex-direction: row;flex-wrap: wrap;"><span class="in_t" id="sms_name">Sim
+                Name</span><span style="font-size: 2vh;" id="sms_prov">Sim Name</span><button class="tst_btn rpl" id="sms_edit" style="display: none;"
+                onclick='window.location.hash = "#/edit_sim/" + window.location.hash.split("#/sims/")[1]'>Edit
+                Sim</button></div>
+        <div>
+            <iframe id="sim_frame" frameborder="0"
+                style="width:80vw;height:70vh;background-color: black;color:white;scroll-behavior: smooth;"></iframe>
+        </div>
+        `;
+let page_list_sims = `
+<span class="in_t">Simulations List</span>
+        <hr color="white" width="100%">
+        <div style="display: flex;flex-direction: row;flex-wrap: wrap;">
+            <button class="tst_btn rpl" id="psims">Physics</button>
+            <button class="tst_btn rpl" id="csims">Chemistry</button>
+            <button class="tst_btn rpl" id="msims">Maths</button>
+            <button class="tst_btn rpl" id="bsims">Biology</button>
+            <button class="tst_btn rpl" id="cosims">Computer</button>
+            <button class="tst_btn rpl" id="ssims">Statistics</button>
+            <button class="tst_btn rpl" id="usims">Unfiled</button>
+        </div>
+        <div id="sim_cont" style="overflow-y: scroll;height:50vh;" class="flex_type">
+        </div>`;
+exports.default = {
+    page_edit_sims,
+    page_list_sims,
+    page_sims
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"7hktz":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_test_instructions", ()=>page_test_instructions);
+let page_test_instructions = `
+<span class="in_t">Test Instructions</span>
+        <hr color="white" width="100%">
+        <div id = "ti_i" style="width:80vw;overflow-y: scroll;border:yellow 3px solid;display: flex;flex-direction: column;">
+            <span style="font-size:5vh;text-align: center;">Please Read The Instructions And Terms Carefully</span>
+            <span style="font-size:18px;color:yellow;">Test Information:</span>
+            <ul style="font-size: 14px;color:white;">
+                <li> Test Name:&nbsp;<span id = "i_name"></span></li>
+                <li> Starts From:&nbsp;<span id = "i_start"></span> </li>
+                <li> Ends At:&nbsp;<span id = "i_end"></span> </li>
+                <li> Time Allotted:&nbsp;<span id = "i_time"></span> </li>
+                <li> Syllabus:&nbsp;<span id = "i_syllabus"></span> </li>
+                <li> Total Marks:&nbsp;<span id = "i_total"></span> </li>
+                <li> No of Questions:&nbsp;<span id = "i_qno"></span> </li>
+            </ul>
+            <span style="font-size:18px;color:yellow;">General Instructions:</span>
+            <ol style="font-size: 14px;">
+                <li>The Exam Must Be Completed In 1 Sitting. You Will Be Able To Open This Test Window Only Once. </li>
+                <li>Read Every Question Carefully And Select Your Answer and Try To Answer As Many Questions As Possible
+                    In The Exam.</li>
+                <li>The Questions Palette displayed on the right side of screen will show the status of each question
+                    using one of the following symbols:</li>
+                <div>
+                    <div style="margin:9px"><span class="tts_notvisit">12</span>You have not visited the question yet.
+                    </div>
+                    <div style="margin:9px"><span class="tts_notanswer">21</span>You have not answered the question.
+                    </div>
+                    <div style="margin:9px"><span class="tts_answered">45</span>You have answered the question.</div>
+                    <div style="margin:9px"><span class="tts_review">30</span>You have NOT answered the question, but
+                        have marked the question for review.</div>
+                    <div style="margin:9px"><span class="tts_ansreview">37</span>The question(s) "Answered and Marked
+                        for Review" will be considered for evalution.</div>
+                </div>
+                <li>When the timer reaches zero, the examination will end by itself. You will not be required to end or
+                    submit your examination.</li>
+                <li>Make Sure To Have A Good Internet Connection. Loss in Internet Connectivity may prevent submission
+                    of answers. </li>
+                <li>DO NOT TRY TO Minimise The Full Screen Mode Of The Exam. You Will Recieive 1 Warning For Doing So
+                    After Which Your Test Will End</li>
+            </ol>
+            <hr style = "width:95%">
+            <span style="font-size:18px;color:yellow;">Navigating to a Question:</span>
+            <ol style="font-size:14px;">
+                <li>To view/answer a question, do the following: Click on the question number in the Question Palette at
+                    the right of your screen to go to that numbered question directly. Note that using this option does
+                    NOT save your answer to the current question.</li>
+            </ol>
+            <hr style = "width:95%">
+            <span style="font-size:18px;color:yellow;">Answering a Question:</span>
+            <ol style="font-size:14px;">
+                Procedure for answering a multiple choice type question:
+                <li>To select you answer, click on the button of one of the options.</li>
+                <li>To deselect your chosen answer, click on the button of the chosen option again or click on the Clear
+                    Response button</li>
+                <li>To change your chosen answer, click on the button of another option</li>
+                <li>To save your answer, you MUST click on the Save button.</li>
+                <li>To mark the question for review, click on the Mark for Review button.</li>
+                <li>To change your answer to a question that has already been answered, first select that question for
+                    answering and then follow the procedure for answering that type of question.</li>
+            </ol>
+            <hr style = "width:95%">
+            <span style="font-size:18px;color:yellow;">Navigating through sections:</span>
+            <ol style="font-size:14px;">
+                <li>All Questions are Visible in the Question Pallete along under the respective sections/subjects</li>
+            </ol>
+            <hr style = "width:95%">
+            <span style="font-size:18px;color:yellow;">Test Specific Instructions:</span>
+            <div id = "tsi" style="font-size:14px;">
+            </div>
+            <hr style = "width:95%">
+            <span style="font-size:18px;color:yellow;">Terms And Conditions:</span>
+            <span style="font-size:14px;">By Checking on "I Agree" you Agree to All Terms And Conditions:</span>
+            <ol style="font-size:14px;">
+                <li>I have read and understood all the instructions. </li>
+                <li>I agree that all computer hardware allotted to me are in proper working condition. </li>
+                <li>I declare that i am not in possession of / not wearing / not carrying any prohibited gadget like
+                    mobile phone,bluetooth devices etc. /any prohibited material with me into the Examination Hall.</li>
+                <li>I also agree that I will not tamper with any software/technologies/devices alloted to me while
+                    attempting
+                    this test.
+                </li>
+                <li>I agree that in case of not adhering to the instructions, I shall be liable to be debarred from this
+                    Test and/or to disciplinary action, which may include ban from future Test / Examinations</li>
+            </ol>
+            <div style = "font-size:25px;color:lime;"><input type="checkbox" id = "agree_in" name = "agree_in"><label for="agree_in">I Agree</label></div>
+            <span style="font-size:5vh;text-align: center;">👍 All The Best! 👍</span>
+            <button class="tst_btn rpl" id="tin_start" 
+                onclick='window.location.hash = "#/attempt/" + window.location.hash.split("#/instructions/")[1]' disabled>Start</button>
+        </div>
+`;
+exports.default = {
+    page_test_instructions
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"7y3N8":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_test_list", ()=>page_test_list);
+parcelHelpers.export(exports, "page_test_v1", ()=>page_test_v1);
+parcelHelpers.export(exports, "page_test_end", ()=>page_test_end);
+let page_test_list = `
+<span class="in_t">Tests</span>
+        <hr color="white" width="100%">
+        <div><button class="tst_btn rpl" id="ti_act">Active Tests</button><button class="tst_btn rpl"
+                id="ti_fin">Finished Tests</button><button class="tst_btn rpl" id="ti_upc">Upcoming Tests</button></div>
+        <div id="testlinks">
+        </div>`;
+let page_test_v1 = `
+<div style="border: grey 2px dashed;flex-direction: row;margin:10px;" class="flex_type disable-text-selection" onmousedown="return false" onselectstart="return false">
+            <div style="display: flex;flex-direction: column;width: 60vw;height:80vh;margin:10px;min-width: 300px;">
+                <div id="tt_extrabx" style="display: flex;flex-direction:row;height: 40px;margin:10px;">
+                    <span id="tt_timeleft">00:00:00</span>
+                    <span id="tt_marksaward"></span>
+                    <span id="tt_timespent" style="margin-left:5px;"></span>
+                    <span id="tt_testname" style="width: 100%;text-align: right;margin-left: 5px;">TEST
+                        NAME</span>
+                    <button id="tt_rep" class="tst_btn rpl">Report</button>
+                    <button id="tt_sub" class="tst_btn rpl">Submit</button>
+                </div>
+                <div id="tt_question">
+                    <div style="font-size: larger;">Question <span id="tt_qno">12</span></div>
+                    <hr>
+                    <div id="tt_qtitle">Who Is The President Of India?</div>
+                    <hr>
+                </div>
+                <div id="tt_footer" style="display:flex;">
+                    <button class="tst_btn rpl" id="tt_save">Save</button>
+                    <button class="tst_btn rpl" id="tt_clear">Clear</button>
+                    <button class="tst_btn rpl" id="tt_review">Mark For Review</button>
+                    <button class="tst_btn rpl" id="tt_ansreview">Save And Mark For Review</button>
+                </div>
+            </div>
+            <div>
+                <div id="tt_chgbx">
+                    <button class="tst_btn rpl" id="tt_qp">Q.Paper</button>
+                    <button class="tst_btn rpl" id="tt_instr">Instructions</button>
+                </div>
+                <div id="tt_infobx">
+                    <div style="margin:9px"><span class="tts_notvisit">12</span>Not Visited</div>
+                    <div style="margin:9px"><span class="tts_notanswer">21</span>Not Answered</div>
+                    <div style="margin:9px"><span class="tts_answered">45</span>Answered</div>
+                    <div style="margin:9px"><span class="tts_review">30</span>Review</div>
+                    <div style="margin:9px"><span class="tts_ansreview">37</span>Review And Answered</div>
+                </div>
+                <div id="tt_qnobx">
+                    <div>
+                        <div id="tw_Physics"><span>Physics</span>
+                            <div id="tw_Physics_c"></div>
+                        </div>
+                        <div id="tw_Chemistry"><span>Chemistry</span>
+                            <div id="tw_Chemistry_c"></div>
+                        </div>
+                        <div id="tw_Math"><span>Math</span>
+                            <div id="tw_Math_c"></div>
+                        </div>
+                        <div id="tw_Computer"><span>Computer</span>
+                            <div id="tw_Computer_c"></div>
+                        </div>
+                        <div id="tw_Biology"><span>Biology</span>
+                            <div id="tw_Biology_c"></div>
+                        </div>
+                        <div id="tw_Statistics"><span>Statistics</span>
+                            <div id="tw_Statistics_c"></div>
+                        </div>
+                        <div id="tw_Unfiled"><span>Unfiled</span>
+                            <div id="tw_Unfiled_c"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+let page_test_end = `
+<span class="in_t" id="te_title">The Test Has Ended</span>
+        <span style="font-size:3vh;" id ="te_msg">Your Results Will Be Released After<span id="te_endtime"></span></span>
+        <a class="tst_btn rpl" href="/#/dashboard">Go To Dashboard</a>
+        <hr color="white" width="100%">`;
+exports.default = {
+    page_test_end,
+    page_test_list,
+    page_test_v1
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"kt253":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_toc", ()=>page_toc);
+let page_toc = `
+<span class="in_t">Terms And Conditions</span>
+        <span class="sp_txt">Copyright 2021-23 Quarkz By Mr Techtroid</span>
+        <span class="in_t_2">Last Updated: 04 April 2023(IST)</span>
+<div id="lgl_container">
+    <ol>
+        <h3>A. Acceptance of Terms and Conditions</h3>
+        <li>By using the Quarkz website, you acknowledge and agree to the terms and conditions set forth below. If you do not agree to these terms and conditions, you should not use the Quarkz website.</li>
+        <h3>B. Account Information And User Generated Content</h3>
+        <li>By creating an account on the Quarkz website, you agree to provide accurate and complete information about yourself as requested in the registration form. You also agree to keep your account information up-to-date and secure. </li>
+        <li>All user-generated content on the Quarkz website, including but not limited to quizzes, tests, assignments, notes, and forum posts, may be accessed by Quarkz admins or authorized moderators. When you request account deletion, no user-generated data will be deleted. Instead, the account will be unlinked from our authentication services. However, this data will continue to be accessible to ONLY Quarkz admins.
+        <h3>C. Account Information And User Generated Content</h3>
+        <li>Any content uploaded, published, submitted, or posted by you on the Quarkz platform, including without limitation, text, graphics, images, videos, and audio, will be owned by you, but we are also granted a worldwide, non-exclusive, royalty-free, sublicensable, and transferable license to use, reproduce, distribute, share, display, publish, retain, make available online, and/or electronically transmit such user-generated content as well as technical information collected. You represent and warrant that you have all necessary rights to grant us this license.</li>
+        <h3>D. Code of Conduct</h3>
+        <li>You agree to use the Quarkz website in a lawful and ethical manner. You agree not to engage in any activity that could damage, disable, overburden, or impair the website, or interfere with any other user's access to the website. You agree not to post or transmit any content that is obscene, defamatory, libelous, abusive, discriminatory, or otherwise offensive. You agree not to harass or bully other users on the website.</li>
+        <h3>E. Termination of Access</h3>
+        <li>We reserve the right to terminate access to the Quarkz website, or any part thereof, to any user at any time, without prior notice, for any reason, including without limitation, for a violation of these terms and conditions.</li>
+        <h3>F. Age Restrictions</h3>
+        <li>By creating an account on the Quarkz website, you represent and warrant that you are 13 years of age or older. If you are under 13 years of age, you must obtain permission from your guardians or parents to use the Quarkz website. We do not knowingly collect any personal information from users under 13 years of age. If we become aware that we have collected personal information from a user under 13 years of age, we will take steps to delete that information.</li>
+        <h3>G. Free Use Disclaimer</h3>
+        <li>The Quarkz website may contain copyrighted material that has not been specifically authorized by the copyright owner. Such material is made available for educational purposes under the "fair use" provision of the Copyright Act. Quarkz respects the intellectual property rights of others, and we ask that our users do the same.</li>
+        <li>Copyright Disclaimer under section 107 of the Copyright Act 1976, allowance is made for “fair use”
+            for purposes such as criticism, comment, news reporting, teaching, scholarship, education and
+            research. </li>
+        <h3>H. Licensing And Assets</h3>
+        <li>All codes, graphics, assets, files, and information located on the Quarkz website <span class="sp_txt">quarkz.netlify.app</span> or any of our storage services, such as Firebase, are part of Quarkz. Any usage, reproduction of any of the same without prior consent of owner Mr. Techtroid or Quarkz team is prohibited. </li>
+        <li>YouTube videos used on this website belong to their respective channel owners. Usage of questions and notes are from fair use under education, teaching, and research categories. Simulations used on this website belong to the respective providers.</li>
+        <li>If You Feel Any Content is violating your Copyright and want it to be removed from this site, contact us at the contact us page. We will make sure that we will remove the content in 24 Hours.</li>
+        <h3>I. User Conduct</h3>
+        <li>When using Quarkz, you agree to abide by all applicable laws and regulations, as well as our community guidelines. You also agree to respect the rights and dignity of others and not engage in any conduct that is discriminatory, harassing, or harmful in any way. Any violation of these rules may result in the termination of your account and may also lead to legal action.
+        <h3>J. Indemnification</h3>
+        <li>You agree to indemnify and hold Quarkz, its affiliates, licensors, and their respective directors, officers, agents, and employees, harmless from and against any and all claims, losses, liabilities, damages, costs, and expenses, including reasonable attorneys' fees, arising out of or related to your use of our website, your violation of these Terms and Conditions, or any unauthorized use of your account.</li>
+        <h3>K. Disclaimer of Warranties</h3>
+        <li>Quarkz does not warrant that the site will be error-free, uninterrupted, or secure. You acknowledge and agree that your use of the site is at your own risk. Quarkz makes no representations or warranties of any kind, express or implied, regarding the accuracy, completeness, reliability, suitability, or availability of the site or the information, products, services, or related graphics contained on the site for any purpose. To the fullest extent permitted by law, Quarkz disclaims all warranties, including but not limited to warranties of title, non-infringement, merchantability, and fitness for a particular purpose.</li>
+        <h3>L. Limitation of Liability</h3>
+        <li>In no event shall Quarkz be liable for any direct, indirect, incidental, special, or consequential damages arising out of or in any way connected with your use of or inability to use the site, or for any information, products, services, or related graphics obtained through the site, even if Quarkz has been advised of the possibility of such damages. Some jurisdictions do not allow the exclusion or limitation of liability for incidental or consequential damages, so the above limitation may not apply to you.</li>
+        <h3>M. Governing Law and Jurisdiction</h3>
+        <li>These Terms and Conditions shall be governed by and construed in accordance with the laws of India, without giving effect to any principles of conflicts of law. You agree that any dispute arising from or relating to these Terms and Conditions or your use of the site shall be brought exclusively in the courts located in India, and you hereby consent to the personal jurisdiction and venue of such courts.</li>
+        <h3>N. Termination</h3>
+        <li>We may terminate your access to the site, without cause or notice, which may result in the forfeiture and destruction of all information associated with your account. All provisions of these Terms and Conditions that by their nature should survive termination shall survive termination, including, without limitation, ownership provisions, warranty disclaimers, indemnity, and limitations of liability.</li>
+        <h3>O. Entire Agreement</h3>
+        <li>These Terms and Conditions constitute the entire agreement between you and Quarkz and supersedes all prior or contemporaneous agreements, representations, warranties, and understandings, whether written or oral, relating to the site.</li>
+        <h3>P. Contact Us</h3>
+        <li>If you have any questions or comments about these Terms and Conditions or our website, please contact us through our "Contact Us" page.</li>
+    </ol>
+</div>`;
+exports.default = {
+    page_toc
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"eSIhy":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_edit_topic", ()=>page_edit_topic);
+parcelHelpers.export(exports, "page_topic", ()=>page_topic);
+let page_edit_topic = `
+<span class="in_t" class="" id="fu_topic_title">Add/Edit Topic</span>
+        <div id="aq_basic" style="flex-direction: column;">
+            <input type="text" id="aq_tpcname" class="_in_aq" placeholder="Tests/Topic/Question Bank Name">
+            <select name="type" id="aq_tpclevel" class="_in_aq col-red">
+                <option value="jee">JEE</option>
+                <option value="neet">NEET</option>
+                <option value="foundation">Foundation</option>
+            </select>
+            <input type="text" id="aq_tpc_chapterid" class="_in_aq" placeholder="Chapter ID">
+            <select name="type" id="aq_tpc_subj" class="_in_aq col-red">
+                <option value="physics">Physics</option>
+                <option value="chemistry">Chemistry</option>
+                <option value="maths">Maths</option>
+                <option value="biology">Biology</option>
+                <option value="computer">Computer</option>
+                <option value="statistics">Statistics</option>
+                <option value="unfiled">Unfiled</option>
+            </select>
+        </div>
+        <div id="aq_test_extra" style="flex-direction: column;">
+            <input type="text" id="aq_tst_batches" class="_in_aq" placeholder="Batch ID">
+            <input type="datetime-local" id="aq_tst_stron" class="_in_aq">
+            <input type="datetime-local" id="aq_tst_endon" class="_in_aq">
+            <input type="text" id="aq_tst_syllabi" class="_in_aq" placeholder="Syllabus">
+            <input type="number" id="aq_tst_timealotted" class="_in_aq" placeholder="Time Alloted">
+            <div class="summernote" id="aq_add_test_instr">Additional Test Instructions</div>
+        </div>
+        <div id="lqadd" style="display: flex;flex-direction: row;margin:10px;height: 50vh;">
+            <div id="question_list"
+                style="border: 2px lime solid;width: 15vw;height:50vh;display: flex;flex-direction: column;align-items: center;text-align: center;font-size: 3vh;overflow-y: scroll;"
+                class="title-notes"></span>
+            </div>
+            <div
+                style="border: 2px lime solid;width:75vw;display: flex;flex-direction: column;overflow-y: scroll;height:50vh;">
+                <select name="type" id="aq_mode" class="_in_aq col-red">
+                    <option value="question">Question</option>
+                    <option value="lesson">Lesson</option>
+                    <option value="exam">Exam</option>
+                </select>
+                <div class="flex_type" id="aq_exams">
+                    <input type="text" id="aq_examname" class="_in_aq" placeholder="Exam Names">
+                    <input type="text" id="aq_examdate" class="_in_aq" placeholder="Exam Dates">
+                    <input type="text" id="aq_examinfo" class="_in_aq" placeholder="Exam Info Link">
+                    <input type="text" id="aq_examsyllabus" class="_in_aq" placeholder="Syllabus Link">
+                </div>
+                <div class="flex_type" id="aq_all" style="align-items: unset;" id="aq_uiad">
+                    <div class="summernote" id="aq_qtext">Question</div>
+                    <input type="text" id="aq_answer" class="_in_aq" placeholder="Answer">
+                    <input type="url" id="aq_yurl" class="_in_aq" placeholder="Youtube ID">
+                    <div class="summernote" id="aq_expl">Explanation</div>
+                    <textarea type="answer" id="aq_hint" class="_in_aq" style="resize: none;overflow-y: scroll;"
+                        placeholder="Hint"></textarea>
+                    <input type="number" id="aq_posmrks" class="_in_aq" placeholder="Marks For Correct">
+                    <input type="number" id="aq_negmrks" class="_in_aq" placeholder="Marks For Incorrect">
+                    <select name="type" id="aq_section" class="_in_aq col-red">
+                        <option value="Physics">Physics</option>
+                        <option value="Chemistry">Chemistry</option>
+                        <option value="Math">Math</option>
+                        <option value="Biology">Biology</option>
+                        <option value="Computer">Computer</option>
+                        <option value="Statistics">Statistics</option>
+                        <option value="Unfiled">Unfiled</option>
+                    </select>
+                </div>
+                <div id="aq_ans_hold">
+                    <select name="type" id="aq_type" class="_in_aq col-red">
+                        <option value="mcq">MCQ</option>
+                        <option value="mcq_multiple">MCQ Multiple</option>
+                        <option value="mcq_multiple_partial">MCQ Multiple(Partial)</option>
+                        <option value="matrix">Matrix</option>
+                        <option value="numerical">Numerical</option>
+                        <option value="explain">Explain</option>
+                        <option value="fill">Fill In The Blanks</option>
+                    </select>
+                    <div id="aq_mcq_con" class="flex_type">
+                        <div class="aq_mcq_p" onclick="changeColor(this)"><input class="aq_mcq"></div>
+                        <div class="aq_mcq_p" onclick="changeColor(this)"><input class="aq_mcq"></div>
+                        <div class="aq_mcq_p" onclick="changeColor(this)"><input class="aq_mcq"></div>
+                        <div class="aq_mcq_p" onclick="changeColor(this)"><input class="aq_mcq"></div>
+                    </div>
+                    <div id="aq_matrix">
+                        <table>
+                            <tr>
+                                <td><input class="aq_i1"><input class="aq_i2"></td>
+                            </tr>
+                            <tr>
+                                <td><input class="aq_i1"><input class="aq_i2"></td>
+                            </tr>
+                            <tr>
+                                <td><input class="aq_i1"><input class="aq_i2"></td>
+                            </tr>
+                            <tr>
+                                <td><input class="aq_i1"><input class="aq_i2"></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <button class="tst_btn rpl" id="aq_ao">Add Option</button>
+                    <button class="tst_btn rpl" id="aq_ro">Remove Option</button>
+                </div>
+                <button class="tst_btn rpl" id="aq_re">Remove Entry</button>
+            </div>
+        </div>
+        <button class="tst_btn rpl" id="aq_tpc_save">Save/Update Topic</button>
+        <button class="tst_btn rpl" id="aq_qbc_save">Save/Update QBank</button>
+        <button class="tst_btn rpl" id="aq_tst_save">Save/Update Test</button>
+        <button class="tst_btn rpl" id="aq_exam_save">Save/Update Exams</button>
+        <button class="tst_btn rpl" id="aq_export">Export</button>
+
+`;
+let page_topic = `
+<span style="font-size: 3vh;color:lime" id="tp_title">Topic Name</span>
+<span style="font-size: 4vh;color:yellow" id="tp_lsno">Lesson Name</span>
+        <hr width="100%" color="white">
+        <div class="flex_type" style="flex-direction: row;flex-wrap: wrap;">
+            <button class="tst_btn rpl" id="tp_nxt">Next</button>
+            <button class="tst_btn rpl" id="tp_prv">Previous</button>
+            <button class="tst_btn rpl" id="tp_pnt" style="display: none;">Export</button>
+            <button class="tst_btn rpl" id="tp_edt" style="display: none;">Edit</button>
+            <button class="tst_btn rpl" id="tp_rep">Report</button>
+        </div>
+        <hr width="100%" color="white">
+        <div id="tp_lesson" style="width: 80%;">
+            <div id="tp_full_vid">
+                <!-- <iframe id = "video" style = "width:80%; height: 450px; border-style: solid; ;border-width: 10px;" hidden = "True"  allow = "autoplay"></iframe> -->
+                <div style="pointer-events: none;width:100%;">
+                    <div>
+                        <div id="player" style="width: 100%;"></div>
+                    </div>
+                    <div id="yt_progressBar" style="width:100%;">
+                        <div id="yt_progressBar_in"></div>
+                    </div>
+                </div>
+                <div id="toolbar"
+                    style="border:3px solid grey; border-radius: 10px 10px 10px 10px;padding-left: 5px;padding-right: 5px;">
+                    <span class="material-icons" id="tp_bw_btn" onclick="player.seekTo(player.getCurrentTime()-10)"
+                        title="-10 Seconds">fast_rewind</span>
+                    <span class="material-icons" id="tp_pl_btn" title="Play"
+                        onclick="player.playVideo()">play_arrow</span>
+                    <span class="material-icons" id="tb_pa_btn" title="Pause" onclick="player.pauseVideo()">pause</span>
+                    <span class="material-icons" onclick="player.stopVideo()" id="tb_st_btn" title="Stop">stop</span>
+                    <span class="material-icons" id="tb_fw_btn" onclick="player.seekTo(player.getCurrentTime()+10)"
+                        title="+10 Seconds">fast_forward</span>
+                    <span id="mute" class="material-icons" id="tb_um_btn" onclick="volumetype()"
+                        title="Mute/Unmute">volume_up</span>
+                    <span id="mute" class="material-icons" id="tb_um_btn" title="Mute/Unmute"
+                        onclick="fullscreen()">fit_screen</span>
+                    <span class="material-symbols-outlined" id="tb_wy_btn" onclick="window.open(player.getVideoUrl())"
+                        title="Watch On Youtube">youtube_activity</span>
+                    <input type="range" min="0" max="100" value="50" id="tb_vl_br" style="background-color: grey;"
+                        onchange="volumechange()" oninput="volumechange()">
+                </div>
+            </div>
+            <div>
+                <div id="tp_expl" style="height:max-content;min-height: 12vh;text-align: left;">Explanation</div>
+                <img id="tp_lsimg">
+            </div>
+        </div>
+
+        <div id="tp_question" style="width: 80%;align-items: center;display: flex;flex-direction: column;">
+            <div id="tp_qtext" style="width:80%;height:max-content;min-height: 12vh;">Question</div>
+            <div id="tp_ans_hold">
+                <input type="answer" id="tp_answer" class="_in_aq" placeholder="Answer">
+                <div id="tp_mcq_con" class="flex_type">
+                </div>
+                <div id="tp_matrix">
+                    <table>
+                        <tr>
+                            <td><span class="tp_i1"></span><span class="tp_i2"></span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="tp_i1"></span><span class="tp_i2"></span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="tp_i1"></span><span class="tp_i2"></span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="tp_i1"></span><span class="tp_i2"></span></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div>
+                <button class="tst_btn rpl" id="tp_sbm">Submit</button>
+                <div id="tp_status"></div>
+            </div>
+            <div id="tp_hint" style="display: none;">Hint</div>
+            <div id="tp_e_answer" style="display: none;">Answer</div>
+            <div id="tp_a_expl" style="display: none;">Explanation</div>
+        </div>`;
+exports.default = {
+    page_edit_topic,
+    page_topic
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"enRwb":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_edit_user", ()=>page_edit_user);
+let page_edit_user = `
+<span class="in_t">Users</span>
+        <hr color="white" width="100%">
+        <div
+            style="border:orangered 3px solid;border-radius: 30px;display: flex;flex-direction: column;align-items: center;width:80%;">
+            <span style="font-size:3vh;color:yellow;width:80%;">Add Users</span><iframe
+                href="index.html#/register"></iframe>
+        </div>
+        <hr color="white" width="50%">
+        <input type="answer" id="us_user" class="_in_aq" placeholder="username">
+
+`;
+exports.default = {
+    page_edit_user
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"71ul5":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_usernotes", ()=>page_usernotes);
+let page_usernotes = `
+<div id="un_list" style="border:3px solid grey;width:25vw;height:90%"></div>
+        <div id="un_render" style="width:77vw;height:100%">
+            <div id="un_tools" style="width:100%;display: flex;flex-direction: row;flex-wrap: wrap;">
+                <select id="un_rendermode" class="_in_aq" style="width: 100px;color:red;"
+                    value="edit">
+                    <option value="edit">edit</option>
+                    <option value="preview">preview</option>
+                </select>
+                <select id="un_viewership" class="_in_aq" style="width: 100px;color:red;">
+                    <option value="private">private</option>
+                    <option value="public_view">public(view_only)</option>
+                    <option value="public">public</option>
+                </select>
+                <input id="un_title" type="text" class="_in_aq" style="width:20vw;" value="Notes Title">
+                <button id="un_save" class="rpl tst_btn" style="height: 30px;">Save</button>
+                <button id="un_print" class="rpl tst_btn" style="height: 30px;">Print</button>
+                <input id="un_colorpicker" type="color" name="favcolor" value="#ff0000"
+                    style="width:5vw;height:30px;background-color: transparent;border:none" onchange="notesUIHandler()">
+            </div>
+            <div id="un_edit" style="height:90%;width:100%">
+                <div class="summernote" id="un_editable" style="height:90%">Notes</div>
+            </div>
+            <div id="un_preview" style="height:90%;width:100%;overflow:scroll">
+            </div>
+            <iframe style="display: none;" id="un_print_iframe"></iframe>
+        </div>
+`;
+exports.default = {
+    page_usernotes
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"56dox":[function(require,module,exports) {
+// Video Creator - https://www.educative.io/edpresso/how-to-create-a-screen-recorder-in-javascript
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "recordScreen", ()=>recordScreen);
+parcelHelpers.export(exports, "createRecorder", ()=>createRecorder);
+parcelHelpers.export(exports, "saveFile", ()=>saveFile);
+async function recordScreen() {
+    return await navigator.mediaDevices.getDisplayMedia({
+        audio: true,
+        video: {
+            mediaSource: "screen"
+        }
+    });
+}
+function createRecorder(stream, mimeType) {
+    let recordedChunks = [];
+    const mediaRecorder = new MediaRecorder(stream);
+    mediaRecorder.ondataavailable = function(e) {
+        if (e.data.size > 0) recordedChunks.push(e.data);
+    };
+    mediaRecorder.onstop = function() {
+        saveFile(recordedChunks);
+        recordedChunks = [];
+    };
+    mediaRecorder.start(200);
+    return mediaRecorder;
+}
+function saveFile(recordedChunks) {
+    const blob = new Blob(recordedChunks, {
+        type: "video/webm"
+    });
+    let filename = window.prompt("Enter file name"), downloadLink = document.createElement("a");
+    downloadLink.href = URL.createObjectURL(blob);
+    downloadLink.download = `${filename}.webm`;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    URL.revokeObjectURL(blob); // clear from memory
+    document.body.removeChild(downloadLink);
+}
+exports.default = {
+    saveFile,
+    createRecorder,
+    recordScreen
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"17XFv":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _d3Array = require("d3-array");
@@ -64009,6 +65568,9 @@ parcelHelpers.export(exports, "sortObj", ()=>sortObj);
 parcelHelpers.export(exports, "sortObjv2", ()=>sortObjv2);
 // Make Elements Latex Rendered
 parcelHelpers.export(exports, "renderMarkedMath", ()=>renderMarkedMath);
+parcelHelpers.export(exports, "qCorrector", ()=>qCorrector);
+parcelHelpers.export(exports, "playSoundEffect", ()=>playSoundEffect);
+parcelHelpers.export(exports, "showLS", ()=>showLS);
 function sd(seconds) {
     seconds = Number(seconds);
     var d = Math.floor(seconds / 86400);
@@ -64098,6 +65660,74 @@ function renderMarkedMath(eleid, toid) {
     dE(toid).innerHTML = v;
     renderMathInElement(dE(toid));
 }
+function qCorrector(type, answer, useranswer, p_correct, p_incorrect, p_unattempted) {
+    if (useranswer == undefined || useranswer == []) return {
+        type: "unattempted",
+        points: p_unattempted
+    };
+    if (type == "numerical" || type == "fill") {
+        let calc = answer.some((item)=>useranswer.includes(item));
+        if (calc) return {
+            type: "correct",
+            marks: p_correct
+        };
+        else return {
+            type: "incorrect",
+            marks: p_incorrect
+        };
+    }
+    if (type == "mcq" || type == "mcq_multiple") {
+        let calc = areEqual(answer, useranswer);
+        if (calc) return {
+            type: "correct",
+            marks: p_correct
+        };
+        else return {
+            type: "incorrect",
+            marks: p_incorrect
+        };
+    }
+    if (type == "mcq_multiple_partial") {
+        if (useranswer.length > answer.length) return {
+            type: "incorrect",
+            marks: p_incorrect
+        };
+        let calc = useranswer.every((item)=>answer.includes(item));
+        let m_crr = 0;
+        if (calc) {
+            switch(useranswer.length){
+                case 3:
+                    m_crr = 0.75 * p_correct;
+                    break;
+                case 2:
+                    m_crr = 0.5 * p_correct;
+                    break;
+                case 1:
+                    m_crr = 0.25 * p_correct;
+                    break;
+            }
+            return {
+                type: "correct",
+                marks: m_crr
+            };
+        } else return {
+            type: "incorrect",
+            marks: p_incorrect
+        };
+    }
+}
+function playSoundEffect(type) {
+    let audio = new Audio();
+    if (type == 1) audio.src = "data:audio/mp3;base64,//NAxAALQAZ2X0EYAJ49pNra2nJwOIHKB9NZ8QBj1O+GOAwffBAHw//B8H3//8Pn//gR3/5yv/8oGPPPefPDDDDDDb186YxYsYPRbsWEH1mpoRfuDcILXq9NdBAEgtOkocV0H8nIkBn/80LELh+CHuWVmVgAHrqhHIc3Iyug3/zBpGKDIxVPqV//lZnSJfRYhbs5rf//wsskcVPsaq09D+1L////z7DTZGcebwI3OGJSxv+GDhQHxRoYORiVIb/+8if/xxSEIExwirioyUO/QOL/80DEDBdROuwBmEgAwyzKLPPH4hQw7VbLsj4f4dVbI7QGKQmufTxLU3btuTxLySxenJdS7S6Xj8+TyVb8TKk0Btzx6ktSSe4YOSTa0VUpw+tCRe1lz9m6lGx7tKbalUllwO+mwOjYq//zQsQJFKEi8AGYSAAznHAlb3TT56hyYiMkHijTQeyCzkNwLUyd5vuTzuh0nJbO314VCu/xrc2Xz4l2uMjEoa8Y9CEsax46og1rqmuelLRNscP0t/7+lSq2H0OKWbKECbWZap1I2Rxh5v/zQMQSF+l67AGYSACadS5H+ixc8HA/MWVeQWkj5k9I2k6WpdPpam51vrWslT2adWp+72sjtfKxL341m5C8r1qZdDGnAgqgmlrbnjkKRJMYxwxSEMZf0Ma8d0IgI0IqmfhYJRB1KF3q//NCxA0U+P7wAZhIAGbrOP1NvZQxuhco3oeo+s5FayHnjlNpPrKeltPlq13Wq2/vSqHeQYOGrSQJsGDFpIMJMU5Y9CGvGLTYUsuxd4ymx3966fvVWmjCOrbUqLbdhEPs7lD21X+oXt4///NAxBUXmUbsAZhIAHcF13C4fw0VbL2iIOeN0j59fpvTcm+GJ9nvUt/ev5W+G3WViXr7WTxPhQYpCGMa9yxiUNY8apLReShNcKDRiUNZeujvVShl7lUKVVQJpaJZEDHWaVJ2MyBlEvj/80LEERc5PuwBmEgA9QOrJHnmqUaMB7jhZgzNpFzxWk09S1PJPTcn2Kdb27u9db71PwvKzNnUaxLnBwBHyVh4aosVY1rhq0IQTa2OqcPUpLH3f3KTbe5a0SVDQGBIEkZ0sW3uOTOsykX/80DEEBgRnuwBmEgADGn9uudNhxc8Oh+4lXlOaI7MIKVtybrPQzuS1qoXrOsp6tbaf3J/axPwvKyOzqNZfl9v/5sft+tSLIbPvHrSwSEEueoc0YpDU39O6+lLOOoVIUw6SDaG7KiLc//zQsQKFOEG8AGYSACici3A1NDlDEaGBrrajYuHpC5Zz+aQ2wWpWnVtOT6WJ4r5X0qdfTu7xLnBwwBpINCIyhBNrXrHUJTYpaUVk2Y1Txyl2tq+51f+hRgCeSEoSOSKbiw2HWZRt/3zef/zQMQSF3ky7AGYMAApIs/EHS8daBEgCniNE6OG0DopKEbGPSS8tTGOt8UxxHu1Zpe20tkJ90oJhFphg+PUJQHNjqloZa97lMMCVMgLsS5uhuruXVZ///XUAq3kDEKHAYzPHnb6s2d3//NCxA8YGSLoAZhIAB56GMPnG5RGEJEqDiSEngZsws9GqbWSOWw6oxijihfJfx2ME4yalO41P3s9dARmwTNg+sWNjRVSXigsLmx4uhlw5qSo9BgXQZeLpfrS/+r/VRURFf8UMz8tmyl+//NAxAoR4LbwAZgYACemJc/2chp6eUSKVhXEBA4AGCwxIdBaDBDCuM2aECQGhdBomYFAZIC6CB46seKgc01DGsOrFVlbKGN/RxilJkukBTKGEE3Sa1SvVFGcQJFIhAs3A8cEZ2ZgujH/80LEHRhxUugBmEgAEqjPIWefWbYTrGW18dqsmHNzUl4ZVNTSljdVKe7jru9+7Vx12DCQ0XLMMMJCxo2xzZuybFzKFUjGmh7DO77Wpo0723elCiHLCBrAlvXjfiBaz2we8kuj8IkktmT/80DEFxUA+uwBmDAAXiZpyQIBEhxpi0k8Ur1klNO7CltbTry8sUUe4w+TWABGbEb0jzgcZAQsgegXIv9/GUvZQMFP///0////6BGRwB07RC1DlQPCLsVd2dkc1TTMHTSxDCTsMORVdP/zQsQeEljy8AGYMACNG9RVxGGtimqdm36qedzCiwsNMmTM0ZFgMTYZSzNOiySYteroNb9NtX/9Sko3RLgr7ITRl2cILzcunuymTyqpSnQRFuiiegtMtZUUjpjSvYiHhlLsRIEiRx4cw//zQMQwEWDK8AGYMABmhrTZMVMuFJpWgcxtCoq1Fswz72GaC6WkFrFVi9Uof+TwzAz8vfCZVL4zCpcNHVFyslTr4PieYWdFVVa7pa3qJVUNqPnfjUFJhoRsNEggBiYPtNjGmVsC5gqK//NCxEUVgPbsAZhIACChgUSaV0pVQulQu3qo/Z/pCx2RjjGigkr8xV57bzQNA0UisVl0XnSBNGixGH6b5pRthc1NiSknJwnaa033t91XGsilYVIEj5p6TAFIhwWYlqRZimmixpqTC21I//NAxEsUmPbsAZhIAEPXWygW//0VFgLyLTL4FFyN/pG+lGzitFpFCJDLZEQFUKEFExBmpJQqQyZzVVGFUqoXla1dEuKWlDfWrtuthpeD57KorL8snuvf2VXV75bfP21ffPd6l1u6Bmn/80LEUxRBKuwBmDABI9HlguvYZLIMpf9s8HVrX+CJE4ifH/kpY71Yf9VhG+NbX/7Mloylfjn//pNKnuBWR8sJWCzWtZ+ZFUi04+r/1hLRGHhTX//UlaA26G5LNgPgGuWeJXEPKuET2+r/80DEXhKhFuABmEgAeV6g6V+z/DXLf/////+DSw0W+SnlqkxBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqv/zQsRuCggF0l/AEACqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqg==";
+    else if (type == 2) audio.src = "data:audio/mp3;base64,//NIZAAFvAE3L6CIAAg4BeABQBAAlj9tackkSXAfLvgm+J3tUGOXB9+CEoCAIf8Hw//sf/4IO6gwH///y4Pn//y8T+XP/wQBAEDn///6gxKAg4hf//8EAQBCo5/BMH3/g4CAYRbnMzpMlkcVicRiMQAP4avle0n2eEEd2Ig+yxg/FEknHuXzckR6qdqfJdSR//NIZCwPFYFvL8e0AYbIRoxthRAAkVJrdBjho63HkYqlymg7PzA0pyaJMGyULXMLIfMPnSSTQZalWUaUPmZi30hnUtSmUipSbJl+/1GlhzP9ZkdaqtaS132ROfsZv/9RiBAACAIEABgf/GeBHf8p8479P/6v/7f/l////k0aQZHhlbthc46MySSxxAjxJBO0//NIZBMKyPVrP+a0AQmp7oSp1GgBQhAbQXY1R0frRajUlSTNS6XS638yPgvK/6ReLxeNndFL//0VJJGRkXkv/+tElR6kqPoKyIKD47v/UDQNf/BUFTv/h0EP/uiFuwNCZEzLVD///tR/8fwuZo3/////9///tQQtJAzAEwl3HABSiiAV2ylyDGWOG3ap4Cv3//NIZBEKIY19PwHnK4kx6r46UBtq+SRTmm5sDPZ5Ehv//8/QxiEwyp7/6iOJbGN+r5jD4PwfiQQnv///3YVlS3/////3QwcAYDgmejf///9BwaDRpABBYAYAsP+YVDMSwnIFgRZQ9/////8PQQGb//qPHTM4FTEHFZoDUFS2LxwPIfsk5kkX0S60yCiDXRqS//NIZBYMAY9zLzWSsQgoor2uAIpG9f6kUW/Ul9JJFHA8qZW90O0ieTD+ILGp7/6kkkkmUk///+vSM0W//////qIuCOxwutumiy0WSWiyn6kknrSSMSZIqUBHQYCC0JECE0UQAoG4UKxlA4E9rf+qR/6P////8qd///UGPi3/qN0AQgMS2iZjAPm5X9g3iavO//NIRBAHZUVfLwFnJw+LGspeAdRK//9Lf6MeSdTm+p6I6CoqLf/92OnJX///6Epb/////+gGlFK5wuskj+siDQAhAYu2N7HA3k9gCwibf//2OY39mPPBstt0ICyMMDxKKhY//9nt///f6D5S//////+GYrbNxYMM5M///9UIVQBQC7dMb2OAkIwGozCHRHhO//NIZBEImVdfLwAyIwvyhsG+A05OvS9/61Ukyq6/f3LTerdByGIEq44zAYn/+pSLqUur6f//qPHTP//////FZGxq81LRiln/rA4UFtaugACburwcQWOpUT/96Nd00q9yDP//HjALf/89ivqf///6nCT7/////8FA9QHAA7bOboOB/RUYGppNc3AOEGU63dyI//NIZBcL4Y1XL0itaQiA5spcKAbGt7dnmYTcwpTW6TAxSLQzhECKByCEFyEBHgaCEEpv/+iVHSgfYv2MkUf//XWbMaCLP6/////+sEODUggpuPYolwxd///+Tx3qAFQAG2AGwD/kZ0ZtQz/mscRTn+aQoEgEf6nf//+tP//8GgBAA9tUd6MB/7HadicCnBzW//NIRBEHbUVhLzRHbw5p5sZeAcpO2N0dOvnCBjoy/M70b/+gYV//2CKGaZ3r///caDQCz//////qIokt+f/9YAqBo2ue9HANdaZQFwS+ZX/95iCyn/6BiGa3dos8jCQBM//+MEB6D////1Eg8Bw48N//+Cv7f+XATggs2GHzROkoXc8MRUeOaf//7rr+Y6DL//NIZBcIEUU2agHnJg7qimQAA9RMqi/VkFLohQEP/6K5NjiRVkdf//9h0FBR///+v/0PHAKsKhrtS5n4XAKf7GGWKzFcFAS2Pipn/+6Gnf6zVFhVt92OICRHKHX//yx8w9bP///3EEpO6af//yJTf+glBuc4l1f9KQAqQq6yIB/9EAtHlwUAIjp6///PVovL//NIZBUH6Yk6Kyhnho4qimQKA9RI/5O4LU4if8YEzuIAKf/86ejs1HX///NPB2Yk9H/////xwozf/Z///3JDQk/sVKrmcYYUwITrt//U2rf6FDiWYzf5MflBS3/92I1ZU3///8hFQUj7ub///R//MGYIR7Pt/7grAJh9w+J34EvErYGURcb5//9JYfHL9Knj//NIZBgIgUU0KgHqJgtKgmQAA85NVkPVvuhhpEaIws3/+s8fIWd2p///qyngvCJvKmmP//+z/+cA+SP8XY//JgL/CRGbXT1aGfDzT//6L/6mC+x/6GKYfYeFjf/rfSe7f///gqEzu9/////+BoYqAAmoG212t4CIEDcEkMAbfP//7FS5Y1PpjYw3/2LkqCYX//NIZCEHzYtdLwFnNQqqhmQAAs5NX//muNz2su///+oUHXfr///v/8gSJ/849e///TI/QjASHS5Iewm26//+xrKn9HLNf/o2UGf//df////UKiQ5zJ/////0EIvn/9zwtADuQ9yIAgAn46mv//s26frc8ZHz/+sthQZ//0VGNZ0an//+jDgsJdv//+3/yp5c//NIRDMGzUUuAKicAA2ihnT/TSgAI//9AaFNKBiAf/YegFBTSYFEQl///qif92MLCFv9dqCr//0Rxwszrff///AIWf3/////xgHd9bv+LaMBQGYNR6LRsJhsLhKAAtVXWsm4F0I4JCP2BzsSRTNPtNUkUfbWdSXo/KHQIhiaJuon/n/uXkVJLUr+j+w+O12R//NIREEJ4VtLf8a0AJAp6n5dkWgASWl/2/+tv///mD//zpWAEiNtiIJhoJhQeOAVM/diZwqhah2C4qwZ7DiKZp9TM7I+jziTrQL31vUx30Uf29e3q/u/6qvr/80v8Ndv9T/xMgIAAKKKLRqB7v+Iv57+s6V/+Iuo8R///0+7///iVqrzMyxoBCYBgEk4KSrf//NIRCwDsADnL+AIAAqgkWgBxhgA57VAICMKAiYBDDwKuBkNf////////BVQdEq3FkxBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//NIZF8AAAGkAAAAAAAAA0gAAAAAqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq";
+    audio.play();
+}
+function showLS(type) {
+    // Get the loading spinner element
+    let loadingSpinner = document.getElementById("loading-spinner");
+    if (type == "s") loadingSpinner.style.display = "block";
+    else loadingSpinner.style.display = "none";
+}
 exports.default = {
     sd,
     sha256,
@@ -64111,7 +65741,10 @@ exports.default = {
     sortObj,
     sortObjv2,
     renderMarkedMath,
-    mergeById
+    mergeById,
+    qCorrector,
+    playSoundEffect,
+    showLS
 };
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"66uq8":[function(require,module,exports) {
@@ -64152,6 +65785,9 @@ function sysaccess() {
         },
         error: function(logtxt) {
             r("", logtxt);
+        },
+        warn: function(logtxt) {
+            r("", logtxt);
         }
     };
     // w("c-exec").addEventListener("click",x(w("c-input").value))
@@ -64160,1409 +65796,44 @@ function sysaccess() {
     init();
 }
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"gCJDO":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "page_about", ()=>page_about);
-let page_about = `
-<span class="in_t">About</span>
-        <img id="abt_tab_t_t_img" alt="MTT Logo" src="https://avatars1.githubusercontent.com/u/64828294?s=460&amp;v=4">
-        <div id="abt_tab_t_hold">
-            <span id="abt_name">Mr Techtroid</span>
-            <span class="abt_det">
-                <span id="abt_email">mrtechtroid@outlook.com</span>
-            </span>
-            <div style="font-size: 12px;width:400px;align-items: flex-end;">
-                <span>I Am Mr Techtroid The Main Developer Of <span class="sp_txt">Quarkz!</span></span>
-                <span>I Built This Website As A Way For Schools To Head Towards Online Learning</span>
-                <span>Its Built In A Way That It Is Easy For Both Teachers And Students To Use</span>
-                <span>Quarkz Is Currently Under Beta Version And Many Features Will Come In The Future</span>
-            </div>
-        </div>
-        <div id="abt_c_1">
-            <button id="lgl_btn" class="tst_btn rpl">Legal</button>
-            <button id="rbu_btn" class="tst_btn rpl" onclick="window.location = '/#/bugreport'">Report Bugs</button>
-            <button id="apinf_btn" class="tst_btn rpl" onclick="window.location = '/#/appinfo'">App Info</button>
-            <a id="contq_btn"
-                href="https://docs.google.com/forms/d/e/1FAIpQLSfLZ2_GUDv6EYRR3kz53BYtsP3SaTIMfCo8az-xPzUi1nb91A/viewform"
-                class="tst_btn rpl" target="_blank">Contact Us</a>
-        </div>
-`;
-exports.default = {
-    page_about
-};
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"iujZH":[function(require,module,exports) {
+module.exports = require("3514bf9f94528934").getBundleURL("10Mjw") + "js/sw.js" + "?" + Date.now();
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"fMnHP":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "page_list_chapter", ()=>page_list_chapter);
-parcelHelpers.export(exports, "page_edit_chapter", ()=>page_edit_chapter);
-parcelHelpers.export(exports, "page_chapter", ()=>page_chapter);
-let page_list_chapter = `
-<span class="in_t">Chapters</span>
-        <hr color="white" width="100%">
-        <div style="display: flex;flex-direction: row;flex-wrap: wrap;">
-            <button class="tst_btn rpl" id="pchb">Physics</button>
-            <button class="tst_btn rpl" id="cchb">Chemistry</button>
-            <button class="tst_btn rpl" id="mchb">Maths</button>
-            <button class="tst_btn rpl" id="bchb">Biology</button>
-            <button class="tst_btn rpl" id="cochb">Computer</button>
-            <button class="tst_btn rpl" id="schb">Statistics</button>
-            <button class="tst_btn rpl" id="uchb">Unfiled</button>
-        </div>
-        <div id="qb_cont_2" style="overflow-y: scroll;height:50vh;" class="flex_type">
-        </div>`;
-let page_edit_chapter = `
-<span class="in_t" class="">Edit Chapters</span>
-        <input type="text" id="chp_chapname" class="_in_aq" placeholder="Chapter Name">
-        <span class="in_t" class="">Question Bank</span>
-        <div id = "chp_qbank">
-        </div>
-        <span class="in_t" class="">Topics</span>
-        <div id = "chp_qbank">
-        </div>`;
-let page_chapter = `
-<span class="in_t" id="chp_chaptername">Topic</span><button class="tst_btn rpl" id="chp_edit">Edit</button>
-        <div class = "flex_type" style="flex-direction: row;flex-wrap: wrap;">
-            <div id="chpt_topics" class = "db_class">
-                <span style="font-size: 25px;color:yellow">Topics</span>
-                <div id="chp_tpc_list" style="overflow-y: scroll;height:60vh;" class="flex_type"></div>
-            </div>
-            <div id="chpt_qbanks" class = "db_class">
-                <span style="font-size: 25px;color:yellow">Question Banks</span>
-                <div id="chp_qbk_list" style="overflow-y: scroll;height:60vh;" class="flex_type"></div>
-            </div>
-        </div>`;
-exports.default = {
-    page_chapter,
-    page_edit_chapter,
-    page_list_chapter
-};
-
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"6uKbY":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "page_cyberhunt", ()=>page_cyberhunt);
-let page_cyberhunt = `<div id="cyberhunt" class="full_page flex_type">
-        <div id="cyb_code" class="flex_type">
-            <span class="in_t">Join Cyberhunt!</span>
-            <hr color="white" width="100%">
-            <span>Do You Want To Join A Cyberhunt?Enter The Cyberhunt Code Below:</span>
-            <input id="cyb_cd_in" class="_in_aq" placeholder="i2a01pmzshn1">
-            <button class="tst_btn rpl" id="cyb_cd_sbm"
-                onclick="if (document.getElementById('cyb_cd_in').value != ''){window.location.hash = '/cyberhunt/'+document.getElementById('cyb_cd_in').value}">Submit</button>
-            <span>Joined Cyberhunts</span>
-            <div id="cyb_joined"
-                style="overflow-y: scroll;display: flex;flex-direction: column;height: 30vh;width: 40vw;border: 3px greenyellow solid;padding-left: 6px;">
-            </div>
-        </div>
-        <div id="cyb_edit">
-
-        </div>
-        <div id="cyb_viewer" class="flex_type" style="width:100%;height:100%">
-            <div
-                style="display:flex;flex-direction:column;justify-content: left;width:100%;margin-left:5vw;margin-top:10px;">
-                <span style="font-size: 16px;">Welcome to</span>
-                <span id="cyb_v_name" style="font-size: 30px">CyberHunt Name</span>
-                <span id="cyb_v_status" style="font-size: 18px">started on XX:XX</span>
-                <span id="cyb_v_crtby" style="font-size: 15px">By Mr Techtroid</span>
-            </div>
-            <span style="font-size: 16px;">Participants List</span>
-            <div id="cyb_v_plist"
-                style="display:flex;flex-direction:row;flex-wrap:wrap;border: solid grey 2px;border-radius: 10px 10px 10px;width:90%;height:40vh;padding:10px;overflow-y: scroll;">
-                <div class="cyb_v_plist_p"
-                    style="display: flex;flex-direction: column;width:100px;height:50px;border: solid grey 2px;border-radius: 10px 10px 10px;text-align: center;">
-                    <span>Mr Techtroid</span>
-                </div>
-            </div>
-        </div>
-
-    </div>`;
-exports.default = {
-    page_cyberhunt
-};
-
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"hkEZ0":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "page_dashboard", ()=>page_dashboard);
-parcelHelpers.export(exports, "page_bug_report", ()=>page_bug_report);
-parcelHelpers.export(exports, "page_app_info", ()=>page_app_info);
-parcelHelpers.export(exports, "page_schedule", ()=>page_schedule);
-parcelHelpers.export(exports, "error_page", ()=>error_page);
-parcelHelpers.export(exports, "page_notes", ()=>page_notes);
-parcelHelpers.export(exports, "page_ariel", ()=>page_ariel);
-parcelHelpers.export(exports, "page_edit_exams", ()=>page_edit_exams);
-parcelHelpers.export(exports, "page_updates", ()=>page_updates);
-parcelHelpers.export(exports, "page_uploads", ()=>page_uploads);
-let page_dashboard = `
-<div id="sidebar">
-            <div id="options_tab"
-                style="display: flex;flex-direction: row;align-items:center;height:50px;justify-content: space-evenly;width: 25vw;max-width: 250px;">
-                <span class="material-symbols-outlined rpl" onclick="window.location = '#/settings'">settings</span>
-                <span class="material-symbols-outlined rpl" id="abt_btn">info</span>
-                <span class="material-symbols-outlined rpl" onclick="window.location = '#/updates'">notifications</span>
-                <span class="material-symbols-outlined rpl" id="prf_btn">account_circle</span>
-                <span class="material-symbols-outlined rpl" id="lgt_btn">logout</span>
-            </div>
-            <hr style="width: 100%;">
-            <div id="profile_tab"
-                style="display: flex;flex-direction: column;align-items: center;height:170px;max-width: 250px;">
-                <img id="prf_tab_img" style="width: 100px;height:100px;object-fit: cover;margin:5px;border:2px solid #06d85f;border-radius:30px;"></img>
-                <span style="color:rgb(0, 255, 221)" id="dshd_name">NAME</span>
-                <span style="color:rgb(104, 104, 92);font-size: small;" id="dshd_uname">@username</span>
-                <span style="color:rgb(251, 255, 0)" id="dshd_batch">BATCH</span>
-            </div>
-            <hr style="width: 100%;">
-            <div class="flex_type"
-                style="flex-direction: column;align-items: center;overflow-y: scroll;width: 30vw;height:250px;max-width: 250px;">
-                <div class="dshbox_v2 " id="tmt_btn">Time Table</div>
-                <div class="dshbox_v2" id="chp_btn">Chapters</div>
-                <div class="dshbox_v2" id="tstinf_btn">Test Infos</div>
-                <div class="dshbox_v2" id="usn_btn" onclick="window.location.hash = '/usernotes/'">Your Notes</div>
-                <div class="dshbox_v2" id="tpc_btn" style="display: none;">Topics</div>
-                <div class="dshbox_v2" id="lvq_btn" style="display:none">Live Quiz</div>
-                <div class="dshbox_v2" id="frm_btn">Forum</div>
-                <div class="dshbox_v2" id="qba_btn" style="display: none;">Question Bank</div>
-                <div class="dshbox_v2" id="sim_btn">Simulations</div>
-                <div class="dshbox_v2" id="cyb_btn">Cyberhunts</div>
-                <div id="adminonly" style="display:none;flex-direction:column;">
-                    <div class="dshbox_v2" id="adi_btn">Admin Functions</div>
-                    <div class="dshbox_v2" id="usc_btn">Users</div>
-                </div>
-            </div>
-            <hr style="width: 100%;">
-            <span style="font-size: small;">© 2021-23 Quarkz!</span>
-        </div>
-        <div
-            style="display: flex;flex-direction: row;flex-wrap: wrap;margin-left: 10px;align-items: flex-start;height:100%;margin-top: 15px;justify-content: space-evenly;overflow-y: scroll;">
-            <div id="db_exam_info" class = "db_class" style="max-height: 30vh;">
-                <span style="font-size: 25px;color:yellow">Exam Info</span>
-                <div id="db_exam_list"></div>
-            </div>
-            <div id="db_social_media" class = "db_class">
-                <span style="font-size: 25px;color:yellow">We're on Social Media</span>
-                <span style="font-size: 14px;color:grey;margin-left: 10px;">Follow us, & share with your friends. It motivates us to keep
-                    working hard for you to bring new features. </span>
-                <img style="width:50px;" alt="Youtube Logo" class="rpl"
-                    onclick="window.open('https://www.youtube.com/@quarkz./', '_blank');"
-                    src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAABaCAMAAABHRa6wAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAACcFBMVEUAAAD/Ly//BQX/AAD/ExP/MDD/LS3/LCz/PDz/Z2f/X1//EhL/CAj/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/CAj/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/R0f/Q0P/Wlr/QED/Vlb/PT3/UlL/PDz/UFD/Ojr/Tk7/OTn/TEz/ODj/S0v/Nzf/Skr/Nzf/SUn/Njb/SEj/Njb/SEj/Njb/R0f/NTX/R0f/NTX/R0f/NTX/Rkb/NTX/NTX/AAD/AAD/AAD/CAj/Hh7/HBz/HBz/Gxv/Gxv/Ghr/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/HR3/AAD/AQH/BQX/wcH/EBD/////jY3/X1//7+//MzP/x8f/DQ3/mZn/Zmb/9vb/Ojr/0ND/EhL/oqL/dXX/+vr/QkL/1dX/GRn/qKj/fHz/SUn/3Nz/Hh7/sbH/paX/S0s8CEr+AAAAsHRSTlMAAAAAAAAAAAAAAAAABhMhKzdCUVlkbnqHjpidpqi3us7C1tnP3uLl7uzn18W2saV8ZVtQRjYBHDxaq8HT5vP98uivXkAiBidyrN3ksnkvCpenGaG5VfWCqhXb+kNxs8bp9ESQjLjN8OP5AQ4JIBYxJkE4VUhlVnJlgHSOgJiKoZOpnrKftKu9r8LA9/bYAQ4bJC88R1BYYnB6goqQlZykp7WzvL69xcrJzNrZxqmjGt/aNR4AAAABYktHRLUzDlpLAAAAB3RJTUUH5wEdCycyRsErbAAAAv5JREFUaN7dmudXE1EQxR8bu0KiKCSgggFi1KhRUexKVEQFxV6xYa/Yu2LBrkjvKE0CtmcZe+/df8nNCgfhgLi7z9xznE/58ub+srtvd97MZewP4SNJBl8/o6lzF/+u3QICzZag4O49eoaE9rKGhUfYbLbe9j5y2PvKPyPC+1kdoSH9BwwMDrKYnQGDBg+JHGoy+vkaJMmHqQtpWNTwEYGWkaNGjxk7juuP8dFWh8vinDBxUoyhRe3JsVOmCtBsNqbFxU9vnmJGwr/Uro+Zs5r+97O9I++JOU1cBZP35D0R2Vh/rnf1OXc21Pf3tj7n8b/rG72v3+AuGOYhAHj9kzgfos8X1Om3wuhzvrAWIBYFkFALsAgFsFhS9GNQ+pwbFYAlOIBEBcCMA1iqACzDASz31CqtV+AAlHeRAajPPZVBFBJgJXYT/NoGiUiAJBlgFRJgtQzgQgJYZYA1ahfdFgiwtg1ru07tojt374kjaMfar1e9iOi+MIANrIP6RSTHA0EAG9kmbQD08JEQgM1si0YAosdPBABsZcmaAYie6gfYxrbrACB6phdgB9upC4Cev9AHsIvt1gdA9PKVHoA9bK9eAKLXOgD2sf36AYjeaAY4wA6KAKC37zQCHGKHhQAQvf+gCeAISxEEQPRRC8BRdkwYANEn9bmOsxMCAYg+q82Vyk4KBaAvX9XlOsVOiwUg+qYq1xnxAETfVeQ6+x8CqL0F8IdQ7Db8oTZXKv5FlCIMQOOrGP4xgn+O4QUJvCSDF6Xwshx+MEnWASDkaAY/nMKP5/AGBbxFA29Swdt0+EYlvFULb1bD2/XwgQV8ZAMfWsHHdvjBJXx0Cx9ew8f3eAMD3MIBN7HgbTxwIxPeyoU3s+HtfHhDI97SqVwFrKm1jsJj63VaXI6w6HMiRM/bLzjikv7O1tsofCSp48W0S+kZmVnZObl5+QWFRcUll6+UlpVXVF6tcrura67JUVPtdlddr6woLyu9cbOkuKiwID8vNyc7KzMj/VZap5aMzT8BRpXwJFof0ooAAAAldEVYdGRhdGU6Y3JlYXRlADIwMjMtMDEtMjlUMTE6Mzk6NTArMDA6MDCGz66vAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDIzLTAxLTI5VDExOjM5OjUwKzAwOjAw95IWEwAAACB0RVh0c29mdHdhcmUAaHR0cHM6Ly9pbWFnZW1hZ2ljay5vcme8zx2dAAAAGHRFWHRUaHVtYjo6RG9jdW1lbnQ6OlBhZ2VzADGn/7svAAAAF3RFWHRUaHVtYjo6SW1hZ2U6OkhlaWdodAA5MDwVcVIAAAAXdEVYdFRodW1iOjpJbWFnZTo6V2lkdGgAMTI40I0R3QAAABl0RVh0VGh1bWI6Ok1pbWV0eXBlAGltYWdlL3BuZz+yVk4AAAARdEVYdFRodW1iOjpTaXplADE1NDVC02RgawAAABZ0RVh0VGh1bWI6OlVSSQBmaWxlOi8vUE5HOqYqZyIAAAAASUVORK5CYII=">
-            </div>
-            <div id="db_study_resources" class = "db_class">
-                <span style="font-size: 25px;color:yellow">Additional Study Resources</span>
-                <div class="tlinks_min rpl" onclick="window.location.hash = '/mainsformulas'"><span
-                        style="font-size: 16px;">JEE Mains Formula Sheets</span></div>
-                <div class="tlinks_min rpl" onclick="window.location.hash = '/downloads'"><span
-                        style="font-size: 16px;">FREE PDF Downloads</span></div>
-            </div>
-        </div>`;
-let page_bug_report = `
-<iframe id="bgrep_frame"
-            src="https://docs.google.com/forms/d/e/1FAIpQLSeo2JZDaBApBiTeXmAnkVX60hSuJGHJkd9jsF9ePg0iM9ufjA/viewform?embedded=true"
-            frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>`;
-let page_app_info = `
-<span class="in_t">App Info</span>
-        <pre id="ren_appinf"></pre>`;
-let page_schedule = `
-<span class="in_t">Schedule</span>
-        <iframe id="tmt_frame" width="100%" height="90%" frameborder="0" scrolling="no"></iframe>`;
-let error_page = `
-<span class="in_t">404</span>
-        <hr color="white" width="100%">
-        <span style="font-size: 3vh;">You don't have access to this page.</span>
-        <a class="tst_btn rpl" href="/#/dashboard">Go To Dashboard</a>`;
-let page_notes = `
-<div style="position: fixed;">
-            <embed id="nt_id" style="width: 95vw;height: 90vh;">
-            <div id = "nt_nocontrol">Quarkz!</div>
-        </div>`;
-let page_ariel = `
-<div id="c-output"
-            style="color:yellow;overflow-y: scroll;display: flex;flex-direction: column;height: 80vh;width: 90vw;border: 3px greenyellow solid;padding-left: 6px;">
-
-        </div>
-        <div>
-            <input type="text" id="c-input" class="_in_aq" placeholder="Command">
-            <button class="tst_btn rpl" id="c-exec">Execute</button>
-        </div>`;
-let page_edit_exams = `
-<div id="lqadd" style="display: flex;flex-direction: row;margin:10px;height: 50vh;">
-            <div id="question_list"
-                style="border: 2px lime solid;width: 15vw;height:50vh;display: flex;flex-direction: column;align-items: center;text-align: center;font-size: 3vh;overflow-y: scroll;"
-                class="title-notes"></span>
-            </div>
-            <div
-                style="border: 2px lime solid;width:75vw;display: flex;flex-direction: column;overflow-y: scroll;height:50vh;">
-                <select name="type" id="aq_mode" class="_in_aq col-red" value = "exam">
-                    <option value="exam">Exam</option>
-                </select>
-                <div class="flex_type" id="aq_exams">
-                    <input type="text" id="aq_examname" class="_in_aq" placeholder="Exam Names">
-                    <input type="text" id="aq_examdate" class="_in_aq" placeholder="Exam Dates">
-                    <input type="text" id="aq_examinfo" class="_in_aq" placeholder="Exam Info Link">
-                    <input type="text" id="aq_examsyllabus" class="_in_aq" placeholder="Syllabus Link">
-                </div>
-                <button class="tst_btn rpl" id="aq_re">Remove Entry</button>
-            </div>
-        </div>
-        <button class="tst_btn rpl" id="aq_exam_save">Save/Update Exams</button>
-`;
-let page_updates = `
-<div class = "flex_type" style="flex-direction: row;flex-wrap: wrap;">
-            <div class = "db_class">
-                <span style="font-size: 25px;color:yellow">Release Notes</span>
-                <div id="rel_list" style="overflow-y: scroll;height:80vh; width: 100%; display: block;" class="flex_type"></div>
-            </div>
-            <div class = "db_class">
-                <span style="font-size: 25px;color:yellow">Updates</span>
-                <div id="updt_list" style="overflow-y: scroll;height:80vh; width: 100%; display: block;" class="flex_type"></div>
-            </div>
-        </div>
-
-
-`;
-let page_uploads = `
-<div class = "db_class">
-<span style="font-size: 25px;color:yellow">Upload Files</span>
-        <label for="file" style= "background-color: indigo;color: white;padding: 0.5rem;font-family: sans-serif;border-radius: 0.3rem;cursor: pointer;margin-top: 1rem;" class = "rpl">Choose File To Upload</label>
-        <input type="file" id="file" style="width: 50vw;height: 30px;margin: auto;" hidden>
-        <span id="file_progress"></span>
-        <span id="file_status"></span>
-        <input id="file_link" type="url" class = "_in_aq" style = "width:25vw;" placeholder = "Short URL"  disabled>
-        <input id="file_link_long" type="url" class = "_in_aq" style = "width:25vw;" placeholder = "Long URL" disabled>
-        <span style="font-size: 10px;">Note: File Names Will Be Modified to the following format:</span>
-        <span style="font-size: 10px;">{IP ADDRESS}-{DATE}-{ORIGNAL FILE NAME}</span>
-        <span style="font-size: 10px;">Max File Upload Size: 50mb</span>
-    </div>
-`;
-exports.default = {
-    page_app_info,
-    page_ariel,
-    page_bug_report,
-    page_dashboard,
-    page_notes,
-    page_schedule,
-    error_page,
-    page_edit_exams,
-    page_updates,
-    page_uploads
-};
-
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"g2MAL":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "page_jee_main", ()=>page_jee_main);
-parcelHelpers.export(exports, "page_downloads", ()=>page_downloads);
-parcelHelpers.export(exports, "downloads_render", ()=>downloads_render);
-parcelHelpers.export(exports, "download_links_list", ()=>download_links_list);
-let page_jee_main = `
-    <span style="font-size: 5vh;color:yellow" id="fm_title">Mains Formula Sheet</span>
-    <hr color="white" width="100%">
-    <div style="overflow-y: scroll;height:50vh;" class="flex_type">
-    <span class="tlinks rpl" onclick = "window.location.hash = '/notes/PHYFORMULAS'">Physics Formula Sheet</span>
-    <span class="tlinks rpl" onclick = "window.location.hash = '/notes/MATHFORMULAS'">Maths Formula Sheet</span>
-    <span class="tlinks rpl" onclick = "window.location.hash = '/notes/PCHEMNOTES'">Physical Chemistry Formula Sheet</span>
-    <span class="tlinks rpl" onclick = "window.location.hash = '/notes/OCHEMNOTES'">Organic Chemistry Formula Sheet</span>
-    <span class="tlinks rpl" onclick = "window.location.hash = '/notes/ICHEMNOTES'">Inorganic Chemistry Formula Sheet</span>
-    </div>
-    <span style="font-size: 8px;">All PDF's Are Owned by their Respective Owners</span>
-`;
-let page_downloads = `
-<span style="font-size: 5vh;color:yellow" id="fm_title">Downloads</span>
-    <hr color="white" width="100%">
-    <div style="overflow-y: scroll;height:50vh;" class="flex_type">
-      
-    </div>
-`;
-function downloads_render(download_links_list, rendertype) {
-    var jee_html = "";
-    if (rendertype == "formulasheet") jee_html += `<span style="font-size: 5vh;color:yellow" id="fm_title">Mains Formula Sheet</span>`;
-    else jee_html += `<span style="font-size: 5vh;color:yellow" id="fm_title">Downloads</span>`;
-    jee_html += `
-    <hr color="white" width="100%">
-    <div style="overflow-y: scroll;height:50vh;" class="flex_type">`;
-    for(var i = 0; i < download_links_list.length; i++)if (download_links_list[i].type2 == rendertype) {
-        if (download_links_list[i].url == "") jee_html += `<span class="tlinks-2 rpl " onclick = "window.location.hash = '` + download_links_list[i].hashurl + `'"><span class="material-symbols-outlined">` + download_links_list[i].type + `</span>&nbsp;&nbsp;` + download_links_list[i].title + `</span>`;
-        else jee_html += `<span class="tlinks-2 rpl " onclick = "window.open('` + download_links_list[i].url + `','_blank')"><span class="material-symbols-outlined">` + download_links_list[i].type + `</span>&nbsp;&nbsp;` + download_links_list[i].title + `</span>`;
+},{"3514bf9f94528934":"lgJ39"}],"lgJ39":[function(require,module,exports) {
+"use strict";
+var bundleURL = {};
+function getBundleURLCached(id) {
+    var value = bundleURL[id];
+    if (!value) {
+        value = getBundleURL();
+        bundleURL[id] = value;
     }
-    jee_html += ` </div>
-    <span style="font-size: 8px;">All PDF's Marked As <span style="font-size: 8px;" class="material-symbols-outlined">quiet_time_active</span> Are Owned by their Respective Owners</span>`;
-    return jee_html;
+    return value;
 }
-let download_links_list = [
-    {
-        hashurl: "/notes/PHYFORMULAS",
-        title: "Physics Formula Sheet",
-        url: "",
-        type: "quiet_time_active",
-        type2: "formulasheet"
-    },
-    {
-        hashurl: "/notes/MATHFORMULAS",
-        title: "Maths Formula Sheet",
-        url: "",
-        type: "quiet_time_active",
-        type2: "formulasheet"
-    },
-    {
-        hashurl: "/notes/PCHEMNOTES",
-        title: "Physical Chemistry Formula Sheet",
-        url: "",
-        type: "quiet_time_active",
-        type2: "formulasheet"
-    },
-    {
-        hashurl: "/notes/OCHEMNOTES",
-        title: "Organic Chemistry Sheet",
-        url: "",
-        type: "quiet_time_active",
-        type2: "formulasheet"
-    },
-    {
-        hashurl: "/notes/ICHEMNOTES",
-        title: "Inorganic Chemistry Sheet",
-        url: "",
-        type: "quiet_time_active",
-        type2: "formulasheet"
-    },
-    {
-        hashurl: "",
-        title: "Full Chemistry Modules",
-        url: "https://drive.google.com/file/d/1PKwlLjqXESAewAOHFi866uUb72XjooQH/view",
-        type: "quiet_time_active",
-        type2: "downloads"
-    },
-    {
-        hashurl: "",
-        title: "Full Maths Modules",
-        url: "https://drive.google.com/file/d/1_TLdj5e8SG8VFvKu-asEy7RAq4_T85YB/view",
-        type: "quiet_time_active",
-        type2: "downloads"
-    },
-    {
-        hashurl: "",
-        title: "Full Physics Modules",
-        url: "https://drive.google.com/file/d/10NWV6viuY2eru-y1j9MSXmhbl7bZKyOD/view",
-        type: "quiet_time_active",
-        type2: "downloads"
+function getBundleURL() {
+    try {
+        throw new Error();
+    } catch (err) {
+        var matches = ("" + err.stack).match(/(https?|file|ftp|(chrome|moz|safari-web)-extension):\/\/[^)\n]+/g);
+        if (matches) // The first two stack frames will be this function and getBundleURLCached.
+        // Use the 3rd one, which will be a runtime in the original bundle.
+        return getBaseURL(matches[2]);
     }
-];
-exports.default = {
-    page_jee_main,
-    page_downloads,
-    download_links_list,
-    downloads_render
-};
-
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"3VUaP":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "page_finished_test", ()=>page_finished_test);
-let page_finished_test = `
-<span style="font-size: 5vh;color:yellow" id="fti_title">Test Name</span>
-        <hr color="white" width="100%">
-        <div id="fto_overview" style="display: flex;flex-direction: row;flex-wrap:wrap">
-            <div class="fto_box">
-                <div class="fto_box_title">TOTAL MARKS</div>
-                <div class="fto_box_content" id="fto_total">100/100</div>
-            </div>
-            <div class="fto_box">
-                <div class="fto_box_title">CORRECT</div>
-                <div class="fto_box_content"><span id="fto_correct">45</span><span class="fto_small">marks</span></div>
-            </div>
-            <div class="fto_box">
-                <div class="fto_box_title">INCORRECT</div>
-                <div class="fto_box_content"><span id="fto_incorrect">45</span><span class="fto_small">marks</span>
-                </div>
-            </div>
-            <div class="fto_box">
-                <div class="fto_box_title">UNANSWERED</div>
-                <div class="fto_box_content"><span id="fto_unanswered">45</span><span class="fto_small">marks</span>
-                </div>
-            </div>
-            <div class="fto_box">
-                <div class="fto_box_title">RANK</div>
-                <div class="fto_box_content" id="fto_rank">5</div>
-            </div>
-        </div>
-        <hr color="white" width="100%">
-        <div id="fto_overview" style="display: flex;flex-direction: row;flex-wrap:wrap">
-            <button class="tst_btn rpl" id="fto_detail"
-                onclick='window.location.hash = "#/testreport/" + window.location.hash.split("#/finished/")[1]'>Detailed
-                View</button>
-        </div>
-        <div style="display:flex;flex-direction:row;flex-wrap:wrap;">
-            <div style="display:flex;flex-direction:column;flex-wrap:wrap;">
-                <span style="font-size: 3vh;">Section Wise Scores</span>
-                <div id="fto_percents" style="display: flex;flex-direction: column;"></div>
-                <div>Legend: <span style="color:green">Correct</span>&nbsp;<span
-                        style="color:red">Incorrect</span>&nbsp;<span style="color:orange">Unattempted</span></div>
-            </div>
-            <div style="margin-left:20px;display:flex;flex-direction:column;">
-                <span style="font-size: 3vh;">Leaderboard</span>
-                <div id="fto_leaderboard"></div>
-            </div>
-        </div>
-        <div style="display:flex;flex-direction:column;flex-wrap:wrap;">
-            <span style="font-size: 3vh;">Section Wise Time Spent</span>
-            <div id="fto_time" style="display: flex;flex-direction: column;"></div>
-            <div>Legend: <span style="color:green">Correct</span>&nbsp;<span
-                    style="color:red">Incorrect</span>&nbsp;<span style="color:orange">Unattempted</span></div>
-        </div>
-        <div style="display:flex;flex-direction:column;flex-wrap:wrap;">
-            <span style="font-size: 3vh;">Time Spent Per Question</span>
-            <div id="fto_draw" style="display: flex;flex-direction: column;"></div>
-        </div>`;
-exports.default = {
-    page_finished_test
-};
-
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"bKen7":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "page_forum", ()=>page_forum);
-let page_forum = `
-<span style="font-size: 5vh;color:yellow" id="fm_title">Forum</span>
-        <hr width="100%" color="white">
-        <div style="border:hotpink 3px solid;width:80%;">
-            <div id='pinned_msg'
-                style="background-color: rgb(38, 44, 31);color:rgb(21, 209, 209);overflow-y: scroll;height:30px;">Pinned
-                Message:<span id='pinnedtxt'>1</span></div>
-            <div id="forum_live" style="height:60vh;overflow-y: scroll;display: flex;flex-direction: column;">
-            </div>
-        </div>
-
-        <div>
-            <input type="text" id="fm_message" class="_in_aq" placeholder="Message">
-            <button class="tst_btn rpl" id="fm_send">Send</button>
-        </div>
-`;
-exports.default = {
-    page_forum
-};
-
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"kxrBw":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "page_functions", ()=>page_functions);
-let page_functions = `
-<span class="in_t" class="">Functions</span>
-        <div class = "flex_type" style = "flex-direction: row;flex-wrap: wrap;">
-            <div id="fc_topics" class = "db_class">
-                <span style="font-size: 25px;color:yellow">Chapters/Topics</span>
-                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/add/tpc'">Add Topics</div>
-            </div>
-            <div id="fc_sims" class = "db_class">
-                <span style="font-size: 25px;color:yellow">Question Banks/Sims</span>
-                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/add/simulation'">Add Simulations</div>
-                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/add/qubank'">Add Question Bank</div>
-            </div>
-            <div id="fc_tests" class = "db_class">
-                <span style="font-size: 25px;color:yellow">Tests</span>
-                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/add/tests'">Add Test</div>
-                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/update/tests'">Update Test</div>
-            </div>
-            <div id="fc_batch" class = "db_class">
-                <span style="font-size: 25px;color:yellow">Batches</span>
-                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/add/batch'">Add New Batch</div>
-                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/list/batch'">Update Batches</div>
-                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/update/batch'">Update Batches</div>
-            </div>
-            <div id="fc_misc" class = "db_class">
-                <span style="font-size: 25px;color:yellow">Misc</span>
-                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/edit_exams'">Edit Exams</div>
-            </div>
-        </div>
-`;
-exports.default = {
-    page_functions
-};
-
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"l4cy5":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "log", ()=>log);
-function log(title, msg, action, actionname, type) {
-    var no = Math.floor(Math.random() * 10000);
-    var html = `
-    <div id="msg_popup_` + no + `" class="overlay">
-    <div class="popup">
-        <center>
-            <h2 id="msg_popup_txt_` + no + `">Note</h2>
-        </center>
-        <a class="close"
-            onclick="document.getElementById('msg_popup_` + no + `').remove()">&times;</a>
-        <p id="msg_popup_content_` + no + `"></p>
-        <button class="tst_btn rpl" id="msg_action_` + no + `"></button>
-    </div>
-    </div>
-    `;
-    if (type == 1) dE("output").insertAdjacentHTML("beforeend", html);
-    else if (type == 3) {
-        var html = `
-    <div id="msg_popup_` + no + `" class="overlay">
-    <div class="popup">
-        <center>
-            <h2 id="msg_popup_txt_` + no + `">` + title + `</h2>
-        </center>
-        <a class="close"
-            onclick="document.getElementById('msg_popup_` + no + `').remove()">&times;</a>
-        <p id="msg_popup_content_` + no + `">` + msg + `</p>
-        <button class="tst_btn rpl" id="msg_info_` + no + `" onclick = "window.open('` + action + `', '_blank');">Info</button>
-        <button class="tst_btn rpl" id="msg_syllabus_` + no + `" onclick = "window.open('` + actionname + `', '_blank');">Syllabus</button>
-    </div>
-    </div>
-    `;
-        dE("quarkz_body").insertAdjacentHTML("beforeend", html);
-    } else dE("quarkz_body").insertAdjacentHTML("beforeend", html);
-    dE("msg_popup_" + no).style.visibility = "visible";
-    dE("msg_popup_" + no).style.opacity = "1";
-    if (type == 3) return;
-    dE("msg_action_" + no).style.display = "none";
-    document.getElementById("msg_popup_txt_" + no).innerText = title;
-    document.getElementById("msg_popup_content_" + no).innerText = msg;
-    if (action == undefined) action = function() {};
-    else dE("msg_action_" + no).style.display = "block";
-    if (actionname == undefined) actionname = "";
-    dE("msg_action_" + no).onclick = action;
-    dE("msg_action_" + no).innerText = actionname;
-    return "msg_popup_" + no;
+    return "/";
 }
-exports.default = {
-    log
-};
-
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"6nKCl":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "page_login", ()=>page_login);
-let page_login = `
-<div id="lgn_bx">
-    <span class="in_t">Welcome to Quarkz</span>
-    <input type="text" id="lg_uname" class="text_bx_1" placeholder="Username">
-    <input type="password" id="lg_pass" class="text_bx_1" placeholder="Password">
-    <div>
-        <button class="tst_btn rpl" id="sgn_in">Sign In</button>
-        <button class="tst_btn rpl" id="reg_in">Register</button>
-    </div>
-    <span id="lgn_err" class="err_txt">ERROR:Wrong Username Or Password</span>
-    <span class="lgn_c_1"><a href="/#/about">About</a>&nbsp;&nbsp;<a href="/#/legal">Legal</a>&nbsp;&nbsp;<a
-            href="/#/bugreport">Report A Bug</a>
-    </span>
-    <span class="lgn_c_1">
-        <a href="/#/mainsformulas">Formula Sheets</a>&nbsp;&nbsp;
-        <a href="/#/downloads">Downloads</a>
-    </span>
-</div>
-`;
-exports.default = {
-    page_login
-};
-
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"95h6E":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "page_printable", ()=>page_printable);
-let page_printable = `
-<span class=" in_t no-print">Export</span>
-        <hr color="white" width="100%" class="no-print">
-        <span class="no-print"><button class="tst_btn rpl no-print" onclick="print()">Print</button><button
-                class="tst_btn rpl no-print" id="shf_btn">Shuffle</button><button class="tst_btn rpl no-print"
-                id="tsinf_btn">Update Bank
-                Info</button><button class="tst_btn rpl no-print" id="tans_btn">Answers</button><button
-                class="tst_btn rpl no-print" id="tansexpl_btn">Explanation And Answers</button><button
-                class="tst_btn rpl no-print" id="tremove_btn">Remove
-                All</button></span>
-        <hr color="white" width="100%">
-        <span class="in_t_3" id="qb_title">ERROR</span>
-        <hr color="white" width="100%">
-        <div id="pe_tst_info" class="flex_type no-print">
-            <span>Test<input id="pe_tst_type_1" type="checkbox"></span>
-            <span id="">General Instructions<input id="pe_tst_type_2" type="checkbox"></span>
-            <textarea type="answer" id="pe_gi_ins" class="_in_aq" placeholder="General Instructions"></textarea>
-            <div id="pe_tst_mrk">
-                <span>MCQ:<input type="number" id="pe_mcq_pno" class="_in_pq" value="3"><input type="number"
-                        id="pe_mcq_nno" class="_in_pq" value="-1"></span>
-                <span>MCQ Multiple:<input type="number" id="pe_mcmul_pno" class="_in_pq" value="3"><input type="number"
-                        id="pe_mcmul_nno" class="_in_pq" value="-1"></span>
-                <span>Numerical:<input type="number" id="pe_num_pno" class="_in_pq" value="4"><input type="number"
-                        id="pe_num_nno" class="_in_pq" value="0"></span>
-                <span>True Or False:<input type="number" id="pe_taf_pno" class="_in_pq" value="1"><input type="number"
-                        id="pe_taf_fno" class="_in_pq" value="0"></span>
-                <span>Explain:<input type="number" id="pe_exp_pno" class="_in_pq" value="4"><input type="number"
-                        id="pe_exp_nno" class="_in_pq" value="0"></span>
-                <span>Matrix<input type="number" id="pe_mat_pno" class="_in_pq" value="12"><input type="number"
-                        id="pe_mat_nno" class="_in_pq" value="-4"></span>
-            </div>
-        </div>
-        <div id="eqb_instr"><span style="color: green;">General
-                Instructions:&nbsp;&nbsp;</span><span id="equ_gi"></span>
-            <hr color="white" width="100%">
-        </div>
-
-        <div id="eqb_add" type="1">
-        </div>
-
-`;
-exports.default = {
-    page_printable
-};
-
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"2MtJU":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "page_profile", ()=>page_profile);
-let page_profile = `
-<div id="prf_tab_t">
-            <div id="prf_tab_t_t">
-                <img style = "background-color:black;border:2px solid #06d85f;border-radius:30px;" id="prf_tab_t_t_img"></img>
-                <div id="prf_tab_t_hold">
-                    <span id="prf_name"></span>
-                    <span class="prf_det">
-                        <span id="prf_email"></span>&nbsp;•&nbsp;<span id="prf_gender"></span>
-                    </span>
-                    <span class="prf_det">
-                        <span id="prf_phone"></span>&nbsp;•&nbsp;<span id="prf_class"></span>
-                    </span>
-                    <span class="prf_det">
-                        <span id="prf_batch"></span>&nbsp;•&nbsp;<span id="prf_crton"></span>
-                    </span>
-                </div>
-            </div>
-        </div>
-`;
-exports.default = {
-    page_profile
-};
-
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"chYH6":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "page_qbnkvid", ()=>page_qbnkvid);
-let page_qbnkvid = `
-<button id="qbnk_vid_btn" class="tst_btn rpl">Start</button>
-        <button id="qbnk_vid_btn_e" class="tst_btn rpl" style="display: none;">Stop</button>
-        <span style="font-size: 5vh;color:yellow;font-family: Nunito;" id="tb_q_title">Topic Name</span>
-        <hr width="100%" color="white">
-        <div class="div-qbnk">Quarkz!</div>
-        <img alt="Quarkz Logo" src="assets/Quarkz-T.png"
-            style="position:absolute;height:100px;width: 100px;top:0;left:0;z-index: 1;">
-        <div id="qbnk_vid_q" style="display: flex;flex-direction: column;align-items: center;z-index: 2;">
-            <div class="div-qbnk1"><span>Pause The Video If You Need More Time.Each Question Will Be Shown For 10
-                    Seconds.</span><span id="qbnk_timer" style="font-size: 80px;color:rgb(0, 255, 255)">0</span></div>
-            <span style="width: 60vw;"><span id="tb_q_qno" style="color: coral;"></span>
-                <div id="tb_q_qtext" style="width:100%;height:max-content;min-height: 12vh;">Question</div>
-            </span>
-            <div id="tb_q_ans_hold">
-                <input type="answer" id="tb_q_answer" class="_in_aq" placeholder="Answer">
-                <div id="tb_q_mcq_con" class="flex_type">
-                </div>
-                <div id="tb_q_matrix">
-                    <table>
-                        <tr>
-                            <td><span class="tb_q_i1"></span><span class="tb_q_i2"></span></td>
-                        </tr>
-                        <tr>
-                            <td><span class="tb_q_i1"></span><span class="tb_q_i2"></span></td>
-                        </tr>
-                        <tr>
-                            <td><span class="tb_q_i1"></span><span class="tb_q_i2"></span></td>
-                        </tr>
-                        <tr>
-                            <td><span class="tb_q_i1"></span><span class="tb_q_i2"></span></td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-        </div>
-        <div id="qbnk_vid_ans" style="display: flex;flex-direction: column;align-items: center;">
-            <span style="font-size: 5vh;color:yellow;">Answer</span>
-            <div id="tb_q_hint" style="width:80%;height:max-content;min-height: 12vh;"></div>
-            <div id="tb_q_ans" style="height:max-content;min-height: 12vh;"></div>
-            <div id="tb_q_expl" style="width:80%;height:max-content;min-height: 12vh;"></div>
-        </div>
-        <div id="qbnk_vid_title"
-            style="display:flex;flex-direction: column;align-items: center;justify-content: center;height:60vh">
-            <span style="font-size: 15vh;color:yellow;font-family: Nunito;" id="qb_vid_ti"></span>
-        </div>
-        <div id="qbnk_vid_end" style="display:flex;flex-direction: column;align-items: center;justify-content: center;">
-            <span style="font-size: 5vh;color:yellow">Thanks For Watching</span>
-            <span style="font-size: 3vh;color:yellow">Subscribe To Quarkz! For More Such Videos</span>
-
-        </div>`;
-exports.default = {
-    page_qbnkvid
-};
-
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"kcVux":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "page_register", ()=>page_register);
-let page_register = `
-<span class="in_t">Register</span>
-        <div class = "db_class">
-        <span style="font-size: 25px;color:yellow">Personal Info</span>
-        <input type="text" id="rg_name" class="_in_reg" placeholder="Name">
-        <div style = "display:flex;flex-direction:row">
-        <label for="rg_dob">Date:&nbsp;&nbsp;</label>
-        <input name = "rg_dob" type="date" id="rg_dob" class="_in_reg">
-        </div>
-        <div style = "display:flex;flex-direction:row">
-        <label for="class">Class:&nbsp;&nbsp;</label>
-        <select name="class" id="rg_class">
-            <option value="6">6</option>
-            <option value="7">7</option>
-            <option value="8">8</option>
-            <option value="9">9</option>
-            <option value="10">10</option>
-            <option value="11">11</option>
-            <option value="12">12</option>
-        </select>
-        </div>
-        <div style = "display:flex;flex-direction:row">
-        <label for="gender">Gender:&nbsp;&nbsp;</label>
-        <select name="gender" id="rg_gender">
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-        </select>
-        </div>
-        </div>
-        <div class = "db_class">
-        <span style="font-size: 25px;color:yellow">Account Info</span>
-        <input type="tel" id="rg_mbleno" class="_in_reg" placeholder="Mobile No">
-        <input type="text" id="rg_uname" class="_in_reg" placeholder="Email Address">
-        <input type="password" id="rg_pass" class="_in_reg" placeholder="Password">
-        <input type="password" id="rg_pass1" class="_in_reg" placeholder="Confirm Password">
-        </div>
-        <button class="tst_btn rpl" id="rg_in">Register</button>
-
-`;
-
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"fvpoO":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "page_settings", ()=>page_settings);
-let page_settings = `
-<span class="in_t">Settings</span>
-        <hr color="white" width="100%">
-        <div class = "flex_type" style = "flex-direction: row;flex-wrap: wrap;">
-            <div id="st_accinfo" class = "db_class">
-                <span style="font-size: 25px;color:yellow">Account Info</span>
-                <button id="pass_rst_btn" class="tst_btn rpl">Reset/Change Password</button>
-            </div>
-            <div id="st_notif" class = "db_class">
-                <span style="font-size: 25px;color:yellow">Notifications</span>
-                <button id="notif_btn" class="tst_btn rpl" disabled>Enable Notifications</button>
-            </div>
-            <div id="st_rateapp" class = "db_class">
-                <span style="font-size: 25px;color:yellow">Rate Our App!</span>
-                <div id="stars">
-                <span class="star" data-value="1">&#9733;</span>
-                <span class="star" data-value="2">&#9733;</span> 
-                <span class="star" data-value="3">&#9733;</span>
-                <span class="star" data-value="4">&#9733;</span>
-                <span class="star" data-value="5">&#9733;</span>
-                </div>
-                <textarea placeholder="This App was Very Useful!" style="height: 50px;resize: none;" id="rate_comment"></textarea>
-                <button id="sub_rat_btn" class="tst_btn rpl">Submit Rating</button>
-            </div>
-            <div id="st_prftype" class = "db_class">
-                <span style="font-size: 25px;color:yellow">Profile Picture Type</span>
-                <div style ="display:flex;flex-direction:row;flex-wrap:wrap;">
-                <img style = "border:2px solid #06d85f;border-radius:30px;width:100px;height:100px;" class = "prf_typ" id="prf_typ_1"></img>
-                <img style = "border:2px solid #06d85f;border-radius:30px;width:100px;height:100px;" class = "prf_typ" id="prf_typ_2"></img>
-                <img style = "border:2px solid #06d85f;border-radius:30px;width:100px;height:100px;" class = "prf_typ" id="prf_typ_3"></img>
-                </div>
-                <span style = "font-size:12px">Changing your Profile Picture only changes on this Browser. These Pictures are generated using Hashes/Initials of your Names.</span>
-            </div>
-        </div>`;
-exports.default = {
-    page_settings
-};
-
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"7kmTm":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "page_edit_sims", ()=>page_edit_sims);
-parcelHelpers.export(exports, "page_sims", ()=>page_sims);
-parcelHelpers.export(exports, "page_list_sims", ()=>page_list_sims);
-let page_edit_sims = `
-<span class="in_t" class="">Add/Edit Simulation</span>
-        <input type="text" id="aq_simname" class="_in_aq" placeholder="Simulation Name">
-        <input type="url" id="aq_simurl" class="_in_aq" placeholder="Simulation URL">
-        <input type="text" id="aq_simprov" class="_in_aq" placeholder="Simulation Provider">
-        <input type="text" id="aq_simlicense" class="_in_aq" placeholder="Simulation License">
-        <select name="type" id="aq_simsubj" class="_in_aq col-red">
-            <option value="physics">Physics</option>
-            <option value="chemistry">Chemistry</option>
-            <option value="maths">Maths</option>
-            <option value="biology">Biology</option>
-            <option value="computer">Computer</option>
-            <option value="statistics">Statistics</option>
-            <option value="unfiled">Unfiled</option>
-        </select>
-        <button class="tst_btn rpl" id="aq_sims_save">Save</button>
-
-`;
-let page_sims = `
-<span class="in_t">Simulations</span>
-        <hr color="white" width="100%">
-        <div style="display: flex;flex-direction: row;flex-wrap: wrap;"><span class="in_t" id="sms_name">Sim
-                Name</span><span style="font-size: 2vh;" id="sms_prov">Sim Name</span><button class="tst_btn rpl" id="sms_edit" style="display: none;"
-                onclick='window.location.hash = "#/edit_sim/" + window.location.hash.split("#/sims/")[1]'>Edit
-                Sim</button></div>
-        <div>
-            <iframe id="sim_frame" frameborder="0"
-                style="width:80vw;height:70vh;background-color: black;color:white;scroll-behavior: smooth;"></iframe>
-        </div>
-        `;
-let page_list_sims = `
-<span class="in_t">Simulations List</span>
-        <hr color="white" width="100%">
-        <div style="display: flex;flex-direction: row;flex-wrap: wrap;">
-            <button class="tst_btn rpl" id="psims">Physics</button>
-            <button class="tst_btn rpl" id="csims">Chemistry</button>
-            <button class="tst_btn rpl" id="msims">Maths</button>
-            <button class="tst_btn rpl" id="bsims">Biology</button>
-            <button class="tst_btn rpl" id="cosims">Computer</button>
-            <button class="tst_btn rpl" id="ssims">Statistics</button>
-            <button class="tst_btn rpl" id="usims">Unfiled</button>
-        </div>
-        <div id="sim_cont" style="overflow-y: scroll;height:50vh;" class="flex_type">
-        </div>`;
-exports.default = {
-    page_edit_sims,
-    page_list_sims,
-    page_sims
-};
-
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"7hktz":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "page_test_instructions", ()=>page_test_instructions);
-let page_test_instructions = `
-<span class="in_t">Test Instructions</span>
-        <hr color="white" width="100%">
-        <div style="width:80vw;overflow-y: scroll;border:yellow 3px solid;display: flex;flex-direction: column;">
-            <span style="font-size:5vh;text-align: center;">Please Read The Instructions And Terms Carefully</span>
-            <span style="font-size:18px;color:yellow;">General Instructions:</span>
-            <ol style="font-size: 14px;">
-                <li>The Exam Must Be Completed In 1 Sitting. You Will Be Able To Open This Test Window Only Once. </li>
-                <li>Read Every Question Carefully And Select Your Answer and Try To Answer As Many Questions As Possible
-                    In The Exam.</li>
-                <li>The Questions Palette displayed on the right side of screen will show the status of each question
-                    using one of the following symbols:</li>
-                <div>
-                    <div style="margin:9px"><span class="tts_notvisit">12</span>You have not visited the question yet.
-                    </div>
-                    <div style="margin:9px"><span class="tts_notanswer">21</span>You have not answered the question.
-                    </div>
-                    <div style="margin:9px"><span class="tts_answered">45</span>You have answered the question.</div>
-                    <div style="margin:9px"><span class="tts_review">30</span>You have NOT answered the question, but
-                        have marked the question for review.</div>
-                    <div style="margin:9px"><span class="tts_ansreview">37</span>The question(s) "Answered and Marked
-                        for Review" will be considered for evalution.</div>
-                </div>
-                <li>When the timer reaches zero, the examination will end by itself. You will not be required to end or
-                    submit your examination.</li>
-                <li>Make Sure To Have A Good Internet Connection. Loss in Internet Connectivity may prevent submission
-                    of answers. </li>
-                <li>DO NOT TRY TO Minimise The Full Screen Mode Of The Exam. You Will Recieive 1 Warning For Doing So
-                    After Which Your Test Will End</li>
-            </ol>
-            <hr style = "width:95%">
-            <span style="font-size:18px;color:yellow;">Navigating to a Question:</span>
-            <ol style="font-size:14px;">
-                <li>To view/answer a question, do the following: Click on the question number in the Question Palette at
-                    the right of your screen to go to that numbered question directly. Note that using this option does
-                    NOT save your answer to the current question.</li>
-            </ol>
-            <hr style = "width:95%">
-            <span style="font-size:18px;color:yellow;">Answering a Question:</span>
-            <ol style="font-size:14px;">
-                Procedure for answering a multiple choice type question:
-                <li>To select you answer, click on the button of one of the options.</li>
-                <li>To deselect your chosen answer, click on the button of the chosen option again or click on the Clear
-                    Response button</li>
-                <li>To change your chosen answer, click on the button of another option</li>
-                <li>To save your answer, you MUST click on the Save button.</li>
-                <li>To mark the question for review, click on the Mark for Review button.</li>
-                <li>To change your answer to a question that has already been answered, first select that question for
-                    answering and then follow the procedure for answering that type of question.</li>
-            </ol>
-            <hr style = "width:95%">
-            <span style="font-size:18px;color:yellow;">Navigating through sections:</span>
-            <ol style="font-size:14px;">
-                <li>All Questions are Visible in the Question Pallete along under the respective sections/subjects</li>
-            </ol>
-            <hr style = "width:95%">
-            <span style="font-size:18px;color:yellow;">Test Specific Instructions:</span>
-            <div id = "tsi" style="font-size:14px;">
-            </div>
-            <hr style = "width:95%">
-            <span style="font-size:18px;color:yellow;">Terms And Conditions:</span>
-            <span style="font-size:14px;">By Checking on "I Agree" you Agree to All Terms And Conditions:</span>
-            <ol style="font-size:14px;">
-                <li>I have read and understood all the instructions. </li>
-                <li>I agree that all computer hardware allotted to me are in proper working condition. </li>
-                <li>I declare that i am not in possession of / not wearing / not carrying any prohibited gadget like
-                    mobile phone,bluetooth devices etc. /any prohibited material with me into the Examination Hall.</li>
-                <li>I also agree that I will not tamper with any software/technologies/devices alloted to me while
-                    attempting
-                    this test.
-                </li>
-                <li>I agree that in case of not adhering to the instructions, I shall be liable to be debarred from this
-                    Test and/or to disciplinary action, which may include ban from future Test / Examinations</li>
-            </ol>
-            <div style = "font-size:25px;color:lime;"><input type="checkbox" id = "agree_in" name = "agree_in"><label for="agree_in">I Agree</label></div>
-            <span style="font-size:5vh;text-align: center;">👍 All The Best! 👍</span>
-            <button class="tst_btn rpl" id="tin_start" 
-                onclick='window.location.hash = "#/attempt/" + window.location.hash.split("#/instructions/")[1]' disabled>Start</button>
-        </div>
-`;
-exports.default = {
-    page_test_instructions
-};
-
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"7y3N8":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "page_test_list", ()=>page_test_list);
-parcelHelpers.export(exports, "page_test_v1", ()=>page_test_v1);
-parcelHelpers.export(exports, "page_test_end", ()=>page_test_end);
-let page_test_list = `
-<span class="in_t">Tests</span>
-        <hr color="white" width="100%">
-        <div><button class="tst_btn rpl" id="ti_act">Active Tests</button><button class="tst_btn rpl"
-                id="ti_fin">Finished Tests</button><button class="tst_btn rpl" id="ti_upc">Upcoming Tests</button></div>
-        <div id="testlinks">
-        </div>`;
-let page_test_v1 = `
-<div style="border: grey 2px dashed;flex-direction: row;margin:10px;" class="flex_type">
-            <div style="display: flex;flex-direction: column;width: 60vw;height:80vh;margin:10px;min-width: 300px;">
-                <div id="tt_extrabx" style="display: flex;flex-direction:row;height: 40px;margin:10px;">
-                    <span id="tt_timeleft">00:00:00</span>
-                    <span id="tt_marksaward"></span>
-                    <span id="tt_timespent" style="margin-left:5px;"></span>
-                    <span id="tt_testname" style="width: 100%;text-align: right;margin-left: 5px;">TEST
-                        NAME</span>
-                    <button id="tt_sub" class="tst_btn rpl">Submit</button>
-                </div>
-                <div id="tt_question">
-                    <div style="font-size: larger;">Question <span id="tt_qno">12</span></div>
-                    <hr>
-                    <div id="tt_qtitle">Who Is The President Of India?</div>
-                    <hr>
-                </div>
-                <div id="tt_footer" style="display:flex;">
-                    <button class="tst_btn rpl" id="tt_save">Save</button>
-                    <button class="tst_btn rpl" id="tt_clear">Clear</button>
-                    <button class="tst_btn rpl" id="tt_review">Mark For Review</button>
-                    <button class="tst_btn rpl" id="tt_ansreview">Save And Mark For Review</button>
-                </div>
-            </div>
-            <div>
-                <div id="tt_infobx">
-                    <div style="margin:9px"><span class="tts_notvisit">12</span>Not Visited</div>
-                    <div style="margin:9px"><span class="tts_notanswer">21</span>Not Answered</div>
-                    <div style="margin:9px"><span class="tts_answered">45</span>Answered</div>
-                    <div style="margin:9px"><span class="tts_review">30</span>Review</div>
-                    <div style="margin:9px"><span class="tts_ansreview">37</span>Review And Answered</div>
-                </div>
-                <div id="tt_qnobx">
-                    <div>
-                        <div id="tw_Physics"><span>Physics</span>
-                            <div id="tw_Physics_c"></div>
-                        </div>
-                        <div id="tw_Chemistry"><span>Chemistry</span>
-                            <div id="tw_Chemistry_c"></div>
-                        </div>
-                        <div id="tw_Math"><span>Math</span>
-                            <div id="tw_Math_c"></div>
-                        </div>
-                        <div id="tw_Computer"><span>Computer</span>
-                            <div id="tw_Computer_c"></div>
-                        </div>
-                        <div id="tw_Biology"><span>Biology</span>
-                            <div id="tw_Biology_c"></div>
-                        </div>
-                        <div id="tw_Statistics"><span>Statistics</span>
-                            <div id="tw_Statistics_c"></div>
-                        </div>
-                        <div id="tw_Unfiled"><span>Unfiled</span>
-                            <div id="tw_Unfiled_c"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>`;
-let page_test_end = `
-<span class="in_t" id="te_title">The Test Has Ended</span>
-        <span style="font-size:3vh;">Your Results Will Be Released After<span id="te_endtime"></span></span>
-        <a class="tst_btn rpl" href="/#/dashboard">Go To Dashboard</a>
-        <hr color="white" width="100%">`;
-exports.default = {
-    page_test_end,
-    page_test_list,
-    page_test_v1
-};
-
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"kt253":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "page_toc", ()=>page_toc);
-let page_toc = `
-<span class="in_t">Terms And Conditions</span>
-        <span class="sp_txt">Copyright 2021-23 Quarkz By Mr Techtroid</span>
-        <span class="in_t_2">Last Updated: 04 April 2023(IST)</span>
-<div id="lgl_container">
-    <ol>
-        <h3>A. Acceptance of Terms and Conditions</h3>
-        <li>By using the Quarkz website, you acknowledge and agree to the terms and conditions set forth below. If you do not agree to these terms and conditions, you should not use the Quarkz website.</li>
-        <h3>B. Account Information And User Generated Content</h3>
-        <li>By creating an account on the Quarkz website, you agree to provide accurate and complete information about yourself as requested in the registration form. You also agree to keep your account information up-to-date and secure. </li>
-        <li>All user-generated content on the Quarkz website, including but not limited to quizzes, tests, assignments, notes, and forum posts, may be accessed by Quarkz admins or authorized moderators. When you request account deletion, no user-generated data will be deleted. Instead, the account will be unlinked from our authentication services. However, this data will continue to be accessible to ONLY Quarkz admins.
-        <h3>C. Account Information And User Generated Content</h3>
-        <li>Any content uploaded, published, submitted, or posted by you on the Quarkz platform, including without limitation, text, graphics, images, videos, and audio, will be owned by you, but we are also granted a worldwide, non-exclusive, royalty-free, sublicensable, and transferable license to use, reproduce, distribute, share, display, publish, retain, make available online, and/or electronically transmit such user-generated content as well as technical information collected. You represent and warrant that you have all necessary rights to grant us this license.</li>
-        <h3>D. Code of Conduct</h3>
-        <li>You agree to use the Quarkz website in a lawful and ethical manner. You agree not to engage in any activity that could damage, disable, overburden, or impair the website, or interfere with any other user's access to the website. You agree not to post or transmit any content that is obscene, defamatory, libelous, abusive, discriminatory, or otherwise offensive. You agree not to harass or bully other users on the website.</li>
-        <h3>E. Termination of Access</h3>
-        <li>We reserve the right to terminate access to the Quarkz website, or any part thereof, to any user at any time, without prior notice, for any reason, including without limitation, for a violation of these terms and conditions.</li>
-        <h3>F. Age Restrictions</h3>
-        <li>By creating an account on the Quarkz website, you represent and warrant that you are 13 years of age or older. If you are under 13 years of age, you must obtain permission from your guardians or parents to use the Quarkz website. We do not knowingly collect any personal information from users under 13 years of age. If we become aware that we have collected personal information from a user under 13 years of age, we will take steps to delete that information.</li>
-        <h3>G. Free Use Disclaimer</h3>
-        <li>The Quarkz website may contain copyrighted material that has not been specifically authorized by the copyright owner. Such material is made available for educational purposes under the "fair use" provision of the Copyright Act. Quarkz respects the intellectual property rights of others, and we ask that our users do the same.</li>
-        <li>Copyright Disclaimer under section 107 of the Copyright Act 1976, allowance is made for “fair use”
-            for purposes such as criticism, comment, news reporting, teaching, scholarship, education and
-            research. </li>
-        <h3>H. Licensing And Assets</h3>
-        <li>All codes, graphics, assets, files, and information located on the Quarkz website <span class="sp_txt">quarkz.netlify.app</span> or any of our storage services, such as Firebase, are part of Quarkz. Any usage, reproduction of any of the same without prior consent of owner Mr. Techtroid or Quarkz team is prohibited. </li>
-        <li>YouTube videos used on this website belong to their respective channel owners. Usage of questions and notes are from fair use under education, teaching, and research categories. Simulations used on this website belong to the respective providers.</li>
-        <li>If You Feel Any Content is violating your Copyright and want it to be removed from this site, contact us at the contact us page. We will make sure that we will remove the content in 24 Hours.</li>
-        <h3>I. User Conduct</h3>
-        <li>When using Quarkz, you agree to abide by all applicable laws and regulations, as well as our community guidelines. You also agree to respect the rights and dignity of others and not engage in any conduct that is discriminatory, harassing, or harmful in any way. Any violation of these rules may result in the termination of your account and may also lead to legal action.
-        <h3>J. Indemnification</h3>
-        <li>You agree to indemnify and hold Quarkz, its affiliates, licensors, and their respective directors, officers, agents, and employees, harmless from and against any and all claims, losses, liabilities, damages, costs, and expenses, including reasonable attorneys' fees, arising out of or related to your use of our website, your violation of these Terms and Conditions, or any unauthorized use of your account.</li>
-        <h3>K. Disclaimer of Warranties</h3>
-        <li>Quarkz does not warrant that the site will be error-free, uninterrupted, or secure. You acknowledge and agree that your use of the site is at your own risk. Quarkz makes no representations or warranties of any kind, express or implied, regarding the accuracy, completeness, reliability, suitability, or availability of the site or the information, products, services, or related graphics contained on the site for any purpose. To the fullest extent permitted by law, Quarkz disclaims all warranties, including but not limited to warranties of title, non-infringement, merchantability, and fitness for a particular purpose.</li>
-        <h3>L. Limitation of Liability</h3>
-        <li>In no event shall Quarkz be liable for any direct, indirect, incidental, special, or consequential damages arising out of or in any way connected with your use of or inability to use the site, or for any information, products, services, or related graphics obtained through the site, even if Quarkz has been advised of the possibility of such damages. Some jurisdictions do not allow the exclusion or limitation of liability for incidental or consequential damages, so the above limitation may not apply to you.</li>
-        <h3>M. Governing Law and Jurisdiction</h3>
-        <li>These Terms and Conditions shall be governed by and construed in accordance with the laws of India, without giving effect to any principles of conflicts of law. You agree that any dispute arising from or relating to these Terms and Conditions or your use of the site shall be brought exclusively in the courts located in India, and you hereby consent to the personal jurisdiction and venue of such courts.</li>
-        <h3>N. Termination</h3>
-        <li>We may terminate your access to the site, without cause or notice, which may result in the forfeiture and destruction of all information associated with your account. All provisions of these Terms and Conditions that by their nature should survive termination shall survive termination, including, without limitation, ownership provisions, warranty disclaimers, indemnity, and limitations of liability.</li>
-        <h3>O. Entire Agreement</h3>
-        <li>These Terms and Conditions constitute the entire agreement between you and Quarkz and supersedes all prior or contemporaneous agreements, representations, warranties, and understandings, whether written or oral, relating to the site.</li>
-        <h3>P. Contact Us</h3>
-        <li>If you have any questions or comments about these Terms and Conditions or our website, please contact us through our "Contact Us" page.</li>
-    </ol>
-</div>`;
-exports.default = {
-    page_toc
-};
-
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"eSIhy":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "page_edit_topic", ()=>page_edit_topic);
-parcelHelpers.export(exports, "page_topic", ()=>page_topic);
-let page_edit_topic = `
-<span class="in_t" class="" id="fu_topic_title">Add/Edit Topic</span>
-        <div id="aq_basic" style="flex-direction: column;">
-            <input type="text" id="aq_tpcname" class="_in_aq" placeholder="Tests/Topic/Question Bank Name">
-            <select name="type" id="aq_tpclevel" class="_in_aq col-red">
-                <option value="jee">JEE</option>
-                <option value="neet">NEET</option>
-                <option value="foundation">Foundation</option>
-            </select>
-            <input type="text" id="aq_tpc_chapterid" class="_in_aq" placeholder="Chapter ID">
-            <select name="type" id="aq_tpc_subj" class="_in_aq col-red">
-                <option value="physics">Physics</option>
-                <option value="chemistry">Chemistry</option>
-                <option value="maths">Maths</option>
-                <option value="biology">Biology</option>
-                <option value="computer">Computer</option>
-                <option value="statistics">Statistics</option>
-                <option value="unfiled">Unfiled</option>
-            </select>
-        </div>
-        <div id="aq_test_extra" style="flex-direction: column;">
-            <input type="text" id="aq_tst_batches" class="_in_aq" placeholder="Batch ID">
-            <input type="datetime-local" id="aq_tst_stron" class="_in_aq">
-            <input type="datetime-local" id="aq_tst_endon" class="_in_aq">
-            <input type="text" id="aq_tst_syllabi" class="_in_aq" placeholder="Syllabus">
-            <input type="number" id="aq_tst_timealotted" class="_in_aq" placeholder="Time Alloted">
-            <div class="summernote" id="aq_add_test_instr">Additional Test Instructions</div>
-        </div>
-        <div id="lqadd" style="display: flex;flex-direction: row;margin:10px;height: 50vh;">
-            <div id="question_list"
-                style="border: 2px lime solid;width: 15vw;height:50vh;display: flex;flex-direction: column;align-items: center;text-align: center;font-size: 3vh;overflow-y: scroll;"
-                class="title-notes"></span>
-            </div>
-            <div
-                style="border: 2px lime solid;width:75vw;display: flex;flex-direction: column;overflow-y: scroll;height:50vh;">
-                <select name="type" id="aq_mode" class="_in_aq col-red">
-                    <option value="question">Question</option>
-                    <option value="lesson">Lesson</option>
-                    <option value="exam">Exam</option>
-                </select>
-                <div class="flex_type" id="aq_exams">
-                    <input type="text" id="aq_examname" class="_in_aq" placeholder="Exam Names">
-                    <input type="text" id="aq_examdate" class="_in_aq" placeholder="Exam Dates">
-                    <input type="text" id="aq_examinfo" class="_in_aq" placeholder="Exam Info Link">
-                    <input type="text" id="aq_examsyllabus" class="_in_aq" placeholder="Syllabus Link">
-                </div>
-                <div class="flex_type" id="aq_all" style="align-items: unset;" id="aq_uiad">
-                    <div class="summernote" id="aq_qtext">Question</div>
-                    <input type="text" id="aq_answer" class="_in_aq" placeholder="Answer">
-                    <input type="url" id="aq_yurl" class="_in_aq" placeholder="Youtube ID">
-                    <div class="summernote" id="aq_expl">Explanation</div>
-                    <textarea type="answer" id="aq_hint" class="_in_aq" style="resize: none;overflow-y: scroll;"
-                        placeholder="Hint"></textarea>
-                    <input type="number" id="aq_posmrks" class="_in_aq" placeholder="Marks For Correct">
-                    <input type="number" id="aq_negmrks" class="_in_aq" placeholder="Marks For Incorrect">
-                    <select name="type" id="aq_section" class="_in_aq col-red">
-                        <option value="Physics">Physics</option>
-                        <option value="Chemistry">Chemistry</option>
-                        <option value="Math">Math</option>
-                        <option value="Biology">Biology</option>
-                        <option value="Computer">Computer</option>
-                        <option value="Statistics">Statistics</option>
-                        <option value="Unfiled">Unfiled</option>
-                    </select>
-                </div>
-                <div id="aq_ans_hold">
-                    <select name="type" id="aq_type" class="_in_aq col-red">
-                        <option value="mcq">MCQ</option>
-                        <option value="mcq_multiple">MCQ Multiple</option>
-                        <option value="matrix">Matrix</option>
-                        <option value="numerical">Numerical</option>
-                        <option value="explain">Explain</option>
-                        <option value="fill">Fill In The Blanks</option>
-                    </select>
-                    <div id="aq_mcq_con" class="flex_type">
-                        <div class="aq_mcq_p" onclick="changeColor(this)"><input class="aq_mcq"></div>
-                        <div class="aq_mcq_p" onclick="changeColor(this)"><input class="aq_mcq"></div>
-                        <div class="aq_mcq_p" onclick="changeColor(this)"><input class="aq_mcq"></div>
-                        <div class="aq_mcq_p" onclick="changeColor(this)"><input class="aq_mcq"></div>
-                    </div>
-                    <div id="aq_matrix">
-                        <table>
-                            <tr>
-                                <td><input class="aq_i1"><input class="aq_i2"></td>
-                            </tr>
-                            <tr>
-                                <td><input class="aq_i1"><input class="aq_i2"></td>
-                            </tr>
-                            <tr>
-                                <td><input class="aq_i1"><input class="aq_i2"></td>
-                            </tr>
-                            <tr>
-                                <td><input class="aq_i1"><input class="aq_i2"></td>
-                            </tr>
-                        </table>
-                    </div>
-                    <button class="tst_btn rpl" id="aq_ao">Add Option</button>
-                    <button class="tst_btn rpl" id="aq_ro">Remove Option</button>
-                </div>
-                <button class="tst_btn rpl" id="aq_re">Remove Entry</button>
-            </div>
-        </div>
-        <button class="tst_btn rpl" id="aq_tpc_save">Save/Update Topic</button>
-        <button class="tst_btn rpl" id="aq_qbc_save">Save/Update QBank</button>
-        <button class="tst_btn rpl" id="aq_tst_save">Save/Update Test</button>
-        <button class="tst_btn rpl" id="aq_exam_save">Save/Update Exams</button>
-        <button class="tst_btn rpl" id="aq_export">Export</button>
-
-`;
-let page_topic = `
-<span style="font-size: 3vh;color:lime" id="tp_title">Topic Name</span>
-<span style="font-size: 4vh;color:yellow" id="tp_lsno">Lesson Name</span>
-        <hr width="100%" color="white">
-        <div class="flex_type" style="flex-direction: row;flex-wrap: wrap;">
-            <button class="tst_btn rpl" id="tp_nxt">Next</button>
-            <button class="tst_btn rpl" id="tp_prv">Previous</button>
-            <button class="tst_btn rpl" id="tp_pnt" style="display: none;">Export</button>
-            <button class="tst_btn rpl" id="tp_edt" style="display: none;">Edit</button>
-        </div>
-        <hr width="100%" color="white">
-        <div id="tp_lesson" style="width: 80%;">
-            <div id="tp_full_vid">
-                <!-- <iframe id = "video" style = "width:80%; height: 450px; border-style: solid; ;border-width: 10px;" hidden = "True"  allow = "autoplay"></iframe> -->
-                <div style="pointer-events: none;width:100%;">
-                    <div>
-                        <div id="player" style="width: 100%;"></div>
-                    </div>
-                    <div id="yt_progressBar" style="width:100%;">
-                        <div id="yt_progressBar_in"></div>
-                    </div>
-                </div>
-                <div id="toolbar"
-                    style="border:3px solid grey; border-radius: 10px 10px 10px 10px;padding-left: 5px;padding-right: 5px;">
-                    <span class="material-icons" id="tp_bw_btn" onclick="player.seekTo(player.getCurrentTime()-10)"
-                        title="-10 Seconds">fast_rewind</span>
-                    <span class="material-icons" id="tp_pl_btn" title="Play"
-                        onclick="player.playVideo()">play_arrow</span>
-                    <span class="material-icons" id="tb_pa_btn" title="Pause" onclick="player.pauseVideo()">pause</span>
-                    <span class="material-icons" onclick="player.stopVideo()" id="tb_st_btn" title="Stop">stop</span>
-                    <span class="material-icons" id="tb_fw_btn" onclick="player.seekTo(player.getCurrentTime()+10)"
-                        title="+10 Seconds">fast_forward</span>
-                    <span id="mute" class="material-icons" id="tb_um_btn" onclick="volumetype()"
-                        title="Mute/Unmute">volume_up</span>
-                    <span id="mute" class="material-icons" id="tb_um_btn" title="Mute/Unmute"
-                        onclick="fullscreen()">fit_screen</span>
-                    <span class="material-symbols-outlined" id="tb_wy_btn" onclick="window.open(player.getVideoUrl())"
-                        title="Watch On Youtube">youtube_activity</span>
-                    <input type="range" min="0" max="100" value="50" id="tb_vl_br" style="background-color: grey;"
-                        onchange="volumechange()" oninput="volumechange()">
-                </div>
-            </div>
-            <div>
-                <div id="tp_expl" style="height:max-content;min-height: 12vh;text-align: left;">Explanation</div>
-                <img id="tp_lsimg">
-            </div>
-        </div>
-
-        <div id="tp_question" style="width: 80%;align-items: center;display: flex;flex-direction: column;">
-            <div id="tp_qtext" style="width:80%;height:max-content;min-height: 12vh;">Question</div>
-            <div id="tp_ans_hold">
-                <input type="answer" id="tp_answer" class="_in_aq" placeholder="Answer">
-                <div id="tp_mcq_con" class="flex_type">
-                </div>
-                <div id="tp_matrix">
-                    <table>
-                        <tr>
-                            <td><span class="tp_i1"></span><span class="tp_i2"></span></td>
-                        </tr>
-                        <tr>
-                            <td><span class="tp_i1"></span><span class="tp_i2"></span></td>
-                        </tr>
-                        <tr>
-                            <td><span class="tp_i1"></span><span class="tp_i2"></span></td>
-                        </tr>
-                        <tr>
-                            <td><span class="tp_i1"></span><span class="tp_i2"></span></td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-
-            <div>
-                <button class="tst_btn rpl" id="tp_sbm">Submit</button>
-                <div id="tp_status"></div>
-            </div>
-            <div id="tp_hint" style="display: none;">Hint</div>
-            <div id="tp_e_answer" style="display: none;">Answer</div>
-            <div id="tp_a_expl" style="display: none;">Explanation</div>
-        </div>`;
-exports.default = {
-    page_edit_topic,
-    page_topic
-};
-
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"enRwb":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "page_edit_user", ()=>page_edit_user);
-let page_edit_user = `
-<span class="in_t">Users</span>
-        <hr color="white" width="100%">
-        <div
-            style="border:orangered 3px solid;border-radius: 30px;display: flex;flex-direction: column;align-items: center;width:80%;">
-            <span style="font-size:3vh;color:yellow;width:80%;">Add Users</span><iframe
-                href="index.html#/register"></iframe>
-        </div>
-        <hr color="white" width="50%">
-        <input type="answer" id="us_user" class="_in_aq" placeholder="username">
-
-`;
-exports.default = {
-    page_edit_user
-};
-
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"71ul5":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "page_usernotes", ()=>page_usernotes);
-let page_usernotes = `
-<div id="un_list" style="border:3px solid grey;width:25vw;height:90%"></div>
-        <div id="un_render" style="width:77vw;height:100%">
-            <div id="un_tools" style="width:100%;display: flex;flex-direction: row;flex-wrap: wrap;">
-                <select id="un_rendermode" class="_in_aq" style="width: 100px;color:red;"
-                    value="edit">
-                    <option value="edit">edit</option>
-                    <option value="preview">preview</option>
-                </select>
-                <select id="un_viewership" class="_in_aq" style="width: 100px;color:red;">
-                    <option value="private">private</option>
-                    <option value="public_view">public(view_only)</option>
-                    <option value="public">public</option>
-                </select>
-                <input id="un_title" type="text" class="_in_aq" style="width:20vw;" value="Notes Title">
-                <button id="un_save" class="rpl tst_btn" style="height: 30px;">Save</button>
-                <button id="un_print" class="rpl tst_btn" style="height: 30px;">Print</button>
-                <input id="un_colorpicker" type="color" name="favcolor" value="#ff0000"
-                    style="width:5vw;height:30px;background-color: transparent;border:none" onchange="notesUIHandler()">
-            </div>
-            <div id="un_edit" style="height:90%;width:100%">
-                <div class="summernote" id="un_editable" style="height:90%">Notes</div>
-            </div>
-            <div id="un_preview" style="height:90%;width:100%;overflow:scroll">
-            </div>
-            <iframe style="display: none;" id="un_print_iframe"></iframe>
-        </div>
-`;
-exports.default = {
-    page_usernotes
-};
-
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"56dox":[function(require,module,exports) {
-// Video Creator - https://www.educative.io/edpresso/how-to-create-a-screen-recorder-in-javascript
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "recordScreen", ()=>recordScreen);
-parcelHelpers.export(exports, "createRecorder", ()=>createRecorder);
-parcelHelpers.export(exports, "saveFile", ()=>saveFile);
-async function recordScreen() {
-    return await navigator.mediaDevices.getDisplayMedia({
-        audio: true,
-        video: {
-            mediaSource: "screen"
-        }
-    });
+function getBaseURL(url) {
+    return ("" + url).replace(/^((?:https?|file|ftp|(chrome|moz|safari-web)-extension):\/\/.+)\/[^/]+$/, "$1") + "/";
+} // TODO: Replace uses with `new URL(url).origin` when ie11 is no longer supported.
+function getOrigin(url) {
+    var matches = ("" + url).match(/(https?|file|ftp|(chrome|moz|safari-web)-extension):\/\/[^/]+/);
+    if (!matches) throw new Error("Origin not found");
+    return matches[0];
 }
-function createRecorder(stream, mimeType) {
-    let recordedChunks = [];
-    const mediaRecorder = new MediaRecorder(stream);
-    mediaRecorder.ondataavailable = function(e) {
-        if (e.data.size > 0) recordedChunks.push(e.data);
-    };
-    mediaRecorder.onstop = function() {
-        saveFile(recordedChunks);
-        recordedChunks = [];
-    };
-    mediaRecorder.start(200);
-    return mediaRecorder;
-}
-function saveFile(recordedChunks) {
-    const blob = new Blob(recordedChunks, {
-        type: "video/webm"
-    });
-    let filename = window.prompt("Enter file name"), downloadLink = document.createElement("a");
-    downloadLink.href = URL.createObjectURL(blob);
-    downloadLink.download = `${filename}.webm`;
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    URL.revokeObjectURL(blob); // clear from memory
-    document.body.removeChild(downloadLink);
-}
-exports.default = {
-    saveFile,
-    createRecorder,
-    recordScreen
-};
+exports.getBundleURL = getBundleURLCached;
+exports.getBaseURL = getBaseURL;
+exports.getOrigin = getOrigin;
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"hagNj":[function(require,module,exports) {
+},{}],"hagNj":[function(require,module,exports) {
 "use strict";
 exports.randomBytes = exports.rng = exports.pseudoRandomBytes = exports.prng = require("ac1d8e9445f8b08f");
 exports.createHash = exports.Hash = require("431326302f36a75");
@@ -65653,8 +65924,8 @@ exports.constants = {
 };
 
 },{"ac1d8e9445f8b08f":"8hjhE","431326302f36a75":"2WyL8","993acbed143eb446":"k1utz","d4ff5437158ba9a4":"busIB","885e9906307b2de3":"g38Hg","fbd7d8ba6427a2a1":"d4idn","9a640cae6a65ace9":"hwD3y","c7420bfc94dd7519":"jbRNy","df4cba908ba99ef8":"9Rcg1","6f4f42c261742c56":"h9Rdh","5dffb96c06c10e25":"k3tsT"}],"8hjhE":[function(require,module,exports) {
-var global = arguments[3];
 var process = require("d00bc03b27f31d77");
+var global = arguments[3];
 "use strict";
 // limit of Crypto.getRandomValues()
 // https://developer.mozilla.org/en-US/docs/Web/API/Crypto/getRandomValues
@@ -100929,8 +101200,8 @@ function compare(a, b) {
 }
 
 },{"24db0b4351a55d90":"4Szbv","82e73588098638e9":"e2JgG","ad62b18fee081403":"iaxu0","8433718b602ae08e":"3pDum","f089c5eb8055541a":"e594P","1c3dba0fb1d7d3bc":"2WyL8","4be95d83e50b2d4":"fFkPV","3ac2c1eb722de677":"eW7r9"}],"k3tsT":[function(require,module,exports) {
-var global = arguments[3];
 var process = require("94e2a6a2df722f40");
+var global = arguments[3];
 "use strict";
 function oldBrowser() {
     throw new Error("secure random number generation not supported by this browser\nuse chrome, FireFox or Internet Explorer 11");

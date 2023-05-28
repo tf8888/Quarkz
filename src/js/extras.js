@@ -1,3 +1,4 @@
+
 /*
 Copyright 2021-23 Quarkz By Mr Techtroid
 
@@ -199,6 +200,15 @@ function examlog(examname, dates, examinfo, syllabus) {
   document.getElementById("exam_dates").innerText = dates
   dE("exam_einfo").href = examinfo
   dE("exam_syl").href = syllabus
+}
+ function showqLS(type) {
+  // Get the loading spinner element
+  let loadingSpinner = document.getElementById('loading-spinner');
+  if (type == "s"){
+      loadingSpinner.style.display = 'block';
+  }else{
+      loadingSpinner.style.display = 'none';
+  }
 }
 
 window.beforeunload = function(e){

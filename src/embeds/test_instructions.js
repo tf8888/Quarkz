@@ -1,8 +1,18 @@
 export let page_test_instructions = `
 <span class="in_t">Test Instructions</span>
         <hr color="white" width="100%">
-        <div style="width:80vw;overflow-y: scroll;border:yellow 3px solid;display: flex;flex-direction: column;">
+        <div id = "ti_i" style="width:80vw;overflow-y: scroll;border:yellow 3px solid;display: flex;flex-direction: column;">
             <span style="font-size:5vh;text-align: center;">Please Read The Instructions And Terms Carefully</span>
+            <span style="font-size:18px;color:yellow;">Test Information:</span>
+            <ul style="font-size: 14px;color:white;">
+                <li> Test Name:&nbsp;<span id = "i_name"></span></li>
+                <li> Starts From:&nbsp;<span id = "i_start"></span> </li>
+                <li> Ends At:&nbsp;<span id = "i_end"></span> </li>
+                <li> Time Allotted:&nbsp;<span id = "i_time"></span> </li>
+                <li> Syllabus:&nbsp;<span id = "i_syllabus"></span> </li>
+                <li> Total Marks:&nbsp;<span id = "i_total"></span> </li>
+                <li> No of Questions:&nbsp;<span id = "i_qno"></span> </li>
+            </ul>
             <span style="font-size:18px;color:yellow;">General Instructions:</span>
             <ol style="font-size: 14px;">
                 <li>The Exam Must Be Completed In 1 Sitting. You Will Be Able To Open This Test Window Only Once. </li>

@@ -7,7 +7,7 @@ export let page_test_list = `
         </div>`
 
 export let page_test_v1 = `
-<div style="border: grey 2px dashed;flex-direction: row;margin:10px;" class="flex_type">
+<div style="border: grey 2px dashed;flex-direction: row;margin:10px;" class="flex_type disable-text-selection" onmousedown="return false" onselectstart="return false">
             <div style="display: flex;flex-direction: column;width: 60vw;height:80vh;margin:10px;min-width: 300px;">
                 <div id="tt_extrabx" style="display: flex;flex-direction:row;height: 40px;margin:10px;">
                     <span id="tt_timeleft">00:00:00</span>
@@ -15,6 +15,7 @@ export let page_test_v1 = `
                     <span id="tt_timespent" style="margin-left:5px;"></span>
                     <span id="tt_testname" style="width: 100%;text-align: right;margin-left: 5px;">TEST
                         NAME</span>
+                    <button id="tt_rep" class="tst_btn rpl">Report</button>
                     <button id="tt_sub" class="tst_btn rpl">Submit</button>
                 </div>
                 <div id="tt_question">
@@ -31,6 +32,10 @@ export let page_test_v1 = `
                 </div>
             </div>
             <div>
+                <div id="tt_chgbx">
+                    <button class="tst_btn rpl" id="tt_qp">Q.Paper</button>
+                    <button class="tst_btn rpl" id="tt_instr">Instructions</button>
+                </div>
                 <div id="tt_infobx">
                     <div style="margin:9px"><span class="tts_notvisit">12</span>Not Visited</div>
                     <div style="margin:9px"><span class="tts_notanswer">21</span>Not Answered</div>
@@ -67,7 +72,7 @@ export let page_test_v1 = `
         </div>`
 export let page_test_end = `
 <span class="in_t" id="te_title">The Test Has Ended</span>
-        <span style="font-size:3vh;">Your Results Will Be Released After<span id="te_endtime"></span></span>
+        <span style="font-size:3vh;" id ="te_msg">Your Results Will Be Released After<span id="te_endtime"></span></span>
         <a class="tst_btn rpl" href="/#/dashboard">Go To Dashboard</a>
         <hr color="white" width="100%">`
 
