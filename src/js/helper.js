@@ -208,5 +208,14 @@ export function showLS(type) {
         loadingSpinner.style.display = 'none';
     }
 }
-
-export default { sd, sha256, makeid,mobileCheck,areObjectsEqual,areEqual,getServerTime,fullEle,dE,sortObj,sortObjv2,renderMarkedMath,mergeById,qCorrector,playSoundEffect,showLS}
+export function antiCopyEle(id){
+    dE(id).addEventListener("mousedown",function(){return false})
+    dE(id).addEventListener("selectstart",function(){return false})
+    dE(id).addEventListener("cut",function(){return false})
+    dE(id).addEventListener("copy",function(){return false})
+    dE(id).addEventListener("paste",function(){return false})
+    dE(id).addEventListener("drag",function(){return false})
+    dE(id).addEventListener("drop",function(){return false})
+    dE(id).classList.add("disable-text-selection")
+}
+export default { sd, sha256, makeid,mobileCheck,areObjectsEqual,areEqual,getServerTime,fullEle,dE,sortObj,sortObjv2,renderMarkedMath,mergeById,qCorrector,playSoundEffect,showLS,antiCopyEle}

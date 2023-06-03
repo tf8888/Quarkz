@@ -599,6 +599,7 @@ var _recorder = require("../js/recorder");
 var _d3 = require("d3");
 var _helper = require("../js/helper");
 var _reworkui = require("./reworkui");
+var _admin = require("../embeds/admin");
 if ("serviceWorker" in navigator) navigator.serviceWorker.register(require("611c740a5c685ec2"));
 const firebaseConfig = {
     apiKey: "AIzaSyDN8T7Pmw5e-LzmC3nAHEqI0Uk7FF7y6fc",
@@ -865,7 +866,7 @@ function addTestEvents() {
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
             return now.toISOString().slice(0, 16);
         }
-        (0, _log.qp_test)("", (0, _testInstructions.page_test_instructions));
+        (0, _log.qp_test)("Test Instructions", (0, _testInstructions.page_test_instructions));
         (0, _helper.dE)("tsi").innerHTML = testInfo.instructions;
         (0, _helper.dE)("i_name").innerHTML = testInfo.title;
         (0, _helper.dE)("i_start").innerHTML = dateparser(testInfo.strton.seconds * 1000);
@@ -878,10 +879,13 @@ function addTestEvents() {
         (0, _helper.dE)("tin_start").style.display = "none";
         (0, _helper.dE)("ti_i").style.width = "95%";
         (0, _helper.dE)("container").style.borderColor = "transparent";
+        (0, _helper.dE)("ti_title").innerHTML = "";
+        (0, _helper.dE)("ti_hr").style.display = "none";
     }
     var tt_qp = (0, _helper.dE)("tt_qp").addEventListener("click", qpaper);
     var tt_instr = (0, _helper.dE)("tt_instr").addEventListener("click", qinstr);
     var tprep = (0, _helper.dE)("tt_rep").addEventListener("click", (0, _log.report_stuff));
+    (0, _helper.antiCopyEle)("tt_question");
 }
 function testEvents() {
     function tsave() {
@@ -896,6 +900,7 @@ function testEvents() {
     function tansrev() {
         testOperator("tts_ansreview");
     }
+    (0, _helper.antiCopyEle)("tt_question");
     function sTestHand() {
         (0, _log.log)("Warning", "Are You Sure You Want To End The Test", submitTest, "Yes,Submit", 1);
     }
@@ -919,6 +924,9 @@ function topicEvents() {
     var tprep = (0, _helper.dE)("tp_rep").addEventListener("click", (0, _log.report_stuff));
     var tpsbm = (0, _helper.dE)("tp_sbm").addEventListener("click", checkQuestion);
     var tppnt = (0, _helper.dE)("tp_pnt").addEventListener("click", printStuff);
+    (0, _helper.antiCopyEle)("tp_expl");
+    (0, _helper.antiCopyEle)("tp_qtext");
+    (0, _helper.antiCopyEle)("tp_a_expl");
 }
 function editexamEvents() {
     var aqre = (0, _helper.dE)("aq_re").addEventListener("click", removeEntry);
@@ -965,7 +973,7 @@ function dshHand() {
 }
 var dshbtn = (0, _helper.dE)("dsh_btn").addEventListener("click", dshHand);
 function printableEvents() {
-    document.getElementById("tsinf_btn").addEventListener("change", updateUI);
+    document.getElementById("tsinf_btn").addEventListener("click", updateUI);
     document.getElementById("tans_btn").addEventListener("click", function() {
         for(var i = 0; i < document.getElementsByClassName("q_ans_1").length; i++)document.getElementsByClassName("q_ans_1")[i].style.display = "flex";
     });
@@ -1045,6 +1053,7 @@ function coreManager(newlocation, n1) {
         case "legal":
             handlebox = "legal";
             renderBody((0, _toc.page_toc), "", "");
+            (0, _helper.antiCopyEle)("lgl_container");
             break;
         case "appinfo":
             handlebox = "appinfo";
@@ -1100,6 +1109,11 @@ function coreManager(newlocation, n1) {
         case "add/batch":
             handlebox = "fu_topic";
             newBatch();
+            break;
+        case "list/batch":
+            handlebox = "fu_batch";
+            renderBody((0, _admin.page_batch_list), "height:max-content;", "");
+            renderBatchList();
             break;
         case "uploads":
             handlebox = "uploadEvents";
@@ -1274,6 +1288,12 @@ function coreManager(newlocation, n1) {
         });
         edittopicEvents();
         prepareTopicQBank(4);
+    }
+    if (location1.includes("edit_batch") && iorole == true) {
+        handlebox = "fu_topic";
+        renderBody((0, _admin.page_edit_batch), "", "");
+        prepareBatch();
+        (0, _helper.dE)("aq_batch_save").addEventListener("click", updateBatch);
     }
     if (iorole) {
         if (window.location.hash.includes("dashboard")) (0, _helper.dE)("adminonly").style.display = "flex";
@@ -1658,8 +1678,31 @@ async function newBatch() {
         creMng("edit_batch/" + docRef.id, 1);
     } catch  {}
 }
-async function prepareBatch() {}
-async function updateBatch() {}
+async function prepareBatch() {
+    var docRef = (0, _firestore.doc)(db, "batch", window.location.hash.split("edit_batch/")[1]);
+    var docSnap = await (0, _firestore.getDoc)(docRef);
+    if (docSnap.exists()) {
+        var docRef = docSnap.data();
+        (0, _helper.dE)("aq_batname").value = docRef.name;
+        (0, _helper.dE)("aq_class").value = docRef.class;
+        (0, _helper.dE)("aq_timetable").value = docRef.timetable;
+        function dateparser(var1) {
+            var now = new Date(var1);
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            return now.toISOString().slice(0, 16);
+        }
+        (0, _helper.dE)("aq_tst_delon").value = dateparser(docRef.delon.seconds * 1000);
+    }
+}
+async function updateBatch() {
+    let date = new Date((0, _helper.dE)("aq_tst_delon").value);
+    await (0, _firestore.updateDoc)((0, _firestore.doc)(db, "batch", window.location.hash.split("edit_batch/")[1]), {
+        name: (0, _helper.dE)("aq_batname").value,
+        class: parseInt((0, _helper.dE)("aq_class").value),
+        timetable: (0, _helper.dE)("aq_timetable").value,
+        delon: date
+    });
+}
 async function getBatch() {}
 async function unotes1() {
     await (0, _firestore.updateDoc)((0, _firestore.doc)(db, "usernotes", window.location.hash.split("usernotes/")[1]), {
@@ -1732,8 +1775,10 @@ async function getUserNotesList() {
 }
 async function getPDF() {
     var id = window.location.hash.split("notes/")[1];
+    (0, _helper.showLS)("s");
     (0, _storage.getDownloadURL)((0, _storage.ref)(storage, "public/" + id + ".pdf")).then((url)=>{
         (0, _helper.dE)("nt_id").src = "https://docs.google.com/gview?url=" + encodeURI(url) + "&embedded=true";
+        (0, _helper.dE)("nt_id").onload = (0, _helper.showLS)("d");
     }).catch((error)=>{
         switch(error.code){
             case "storage/object-not-found":
@@ -2490,22 +2535,58 @@ async function printQBank(type) {
     else if (type == 3) fireID = "tests";
     else fireID = "qbank";
     var qbankno = window.location.hash.split("printable/" + fireID + "/")[1];
+    (0, _helper.dE)("eqb_add").innerHTML = "";
     var qbanktitle = (0, _helper.dE)("qb_title");
-    var docRef = (0, _firestore.doc)(db, fireID, qbankno);
-    var docSnap = await (0, _firestore.getDoc)(docRef);
-    if (docSnap.exists()) {
-        var docJSON = docSnap.data();
-        qnos = docJSON.qllist;
-        qbanktitle.innerText = docJSON.name;
+    if (type == 1 || type == 2) {
+        var docRef = (0, _firestore.doc)(db, fireID, qbankno);
+        var docSnap = await (0, _firestore.getDoc)(docRef);
+        if (docSnap.exists()) {
+            var docJSON = docSnap.data();
+            qnos = docJSON.qllist;
+            qbanktitle.innerText = docJSON.name;
+        }
+    } else if (type == 3) {
+        var qlist, alist;
+        var docRef = (0, _firestore.doc)(db, fireID, qbankno);
+        var docSnap = await (0, _firestore.getDoc)(docRef);
+        if (docSnap.exists()) {
+            var docJSON = docSnap.data();
+            qnos = docJSON.qllist;
+            qbanktitle.innerText = docJSON.title;
+            (0, _helper.dE)("pt_ins").innerHTML = `
+      <span style="font-size:18px;color:lime;">Test Information:</span>
+            <ul style="font-size: 14px;color:white;">
+                <li> Time Allotted:&nbsp;<span id = "i_time">` + docJSON.timeallotted + `</span> </li>
+                <li> Syllabus:&nbsp;<span id = "i_syllabus">` + docJSON.syllabus + `</span> </li>
+                <li> Total Marks:&nbsp;<span id = "i_total">` + docJSON.totalmarks + `</span> </li>
+                <li> No of Questions:&nbsp;<span id = "i_qno">` + docJSON.questionnos + `</span></li>
+            </ul>
+      <span style="font-size:18px;color:lime;">Test Specific Instructions:</span>
+      <div id = "tsi" style="font-size:14px;">` + docJSON.instructions + `</div><hr>
+    `;
+        }
+        var docRef2 = (0, _firestore.doc)(db, fireID, qbankno, "questions", "questions");
+        var docSnap2 = await (0, _firestore.getDoc)(docRef2);
+        if (docSnap2.exists()) {
+            var docJSON2 = docSnap2.data();
+            qlist = docJSON2.questions;
+        }
+        var docRef3 = (0, _firestore.doc)(db, fireID, qbankno, "questions", "answers");
+        var docSnap3 = await (0, _firestore.getDoc)(docRef3);
+        if (docSnap3.exists()) {
+            var docJSON3 = docSnap3.data();
+            alist = docJSON3.questions;
+        }
+        qnos = (0, _helper.mergeById)(qlist, alist);
     } else {
         creMng("error_page", 1);
         throw new Error;
     }
     var qnos, qtitle, qtype, qimg;
-    (0, _helper.dE)("eqb_add").innerHTML = "";
     for (let ele of qnos){
         if (ele.mode == "question") {
             var docJSON = ele;
+            ele.id = ele.qid || ele.id;
             qtitle = docJSON.title;
             qtype = docJSON.type;
             qimg = docJSON.img;
@@ -2526,7 +2607,10 @@ async function printQBank(type) {
                 for (let ele1 of docJSON.answer)ans += "<div class = 'qb_mcq_ans'>" + ele1 + "</div>";
             }
             if (qtype == "taf") qrt = '<ol class = "qb_mcq_exp" type = "a"><li>True</li><li>False</li></ol>';
-            if (qtype == "explain" || qtype == "numerical" || qtype == "fill") qrt = "";
+            if (qtype == "explain" || qtype == "numerical" || qtype == "fill") {
+                qrt = "";
+                ans += ele.answer.toString() + "</span>";
+            }
             if (qtype == "matrix") {
                 var qop1 = docJSON.op1;
                 var qop2 = docJSON.op2;
@@ -2875,6 +2959,28 @@ async function lquizinit() {
     if (docSnap.exists()) var docJSON = docSnap.data();
     else throw new Error;
 }
+async function renderBatchList() {
+    if (batchList.length <= 0) {
+        const q = (0, _firestore.query)((0, _firestore.collection)(db, "batch"));
+        const querySnapshot = await (0, _firestore.getDocs)(q);
+        querySnapshot.forEach((doc)=>{
+            var tfg = doc.data();
+            batchList.push({
+                id: doc.id,
+                crton: tfg.crton,
+                delon: tfg.delon,
+                class: tfg.class,
+                name: tfg.name
+            });
+        });
+    }
+    for(let i = 0; i < batchList.length; i++){
+        let ele = batchList[i];
+        var crton = new Date(ele.crton * 1000);
+        var delon = new Date(ele.delon * 1000);
+        (0, _helper.dE)("batchlinks").innerHTML += '<div class="tlinks-3" id = "' + ele.id + '" onclick = "window.location.hash = `#/edit_batch/' + ele.id + '`"><center><span class = "t_title">' + ele.name + '</span></center><div class = "tl"><span class = "t_stron">Created On:' + crton.toISOString() + '</span><span class ="t_endon">Ends At:' + delon.toISOString() + '</div><div class = "tl"><span>Class:' + ele.class + "</span></div></div>";
+    }
+}
 async function getTestList(batchid, userid) {
     if (testList != []) {
         const q = (0, _firestore.query)((0, _firestore.collection)(db, "tests"), (0, _firestore.where)("batch", "array-contains", batchid));
@@ -2885,7 +2991,10 @@ async function getTestList(batchid, userid) {
                 title: tfg.title,
                 strton: tfg.strton.seconds,
                 endon: tfg.endon.seconds,
-                testid: doc.id
+                testid: doc.id,
+                qno: tfg.questionnos,
+                marks: tfg.totalmarks,
+                alotted: tfg.timeallotted
             });
         });
     }
@@ -2940,7 +3049,7 @@ function renderTestList(type) {
     for (var ele of renList){
         var strson = new Date(ele.strton * 1000);
         var endson = new Date(ele.endon * 1000);
-        var output = '<div class="tlinks" id = "' + ele.testid + '"><span class = "t_title">' + ele.title + '</span><span class = "t_stron">Starts At:' + strson + '</span><span class ="t_endon">Ends At:' + endson + "</div>";
+        var output = '<div class="tlinks-3" id = "' + ele.testid + '"><center><span class = "t_title">' + ele.title + '</span></center><div class = "tl"><span class = "t_stron">Starts At:' + strson.toISOString() + '</span><span class ="t_endon">Ends At:' + endson.toISOString() + '</div><div class = "tl"><span>Marks:' + ele.marks + "</span><span>Allotted Time:" + parseInt(ele.alotted) / 60 + "&nbsp;Mins</span><span>Questions:" + ele.qno + "</span></div></div>";
         if (type != "finished") {
             (0, _helper.dE)("testlinks").insertAdjacentHTML("beforeend", output);
             (0, _helper.dE)(ele.testid).addEventListener("click", testClicker);
@@ -4123,6 +4232,7 @@ var curr_qlid = "";
 var editqllist = [];
 var autosignin = 0;
 var testList = [];
+var batchList = [];
 var activeTestList = [];
 var upcomingTestList = [];
 var finishedTestList = [];
@@ -4154,7 +4264,7 @@ bc.onmessage = (event)=>{
     if (event.data == `QZCODE-REPORT`) reportHandler();
 };
 
-},{"firebase/app":"aM3Fo","firebase/auth":"79vzg","firebase/firestore":"8A4BC","firebase/storage":"8WX7E","../embeds/about":"gCJDO","../embeds/chapter":"fMnHP","../embeds/cyb":"6uKbY","../embeds/dashboard":"hkEZ0","../embeds/downloads":"g2MAL","../embeds/finished_test":"3VUaP","../embeds/forum":"bKen7","../embeds/functions":"kxrBw","../embeds/log":"l4cy5","../embeds/login":"6nKCl","../embeds/printable":"95h6E","../embeds/profile":"2MtJU","../embeds/qbnkvid":"chYH6","../embeds/register":"kcVux","../embeds/settings":"fvpoO","../embeds/sims":"7kmTm","../embeds/test_instructions":"7hktz","../embeds/tests":"7y3N8","../embeds/toc":"kt253","../embeds/topics":"eSIhy","../embeds/user":"enRwb","../embeds/usernotes":"71ul5","../js/recorder":"56dox","d3":"17XFv","../js/helper":"lVRAz","./reworkui":"66uq8","611c740a5c685ec2":"iujZH","b15128b8ff66a42":"hagNj"}],"aM3Fo":[function(require,module,exports) {
+},{"firebase/app":"aM3Fo","firebase/auth":"79vzg","firebase/firestore":"8A4BC","firebase/storage":"8WX7E","../embeds/about":"gCJDO","../embeds/chapter":"fMnHP","../embeds/cyb":"6uKbY","../embeds/dashboard":"hkEZ0","../embeds/downloads":"g2MAL","../embeds/finished_test":"3VUaP","../embeds/forum":"bKen7","../embeds/functions":"kxrBw","../embeds/log":"l4cy5","../embeds/login":"6nKCl","../embeds/printable":"95h6E","../embeds/profile":"2MtJU","../embeds/qbnkvid":"chYH6","../embeds/register":"kcVux","../embeds/settings":"fvpoO","../embeds/sims":"7kmTm","../embeds/test_instructions":"7hktz","../embeds/tests":"7y3N8","../embeds/toc":"kt253","../embeds/topics":"eSIhy","../embeds/user":"enRwb","../embeds/usernotes":"71ul5","../js/recorder":"56dox","d3":"17XFv","../js/helper":"lVRAz","./reworkui":"66uq8","../embeds/admin":"1R5ZA","611c740a5c685ec2":"iujZH","b15128b8ff66a42":"hagNj"}],"aM3Fo":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _app = require("@firebase/app");
@@ -5428,8 +5538,8 @@ parcelHelpers.export(exports, "validateCallback", ()=>validateCallback);
 parcelHelpers.export(exports, "validateContextObject", ()=>validateContextObject);
 parcelHelpers.export(exports, "validateIndexedDBOpenable", ()=>validateIndexedDBOpenable);
 parcelHelpers.export(exports, "validateNamespace", ()=>validateNamespace);
-var global = arguments[3];
 var process = require("d8acfab35ed80fa1");
+var global = arguments[3];
 const CONSTANTS = {
     /**
      * @define {boolean} Whether this is the client Node.js SDK.
@@ -40849,19 +40959,19 @@ let page_dashboard = `
 <div id="sidebar">
             <div id="options_tab"
                 style="display: flex;flex-direction: row;align-items:center;height:50px;justify-content: space-evenly;width: 25vw;max-width: 250px;">
-                <span class="material-symbols-outlined rpl" onclick="window.location = '#/settings'">settings</span>
-                <span class="material-symbols-outlined rpl" id="abt_btn">info</span>
-                <span class="material-symbols-outlined rpl" onclick="window.location = '#/updates'">notifications</span>
-                <span class="material-symbols-outlined rpl" id="prf_btn">account_circle</span>
-                <span class="material-symbols-outlined rpl" id="lgt_btn">logout</span>
+                <span class="material-symbols-outlined rpl rpl-2" onclick="window.location = '#/settings'">settings</span>
+                <span class="material-symbols-outlined rpl rpl-2" id="abt_btn">info</span>
+                <span class="material-symbols-outlined rpl rpl-2" onclick="window.location = '#/updates'">notifications</span>
+                <span class="material-symbols-outlined rpl rpl-2" id="prf_btn">account_circle</span>
+                <span class="material-symbols-outlined rpl rpl-2" id="lgt_btn">logout</span>
             </div>
             <hr style="width: 100%;">
             <div id="profile_tab"
                 style="display: flex;flex-direction: column;align-items: center;height:170px;max-width: 250px;">
                 <img id="prf_tab_img" style="width: 100px;height:100px;object-fit: cover;margin:5px;border:2px solid #06d85f;border-radius:30px;"></img>
-                <span style="color:rgb(0, 255, 221)" id="dshd_name">NAME</span>
-                <span style="color:rgb(104, 104, 92);font-size: small;" id="dshd_uname">@username</span>
-                <span style="color:rgb(251, 255, 0)" id="dshd_batch">BATCH</span>
+                <span style="color:var(--clr4)" id="dshd_name">NAME</span>
+                <span style="color:var(--clr5);font-size: small;" id="dshd_uname">@username</span>
+                <span style="color:var(--yellow)" id="dshd_batch">BATCH</span>
             </div>
             <hr style="width: 100%;">
             <div class="flex_type"
@@ -40887,19 +40997,19 @@ let page_dashboard = `
         <div
             style="display: flex;flex-direction: row;flex-wrap: wrap;margin-left: 10px;align-items: flex-start;height:100%;margin-top: 15px;justify-content: space-evenly;overflow-y: scroll;">
             <div id="db_exam_info" class = "db_class" style="max-height: 30vh;">
-                <span style="font-size: 25px;color:yellow">Exam Info</span>
+                <span style="font-size: 25px;color:var(--yellow)">Exam Info</span>
                 <div id="db_exam_list"></div>
             </div>
             <div id="db_social_media" class = "db_class">
-                <span style="font-size: 25px;color:yellow">We're on Social Media</span>
+                <span style="font-size: 25px;color:var(--yellow)">We're on Social Media</span>
                 <span style="font-size: 14px;color:grey;margin-left: 10px;">Follow us, & share with your friends. It motivates us to keep
                     working hard for you to bring new features. </span>
-                <img style="width:50px;" alt="Youtube Logo" class="rpl"
+                <img style="width:50px;" alt="Youtube Logo" class="rpl rpl-2"
                     onclick="window.open('https://www.youtube.com/@quarkz./', '_blank');"
                     src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAABaCAMAAABHRa6wAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAACcFBMVEUAAAD/Ly//BQX/AAD/ExP/MDD/LS3/LCz/PDz/Z2f/X1//EhL/CAj/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/CAj/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/R0f/Q0P/Wlr/QED/Vlb/PT3/UlL/PDz/UFD/Ojr/Tk7/OTn/TEz/ODj/S0v/Nzf/Skr/Nzf/SUn/Njb/SEj/Njb/SEj/Njb/R0f/NTX/R0f/NTX/R0f/NTX/Rkb/NTX/NTX/AAD/AAD/AAD/CAj/Hh7/HBz/HBz/Gxv/Gxv/Ghr/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/HR3/AAD/AQH/BQX/wcH/EBD/////jY3/X1//7+//MzP/x8f/DQ3/mZn/Zmb/9vb/Ojr/0ND/EhL/oqL/dXX/+vr/QkL/1dX/GRn/qKj/fHz/SUn/3Nz/Hh7/sbH/paX/S0s8CEr+AAAAsHRSTlMAAAAAAAAAAAAAAAAABhMhKzdCUVlkbnqHjpidpqi3us7C1tnP3uLl7uzn18W2saV8ZVtQRjYBHDxaq8HT5vP98uivXkAiBidyrN3ksnkvCpenGaG5VfWCqhXb+kNxs8bp9ESQjLjN8OP5AQ4JIBYxJkE4VUhlVnJlgHSOgJiKoZOpnrKftKu9r8LA9/bYAQ4bJC88R1BYYnB6goqQlZykp7WzvL69xcrJzNrZxqmjGt/aNR4AAAABYktHRLUzDlpLAAAAB3RJTUUH5wEdCycyRsErbAAAAv5JREFUaN7dmudXE1EQxR8bu0KiKCSgggFi1KhRUexKVEQFxV6xYa/Yu2LBrkjvKE0CtmcZe+/df8nNCgfhgLi7z9xznE/58ub+srtvd97MZewP4SNJBl8/o6lzF/+u3QICzZag4O49eoaE9rKGhUfYbLbe9j5y2PvKPyPC+1kdoSH9BwwMDrKYnQGDBg+JHGoy+vkaJMmHqQtpWNTwEYGWkaNGjxk7juuP8dFWh8vinDBxUoyhRe3JsVOmCtBsNqbFxU9vnmJGwr/Uro+Zs5r+97O9I++JOU1cBZP35D0R2Vh/rnf1OXc21Pf3tj7n8b/rG72v3+AuGOYhAHj9kzgfos8X1Om3wuhzvrAWIBYFkFALsAgFsFhS9GNQ+pwbFYAlOIBEBcCMA1iqACzDASz31CqtV+AAlHeRAajPPZVBFBJgJXYT/NoGiUiAJBlgFRJgtQzgQgJYZYA1ahfdFgiwtg1ru07tojt374kjaMfar1e9iOi+MIANrIP6RSTHA0EAG9kmbQD08JEQgM1si0YAosdPBABsZcmaAYie6gfYxrbrACB6phdgB9upC4Cev9AHsIvt1gdA9PKVHoA9bK9eAKLXOgD2sf36AYjeaAY4wA6KAKC37zQCHGKHhQAQvf+gCeAISxEEQPRRC8BRdkwYANEn9bmOsxMCAYg+q82Vyk4KBaAvX9XlOsVOiwUg+qYq1xnxAETfVeQ6+x8CqL0F8IdQ7Db8oTZXKv5FlCIMQOOrGP4xgn+O4QUJvCSDF6Xwshx+MEnWASDkaAY/nMKP5/AGBbxFA29Swdt0+EYlvFULb1bD2/XwgQV8ZAMfWsHHdvjBJXx0Cx9ew8f3eAMD3MIBN7HgbTxwIxPeyoU3s+HtfHhDI97SqVwFrKm1jsJj63VaXI6w6HMiRM/bLzjikv7O1tsofCSp48W0S+kZmVnZObl5+QWFRcUll6+UlpVXVF6tcrura67JUVPtdlddr6woLyu9cbOkuKiwID8vNyc7KzMj/VZap5aMzT8BRpXwJFof0ooAAAAldEVYdGRhdGU6Y3JlYXRlADIwMjMtMDEtMjlUMTE6Mzk6NTArMDA6MDCGz66vAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDIzLTAxLTI5VDExOjM5OjUwKzAwOjAw95IWEwAAACB0RVh0c29mdHdhcmUAaHR0cHM6Ly9pbWFnZW1hZ2ljay5vcme8zx2dAAAAGHRFWHRUaHVtYjo6RG9jdW1lbnQ6OlBhZ2VzADGn/7svAAAAF3RFWHRUaHVtYjo6SW1hZ2U6OkhlaWdodAA5MDwVcVIAAAAXdEVYdFRodW1iOjpJbWFnZTo6V2lkdGgAMTI40I0R3QAAABl0RVh0VGh1bWI6Ok1pbWV0eXBlAGltYWdlL3BuZz+yVk4AAAARdEVYdFRodW1iOjpTaXplADE1NDVC02RgawAAABZ0RVh0VGh1bWI6OlVSSQBmaWxlOi8vUE5HOqYqZyIAAAAASUVORK5CYII=">
             </div>
             <div id="db_study_resources" class = "db_class">
-                <span style="font-size: 25px;color:yellow">Additional Study Resources</span>
+                <span style="font-size: 25px;color:var(--yellow)">Additional Study Resources</span>
                 <div class="tlinks_min rpl" onclick="window.location.hash = '/mainsformulas'"><span
                         style="font-size: 16px;">JEE Mains Formula Sheets</span></div>
                 <div class="tlinks_min rpl" onclick="window.location.hash = '/downloads'"><span
@@ -40923,12 +41033,12 @@ let error_page = `
         <a class="tst_btn rpl" href="/#/dashboard">Go To Dashboard</a>`;
 let page_notes = `
 <div style="position: fixed;">
-            <embed id="nt_id" style="width: 95vw;height: 90vh;">
+            <iframe id="nt_id" style="width: 95vw;height: 90vh;"></iframe>
             <div id = "nt_nocontrol">Quarkz!</div>
         </div>`;
 let page_ariel = `
 <div id="c-output"
-            style="color:yellow;overflow-y: scroll;display: flex;flex-direction: column;height: 80vh;width: 90vw;border: 3px greenyellow solid;padding-left: 6px;">
+            style="color:var(--yellow);overflow-y: scroll;display: flex;flex-direction: column;height: 80vh;width: 90vw;border: 3px greenvar(--yellow) solid;padding-left: 6px;">
 
         </div>
         <div>
@@ -40960,11 +41070,11 @@ let page_edit_exams = `
 let page_updates = `
 <div class = "flex_type" style="flex-direction: row;flex-wrap: wrap;">
             <div class = "db_class">
-                <span style="font-size: 25px;color:yellow">Release Notes</span>
+                <span style="font-size: 25px;color:var(--yellow)">Release Notes</span>
                 <div id="rel_list" style="overflow-y: scroll;height:80vh; width: 100%; display: block;" class="flex_type"></div>
             </div>
             <div class = "db_class">
-                <span style="font-size: 25px;color:yellow">Updates</span>
+                <span style="font-size: 25px;color:var(--yellow)">Updates</span>
                 <div id="updt_list" style="overflow-y: scroll;height:80vh; width: 100%; display: block;" class="flex_type"></div>
             </div>
         </div>
@@ -40973,7 +41083,7 @@ let page_updates = `
 `;
 let page_uploads = `
 <div class = "db_class">
-<span style="font-size: 25px;color:yellow">Upload Files</span>
+<span style="font-size: 25px;color:var(--yellow)">Upload Files</span>
         <label for="file" style= "background-color: indigo;color: white;padding: 0.5rem;font-family: sans-serif;border-radius: 0.3rem;cursor: pointer;margin-top: 1rem;" class = "rpl">Choose File To Upload</label>
         <input type="file" id="file" style="width: 50vw;height: 30px;margin: auto;" hidden>
         <span id="file_progress"></span>
@@ -41306,7 +41416,24 @@ function report_stuff() {
             <h2 id="msg_popup_txt_report">Report Error</h2><a class="close_btn"
             onclick="document.getElementById('msg_popup_report').remove()">&times;</a>
         </center>
-        <div>
+        <div style = "display:flex;flex-direction:row;flex-wrap:wrap;overflow-y:scroll;height:80%;">
+          <div id="db_rep_les" class = "db_class">
+          <span style="font-size: 25px;color:var(--yellow)">Lesson</span>
+          <div>
+            <input type="checkbox" id="incorrect-video" name="problem[]" value="incorrect-video">
+            <label for="wrong-answer">Incorrect/No Video</label>
+          </div>
+          <div>
+            <input type="checkbox" id="incorrect-theory" name="problem[]" value="incorrect-theory">
+            <label for="wrong-answer">Incorrect/No Theory</label>
+          </div>
+          <div>
+            <input type="checkbox" id="wrong-image" name="problem[]" value="wrong-image">
+            <label for="confusing-image">Wrong/Incomplete/No Image(s) or Video(s)</label>
+          </div>
+          </div>
+        <div id="db_rep_les" class = "db_class">
+        <span style="font-size: 25px;color:var(--yellow)">Question(Question Bank/Test)</span>
           <div>
             <input type="checkbox" id="incorrect-answer-key" name="problem[]" value="incorrect-answer-key">
             <label for="wrong-answer">Incorrect Answer Key</label>
@@ -41327,14 +41454,19 @@ function report_stuff() {
             <input type="checkbox" id="wrong-image" name="problem[]" value="wrong-image">
             <label for="confusing-image">Wrong/Incomplete/No Image(s) or Video(s)</label>
           </div>
+          </div>
+          <div id="db_rep_les" class = "db_class">
+          <span style="font-size: 25px;color:var(--yellow)">Other Issues</span>
           <div>
             <input type="checkbox" id="other-issue" name="problem[]" value="other-issue">
             <label for="other-issue">Other Issue</label>
           </div>
           <textarea placeholder="(Optional)" style="height: 50px;resize: none;" id="extra_comment"></textarea>
+          </div>
         </div>
-        <button class="tst_btn rpl" id = "popup_report">Report</button>
+        <center><button class="tst_btn rpl" id = "popup_report">Report</button></center>
     </div>
+    
     </div>
   `;
     dE("output").insertAdjacentHTML("beforeend", html);
@@ -41394,6 +41526,7 @@ let page_printable = `
         <hr color="white" width="100%">
         <span class="in_t_3" id="qb_title">ERROR</span>
         <hr color="white" width="100%">
+        <div id="pt_ins" type="1"></div>
         <div id="eqb_add" type="1">
         </div>
 
@@ -41635,12 +41768,12 @@ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "page_test_instructions", ()=>page_test_instructions);
 let page_test_instructions = `
-<span class="in_t">Test Instructions</span>
-        <hr color="white" width="100%">
+<span class="in_t" id = "ti_title">Test Instructions</span>
+        <hr color="white" width="100%" id = "ti_hr">
         <div id = "ti_i" style="width:80vw;overflow-y: scroll;border:yellow 3px solid;display: flex;flex-direction: column;">
             <span style="font-size:5vh;text-align: center;">Please Read The Instructions And Terms Carefully</span>
-            <span style="font-size:18px;color:yellow;">Test Information:</span>
-            <ul style="font-size: 14px;color:white;">
+            <span style="font-size:18px;color:var(--yellow)">Test Information:</span>
+            <ul style="font-size: 14px;color:var(--white);">
                 <li> Test Name:&nbsp;<span id = "i_name"></span></li>
                 <li> Starts From:&nbsp;<span id = "i_start"></span> </li>
                 <li> Ends At:&nbsp;<span id = "i_end"></span> </li>
@@ -41649,7 +41782,7 @@ let page_test_instructions = `
                 <li> Total Marks:&nbsp;<span id = "i_total"></span> </li>
                 <li> No of Questions:&nbsp;<span id = "i_qno"></span> </li>
             </ul>
-            <span style="font-size:18px;color:yellow;">General Instructions:</span>
+            <span style="font-size:18px;color:var(--yellow)">General Instructions:</span>
             <ol style="font-size: 14px;">
                 <li>The Exam Must Be Completed In 1 Sitting. You Will Be Able To Open This Test Window Only Once. </li>
                 <li>Read Every Question Carefully And Select Your Answer and Try To Answer As Many Questions As Possible
@@ -41675,14 +41808,14 @@ let page_test_instructions = `
                     After Which Your Test Will End</li>
             </ol>
             <hr style = "width:95%">
-            <span style="font-size:18px;color:yellow;">Navigating to a Question:</span>
+            <span style="font-size:18px;color:var(--yellow)">Navigating to a Question:</span>
             <ol style="font-size:14px;">
                 <li>To view/answer a question, do the following: Click on the question number in the Question Palette at
                     the right of your screen to go to that numbered question directly. Note that using this option does
                     NOT save your answer to the current question.</li>
             </ol>
             <hr style = "width:95%">
-            <span style="font-size:18px;color:yellow;">Answering a Question:</span>
+            <span style="font-size:18px;color:var(--yellow)">Answering a Question:</span>
             <ol style="font-size:14px;">
                 Procedure for answering a multiple choice type question:
                 <li>To select you answer, click on the button of one of the options.</li>
@@ -41695,16 +41828,16 @@ let page_test_instructions = `
                     answering and then follow the procedure for answering that type of question.</li>
             </ol>
             <hr style = "width:95%">
-            <span style="font-size:18px;color:yellow;">Navigating through sections:</span>
+            <span style="font-size:18px;color:var(--yellow)">Navigating through sections:</span>
             <ol style="font-size:14px;">
                 <li>All Questions are Visible in the Question Pallete along under the respective sections/subjects</li>
             </ol>
             <hr style = "width:95%">
-            <span style="font-size:18px;color:yellow;">Test Specific Instructions:</span>
+            <span style="font-size:18px;color:var(--yellow)">Test Specific Instructions:</span>
             <div id = "tsi" style="font-size:14px;">
             </div>
             <hr style = "width:95%">
-            <span style="font-size:18px;color:yellow;">Terms And Conditions:</span>
+            <span style="font-size:18px;color:var(--yellow)">Terms And Conditions:</span>
             <span style="font-size:14px;">By Checking on "I Agree" you Agree to All Terms And Conditions:</span>
             <ol style="font-size:14px;">
                 <li>I have read and understood all the instructions. </li>
@@ -41742,7 +41875,7 @@ let page_test_list = `
         <div id="testlinks">
         </div>`;
 let page_test_v1 = `
-<div style="border: grey 2px dashed;flex-direction: row;margin:10px;" class="flex_type disable-text-selection" onmousedown="return false" onselectstart="return false">
+<div style="border: grey 2px dashed;flex-direction: row;margin:10px;" class="flex_type">
             <div style="display: flex;flex-direction: column;width: 60vw;height:80vh;margin:10px;min-width: 300px;">
                 <div id="tt_extrabx" style="display: flex;flex-direction:row;height: 40px;margin:10px;">
                     <span id="tt_timeleft">00:00:00</span>
@@ -65571,6 +65704,7 @@ parcelHelpers.export(exports, "renderMarkedMath", ()=>renderMarkedMath);
 parcelHelpers.export(exports, "qCorrector", ()=>qCorrector);
 parcelHelpers.export(exports, "playSoundEffect", ()=>playSoundEffect);
 parcelHelpers.export(exports, "showLS", ()=>showLS);
+parcelHelpers.export(exports, "antiCopyEle", ()=>antiCopyEle);
 function sd(seconds) {
     seconds = Number(seconds);
     var d = Math.floor(seconds / 86400);
@@ -65728,6 +65862,30 @@ function showLS(type) {
     if (type == "s") loadingSpinner.style.display = "block";
     else loadingSpinner.style.display = "none";
 }
+function antiCopyEle(id) {
+    dE(id).addEventListener("mousedown", function() {
+        return false;
+    });
+    dE(id).addEventListener("selectstart", function() {
+        return false;
+    });
+    dE(id).addEventListener("cut", function() {
+        return false;
+    });
+    dE(id).addEventListener("copy", function() {
+        return false;
+    });
+    dE(id).addEventListener("paste", function() {
+        return false;
+    });
+    dE(id).addEventListener("drag", function() {
+        return false;
+    });
+    dE(id).addEventListener("drop", function() {
+        return false;
+    });
+    dE(id).classList.add("disable-text-selection");
+}
 exports.default = {
     sd,
     sha256,
@@ -65744,7 +65902,8 @@ exports.default = {
     mergeById,
     qCorrector,
     playSoundEffect,
-    showLS
+    showLS,
+    antiCopyEle
 };
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"66uq8":[function(require,module,exports) {
@@ -65795,6 +65954,38 @@ function sysaccess() {
     // console = {}
     init();
 }
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"1R5ZA":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_batch_list", ()=>page_batch_list);
+parcelHelpers.export(exports, "page_edit_batch", ()=>page_edit_batch);
+let page_batch_list = `
+<span class="in_t">Batches</span>
+        <hr color="white" width="100%">
+        <div id="batchlinks">
+        </div>`;
+let page_edit_batch = `
+<span class="in_t" class="" id="fu_topic_title">Add/Edit Batch</span>
+<center>
+<div id="aq_basic" style="flex-direction: column;">    
+    <input type="text" id="aq_batname" class="_in_aq" placeholder="Batch Name">
+    <input type="number" id="aq_class" class="_in_aq" placeholder="Class">
+    <input type="datetime-local" id="aq_tst_delon" class="_in_aq">
+    <input type="text" id="aq_timetable" class="_in_aq" placeholder="Timetable ID">
+    <select name="type" id="aq_level" class="_in_aq col-red">
+                <option value="jee">JEE</option>
+                <option value="neet">NEET</option>
+                <option value="foundation">Foundation</option>
+    </select>
+</div>
+</center>
+    <button class="tst_btn rpl" id="aq_batch_save">Save/Update Batch</button>
+`;
+exports.default = {
+    page_batch_list,
+    page_edit_batch
+};
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"iujZH":[function(require,module,exports) {
 module.exports = require("3514bf9f94528934").getBundleURL("10Mjw") + "js/sw.js" + "?" + Date.now();
@@ -65924,8 +66115,8 @@ exports.constants = {
 };
 
 },{"ac1d8e9445f8b08f":"8hjhE","431326302f36a75":"2WyL8","993acbed143eb446":"k1utz","d4ff5437158ba9a4":"busIB","885e9906307b2de3":"g38Hg","fbd7d8ba6427a2a1":"d4idn","9a640cae6a65ace9":"hwD3y","c7420bfc94dd7519":"jbRNy","df4cba908ba99ef8":"9Rcg1","6f4f42c261742c56":"h9Rdh","5dffb96c06c10e25":"k3tsT"}],"8hjhE":[function(require,module,exports) {
-var process = require("d00bc03b27f31d77");
 var global = arguments[3];
+var process = require("d00bc03b27f31d77");
 "use strict";
 // limit of Crypto.getRandomValues()
 // https://developer.mozilla.org/en-US/docs/Web/API/Crypto/getRandomValues
@@ -69527,8 +69718,8 @@ Object.defineProperty(Duplex.prototype, "destroyed", {
 // A bit simpler than readable streams.
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
 // the drain event emission and buffering.
-var global = arguments[3];
 var process = require("e2dacd5664fc8419");
+var global = arguments[3];
 "use strict";
 module.exports = Writable;
 /* <replacement> */ function WriteReq(chunk, encoding, cb) {
@@ -101200,8 +101391,8 @@ function compare(a, b) {
 }
 
 },{"24db0b4351a55d90":"4Szbv","82e73588098638e9":"e2JgG","ad62b18fee081403":"iaxu0","8433718b602ae08e":"3pDum","f089c5eb8055541a":"e594P","1c3dba0fb1d7d3bc":"2WyL8","4be95d83e50b2d4":"fFkPV","3ac2c1eb722de677":"eW7r9"}],"k3tsT":[function(require,module,exports) {
-var process = require("94e2a6a2df722f40");
 var global = arguments[3];
+var process = require("94e2a6a2df722f40");
 "use strict";
 function oldBrowser() {
     throw new Error("secure random number generation not supported by this browser\nuse chrome, FireFox or Internet Explorer 11");

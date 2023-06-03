@@ -13,33 +13,70 @@ For permission requests, please contact [Mr Techtroid] at mrtechtroid@outlook.co
 */
 :root {
   font-style: Nunito;
+}
+.dark_mode{
   --bgcolor: rgb(18, 34, 53);
   --bgimage: radial-gradient(at 47% 33%, hsl(0.00, 0%, 0%) 0, transparent 59%), radial-gradient(at 82% 65%, hsl(218.00, 39%, 11%) 0, transparent 55%);
   --yellow: rgb(228, 228, 3);
-  --black: rgb(0,0,0);
+  --black: rgba(0,0,0,0.75);
   --white: rgb(255, 255, 255);
   --red: red;
   --clr1:  rgba(17, 25, 40, 0.75);
   --clr2: rgba(255, 255, 255, 0.125);
-  --clr3: rgb(0, 4, 255);
+  --clr3: grey;
   --clr4: rgb(0, 225, 255);
-  --clr5: grey;
-  --clr6: orangered;
-  --clr7: rgb(105, 114, 105);
-  --clr8: rgb(168, 168, 173);
+  --clr5: magenta;
+  --clr6:#2d333a;
+  --clr7: #a1f506;
+  --clr8: #292f3a;
   --clr9: rgb(5, 5, 32);
   --clr10: lime;
   --clr11:  rgb(17,25,40);
-  --clr14: rgba(37, 58, 191, 0.098);
-  --clr12: rgb(0,0,0,0.75);
-  --clr15: #06D85F;
-  --clr16: rgb(155, 137, 137);
-  --clr17: rgba(18, 48, 146, 0.5);
-  --clr18:rgb(80, 79, 79);
-  --clr19: rgb(250, 101, 2);
-  --clr20: rgba(47, 97, 184, 0.5);
-  --clr21: rgba(17, 25, 40);
-  --clr22:rgb(156, 189, 11);
+  --clr12: rgba(47, 97, 184, 0.5);
+  --clr13: rgb(250, 101, 2);
+  --clr14: #06D85F;
+}
+.dark_mode #ovr_l_1{
+  display: block;
+}
+.dark_mode #ovr_l_2{
+  display: none;
+}
+.light_mode{
+  --bgcolor:rgb(252, 221, 176);
+  --bgimage: #FF9F9F;
+  --yellow: rgb(7, 3, 228);
+  --black: rgba(255, 255, 255, 0.75);
+  --white: rgb(0, 0, 0,0.75);
+  --red: red;
+  --clr1:  rgb(255, 159, 159,0.75);
+  --clr2: rgba(255, 255, 255, 0.125);
+  --clr3: grey;
+  --clr4: rgb(255, 60, 0);
+  --clr5: magenta;
+  --clr6:rgb(233, 119, 119);
+  --clr7: #a1f506;
+  --clr8: #292f3a;
+  --clr9: rgb(5, 5, 32);
+  --clr10: lime;
+  --clr11:  rgb(255, 159, 159);
+  --clr12: rgba(47, 97, 184, 0.5);
+  --clr13: rgb(250, 101, 2);
+  --clr14: #06D85F;
+}
+.light_mode #ovr_l_1{
+  display: none;
+}
+.light_mode #ovr_l_2{
+  display: block;
+}
+.light_mode .it_popup #container {
+  height: 90%;
+  overflow-y: scroll;
+  border: solid 3px var(--white);
+  text-align: left;
+  font-size: 14px;
+  background-image: url("../assets/Q_Print.png");
 }
 
 html {
@@ -254,11 +291,6 @@ body {
   background: var(--black);
 }
 
-.pro_table th {
-  border: var(--clr6) 3px solid;
-  width: 20vh;
-}
-
 .t_crr {
   position: relative;
 }
@@ -276,7 +308,7 @@ body {
   content: 'C';
   bottom: 2px;
   right: 8px;
-  color: var(--clr3);
+  color: var(--clr9);
   background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAAXNSR0IB2cksfwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAEVQTFRFAAAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/kkg1QAAABd0Uk5TADBff7+vIBCP/9+gcECQ8IDQwGDvULDg0L2uAAAAj0lEQVR4nO2SUQ+CMAyENymMDzeGDPn/P9UFCWpS6rOJ97Skt7trrs798ePwl0akbbqTcejZIV79PsA1ppTGzKQRbuS0S40aIUJ6uSmEzGzld/5dQEMCNfqBCcz5d0IBLfpHBjtkgGJ7zCy2Rwf9IXfXGHUPeRZdFrUsFzMM0krtO564rHk7h9XYJ9R72B4PdY4Ess6OA7IAAAAASUVORK5CYII=')
 }
 
@@ -291,7 +323,7 @@ body {
   content: 'X';
   bottom: 2px;
   right: 8px;
-  color: var(--clr3);
+  color: var(--clr9);
   background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAAXNSR0IB2cksfwAAAAlwSFlzAAALEwAACxMBAJqcGAAAADNQTFRFAAAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA6Y43EAAAABF0Uk5TACB/MMD/z9DwgHBg4LAQUL+CKjl9AAAAgUlEQVR4nO3ROxKAIAwE0ACuAn7vf1oFImORtXfGbUjB5JEg8ue7cd4HLYP3zrgxYNRqwmC2iEi1SIhWA5EMFCQAmTyjIQToCAUUmTnQEHCgIngDpEzYJmG5Jlz6uqxMWPu6bCBu97oIsMvzTwygHBSpQMmFWKMqIBU5OKDI27o1J0mhAtutD+wYAAAAAElFTkSuQmCC')
 }
 
@@ -300,7 +332,7 @@ body {
   content: 'U';
   bottom: 2px;
   right: 8px;
-  color: var(--clr3);
+  color: var(--clr9);
   background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAAXNSR0IB2cksfwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAEJQTFRFAAAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA60NphwAAABZ0Uk5TAGB/QMD/gJDQsHDPECAwUO/wv5+voBP21iAAAABkSURBVHic7ZHLCoAgFAWv6THLR9nj/3+1BI0WZ9UucDYOMsIBRTo/Rg2a6AsDS7QHX4KxqaPBBNMUmElg4asFgH2Weq4tEElwj/CpnMtKJ4ikDGz74QEXaCDhRCGzhY2odX19AdugAyeYRe6mAAAAAElFTkSuQmCC')
 }
 
@@ -309,7 +341,7 @@ body {
   height: 50px;
   width: 130px;
   border-radius: 30px 30px 30px 30px;
-  background-color: #292f3a;
+  background-color: var(--clr8);
   flex-direction: column;
   align-items: center;
   margin: 5px;
@@ -318,7 +350,7 @@ body {
 
 .fto_box_title {
   font-size: 14px;
-  color: #a1f506
+  color: var(--clr7)
 }
 
 .fto_box_content {
@@ -333,7 +365,7 @@ body {
 }
 
 .pb_tr_in {
-  background-color: orange;
+  background-color: var(--clr13);
   height: 20px;
   border-radius: 10px;
   display: flex;
@@ -348,14 +380,14 @@ body {
   padding-left: 10px;
   padding-right: 10px;
   text-decoration: none;
-  background-color: #2d333a;
+  background-color: var(--clr6);
   color: var(--white);
   border: none;
   border-radius: 30px 30px 30px 30px;
 }
 
 .tst_btn:hover {
-  background-color: #7e8fa5;
+  background-color: var(--clr3);
 }
 
 .tlinks,.tlinks-2 {
@@ -368,6 +400,24 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: left;
+}
+.tlinks-3{
+  height: max-content;
+  border: var(--yellow) 1px solid;
+  padding: 10px;
+  width: 50vw;
+  border-radius: 10px;
+  margin: 6px;
+  display: flex;
+  flex-direction: column;
+  justify-content: left;
+}
+.tlinks-3 .tl{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  font-size: small;
+  color: var(--clr3);
 }
 .tlinks-2{
   flex-direction: row !important;
@@ -397,7 +447,7 @@ body {
 
 .t_stron {
   font-size: small;
-  color: var(--clr5);
+  color: var(--clr3);
 }
 
 #tmt_frame {
@@ -409,7 +459,7 @@ body {
 
 .t_endon {
   font-size: small;
-  color: var(--clr5);
+  color: var(--clr3);
 }
 
 .fqu_mcq_p,
@@ -448,7 +498,7 @@ body {
 .tp_i1,
 .tp_i2 {
   background-color: var(--black);
-  border-color: magenta;
+  border-color: var(--clr5);
   color: var(--white);
   padding: 2px;
   width: 30vw;
@@ -461,7 +511,7 @@ body {
 }
 
 .sp_txt {
-  color: magenta;
+  color: var(--clr5);
 }
 
 .err_txt {
@@ -501,7 +551,7 @@ body {
   background-color: transparent;
   text-decoration: none;
   border: none;
-  border-bottom: 2px solid var(--clr7);
+  border-bottom: 2px solid var(--clr3);
   outline: none;
   color: var(--white);
 }
@@ -516,7 +566,7 @@ body {
 
 .qb_q_ty {
   float: right;
-  color: magenta;
+  color: var(--clr5);
 }
 
 #eqb_add {
@@ -570,14 +620,14 @@ body {
 }
 
 #qb_title {
-  color: #eb2d2d;
+  color: var(--clr5);
 }
 
 #abt_img {
   border-radius: 50%;
   width: 250px;
   height: 250px;
-  border: greenyellow;
+  border: var(--clr7);
   border-style: solid;
 }
 
@@ -585,7 +635,9 @@ body {
   display: none;
   height: 6vh;
 }
-
+#pt_ins{
+  width:90%;
+}
 #ovr_l_1 {
   display: block;
   height: 6vh;
@@ -621,7 +673,7 @@ body {
   height: 10vh;
   background-color: var(--bgcolor);
   text-align: center;
-  border: var(--clr5) 2px solid;
+  border: var(--clr3) 2px solid;
 }
 
 @media screen {
@@ -634,7 +686,7 @@ body {
   @page {
     size: A4;
     margin: 15mm 15mm 15mm 15mm;
-    background-image: url("../assets/Q_Print.png");
+    background-image: url("../assets/Q_Print.png") !important;
   }
 
   .divFooter {
@@ -643,11 +695,16 @@ body {
     left: 50%;
     transform: translate(-50%, -50%);
     font-size: 100px;
-    color: var(--clr8);
+    color: var(--clr3);
     z-index: 0;
 
   }
-
+  img{
+    max-width: 90%;
+  }
+  #tsi{
+    color:var(--black);
+  }
   .divFooter2 {
     position: fixed;
     bottom: 5px;
@@ -678,10 +735,9 @@ body {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     background-color: transparent;
-    background-image: none;
     margin: 0;
     background: url("../assets/Q_Print.png");
-    color: var(--black);
+    color: black;
     font-family: Nunito;
   }
 
@@ -699,18 +755,22 @@ body {
   }
 
   hr {
-    color: var(--black);
-    background-color: var(--black);
+    color: black;
+    background-color: black;
   }
 
   #output {
     backface-visibility: visible;
     background-color: transparent;
-    border: var(--black) 3px solid;
+    background: url("../assets/Q_Print.png");
+    border: black 3px solid;
   }
 
   #eqb_instr {
-    color: var(--black);
+    color: black;
+  }
+  #eqb_add{
+    color: black !important;
   }
 
   .qb_ttl,
@@ -743,18 +803,18 @@ body {
 
   .les_q,
   .les_expl {
-    color: var(--black) !important;
+    color: black !important;
   }
 
   .qbtp_q {
-    color: var(--black) !important;
-    border-bottom: var(--black) 1px solid;
+    color: black !important;
+    border-bottom: black 1px solid;
     font-size: 15px;
     position: relative;
   }
 
   .qb_q_ty {
-    color: magenta !important;
+    color: var(--clr5) !important;
   }
 
   footer:before {
@@ -763,7 +823,7 @@ body {
 
   hr,
   li {
-    color: var(--black);
+    color: black;
   }
 
 }
@@ -783,7 +843,7 @@ body {
   left: 50%;
   transform: translate(-50%, -50%);
   font-size: 100px;
-  color: #292f3a;
+  color: var(--clr8);
   z-index: 0;
 
 }
@@ -794,7 +854,7 @@ body {
   right: 3%;
   transform: translate(-50%, -50%);
   font-size: 20px;
-  color: #a1f506;
+  color: var(--clr7);
   z-index: 0;
   width: 120px;
   display: flex;
@@ -822,7 +882,7 @@ body {
   z-index: 2;
   border: none;
   outline: none;
-  background-color: var(--clr14);
+  background-color: var(--clr11);
   color: var(--white);
   cursor: pointer;
   padding: 10px;
@@ -845,7 +905,7 @@ body {
 }
 
 #dsh_btn:hover {
-  background-color: var(--clr17);
+  background-color: var(--clr12);
 }
 
 .dshbox {
@@ -886,7 +946,7 @@ body {
   flex-direction: column;
   padding: 10px;
   overflow-y: scroll;
-  border: var(--clr5) 1px solid;
+  border: var(--clr3) 1px solid;
   border-radius: 30px 0px 0px 30px;
   margin: 10px;
 }
@@ -897,17 +957,17 @@ body {
   flex-direction: row;
   padding: 10px;
   overflow-y: scroll;
-  border: var(--clr5) 1px solid;
+  border: var(--clr3) 1px solid;
   border-radius: 30px 0px 0px 30px;
   margin: 10px;
 }
 .tt_question hr {
-  background-color: var(--clr5);
+  background-color: var(--clr3);
 }
 
 #tt_question {
   height: 70vh;
-  border: var(--clr5) 3px solid;
+  border: var(--clr3) 3px solid;
   overflow-y: scroll;
   /* min-width: 600px; */
 }
@@ -919,7 +979,7 @@ body {
   padding-left: 20px;
   padding-right: 20px;
   border-radius: 5px 5px 5px 5px;
-  border: var(--clr5) 1px solid;
+  border: var(--clr3) 1px solid;
 }
 
 #testv1 {
@@ -963,12 +1023,12 @@ body {
   height: 40vh;
   margin: 10px;
   overflow-y: scroll;
-  border: var(--clr5) 1px solid;
+  border: var(--clr3) 1px solid;
 }
 
 .fto_small {
   font-size: 12px;
-  color: var(--clr5);
+  color: var(--clr3);
   margin: 5px
 }
 
@@ -1020,7 +1080,7 @@ body {
 #yt_progressBar {
   width: 960px;
   height: 6px;
-  background-color: #444444;
+  background-color: var(--clr6);
   display: none;
   margin-top: 1px;
 }
@@ -1068,12 +1128,12 @@ body {
 
 .prf_det {
   font-size: 2vh;
-  color: var(--clr18)
+  color: var(--black)
 }
 
 .abt_det {
   font-size: 2vh;
-  color: var(--clr16)
+  color: var(--clr3)
 }
 
 #prf_phone::before {
@@ -1104,7 +1164,7 @@ body {
 
 
 #abt_tab_t_t_img {
-  border: var(--clr15) 2px solid;
+  border: var(--clr14) 2px solid;
   border-radius: 30px;
   width: 200px;
   height: 200px
@@ -1147,7 +1207,7 @@ circle text {
 }
 
 .dmName {
-  color: mediumspringgreen;
+  color: var(--clr14);
 }
 
 #tb_wy_btn:hover {
@@ -1160,19 +1220,22 @@ circle text {
 }
 
 .rpl:hover {
-  background: #67717e;
+  background: var(--clr3);
 }
-
+.rpl-2:hover {
+  background: transparent !important;
+  color: var(--clr5)
+}
 .rpl:active {
-  background-color: #6eb9f7;
+  background-color: var(--clr4);
   background-size: 100%;
   transition: background 0s;
 }
 
 .loader {
-  border: 16px solid #f3f3f3;
+  border: 16px solid var(--white);
   border-radius: 50%;
-  border-top: 16px solid #3498db;
+  border-top: 16px solid var(--clr4);
   width: 120px;
   height: 120px;
   -webkit-animation: spin 2s linear infinite;
@@ -1208,11 +1271,11 @@ circle text {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #30acd1;
+  background: var(--clr4);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--clr19);
+  background: var(--clr13);
 }
 
 #tp_lesson:-webkit-full-screen,
@@ -1256,7 +1319,7 @@ circle text {
 .t_notes {
   width: 20vw;
   height: 5vh;
-  border: 3px cyan solid;
+  border: 3px var(--white) solid;
   color: var(--white);
   margin: 3px;
 }
@@ -1287,7 +1350,7 @@ circle text {
 }
 
 .dshbox_v2:hover {
-  background-color: var(--clr20);
+  background-color: var(--clr12);
 }
 
 .aq_mcq_p,
@@ -1318,7 +1381,7 @@ circle text {
 .tb_q_i1,
 .tb_q_i2 {
   background-color: var(--black);
-  border-color: magenta;
+  border-color: var(--clr5);
   color: var(--white);
   padding: 2px;
   width: 30vw;
@@ -1328,7 +1391,7 @@ circle text {
 .t_no_qno {
   width: 10vw;
   height: 5vh;
-  border: 3px cyan solid;
+  border: 3px var(--clr14) solid;
   color: var(--white);
   margin: 3px;
 }
@@ -1339,7 +1402,7 @@ circle text {
   bottom: 0;
   left: 0;
   right: 0;
-  background: var(--clr12);
+  background: var(--black);
   transition: opacity 500ms;
   visibility: hidden;
   opacity: 0;
@@ -1370,11 +1433,13 @@ circle text {
   position: relative;
   transition: all 5s ease-in-out;
 }
+.it_popup h2{
+  margin:0px;
+}
 .it_popup #container {
-  width: 60vw;
-  height: 55vh;
+  height: 90%;
   overflow-y: scroll;
-  border: solid 3px var(--yellow);
+  border: solid 3px var(--white);
   text-align: left;
   font-size: 14px;
   background-image: url("../assets/QuarkzPrint_2.png");
@@ -1385,7 +1450,7 @@ circle text {
   font-family: Tahoma, Arial, sans-serif;
 }
 #i_name,#i_start,#i_end,#i_syllabus,#i_time,#i_total,#i_qno{
-  color:grey;
+  color:var(--clr3);
 }
 .disable-text-selection {
   -webkit-user-select: none;
@@ -1442,7 +1507,7 @@ circle text {
   flex-direction: column;
   overflow-y: scroll;
   min-height: 30vh;
-  border: var(--clr5) solid 2px;
+  border: var(--clr3) solid 2px;
   width: 400px;
   border-radius: 10px 10px 10px 10px;
   align-items: center;
@@ -1471,12 +1536,12 @@ circle text {
   width: 20px;
   height: 40px;
   background: var(--white);
-  box-shadow: -200px 0 0 200px var(--clr22);
-  border: 2px solid var(--clr5);
+  box-shadow: -200px 0 0 200px var(--clr7);
+  border: 2px solid var(--clr3);
 }
 
 .popup .close:hover {
-  color: var(--clr15);
+  color: var(--clr14);
 }
 
 .popup .content {
@@ -1490,12 +1555,67 @@ circle text {
 
 /* RateMyApp - Stars */
 .star {
-  color: #ddd;
+  color: var(--white);
   cursor: pointer;
   font-size: 40px;
 }
 
 .star.selected,.star.hovered,
 .star:hover {
-  color: #ffdd00;
+  color: var(--yellow);
+}
+
+#dmodebtn{
+  position: relative;
+}
+#dmodebtn .switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+#dmodebtn .switch input {
+  display: none;
+}
+
+#dmodebtn .slider-t {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+}
+
+#dmodebtn .slider-t:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  content: "☀️"
+}
+
+#dmodebtn input:checked + .slider-t {
+  background-color: #2196F3;
+}
+
+#dmodebtn input:checked + .slider-t:before {
+  transform: translateX(26px);
+  content:"🌙";
+  background-color: black;
+}
+
+#dmodebtn .slider-t.round {
+  border-radius: 34px;
+}
+
+#dmodebtn .slider-t.round:before {
+  border-radius: 50%;
 }

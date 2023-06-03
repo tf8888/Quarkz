@@ -7,7 +7,7 @@ export let page_test_list = `
         </div>`
 
 export let page_test_v1 = `
-<div style="border: grey 2px dashed;flex-direction: row;margin:10px;" class="flex_type disable-text-selection" onmousedown="return false" onselectstart="return false">
+<div style="border: grey 2px dashed;flex-direction: row;margin:10px;" class="flex_type">
             <div style="display: flex;flex-direction: column;width: 60vw;height:80vh;margin:10px;min-width: 300px;">
                 <div id="tt_extrabx" style="display: flex;flex-direction:row;height: 40px;margin:10px;">
                     <span id="tt_timeleft">00:00:00</span>

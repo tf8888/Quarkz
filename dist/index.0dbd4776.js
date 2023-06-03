@@ -117,29 +117,8 @@ function mcqchose(ele) {
 }
 if (screen.width < "300px") document.getElementById("overlay").style.display = "block";
 function updateUI() {
-    if (document.getElementById("pe_tst_type_2").checked) document.getElementById("equ_gi").innerText = document.getElementById("pe_gi_ins").value;
-    if (document.getElementById("pe_tst_type_1").checked) document.querySelectorAll(".qb_q_ty").forEach(function(e) {
-        switch(e.innerText){
-            case "(mcq)":
-                e.innerText = e.innerText + "(" + document.getElementById("pe_mcq_pno").value + "," + document.getElementById("pe_mcq_nno").value + ")";
-                break;
-            case "(mcq_multiple)":
-                e.innerText = e.innerText + "(" + document.getElementById("pe_mcmul_pno").value + "," + document.getElementById("pe_mcmul_nno").value + ")";
-                break;
-            case "(numerical)":
-                e.innerText = e.innerText + "(" + document.getElementById("pe_num_pno").value + "," + document.getElementById("pe_num_nno").value + ")";
-                break;
-            case "(taf)":
-                e.innerText = e.innerText + "(" + document.getElementById("pe_taf_pno").value + "," + document.getElementById("pe_taf_nno").value + ")";
-                break;
-            case "(explain)":
-                e.innerText = e.innerText + "(" + document.getElementById("pe_exp_pno").value + "," + document.getElementById("pe_exp_nno").value + ")";
-                break;
-            case "(matrix)":
-                e.innerText = e.innerText + "(" + document.getElementById("pe_mat_pno").value + "," + document.getElementById("pe_mat_nno").value + ")";
-                break;
-        }
-    });
+    if (dE("pt_ins").style.display == "block") dE("pt_ins").style.display = "none";
+    else dE("pt_ins").style.display = "block";
 }
 function dE(id) {
     return document.getElementById(id);
@@ -175,5 +154,26 @@ function showqLS(type) {
 window.beforeunload = function(e) {
     if (localStorage.getItem("isFirstTab") == `true`) localStorage.removeItem("isFirstTab");
 };
+const toggleSwitch = document.getElementById("toggleSwitch");
+const body = document.body;
+function uiMode() {
+    if (toggleSwitch.checked) {
+        body.classList.add("dark_mode");
+        body.classList.remove("light_mode");
+        localStorage.setItem("ui", "dark");
+    } else {
+        body.classList.add("light_mode");
+        body.classList.remove("dark_mode");
+        localStorage.setItem("ui", "light");
+    }
+}
+toggleSwitch.addEventListener("change", uiMode);
+if (localStorage.getItem("ui") == "light") {
+    toggleSwitch.checked = false;
+    uiMode();
+} else {
+    toggleSwitch.checked = true;
+    uiMode();
+}
 
 //# sourceMappingURL=index.0dbd4776.js.map

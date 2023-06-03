@@ -11,6 +11,7 @@ export let page_printable = `
         <hr color="white" width="100%">
         <span class="in_t_3" id="qb_title">ERROR</span>
         <hr color="white" width="100%">
+        <div id="pt_ins" type="1"></div>
         <div id="eqb_add" type="1">
         </div>
 

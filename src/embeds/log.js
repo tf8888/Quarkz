@@ -73,7 +73,24 @@ export function report_stuff() {
             <h2 id="msg_popup_txt_report">Report Error</h2><a class="close_btn"
             onclick="document.getElementById('msg_popup_report').remove()">&times;</a>
         </center>
-        <div>
+        <div style = "display:flex;flex-direction:row;flex-wrap:wrap;overflow-y:scroll;height:80%;">
+          <div id="db_rep_les" class = "db_class">
+          <span style="font-size: 25px;color:var(--yellow)">Lesson</span>
+          <div>
+            <input type="checkbox" id="incorrect-video" name="problem[]" value="incorrect-video">
+            <label for="wrong-answer">Incorrect/No Video</label>
+          </div>
+          <div>
+            <input type="checkbox" id="incorrect-theory" name="problem[]" value="incorrect-theory">
+            <label for="wrong-answer">Incorrect/No Theory</label>
+          </div>
+          <div>
+            <input type="checkbox" id="wrong-image" name="problem[]" value="wrong-image">
+            <label for="confusing-image">Wrong/Incomplete/No Image(s) or Video(s)</label>
+          </div>
+          </div>
+        <div id="db_rep_les" class = "db_class">
+        <span style="font-size: 25px;color:var(--yellow)">Question(Question Bank/Test)</span>
           <div>
             <input type="checkbox" id="incorrect-answer-key" name="problem[]" value="incorrect-answer-key">
             <label for="wrong-answer">Incorrect Answer Key</label>
@@ -94,14 +111,19 @@ export function report_stuff() {
             <input type="checkbox" id="wrong-image" name="problem[]" value="wrong-image">
             <label for="confusing-image">Wrong/Incomplete/No Image(s) or Video(s)</label>
           </div>
+          </div>
+          <div id="db_rep_les" class = "db_class">
+          <span style="font-size: 25px;color:var(--yellow)">Other Issues</span>
           <div>
             <input type="checkbox" id="other-issue" name="problem[]" value="other-issue">
             <label for="other-issue">Other Issue</label>
           </div>
           <textarea placeholder="(Optional)" style="height: 50px;resize: none;" id="extra_comment"></textarea>
+          </div>
         </div>
-        <button class="tst_btn rpl" id = "popup_report">Report</button>
+        <center><button class="tst_btn rpl" id = "popup_report">Report</button></center>
     </div>
+    
     </div>
   `;
   dE("output").insertAdjacentHTML("beforeend", html)
