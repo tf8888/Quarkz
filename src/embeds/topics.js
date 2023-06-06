@@ -24,6 +24,8 @@ export let page_edit_topic = `
             <input type="datetime-local" id="aq_tst_endon" class="_in_aq">
             <input type="text" id="aq_tst_syllabi" class="_in_aq" placeholder="Syllabus">
             <input type="number" id="aq_tst_timealotted" class="_in_aq" placeholder="Time Alloted">
+            <div><input type="checkbox" id="aq_randomize" name="aq_randomise" value="randomize">
+            <label for="aq_randomize">Randomise Questions</label></div>
             <div class="summernote" id="aq_add_test_instr">Additional Test Instructions</div>
         </div>
         <div id="lqadd" style="display: flex;flex-direction: row;margin:10px;height: 50vh;">
@@ -53,6 +55,7 @@ export let page_edit_topic = `
                         placeholder="Hint"></textarea>
                     <input type="number" id="aq_posmrks" class="_in_aq" placeholder="Marks For Correct">
                     <input type="number" id="aq_negmrks" class="_in_aq" placeholder="Marks For Incorrect">
+                    <input type="url" id="aq_q_topic" class="_in_aq" placeholder="Topic">
                     <select name="type" id="aq_section" class="_in_aq col-red">
                         <option value="Physics">Physics</option>
                         <option value="Chemistry">Chemistry</option>

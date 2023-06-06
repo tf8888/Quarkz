@@ -42,12 +42,12 @@
   --red: red;
   --clr1: #ff9f9fbf;
   --clr2: #ffffff20;
-  --clr3: grey;
+  --clr3: #3d3131;
   --clr4: #ff3c00;
   --clr5: magenta;
   --clr6: #e97777;
   --clr7: #a1f506;
-  --clr8: #292f3a;
+  --clr8: #326adb;
   --clr9: #050520;
   --clr10: lime;
   --clr11: #ff9f9f;
@@ -692,6 +692,27 @@ body {
     z-index: -2;
     position: absolute;
     inset: 0;
+  }
+
+  #un_edit {
+    display: none !important;
+  }
+
+  #un_preview {
+    min-height: 90%;
+    min-width: 95%;
+    height: max-content !important;
+    color: #000 !important;
+    display: block !important;
+    overflow: hidden !important;
+  }
+
+  #un_preview ol {
+    color: #000 !important;
+  }
+
+  #output {
+    height: max-content;
   }
 
   .qb_q {
@@ -1520,6 +1541,81 @@ circle text {
 
 #dmodebtn .slider-t.round:before {
   border-radius: 50%;
+}
+
+.table1 {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;
+  border: 1px solid #ccc;
+  margin: 0;
+  padding: 0;
+}
+
+.table1 caption {
+  margin: .5em 0 .75em;
+  font-size: 1.5em;
+}
+
+.table1 tr {
+  border: 1px solid #ddd;
+  padding: .35em;
+}
+
+.table1 th, .table1 td {
+  text-align: center;
+  padding: .625em;
+}
+
+.table1 th {
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  font-size: .85em;
+}
+
+@media screen and (max-width: 600px) {
+  .table1 {
+    border: 0;
+  }
+
+  .table1 caption {
+    font-size: 1.3em;
+  }
+
+  .table1 thead {
+    clip: rect(0 0 0 0);
+    height: 1px;
+    width: 1px;
+    border: none;
+    margin: -1px;
+    padding: 0;
+    position: absolute;
+    overflow: hidden;
+  }
+
+  .table1 tr {
+    border-bottom: 3px solid #ddd;
+    margin-bottom: .625em;
+    display: block;
+  }
+
+  .table1 td {
+    text-align: right;
+    border-bottom: 1px solid #ddd;
+    font-size: .8em;
+    display: block;
+  }
+
+  .table1 td:before {
+    content: attr(data-label);
+    float: left;
+    text-transform: uppercase;
+    font-weight: bold;
+  }
+
+  .table1 td:last-child {
+    border-bottom: 0;
+  }
 }
 
 /*# sourceMappingURL=index.34df27b5.css.map */

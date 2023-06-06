@@ -23,15 +23,12 @@ export let page_dashboard = `
                 <div class="dshbox_v2" id="chp_btn">Chapters</div>
                 <div class="dshbox_v2" id="tstinf_btn">Test Infos</div>
                 <div class="dshbox_v2" id="usn_btn" onclick="window.location.hash = '/usernotes/'">Your Notes</div>
-                <div class="dshbox_v2" id="tpc_btn" style="display: none;">Topics</div>
-                <div class="dshbox_v2" id="lvq_btn" style="display:none">Live Quiz</div>
-                <div class="dshbox_v2" id="frm_btn">Forum</div>
+                <div class="dshbox_v2" id="frm_btn" style = "display:none">Forum</div>
                 <div class="dshbox_v2" id="qba_btn" style="display: none;">Question Bank</div>
                 <div class="dshbox_v2" id="sim_btn">Simulations</div>
                 <div class="dshbox_v2" id="cyb_btn" style="display:none">Cyberhunts</div>
                 <div id="adminonly" style="display:none;flex-direction:column;">
                     <div class="dshbox_v2" id="adi_btn">Admin Functions</div>
-                    <div class="dshbox_v2" id="usc_btn">Users</div>
                 </div>
             </div>
             <hr style="width: 100%;">

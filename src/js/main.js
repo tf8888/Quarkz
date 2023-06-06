@@ -39,9 +39,10 @@ import { page_edit_user } from "../embeds/user";
 import { page_usernotes } from "../embeds/usernotes"
 import { saveFile, createRecorder, recordScreen } from "../js/recorder"
 import * as d3 from 'd3';
-import { sd, sha256, makeid, mobileCheck, areObjectsEqual, areEqual, getServerTime, fullEle, dE, sortObj, sortObjv2, renderMarkedMath, mergeById, qCorrector, playSoundEffect, showLS, antiCopyEle } from '../js/helper'
+import { sd, sha256, makeid, mobileCheck, areObjectsEqual, areEqual, getServerTime, fullEle, dE, sortObj, sortObjv2, renderMarkedMath, mergeById, qCorrector, playSoundEffect, showLS, antiCopyEle, shuffleArrayWithSeed,buildHtmlTable } from '../js/helper'
 import { sysaccess } from "./reworkui";
 import { page_batch_list, page_edit_batch } from "../embeds/admin";
+import { table } from "console";
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register(
@@ -200,10 +201,6 @@ function dashboardEvents() {
   function prfHand() { changeLocationHash("profile", 1) }
   function adiHand() { changeLocationHash("functions", 1) }
   function tstinfHand() { changeLocationHash("testinfo", 1) }
-  function uscHand() { changeLocationHash("users", 1) }
-  function tpcHand() { changeLocationHash("tpclist", 1) }
-  function lvqHand() { changeLocationHash("livequiz", 1) }
-  function frmHand() { changeLocationHash("forum", 1) }
   function qbaHand() { changeLocationHash("qblist", 1) }
   function chpHand() { changeLocationHash("chplist", 1) }
   var simbtn = dE("sim_btn").addEventListener("click", simHand)
@@ -214,12 +211,7 @@ function dashboardEvents() {
   var tmtbtn = dE("tmt_btn").addEventListener("click", tmtHand);
   var prfbtn = dE("prf_btn").addEventListener("click", prfHand);
   var abtbtn = dE("abt_btn").addEventListener("click", abtHand);
-  var tpcbtn = dE("tpc_btn").addEventListener("click", tpcHand)
-  var uscbtn = dE("usc_btn").addEventListener("click", uscHand)
-  var lvqbtn = dE("lvq_btn").addEventListener("click", lvqHand)
-  var frmbtn = dE("frm_btn").addEventListener("click", frmHand)
   var adibtn = dE("adi_btn").addEventListener("click", adiHand)
-  var qbabtn = dE("qba_btn").addEventListener("click", qbaHand)
   var cybbtn = dE("cyb_btn").addEventListener("click", cybHand)
   var chp_btn = dE("chp_btn").addEventListener("click", chpHand)
   var tstinfbtn = dE("tstinf_btn").addEventListener("click", tstinfHand)
@@ -355,13 +347,13 @@ function testlistEvents() {
 }
 function userNotesEvents() {
   var unsave = dE("un_save").addEventListener("click", unotes1)
-  var unprint = dE("un_print").addEventListener("click", unotes2)
+  var undelete = dE("un_delete").addEventListener("click", unotes2)
   var un_rendermode = dE("un_rendermode").addEventListener("change", notesUIHandler)
   var un_viewership = dE("un_viewership").addEventListener("change", notesUIHandler)
   dE("un_print").addEventListener("click", function () {
     dE("un_preview").style.display = "none";
     dE("un_preview").innerHTML = "<h1 style = 'text-align:center;margin:0px'>" + dE("un_title").value + "</h1>" + getHTML("un_editable");
-    window.idElementPrint(dE("un_preview"), userinfo.name);
+    window.print()
   })
 }
 function dshHand() { changeLocationHash("dashboard", 1) }
@@ -426,7 +418,7 @@ function coreManager(newlocation, n1) {
     case "add/simulation": handlebox = "fu_simulation"; newSimulation(); break;
     case "add/tests": handlebox = "fu_topic"; newTest(); break;
     case "add/batch": handlebox = "fu_topic"; newBatch(); break;
-    case "list/batch": handlebox = "fu_batch"; renderBody(page_batch_list, "height:max-content;", ""); renderBatchList();break;
+    case "list/batch": handlebox = "fu_batch"; renderBody(page_batch_list, "height:max-content;", ""); renderBatchList(); break;
     case "uploads": handlebox = "uploadEvents"; renderBody(page_uploads, "", ""); uploadEvents(); break;
     case "settings": handlebox = "settings"; renderBody(page_settings, "height: max-content;", ""); settingsEvents(); break;
     case "chplist": handlebox = "chapterlist"; renderBody(page_list_chapter, "", ""); chapterEvents(); renderCList(); break;
@@ -442,7 +434,7 @@ function coreManager(newlocation, n1) {
   if (location1.includes("usernotes")) { handlebox = "usernotes"; renderBody(page_usernotes, "flex-direction: row;", ""); userNotesEvents(); getUserNotes(); }
   if (location1.includes("qbnk_vid")) { handlebox = "qbnk_vid"; renderBody(page_qbnkvid, "height:90vh;position: relative;", ""); dE("qbnk_vid_btn").style.display = "block"; dE("qbnk_vid_btn").addEventListener("click", prepareVideo); dE("qbnk_vid_btn_e").addEventListener("click", qbnkend); function qbnkend() { dE("watermark").style.display = "flex"; fullEle(dE("qbnk_vid")) } }
   if (location1.includes("attempt")) { handlebox = "testv1"; renderBody(page_test_v1, "height:max-content;", ""); testEvents(); addTestEvents(); getTestInfo() }
-  if (location1.includes("finished")) { handlebox = "finishedtestinfo"; renderBody(page_finished_test, "overflow-y: scroll;", ""); getSimpleTestReport() }
+  if (location1.includes("finished")) { handlebox = "finishedtestinfo"; renderBody(page_finished_test, "height:max-content;", ""); getSimpleTestReport() }
   if (location1.includes("testreport")) { handlebox = "testv1"; renderBody(page_test_v1, "height:max-content;", ""); getTestReport(); addTestEvents(); }
   if (location1.includes("printable/qbank") && iorole == true) { handlebox = "printable"; renderBody(page_printable, "height:max-content;", ""); printableEvents(); var shfbtn = dE("shf_btn").addEventListener("click", shuffleQBank); printQBank(1); }
   if (location1.includes("ARIEL") && iorole == true) { handlebox = "Ariel"; renderBody(page_ariel, "", ""); }
@@ -457,7 +449,7 @@ function coreManager(newlocation, n1) {
   if (location1.includes("edit_test") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll"); dE("aq_tst_save").addEventListener("click", function () { updateTopicQBank(3) }); edittopicEvents(); prepareTopicQBank(3) }
   if (location1.includes("edit_qubank") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll"); dE("aq_qbc_save").addEventListener("click", function () { updateTopicQBank(2) }); edittopicEvents(); prepareTopicQBank(2) }
   if (location1.includes("edit_exams") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll"); dE("aq_exam_save").addEventListener("click", function () { updateTopicQBank(4) }); edittopicEvents(); prepareTopicQBank(4) }
-  if (location1.includes("edit_batch") && iorole == true){ handlebox = "fu_topic"; renderBody(page_edit_batch,"",""); prepareBatch();dE("aq_batch_save").addEventListener("click",updateBatch)}
+  if (location1.includes("edit_batch") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_batch, "", ""); prepareBatch(); dE("aq_batch_save").addEventListener("click", updateBatch) }
   if (iorole) {
     if (window.location.hash.includes("dashboard")) {
       dE("adminonly").style.display = "flex";
@@ -903,19 +895,19 @@ async function newBatch() {
 }
 async function prepareBatch() {
   var docRef = doc(db, 'batch', window.location.hash.split("edit_batch/")[1])
-    var docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      var docRef = docSnap.data()
-      dE("aq_batname").value = docRef.name;
-      dE("aq_class").value = docRef.class;
-      dE("aq_timetable").value = docRef.timetable;
-      function dateparser(var1) {
-        var now = new Date(var1);
-        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-        return now.toISOString().slice(0, 16);
-      }
-      dE("aq_tst_delon").value = dateparser(docRef.delon.seconds * 1000)
+  var docSnap = await getDoc(docRef);
+  if (docSnap.exists()) {
+    var docRef = docSnap.data()
+    dE("aq_batname").value = docRef.name;
+    dE("aq_class").value = docRef.class;
+    dE("aq_timetable").value = docRef.timetable;
+    function dateparser(var1) {
+      var now = new Date(var1);
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      return now.toISOString().slice(0, 16);
     }
+    dE("aq_tst_delon").value = dateparser(docRef.delon.seconds * 1000)
+  }
 }
 async function updateBatch() {
   let date = new Date(dE("aq_tst_delon").value)
@@ -936,9 +928,12 @@ async function unotes1() {
     lastupdated: serverTimestamp(),
     type: dE("un_viewership").value
   })
+  dE(window.location.hash.split("usernotes/")[1]).innerText = dE("un_title").value
 }
 function unotes2() {
-
+  log("Confirmation", "Are you Sure you want to delete this Document?", function () {
+    window.location.hash = "#/usernotes/delete/" + window.location.hash.split("usernotes/")[1]
+  }, "Confirm", 1)
 }
 async function getUserNotes() {
   try { notesUIHandler() } catch { }
@@ -951,12 +946,11 @@ async function getUserNotes() {
       type: "private",
       lastupdated: serverTimestamp()
     })
-    await updateDoc(doc(db, "users", userinfo.uuid), {
-      usernotes: arrayUnion({ color: "black", id: docRef.id, title: "Notes Title" })
-    })
+    userinfo.usernotes.push({ id: docRef.id, title: "Note Title" })
     creMng("usernotes/" + docRef.id, 1)
   } else if (window.location.hash.includes("usernotes/delete")) {
     await deleteDoc(doc(db, "usernotes", window.location.hash.split("usernotes/delete/")[1]));
+    window.location.hash = "#/usernotes/"
   } else if (window.location.hash == "#/usernotes/") {
     getUserNotesList()
   } else if (window.location.hash.includes("usernotes")) {
@@ -991,15 +985,26 @@ function uNotesClicker() {
   window.location.hash = "#/usernotes/" + this.id.split("uno")[1]
 }
 async function getUserNotesList() {
+  if (userinfo.usernotes.length <= 0) {
+    userinfo.usernotes = []
+    const q = query(collection(db, "usernotes"), where("uuid", "==", userinfo.uuid));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((doc) => {
+      var tfg = doc.data()
+      userinfo.usernotes.push({ id: doc.id, crton: tfg.crton, lastupdated: tfg.lastupdated, title: tfg.title, type: tfg.type, uuid: tfg.uuid })
+    })
+  }
   for (var i = 0; i < userinfo.usernotes.length; i++) {
     dE("un_list").insertAdjacentHTML("beforeend", "<div class='t_notes' id='uno" + userinfo.usernotes[i].id + "' style='background-color: " + userinfo.usernotes[i].color + "'><span class='tntc2' id='" + userinfo.usernotes[i].id + "'>" + userinfo.usernotes[i].title + "</span></div>")
     dE("uno" + userinfo.usernotes[i].id).addEventListener("click", uNotesClicker)
   }
+  dE("un_list").insertAdjacentHTML("beforeend", "<div class='t_notes' id='unoadd'><span><center>+</center></span></div>")
+  dE("unoadd").addEventListener("click", uNotesClicker)
 }
 async function getPDF() {
   var id = window.location.hash.split("notes/")[1]
   showLS("s");
-  getDownloadURL(ref(storage, 'public/' + id + '.pdf')).then((url) => { dE("nt_id").src = "https://docs.google.com/gview?url=" + encodeURI(url) + "&embedded=true";dE("nt_id").onload = showLS("d"); }).catch((error) => {
+  getDownloadURL(ref(storage, 'public/' + id + '.pdf')).then((url) => { dE("nt_id").src = "https://docs.google.com/gview?url=" + encodeURI(url) + "&embedded=true"; dE("nt_id").onload = showLS("d"); }).catch((error) => {
     switch (error.code) {
       case 'storage/object-not-found':
         dE("nt_id").src = "https://docs.google.com/gview?url=" + encodeURI("https://firebasestorage.googleapis.com/v0/b/quarkz.appspot.com/o/public%2F404.pdf?alt=media&token=8cc8f23a-6e24-41d6-984b-6d2cc9b89d11") + "&embedded=true"
@@ -1236,11 +1241,11 @@ function addItemToQLLIst() {
     qop2.push(document.getElementsByClassName("aq_i2")[i].value)
   }
   if (location1.includes("edit_test")) {
-    var json = { qid: curr_qlid, mode: dE("aq_mode").value, title: getHTML("aq_qtext"), y_url: dE("aq_yurl").value, hint: dE("aq_hint").value, expl: getHTML("aq_expl"), type: qtype, answer: qans, op: qop, op1: qop1, op2: qop2, section: dE("aq_section").value, pm: dE("aq_posmrks").value, nm: dE("aq_negmrks").value }
+    var json = { qid: curr_qlid, mode: dE("aq_mode").value, title: getHTML("aq_qtext"), y_url: dE("aq_yurl").value, hint: dE("aq_hint").value, expl: getHTML("aq_expl"), type: qtype, answer: qans, op: qop, op1: qop1, op2: qop2, section: dE("aq_section").value, pm: dE("aq_posmrks").value, nm: dE("aq_negmrks").value, qtopic: dE("aq_q_topic").value }
   } else if (location1.includes("edit_exams")) {
     var json = { id: curr_qlid, name: dE("aq_examname").value, date: dE("aq_examdate").value, info: dE("aq_examinfo").value, syllabus: dE("aq_examsyllabus").value, mode: "exams" }
   } else {
-    var json = { id: curr_qlid, mode: dE("aq_mode").value, title: getHTML("aq_qtext"), y_url: dE("aq_yurl").value, hint: dE("aq_hint").value, expl: getHTML("aq_expl"), type: qtype, answer: qans, op: qop, op1: qop1, op2: qop2, section: dE("aq_section").value, pm: dE("aq_posmrks").value, nm: dE("aq_negmrks").value }
+    var json = { id: curr_qlid, mode: dE("aq_mode").value, title: getHTML("aq_qtext"), y_url: dE("aq_yurl").value, hint: dE("aq_hint").value, expl: getHTML("aq_expl"), type: qtype, answer: qans, op: qop, op1: qop1, op2: qop2, section: dE("aq_section").value, pm: dE("aq_posmrks").value, nm: dE("aq_negmrks").value, qtopic: dE("aq_q_topic").value }
   }
   return json
 }
@@ -1285,7 +1290,7 @@ function renderEditQLList(qno) {
     if (window.location.hash.includes("edit_exams")) {
       editqllist[po] = { id: Date.now() + Math.random().toString(36).substr(2), name: "", date: "", info: "", syllabus: "", mode: "exams" }
     } else {
-      editqllist[po] = { id: Date.now() + Math.random().toString(36).substr(2), mode: "", title: "", y_url: "", img: "", hint: "", expl: "", type: "mcq", answer: ["1"], op: ["1", "2", "3", "4"], op1: [], op2: [], section: "Unfiled", pm: 4, nm: -1 }
+      editqllist[po] = { id: Date.now() + Math.random().toString(36).substr(2), mode: "", title: "", y_url: "", img: "", hint: "", expl: "", type: "mcq", answer: ["1"], op: ["1", "2", "3", "4"], op1: [], op2: [], section: "Unfiled", pm: 4, nm: -1, qtopic: "" }
     }
     if (window.location.hash.includes("edit_qubank") || window.location.hash.includes("edit_test")) { editqllist[po].mode = "question" }
     if (location1.includes("edit_test")) {
@@ -1328,6 +1333,7 @@ function renderEditQLList(qno) {
   dE("aq_section").value = op.section
   dE("aq_posmrks").value = op.pm
   dE("aq_negmrks").value = op.nm
+  dE("aq_q_topic").value = op.qtopic
   setHTML("aq_expl", op.expl)
   if (op.type == "mcq" || op.type == "mcq_multiple" || op.type == "mcq_multiple_partial") {
     dE("aq_mcq_con").innerHTML = ""
@@ -1461,6 +1467,7 @@ async function prepareTopicQBank(iun) {
         dE("aq_tpcname").value = docJSON.title
         dE("aq_tpclevel").value = docJSON.level
         dE("aq_tpc_subj").value = docJSON.subject
+        dE("aq_randomize").checked = docJSON.randomize
         dE("aq_tst_batches").value = docJSON.batch.toString()
         function dateparser(var1) {
           var now = new Date(var1);
@@ -1550,6 +1557,7 @@ async function updateTopicQBank(iun) {
         timeallotted: dE("aq_tst_timealotted").value,
         syllabus: dE("aq_tst_syllabi").value,
         instructions: getHTML("aq_add_test_instr"),
+        randomize: dE("aq_randomize").checked,
         strton: fgio,
         endon: fgio2,
         batch: wer,
@@ -1562,8 +1570,8 @@ async function updateTopicQBank(iun) {
     var a = [];
     for (var i = 0; i < editqllist.length; i++) {
       var ele = editqllist[i]
-      q.push({ qid: ele.qid, mode: ele.mode, title: ele.title, type: ele.type, op: ele.op, op1: ele.op1, op2: ele.op2, section: ele.section, pm: ele.pm, nm: ele.nm })
-      a.push({ qid: ele.qid, hint: ele.hint, expl: ele.expl, answer: ele.answer, section: ele.section, pm: ele.pm, nm: ele.nm, type: ele.type })
+      q.push({ qid: ele.qid, mode: ele.mode, title: ele.title, type: ele.type, op: ele.op, op1: ele.op1, op2: ele.op2, section: ele.section, pm: ele.pm, nm: ele.nm, })
+      a.push({ qid: ele.qid, hint: ele.hint, expl: ele.expl, answer: ele.answer, section: ele.section, pm: ele.pm, nm: ele.nm, type: ele.type,qtopic: ele.qtopic })
     }
     try {
       const docRef = await updateDoc(doc(db, col, id, "questions", "questions"), {
@@ -1672,7 +1680,7 @@ async function printQBank(type) {
       qbanktitle.innerText = docJSON.name;
     }
   } else if (type == 3) {
-    var qlist,alist
+    var qlist, alist
     var docRef = doc(db, fireID, qbankno,)
     var docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
@@ -1681,30 +1689,30 @@ async function printQBank(type) {
       dE("pt_ins").innerHTML = `
       <span style="font-size:18px;color:lime;">Test Information:</span>
             <ul style="font-size: 14px;color:white;">
-                <li> Time Allotted:&nbsp;<span id = "i_time">`+docJSON.timeallotted+`</span> </li>
-                <li> Syllabus:&nbsp;<span id = "i_syllabus">`+docJSON.syllabus+`</span> </li>
-                <li> Total Marks:&nbsp;<span id = "i_total">`+docJSON.totalmarks+`</span> </li>
-                <li> No of Questions:&nbsp;<span id = "i_qno">`+docJSON.questionnos+`</span></li>
+                <li> Time Allotted:&nbsp;<span id = "i_time">`+ docJSON.timeallotted + `</span> </li>
+                <li> Syllabus:&nbsp;<span id = "i_syllabus">`+ docJSON.syllabus + `</span> </li>
+                <li> Total Marks:&nbsp;<span id = "i_total">`+ docJSON.totalmarks + `</span> </li>
+                <li> No of Questions:&nbsp;<span id = "i_qno">`+ docJSON.questionnos + `</span></li>
             </ul>
       <span style="font-size:18px;color:lime;">Test Specific Instructions:</span>
-      <div id = "tsi" style="font-size:14px;">`+docJSON.instructions+`</div><hr>
+      <div id = "tsi" style="font-size:14px;">`+ docJSON.instructions + `</div><hr>
     `
     }
-    var docRef2 = doc(db, fireID, qbankno,"questions","questions")
+    var docRef2 = doc(db, fireID, qbankno, "questions", "questions")
     var docSnap2 = await getDoc(docRef2);
     if (docSnap2.exists()) {
       var docJSON2 = docSnap2.data(); qlist = docJSON2.questions;
     }
-    var docRef3 = doc(db, fireID, qbankno,"questions","answers")
+    var docRef3 = doc(db, fireID, qbankno, "questions", "answers")
     var docSnap3 = await getDoc(docRef3);
     if (docSnap3.exists()) {
       var docJSON3 = docSnap3.data(); alist = docJSON3.questions;
     }
-    qnos = mergeById(qlist,alist)
+    qnos = mergeById(qlist, alist)
   } else { creMng("error_page", 1); throw new Error }
 
   var qnos, qtitle, qtype, qimg;
-  
+
 
   for (let ele of qnos) {
     if (ele.mode == "question") {
@@ -1736,7 +1744,7 @@ async function printQBank(type) {
       if (qtype == "taf") {
         qrt = '<ol class = "qb_mcq_exp" type = "a"><li>True</li><li>False</li></ol>'
       }
-      if (qtype == "explain" || qtype == "numerical" || qtype == "fill") { qrt = "";ans+=ele.answer.toString()+"</span>" }
+      if (qtype == "explain" || qtype == "numerical" || qtype == "fill") { qrt = ""; ans += ele.answer.toString() + "</span>" }
 
       if (qtype == "matrix") {
         var qop1 = docJSON.op1;
@@ -2117,14 +2125,14 @@ async function renderBatchList() {
     const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
       var tfg = doc.data()
-      batchList.push({ id:doc.id,crton:tfg.crton,delon:tfg.delon,class:tfg.class,name:tfg.name })
+      batchList.push({ id: doc.id, crton: tfg.crton, delon: tfg.delon, class: tfg.class, name: tfg.name })
     })
   }
-  for (let i = 0;i<batchList.length;i++){
+  for (let i = 0; i < batchList.length; i++) {
     let ele = batchList[i]
     var crton = new Date(ele.crton * 1000)
     var delon = new Date(ele.delon * 1000)
-    dE("batchlinks").innerHTML += '<div class="tlinks-3" id = "' + ele.id + '" onclick = "window.location.hash = `#/edit_batch/'+ele.id+'`"><center><span class = "t_title">' + ele.name+ '</span></center><div class = "tl"><span class = "t_stron">Created On:' + crton.toISOString() + '</span><span class ="t_endon">Ends At:' + delon.toISOString() + '</div><div class = "tl"><span>Class:' + ele.class + '</span></div></div>'
+    dE("batchlinks").innerHTML += '<div class="tlinks-3" id = "' + ele.id + '" onclick = "window.location.hash = `#/edit_batch/' + ele.id + '`"><center><span class = "t_title">' + ele.name + '</span></center><div class = "tl"><span class = "t_stron">Created On:' + crton.toISOString() + '</span><span class ="t_endon">Ends At:' + delon.toISOString() + '</div><div class = "tl"><span>Class:' + ele.class + '</span></div></div>'
   }
 }
 async function getTestList(batchid, userid) {
@@ -2247,27 +2255,52 @@ async function getSimpleTestReport() {
               dE("fto_correct").innerText = tT.info.correct
               dE("fto_incorrect").innerText = tT.info.incorrect
               dE("fto_unanswered").innerText = tT.info.unattempted
+              dE("fto_accuracy").innerText = tT.info.overall.acc.toString()+"%";
+              dE("fto_qsattempted").innerText = Math.floor(tT.info.overall.qc+tT.info.overall.qic).toString() +"/" +Math.floor(tT.info.overall.qc+tT.info.overall.qic+tT.info.overall.qun).toString()
               testActionLogger = tT.actions
               reQW = tT.info.mList
+              let hji = "<ol>"
+              missedtopics = tT.info.missedtopics
+              for (var i = 0; i < missedtopics.length; i++) {
+                hji += '<li><div class = "tlinks" style = "flex-direction:row;width:25vw;justify-content:space-between;"><span class = "t_name">' + missedtopics[i] + '</span></div></li>'
+              }
+              dE("fto_missed").innerHTML = hji
+              try{
+                let tablebuilder = tT.info.subjectmarks
+                tablebuilder.overall = {correct:tT.info.correct,incorrect:tT.info.incorrect,unattempted:tT.info.unattempted}
+                let tablebuilder2 = []
+                var ion1 = ["Physics", "Chemistry", "Math", "Biology", "Statistics", "Computer", "Unfiled","overall"]
+                for (var eleX of ion1) {
+                  var el2e2 = tT.info.subjectmarks[eleX]
+                  if (!areObjectsEqual(el2e2, { correct: 0, unattempted: 0, incorrect: 0, total: 0,qc:0,qic:0,qun:0 })) {
+                    let fgy = el2e2.correct + el2e2.incorrect+el2e2.unattempted
+                    tablebuilder2.push({subject:eleX,score:fgy,crr_marks:el2e2.correct,correct:el2e2.qc,incr_marks:el2e2.incorrect,incorrect:el2e2.qic,unat_marks:el2e2.unattempted,unattempted:el2e2.qun,})
+                  }
+                }
+                dE("fto_overview_table").appendChild(buildHtmlTable(tablebuilder2))
+              }catch{
+
+              }
               dE("fto_rank").innerText = "0"
-              function r(t, c, ic, un, tm) {
-                var z = tm - (c - ic * 4)
+              function r(t, c, ic, un, tm,m,n,o) {
                 var gf = c + ic
-                return `<div><span>` + t + `(` + gf + ` Marks)</span><div style = "width:40vw;height:30px;display:flex;flex-direction:row;"><div style="width:` + c / tm * 40 + `vw;background-color:green;height:30px;text-align:center;color:white">` + c + `/` + tm + `</div><div style="width:` + Math.abs(4 * ic / tm * 40) + `vw;background-color:red;height:30px;text-align:center;color:white">` + ic + `/` + tm + `</div><div style="width:` + (1 - (c - ic * 4) / tm) * 40 + `vw;background-color:orange;height:30px;text-align:center;color:black">` + z + `/` + tm + `</div></div></div>`
+                var gi = m+n+o
+                return `<div><span>` + t + `(` + gf + ` Marks)</span><div style = "width:80vw;height:30px;display:flex;flex-direction:row;overflow-x:hidden"><div style="width:` + m / gi * 80 + `vw;background-color:green;height:30px;text-align:center;color:white">` + c + `/` + tm + `</div><div style="width:` + n / gi * 80 + `vw;background-color:red;height:30px;text-align:center;color:white">` + ic + `/` + tm + `</div><div style="width:` + o/gi * 80 + `vw;background-color:orange;height:30px;text-align:center;color:black">` + o*4 + `/` + tm + `</div></div></div>`
               }
               var ion1 = ["Physics", "Chemistry", "Math", "Biology", "Statistics", "Computer", "Unfiled"]
               dE("fto_percents").innerHTML = ""
               for (var eleX of ion1) {
                 var el2e2 = tT.info.subjectmarks[eleX]
-                if (!areObjectsEqual(el2e2, { correct: 0, unattempted: 0, incorrect: 0, total: 0 })) {
-                  dE("fto_percents").insertAdjacentHTML("beforeend", r(eleX, el2e2.correct, el2e2.incorrect, el2e2.unattempted, el2e2.total))
+                if (!areObjectsEqual(el2e2, { correct: 0, unattempted: 0, incorrect: 0, total: 0,qc:0,qic:0,qun:0 })) {
+                  dE("fto_percents").insertAdjacentHTML("beforeend", r(eleX, el2e2.correct, el2e2.incorrect, el2e2.unattempted, el2e2.total,el2e2.qc,el2e2.qic,el2e2.qun))
                 }
               }
-              analyseActions(1).then(function () {
+              analyseActions(1).then(function () { 
                 function qw(t, c, ic, un, tm) {
                   var z = tm - (c + ic)
                   return `<div><span>` + t + `(` + sd(tm) + `)</span><div style = "width:80vw;height:30px;display:flex;flex-direction:row;"><div style="width:` + c / tm * 80 + `vw;background-color:green;height:30px;text-align:center;color:white">` + sd(c) + `</div><div style="width:` + ic / tm * 80 + `vw;background-color:red;height:30px;text-align:center;color:white">` + sd(ic) + `</div><div style="width:` + (1 - (c + ic) / tm) * 80 + `vw;background-color:orange;height:30px;text-align:center;color:black">` + sd(z) + `</div></div></div>`
                 }
+                dE("fto_timetaken").innerText = Math.floor((analysedActions.correct+analysedActions.incorrect+analysedActions.unattempted)/60).toString()+"/"+Math.floor(testInfo.timeallotted/60).toString() + "M"
                 var ion1 = ["Physics", "Chemistry", "Math", "Biology", "Statistics", "Computer", "Unfiled"]
                 dE("fto_time").innerHTML = ""
                 for (var eleX of ion1) {
@@ -2275,6 +2308,19 @@ async function getSimpleTestReport() {
                   if (!areObjectsEqual(eXZe2, { correct: 0, unattempted: 0, incorrect: 0, total: 0 })) {
                     dE("fto_time").insertAdjacentHTML("beforeend", qw(eleX, eXZe2.correct, eXZe2.incorrect, eXZe2.unattempted, eXZe2.total))
                   }
+                }
+                try{
+                  let tablebuilder3 = []
+                  var ion1 = ["Physics", "Chemistry", "Math", "Biology", "Statistics", "Computer", "Unfiled"]
+                  for (var eleX of ion1) {
+                    var el2e2 = analysedActions.subject[eleX]
+                    if (!areObjectsEqual(el2e2, { correct:0,incorrect:0,unattempted:0,total:0 })) {
+                      tablebuilder3.push({subject:eleX,correct: sd(el2e2.correct), incorrect: sd(el2e2.incorrect),unattempted: sd(el2e2.unattempted), total: sd(el2e2.correct+el2e2.incorrect+el2e2.unattempted),accuracy:Math.floor((1-tT.info.subjectmarks[eleX].qic/tT.info.subjectmarks[eleX].qc)*100).toString()+"%"})
+                    }
+                  }
+                  dE("fto_time_table").appendChild(buildHtmlTable(tablebuilder3))
+                }catch{
+                
                 }
               })
             }
@@ -2372,18 +2418,22 @@ async function analyseActions(typi) {
         if (qnos[tQList[i].qid] == undefined) {
           qnos[tQList[i].section] = {}
           qnos[tQList[i].section].time = 0
+          subJTimes[tQList[i].section].qun += 1
         } else {
           subJTimes[tQList[i].section].total += ele.time
           if (reQW[i].marks == 0) {
             subJTimes[tQList[i].section].unattempted += ele.time
             un = un + ele.time
+            subJTimes[tQList[i].section].qun += 1
           } else {
             if (reQW[i].marks == tQList[i].pm) {
               subJTimes[tQList[i].section].correct += ele.time
               c = c + ele.time
+              subJTimes[tQList[i].section].qc += 1
             } else {
               subJTimes[tQList[i].section].incorrect += ele.time
               ic = ic + ele.time
+              subJTimes[tQList[i].section].qic += 1
             }
           }
         }
@@ -2431,6 +2481,12 @@ async function getTestReport() {
           docSnap = await getDoc(docRef);
           if (docSnap.exists()) {
             testQuestionList = docSnap.data()
+          }
+          const crypto = require('crypto');
+          const hash = crypto.createHash('sha256').update(userinfo.uuid).digest('hex');
+          const user_num = parseInt(hash.slice(0, 6), 16);
+          if (testInfo.randomize) {
+            testQuestionList = shuffleArrayWithSeed(testQuestionList, user_num)
           }
           docRef = doc(db, "tests", testid, "responses", auth.currentUser.uid);
           docSnap = await getDoc(docRef);
@@ -2495,6 +2551,12 @@ async function getTestInfo() {
     dE("te_title").innerText = "The Test Hasnt Started Yet"
     dE("te_msg").innerText = ""
     return 0;
+  }
+  const crypto = require('crypto');
+  const hash = crypto.createHash('sha256').update(userinfo.uuid).digest('hex');
+  const user_num = parseInt(hash.slice(0, 6), 16);
+  if (testInfo.randomize) {
+    testQuestionList = shuffleArrayWithSeed(testQuestionList, user_num)
   }
   docRef = doc(db, "tests", testid, "responses", auth.currentUser.uid);
   docSnap = await getDoc(docRef);
@@ -2583,11 +2645,13 @@ async function computeResult(type) {
   }
   var u = 0, c = 0, ic = 0;
   var subjectmarks = {
-    "Physics": { correct: 0, unattempted: 0, incorrect: 0, total: 0 },
-    "Chemistry": { correct: 0, unattempted: 0, incorrect: 0, total: 0 }, "Math": { correct: 0, unattempted: 0, incorrect: 0, total: 0 },
-    "Biology": { correct: 0, unattempted: 0, incorrect: 0, total: 0 }, "Computer": { correct: 0, unattempted: 0, incorrect: 0, total: 0 },
-    "Statistics": { correct: 0, unattempted: 0, incorrect: 0, total: 0 }, "Unfiled": { correct: 0, unattempted: 0, incorrect: 0, total: 0 }
+    "Physics": { correct: 0, unattempted: 0, incorrect: 0, total: 0,qun:0,qc:0,qic:0 },
+    "Chemistry": { correct: 0, unattempted: 0, incorrect: 0, total: 0,qun:0,qc:0,qic:0 }, "Math": { correct: 0, unattempted: 0, incorrect: 0, total: 0 ,qun:0,qc:0,qic:0},
+    "Biology": { correct: 0, unattempted: 0, incorrect: 0, total: 0,qun:0,qc:0,qic:0 }, "Computer": { correct: 0, unattempted: 0, incorrect: 0, total: 0 ,qun:0,qc:0,qic:0},
+    "Statistics": { correct: 0, unattempted: 0, incorrect: 0, total: 0,qun:0,qc:0,qic:0 }, "Unfiled": { correct: 0, unattempted: 0, incorrect: 0, total: 0,qun:0,qc:0,qic:0 }
   }
+  var overall = {qc:0,qic:0,qun:0,acc:0}
+  var missedtopics = []
   for (var i = 0; i < trA.length; i++) {
     for (var j = 0; j < trL.length; j++) {
       if (trA[i].qid == trL[j].qid) {
@@ -2601,24 +2665,32 @@ async function computeResult(type) {
           u = u + parseFloat(trA[i].pm)
           subjectmarks[trA[i].section].unattempted += parseFloat(trA[i].pm)
           subjectmarks[trA[i].section].total += parseFloat(trA[i].pm)
+          subjectmarks[trA[i].section].qun += 1
+          overall.qun +=1
         } else {
           if (q_check.type == "correct") {
             marksList.push({ qid: trA[i].qid, marks: parseFloat(trA[i].pm), type: "correct" })
             c = c + parseFloat(q_check.marks)
             subjectmarks[trA[i].section].correct += parseFloat(q_check.marks)
             subjectmarks[trA[i].section].total += parseFloat(trA[i].pm)
+            subjectmarks[trA[i].section].qc += 1
+            overall.qc +=1
           } else {
             marksList.push({ qid: trA[i].qid, marks: parseFloat(trA[i].nm), type: "incorrect" })
             ic = ic + parseFloat(trA[i].nm)
             subjectmarks[trA[i].section].incorrect += parseFloat(trA[i].nm)
             subjectmarks[trA[i].section].total += parseFloat(trA[i].pm)
+            subjectmarks[trA[i].section].qic += 1
+            overall.qic +=1
+            missedtopics.push(trA[i].qtopic)
           }
         }
       }
     }
   }
+  overall.acc = Math.floor((1-overall.qic/overall.qc) *100)
   var t = subjectmarks["Physics"].total + subjectmarks["Chemistry"].total + subjectmarks["Math"].total + subjectmarks["Biology"].total + subjectmarks["Computer"].total + subjectmarks["Statistics"].total + subjectmarks["Unfiled"].total
-  var tFinal = { correct: c, incorrect: ic, unattempted: u, mList: marksList, total: t, usermarks: c + ic, subjectmarks: subjectmarks }
+  var tFinal = { correct: c, incorrect: ic, unattempted: u, mList: marksList, total: t, usermarks: c + ic, subjectmarks: subjectmarks,overall:overall,missedtopics:missedtopics }
   if (type == 1) {
     if (!areObjectsEqual(tFinal, fg)) {
       log("NOTICE", "Please Wait, Marks Are Being Updated")
@@ -2626,8 +2698,10 @@ async function computeResult(type) {
         info: tFinal
       })
       await updateDoc(doc(db, "tests", testid, "responses", "finished"), {
-        leaderboard: arrayUnion({ "uid": userinfo.uuid, "marks": tFinal.usermarks, "name": userinfo.name }),
         leaderboard: arrayRemove({ "uid": userinfo.uuid, "marks": fg.usermarks, "name": userinfo.name }),
+      })
+      await updateDoc(doc(db, "tests", testid, "responses", "finished"), {
+        leaderboard: arrayUnion({ "uid": userinfo.uuid, "marks": tFinal.usermarks, "name": userinfo.name }),
       })
       creMng()
     }
@@ -2664,6 +2738,9 @@ function testqHandler(id, no) {
       dE("tt_qtitle").innerHTML = ""
       var inhtml = '<div class = "qb_q" id = "Q' + ele.qid + '"><div class = "qb_ttl">' + ele.title + '<div id = "qb_q_ty" class = "qb_q_ty qb_qt_ty" >(' + ele.type + ')</div><div id = "qb_q_mrk" class = "qb_q_ty qb_qt_ty" >(' + ele.pm + '/' + ele.nm + ')</div></div></div>'
       dE("tt_qtitle").insertAdjacentHTML('beforeend', inhtml);
+      if (!window.location.hash.includes("/attempt/")) {
+        dE("tt_qtitle").insertAdjacentHTML('beforeend', '<span class = "tst_btn">' + ele.qtopic + '</span>');
+      }
       var asi = "";
       if (ele.type == "mcq") {
         var qop = ele.op;

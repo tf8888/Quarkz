@@ -51,12 +51,12 @@ For permission requests, please contact [Mr Techtroid] at mrtechtroid@outlook.co
   --red: red;
   --clr1:  rgb(255, 159, 159,0.75);
   --clr2: rgba(255, 255, 255, 0.125);
-  --clr3: grey;
+  --clr3: rgb(61, 49, 49);
   --clr4: rgb(255, 60, 0);
   --clr5: magenta;
   --clr6:rgb(233, 119, 119);
   --clr7: #a1f506;
-  --clr8: #292f3a;
+  --clr8: #326adb;
   --clr9: rgb(5, 5, 32);
   --clr10: lime;
   --clr11:  rgb(255, 159, 159);
@@ -725,7 +725,23 @@ body {
     right: 0;
 
   }
-
+  #un_edit{
+    display:none !important;
+  }
+  #un_preview{
+    display:block !important;
+    height:max-content !important;
+    color:black !important; 
+    overflow:hidden !important;
+    min-height: 90%;
+    min-width: 95%;
+  }
+  #un_preview ol{
+    color:black !important;
+  }
+  #output{
+    height:max-content;
+  }
   .qb_q {
     counter-increment: qno;
   }
@@ -1618,4 +1634,84 @@ circle text {
 
 #dmodebtn .slider-t.round:before {
   border-radius: 50%;
+}
+
+.table1 {
+  border: 1px solid #ccc;
+  border-collapse: collapse;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.table1 caption {
+  font-size: 1.5em;
+  margin: .5em 0 .75em;
+}
+
+.table1 tr {
+  border: 1px solid #ddd;
+  padding: .35em;
+}
+
+.table1 th,
+.table1 td {
+  padding: .625em;
+  text-align: center;
+}
+
+.table1 th {
+  font-size: .85em;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+@media screen and (max-width: 600px) {
+  .table1 {
+    border: 0;
+  }
+
+  .table1 caption {
+    font-size: 1.3em;
+  }
+  
+  .table1 thead {
+    border: none;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+  }
+  
+  .table1 tr {
+    border-bottom: 3px solid #ddd;
+    display: block;
+    margin-bottom: .625em;
+  }
+  
+  .table1 td {
+    border-bottom: 1px solid #ddd;
+    display: block;
+    font-size: .8em;
+    text-align: right;
+  }
+  
+  .table1 td::before {
+    /*
+    * aria-label has no advantage, it won't be read inside a table
+    content: attr(aria-label);
+    */
+    content: attr(data-label);
+    float: left;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  
+.table1 td:last-child {
+    border-bottom: 0;
+  }
 }
