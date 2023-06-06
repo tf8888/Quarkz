@@ -1570,7 +1570,7 @@ async function updateTopicQBank(iun) {
     var a = [];
     for (var i = 0; i < editqllist.length; i++) {
       var ele = editqllist[i]
-      q.push({ qid: ele.qid, mode: ele.mode, title: ele.title, type: ele.type, op: ele.op, op1: ele.op1, op2: ele.op2, section: ele.section, pm: ele.pm, nm: ele.nm, })
+      q.push({ qid: ele.qid, mode: ele.mode, title: ele.title, type: ele.type, op: ele.op, op1: ele.op1, op2: ele.op2, section: ele.section, pm: ele.pm, nm: ele.nm,qtopic: ele.qtopic })
       a.push({ qid: ele.qid, hint: ele.hint, expl: ele.expl, answer: ele.answer, section: ele.section, pm: ele.pm, nm: ele.nm, type: ele.type,qtopic: ele.qtopic })
     }
     try {
@@ -2714,8 +2714,6 @@ async function computeResult(type) {
     })
     renderBody(page_test_end, "", "")
   }
-  document.getElementById(gty).style.visibility = 'hidden';
-  document.getElementById(gty).style.opacity = '0'
 }
 function testqHandler(id, no) {
   var MCQ = ``

@@ -2433,7 +2433,8 @@ async function updateTopicQBank(iun) {
                 op2: ele.op2,
                 section: ele.section,
                 pm: ele.pm,
-                nm: ele.nm
+                nm: ele.nm,
+                qtopic: ele.qtopic
             });
             a.push({
                 qid: ele.qid,
@@ -3754,8 +3755,6 @@ async function computeResult(type) {
         });
         renderBody((0, _tests.page_test_end), "", "");
     }
-    document.getElementById(gty).style.visibility = "hidden";
-    document.getElementById(gty).style.opacity = "0";
 }
 function testqHandler(id, no) {
     var MCQ = ``;
@@ -5687,8 +5686,8 @@ parcelHelpers.export(exports, "validateCallback", ()=>validateCallback);
 parcelHelpers.export(exports, "validateContextObject", ()=>validateContextObject);
 parcelHelpers.export(exports, "validateIndexedDBOpenable", ()=>validateIndexedDBOpenable);
 parcelHelpers.export(exports, "validateNamespace", ()=>validateNamespace);
-var process = require("d8acfab35ed80fa1");
 var global = arguments[3];
+var process = require("d8acfab35ed80fa1");
 const CONSTANTS = {
     /**
      * @define {boolean} Whether this is the client Node.js SDK.
@@ -66353,8 +66352,8 @@ exports.constants = {
 };
 
 },{"ac1d8e9445f8b08f":"8hjhE","431326302f36a75":"2WyL8","993acbed143eb446":"k1utz","d4ff5437158ba9a4":"busIB","885e9906307b2de3":"g38Hg","fbd7d8ba6427a2a1":"d4idn","9a640cae6a65ace9":"hwD3y","c7420bfc94dd7519":"jbRNy","df4cba908ba99ef8":"9Rcg1","6f4f42c261742c56":"h9Rdh","5dffb96c06c10e25":"k3tsT"}],"8hjhE":[function(require,module,exports) {
-var process = require("d00bc03b27f31d77");
 var global = arguments[3];
+var process = require("d00bc03b27f31d77");
 "use strict";
 // limit of Crypto.getRandomValues()
 // https://developer.mozilla.org/en-US/docs/Web/API/Crypto/getRandomValues
@@ -101629,8 +101628,8 @@ function compare(a, b) {
 }
 
 },{"24db0b4351a55d90":"4Szbv","82e73588098638e9":"e2JgG","ad62b18fee081403":"iaxu0","8433718b602ae08e":"3pDum","f089c5eb8055541a":"e594P","1c3dba0fb1d7d3bc":"2WyL8","4be95d83e50b2d4":"fFkPV","3ac2c1eb722de677":"eW7r9"}],"k3tsT":[function(require,module,exports) {
-var process = require("94e2a6a2df722f40");
 var global = arguments[3];
+var process = require("94e2a6a2df722f40");
 "use strict";
 function oldBrowser() {
     throw new Error("secure random number generation not supported by this browser\nuse chrome, FireFox or Internet Explorer 11");
