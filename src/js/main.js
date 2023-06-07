@@ -3003,6 +3003,7 @@ async function submitTest() {
   dE("dsh_btn").style.display = "block"
   dE("tp_pnt").style.display = "none"
   clearInterval(testTimerfunction);
+  window.location.hash = "#/finished/" + window.location.hash.split("attempt/")[1]
 }
 window.onbeforeunload = function (event) {
   updatePoints()
