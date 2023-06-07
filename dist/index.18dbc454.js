@@ -3112,7 +3112,7 @@ async function getSimpleTestReport() {
                     testActionLogger = tT.actions;
                     reQW = tT.info.mList;
                     let hji = "<ol>";
-                    missedtopics = tT.info.missedtopics;
+                    let missedtopics = tT.info.missedtopics;
                     for(var i = 0; i < missedtopics.length; i++)hji += '<li><div class = "tlinks" style = "flex-direction:row;width:25vw;justify-content:space-between;"><span class = "t_name">' + missedtopics[i] + "</span></div></li>";
                     (0, _helper.dE)("fto_missed").innerHTML = hji;
                     try {
@@ -3664,7 +3664,7 @@ async function computeResult(type) {
         qun: 0,
         acc: 0
     };
-    var missedtopics1 = [];
+    var missedtopics = [];
     for(var i = 0; i < trA.length; i++){
         for(var j = 0; j < trL.length; j++)if (trA[i].qid == trL[j].qid) {
             var ele = trL[j];
@@ -3703,7 +3703,7 @@ async function computeResult(type) {
                 subjectmarks[trA[i].section].total += parseFloat(trA[i].pm);
                 subjectmarks[trA[i].section].qic += 1;
                 overall.qic += 1;
-                missedtopics1.push(trA[i].qtopic);
+                missedtopics.push(trA[i].qtopic);
             }
         }
     }
@@ -3718,7 +3718,7 @@ async function computeResult(type) {
         usermarks: c + ic,
         subjectmarks: subjectmarks,
         overall: overall,
-        missedtopics: missedtopics1
+        missedtopics: missedtopics
     };
     if (type == 1) {
         if (!(0, _helper.areObjectsEqual)(tFinal, fg)) {
@@ -41409,7 +41409,7 @@ let page_finished_test = `
                 View</button>
         </div>
         <br><hr color="white" width="100%"><br>
-        <div style="display:flex;flex-direction:column;flex-wrap:wrap;">
+        <div style="display:flex;flex-direction:column;flex-wrap:wrap;width:90%;">
             <span style="font-size: 4vh;">Overview</span>
             <span style = "font-size:2vh;">This is a quick snapshot of your performance measured in terms of attempts that were correct, incorrect,
             unattempted. The individual subject-Wise analysis will help you gaze your performance on a subject level.</span>
@@ -41421,7 +41421,7 @@ let page_finished_test = `
                 <div>Legend: <span style="color:green">Correct</span>&nbsp;<span
                         style="color:red">Incorrect</span>&nbsp;<span style="color:orange">Unattempted</span></div>
         </div>
-        <div style="display:flex;flex-direction:column;flex-wrap:wrap;">
+        <div style="display:flex;flex-direction:column;flex-wrap:wrap;width:90%;">
         <br><hr color="white" width="100%"><br>
         <span style="font-size: 4vh;">Time And Accuracy</span>
         <span style = "font-size:2vh;">Time is the most important resource in any competitive exam. And one major element of any test analysis is
@@ -41440,14 +41440,14 @@ let page_finished_test = `
                     <div id="fto_draw" style="display: flex;flex-direction: column;"></div>
         </div>
         <br><hr color="white" width="100%"><br>
-        <div style="display:flex;flex-direction:column;flex-wrap:wrap;width:100%">
+        <div style="display:flex;flex-direction:column;flex-wrap:wrap;width:90%">
         <span style="font-size: 4vh;">Leaderboard</span>
         <span style = "font-size:2vh;">Seeing how your peers fared during the test, allows you to better prepare and brings a competitive spirit to the tests.</span>
         <center><div id="fto_leaderboard"></div></center>
         </div>
         </div>
         <br><hr color="white" width="100%"><br>
-        <div style="display:flex;flex-direction:column;flex-wrap:wrap;">
+        <div style="display:flex;flex-direction:column;flex-wrap:wrap;width:90%;">
         <span style="font-size: 4vh;">Missed Concepts</span>
         <span style = "font-size:2vh;">This section will list all the concepts you got wrong in the exam on an individual subject level. This information
         becomes relevant for you as you will now need to spend some time brushing up these concepts.</span>
@@ -66352,8 +66352,8 @@ exports.constants = {
 };
 
 },{"ac1d8e9445f8b08f":"8hjhE","431326302f36a75":"2WyL8","993acbed143eb446":"k1utz","d4ff5437158ba9a4":"busIB","885e9906307b2de3":"g38Hg","fbd7d8ba6427a2a1":"d4idn","9a640cae6a65ace9":"hwD3y","c7420bfc94dd7519":"jbRNy","df4cba908ba99ef8":"9Rcg1","6f4f42c261742c56":"h9Rdh","5dffb96c06c10e25":"k3tsT"}],"8hjhE":[function(require,module,exports) {
-var global = arguments[3];
 var process = require("d00bc03b27f31d77");
+var global = arguments[3];
 "use strict";
 // limit of Crypto.getRandomValues()
 // https://developer.mozilla.org/en-US/docs/Web/API/Crypto/getRandomValues
@@ -101628,8 +101628,8 @@ function compare(a, b) {
 }
 
 },{"24db0b4351a55d90":"4Szbv","82e73588098638e9":"e2JgG","ad62b18fee081403":"iaxu0","8433718b602ae08e":"3pDum","f089c5eb8055541a":"e594P","1c3dba0fb1d7d3bc":"2WyL8","4be95d83e50b2d4":"fFkPV","3ac2c1eb722de677":"eW7r9"}],"k3tsT":[function(require,module,exports) {
-var global = arguments[3];
 var process = require("94e2a6a2df722f40");
+var global = arguments[3];
 "use strict";
 function oldBrowser() {
     throw new Error("secure random number generation not supported by this browser\nuse chrome, FireFox or Internet Explorer 11");

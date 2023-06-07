@@ -44,7 +44,7 @@ export let page_finished_test = `
                 View</button>
         </div>
         <br><hr color="white" width="100%"><br>
-        <div style="display:flex;flex-direction:column;flex-wrap:wrap;">
+        <div style="display:flex;flex-direction:column;flex-wrap:wrap;width:90%;">
             <span style="font-size: 4vh;">Overview</span>
             <span style = "font-size:2vh;">This is a quick snapshot of your performance measured in terms of attempts that were correct, incorrect,
             unattempted. The individual subject-Wise analysis will help you gaze your performance on a subject level.</span>
@@ -56,7 +56,7 @@ export let page_finished_test = `
                 <div>Legend: <span style="color:green">Correct</span>&nbsp;<span
                         style="color:red">Incorrect</span>&nbsp;<span style="color:orange">Unattempted</span></div>
         </div>
-        <div style="display:flex;flex-direction:column;flex-wrap:wrap;">
+        <div style="display:flex;flex-direction:column;flex-wrap:wrap;width:90%;">
         <br><hr color="white" width="100%"><br>
         <span style="font-size: 4vh;">Time And Accuracy</span>
         <span style = "font-size:2vh;">Time is the most important resource in any competitive exam. And one major element of any test analysis is
@@ -75,14 +75,14 @@ export let page_finished_test = `
                     <div id="fto_draw" style="display: flex;flex-direction: column;"></div>
         </div>
         <br><hr color="white" width="100%"><br>
-        <div style="display:flex;flex-direction:column;flex-wrap:wrap;width:100%">
+        <div style="display:flex;flex-direction:column;flex-wrap:wrap;width:90%">
         <span style="font-size: 4vh;">Leaderboard</span>
         <span style = "font-size:2vh;">Seeing how your peers fared during the test, allows you to better prepare and brings a competitive spirit to the tests.</span>
         <center><div id="fto_leaderboard"></div></center>
         </div>
         </div>
         <br><hr color="white" width="100%"><br>
-        <div style="display:flex;flex-direction:column;flex-wrap:wrap;">
+        <div style="display:flex;flex-direction:column;flex-wrap:wrap;width:90%;">
         <span style="font-size: 4vh;">Missed Concepts</span>
         <span style = "font-size:2vh;">This section will list all the concepts you got wrong in the exam on an individual subject level. This information
         becomes relevant for you as you will now need to spend some time brushing up these concepts.</span>

@@ -2260,7 +2260,7 @@ async function getSimpleTestReport() {
               testActionLogger = tT.actions
               reQW = tT.info.mList
               let hji = "<ol>"
-              missedtopics = tT.info.missedtopics
+              let missedtopics = tT.info.missedtopics
               for (var i = 0; i < missedtopics.length; i++) {
                 hji += '<li><div class = "tlinks" style = "flex-direction:row;width:25vw;justify-content:space-between;"><span class = "t_name">' + missedtopics[i] + '</span></div></li>'
               }
