@@ -151,7 +151,7 @@ export function renderMarkedMath(eleid, toid) {
     renderMathInElement(dE(toid));
 }
 export function qCorrector(type, answer, useranswer, p_correct, p_incorrect, p_unattempted) {
-    if (useranswer == undefined || useranswer == []) {
+    if (useranswer == undefined || useranswer == [] || useranswer.length == 0) {
         return { type: "unattempted", points: p_unattempted }
     }
     if (type == "numerical" || type == "fill") {

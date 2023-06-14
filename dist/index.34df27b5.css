@@ -91,11 +91,13 @@ body {
 #overlay {
   width: 100%;
   height: 100%;
-  background-color: var(--black);
   z-index: 1;
+  pointer-events: none;
+  background-color: #000;
   display: none;
   position: fixed;
   inset: 0;
+  color: #fff !important;
 }
 
 #overlay_div {
@@ -636,8 +638,8 @@ body {
 }
 
 #nt_nocontrol {
-  width: 20vw;
-  height: 10vh;
+  width: 100px;
+  height: 60px;
   background-color: var(--bgcolor);
   text-align: center;
   border: var(--clr3) 2px solid;
@@ -940,7 +942,19 @@ body {
 #tt_question {
   height: 70vh;
   border: var(--clr3) 3px solid;
+  position: relative;
   overflow-y: scroll;
+}
+
+#tt_question img:hover {
+  z-index: 3;
+  border: var(--clr14) solid 5px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  height: 70vh !important;
+  width: 70vw !important;
 }
 
 #tt_timeleft, #tt_marksaward, #tt_timespent, #tt_testname {

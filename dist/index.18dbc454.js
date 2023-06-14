@@ -1097,7 +1097,17 @@ function coreManager(newlocation, n1) {
         case "list/batch":
             handlebox = "fu_batch";
             renderBody((0, _admin.page_batch_list), "height:max-content;", "");
-            renderBatchList();
+            renderAdminBatchList();
+            break;
+        case "list/tests":
+            handlebox = "fu_batch";
+            renderBody((0, _admin.page_batch_list), "height:max-content;", "");
+            renderAdminTestList();
+            break;
+        case "list/chptr":
+            handlebox = "fu_batch";
+            renderBody((0, _admin.page_batch_list), "height:max-content;", "");
+            renderAdminChapterList();
             break;
         case "uploads":
             handlebox = "uploadEvents";
@@ -1207,7 +1217,7 @@ function coreManager(newlocation, n1) {
     }
     if (location1 == "functions" && iorole == true) {
         handlebox = "functions";
-        renderBody((0, _functions.page_functions), "", "");
+        renderBody((0, _functions.page_functions), "height:max-content;", "");
         changeItem();
     }
     if (location1.includes("users") && iorole == true) {
@@ -1288,6 +1298,7 @@ function coreManager(newlocation, n1) {
         if (window.location.hash.includes("sims")) (0, _helper.dE)("sms_edit").style.display = "block";
     }
     stpVid();
+    refreshScreen();
     editqllist = [];
     if (location1 == "forum") gtMsg(1);
     else {
@@ -2973,13 +2984,13 @@ async function lquizinit() {
     if (docSnap.exists()) var docJSON = docSnap.data();
     else throw new Error;
 }
-async function renderBatchList() {
-    if (batchList.length <= 0) {
+async function renderAdminBatchList() {
+    if (adminBatchList.length <= 0) {
         const q = (0, _firestore.query)((0, _firestore.collection)(db, "batch"));
         const querySnapshot = await (0, _firestore.getDocs)(q);
         querySnapshot.forEach((doc)=>{
             var tfg = doc.data();
-            batchList.push({
+            adminBatchList.push({
                 id: doc.id,
                 crton: tfg.crton,
                 delon: tfg.delon,
@@ -2988,11 +2999,33 @@ async function renderBatchList() {
             });
         });
     }
-    for(let i = 0; i < batchList.length; i++){
-        let ele = batchList[i];
+    for(let i = 0; i < adminBatchList.length; i++){
+        let ele = adminBatchList[i];
         var crton = new Date(ele.crton * 1000);
         var delon = new Date(ele.delon * 1000);
         (0, _helper.dE)("batchlinks").innerHTML += '<div class="tlinks-3" id = "' + ele.id + '" onclick = "window.location.hash = `#/edit_batch/' + ele.id + '`"><center><span class = "t_title">' + ele.name + '</span></center><div class = "tl"><span class = "t_stron">Created On:' + crton.toISOString() + '</span><span class ="t_endon">Ends At:' + delon.toISOString() + '</div><div class = "tl"><span>Class:' + ele.class + "</span></div></div>";
+    }
+}
+async function renderAdminTestList() {
+    if (adminTestList.length <= 0) {
+        const q = (0, _firestore.query)((0, _firestore.collection)(db, "tests"));
+        const querySnapshot = await (0, _firestore.getDocs)(q);
+        querySnapshot.forEach((doc)=>{
+            var tfg = doc.data();
+            adminTestList.push({
+                id: doc.id,
+                strton: tfg.strton,
+                endon: tfg.endon,
+                batch: tfg.batch,
+                name: tfg.title
+            });
+        });
+    }
+    for(let i = 0; i < adminTestList.length; i++){
+        let ele = adminTestList[i];
+        var strton = new Date(ele.strton * 1000);
+        var endon = new Date(ele.endon * 1000);
+        (0, _helper.dE)("batchlinks").innerHTML += '<div class="tlinks-3" id = "' + ele.id + '" onclick = "window.location.hash = `#/edit_tests/' + ele.id + '`"><center><span class = "t_title">' + ele.name + '</span></center><div class = "tl"><span class = "t_stron">Created On:' + strton.toISOString() + '</span><span class ="t_endon">Ends At:' + endon.toISOString() + '</div><div class = "tl"><span>Batch:' + ele.batch + "</span></div></div>";
     }
 }
 async function getTestList(batchid, userid) {
@@ -3475,6 +3508,7 @@ async function getTestInfo() {
                 renderBody((0, _tests.page_test_end), "", "");
                 (0, _helper.dE)("te_title").innerText = "You Have Already Attempted This Test";
                 (0, _helper.dE)("te_msg").innerText = "Test Results will be released after Deadline.";
+                window.location.hash = "#/finished/" + window.location.hash.split("attempt/")[1];
                 return 0;
             }
         }
@@ -4036,6 +4070,7 @@ async function submitTest() {
     (0, _helper.dE)("dsh_btn").style.display = "block";
     (0, _helper.dE)("tp_pnt").style.display = "none";
     clearInterval(testTimerfunction);
+    window.location.hash = "#/finished/" + window.location.hash.split("attempt/")[1];
 }
 window.onbeforeunload = function(event) {
     updatePoints();
@@ -4380,7 +4415,8 @@ var curr_qlid = "";
 var editqllist = [];
 var autosignin = 0;
 var testList = [];
-var batchList = [];
+var adminBatchList = [];
+var adminTestList = [];
 var activeTestList = [];
 var upcomingTestList = [];
 var finishedTestList = [];
@@ -41491,10 +41527,15 @@ parcelHelpers.export(exports, "page_functions", ()=>page_functions);
 let page_functions = `
 <span class="in_t" class="">Functions</span>
         <div class = "flex_type" style = "flex-direction: row;flex-wrap: wrap;">
-            <div id="fc_topics" class = "db_class">
-                <span style="font-size: 25px;color:yellow">Chapters/Topics</span>
-                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/add/tpc'">Add Topics</div>
-            </div>
+        <div id="fc_chapters" class = "db_class">
+            <span style="font-size: 25px;color:yellow">Chapters</span>
+            <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/add/chapter'">Add Chapter</div>
+            <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/list/chapter'">List Chapter</div>
+        </div>
+        <div id="fc_topics_qbanks" class = "db_class">
+            <span style="font-size: 25px;color:yellow">Topics/Question Banks</span>
+            <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/add/qubank'">Add Question Bank</div>
+        </div>
             <div id="fc_sims" class = "db_class">
                 <span style="font-size: 25px;color:yellow">Question Banks/Sims</span>
                 <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/add/simulation'">Add Simulations</div>
@@ -41503,13 +41544,12 @@ let page_functions = `
             <div id="fc_tests" class = "db_class">
                 <span style="font-size: 25px;color:yellow">Tests</span>
                 <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/add/tests'">Add Test</div>
-                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/update/tests'">Update Test</div>
+                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/list/tests'">List Tests</div>
             </div>
             <div id="fc_batch" class = "db_class">
                 <span style="font-size: 25px;color:yellow">Batches</span>
                 <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/add/batch'">Add New Batch</div>
-                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/list/batch'">Update Batches</div>
-                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/update/batch'">Update Batches</div>
+                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/list/batch'">List Batches</div>
             </div>
             <div id="fc_misc" class = "db_class">
                 <span style="font-size: 25px;color:yellow">Misc</span>
@@ -41973,16 +42013,17 @@ let page_test_instructions = `
                 <li>The Questions Palette displayed on the right side of screen will show the status of each question
                     using one of the following symbols:</li>
                 <div>
-                    <div style="margin:9px"><span class="tts_notvisit">12</span>You have not visited the question yet.
+                    <div style="margin:17px"><span class="tts_notvisit">12</span>You have not visited the question yet.
                     </div>
-                    <div style="margin:9px"><span class="tts_notanswer">21</span>You have not answered the question.
+                    <div style="margin:17px"><span class="tts_notanswer">21</span>You have not answered the question.
                     </div>
-                    <div style="margin:9px"><span class="tts_answered">45</span>You have answered the question.</div>
-                    <div style="margin:9px"><span class="tts_review">30</span>You have NOT answered the question, but
+                    <div style="margin:17px"><span class="tts_answered">45</span>You have answered the question.</div>
+                    <div style="margin:17px"><span class="tts_review">30</span>You have NOT answered the question, but
                         have marked the question for review.</div>
-                    <div style="margin:9px"><span class="tts_ansreview">37</span>The question(s) "Answered and Marked
+                    <div style="margin:17px"><span class="tts_ansreview">37</span>The question(s) "Answered and Marked
                         for Review" will be considered for evalution.</div>
                 </div>
+                <li>To expand the Image, you can Hover on the Image.(Only On Desktop/Laptop Devices)</li>
                 <li>When the timer reaches zero, the examination will end by itself. You will not be required to end or
                     submit your examination.</li>
                 <li>Make Sure To Have A Good Internet Connection. Loss in Internet Connectivity may prevent submission
@@ -65982,7 +66023,7 @@ function renderMarkedMath(eleid, toid) {
     renderMathInElement(dE(toid));
 }
 function qCorrector(type, answer, useranswer, p_correct, p_incorrect, p_unattempted) {
-    if (useranswer == undefined || useranswer == []) return {
+    if (useranswer == undefined || useranswer == [] || useranswer.length == 0) return {
         type: "unattempted",
         points: p_unattempted
     };
@@ -66352,8 +66393,8 @@ exports.constants = {
 };
 
 },{"ac1d8e9445f8b08f":"8hjhE","431326302f36a75":"2WyL8","993acbed143eb446":"k1utz","d4ff5437158ba9a4":"busIB","885e9906307b2de3":"g38Hg","fbd7d8ba6427a2a1":"d4idn","9a640cae6a65ace9":"hwD3y","c7420bfc94dd7519":"jbRNy","df4cba908ba99ef8":"9Rcg1","6f4f42c261742c56":"h9Rdh","5dffb96c06c10e25":"k3tsT"}],"8hjhE":[function(require,module,exports) {
-var process = require("d00bc03b27f31d77");
 var global = arguments[3];
+var process = require("d00bc03b27f31d77");
 "use strict";
 // limit of Crypto.getRandomValues()
 // https://developer.mozilla.org/en-US/docs/Web/API/Crypto/getRandomValues
@@ -69955,8 +69996,8 @@ Object.defineProperty(Duplex.prototype, "destroyed", {
 // A bit simpler than readable streams.
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
 // the drain event emission and buffering.
-var global = arguments[3];
 var process = require("e2dacd5664fc8419");
+var global = arguments[3];
 "use strict";
 module.exports = Writable;
 /* <replacement> */ function WriteReq(chunk, encoding, cb) {
@@ -73054,8 +73095,8 @@ module.exports = function(iterations, keylen) {
 };
 
 },{}],"T9r9Q":[function(require,module,exports) {
-var global = arguments[3];
 var process = require("d96e00395ab98f3c");
+var global = arguments[3];
 var defaultEncoding;
 /* istanbul ignore next */ if (global.process && global.process.browser) defaultEncoding = "utf-8";
 else if (global.process && global.process.version) {
@@ -101628,8 +101669,8 @@ function compare(a, b) {
 }
 
 },{"24db0b4351a55d90":"4Szbv","82e73588098638e9":"e2JgG","ad62b18fee081403":"iaxu0","8433718b602ae08e":"3pDum","f089c5eb8055541a":"e594P","1c3dba0fb1d7d3bc":"2WyL8","4be95d83e50b2d4":"fFkPV","3ac2c1eb722de677":"eW7r9"}],"k3tsT":[function(require,module,exports) {
-var process = require("94e2a6a2df722f40");
 var global = arguments[3];
+var process = require("94e2a6a2df722f40");
 "use strict";
 function oldBrowser() {
     throw new Error("secure random number generation not supported by this browser\nuse chrome, FireFox or Internet Explorer 11");

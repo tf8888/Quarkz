@@ -154,6 +154,19 @@ function showqLS(type) {
 window.beforeunload = function(e) {
     if (localStorage.getItem("isFirstTab") == `true`) localStorage.removeItem("isFirstTab");
 };
+function refreshScreen(e) {
+    var updatedScreenWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+    // Check if screen width is less than 600px
+    if (updatedScreenWidth < 600) {
+        dE("overlay").style.display = "flex";
+        dE("output").style.pointerEvents = "none";
+        dE("ovr_msg").innerText = "Your Device/Browser is Currently Not Supported, Please Use Chrome/Firefox Browser on Laptop/PC to Access This Website.";
+    } else {
+        dE("output").style.pointerEvents = "auto";
+        dE("overlay").style.display = "none";
+    }
+}
+window.onresize = refreshScreen;
 const toggleSwitch = document.getElementById("toggleSwitch");
 const body = document.body;
 function uiMode() {

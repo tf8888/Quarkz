@@ -418,7 +418,9 @@ function coreManager(newlocation, n1) {
     case "add/simulation": handlebox = "fu_simulation"; newSimulation(); break;
     case "add/tests": handlebox = "fu_topic"; newTest(); break;
     case "add/batch": handlebox = "fu_topic"; newBatch(); break;
-    case "list/batch": handlebox = "fu_batch"; renderBody(page_batch_list, "height:max-content;", ""); renderBatchList(); break;
+    case "list/batch": handlebox = "fu_batch"; renderBody(page_batch_list, "height:max-content;", ""); renderAdminBatchList(); break;
+    case "list/tests": handlebox = "fu_batch"; renderBody(page_batch_list, "height:max-content;", ""); renderAdminTestList(); break;
+    case "list/chptr": handlebox = "fu_batch"; renderBody(page_batch_list, "height:max-content;", ""); renderAdminChapterList(); break;
     case "uploads": handlebox = "uploadEvents"; renderBody(page_uploads, "", ""); uploadEvents(); break;
     case "settings": handlebox = "settings"; renderBody(page_settings, "height: max-content;", ""); settingsEvents(); break;
     case "chplist": handlebox = "chapterlist"; renderBody(page_list_chapter, "", ""); chapterEvents(); renderCList(); break;
@@ -439,7 +441,7 @@ function coreManager(newlocation, n1) {
   if (location1.includes("printable/qbank") && iorole == true) { handlebox = "printable"; renderBody(page_printable, "height:max-content;", ""); printableEvents(); var shfbtn = dE("shf_btn").addEventListener("click", shuffleQBank); printQBank(1); }
   if (location1.includes("ARIEL") && iorole == true) { handlebox = "Ariel"; renderBody(page_ariel, "", ""); }
   if (location1.includes("printable/tests") && iorole == true) { handlebox = "printable"; renderBody(page_printable, "height:max-content;", ""); printableEvents(); var shfbtn = dE("shf_btn").addEventListener("click", shuffleQBank); printQBank(3); }
-  if (location1 == "functions" && iorole == true) { handlebox = "functions"; renderBody(page_functions, "", ""); changeItem() }
+  if (location1 == "functions" && iorole == true) { handlebox = "functions"; renderBody(page_functions, "height:max-content;", ""); changeItem() }
   if (location1.includes("users") && iorole == true) { handlebox = "users"; renderBody(page_edit_user, "", ""); userUpdate() }
   if (location1.includes("topic")) { handlebox = "topic"; renderBody(page_topic, "height: max-content;", ""); topicEvents(); getTopic(1); }
   if (location1.includes("printable/topic") && iorole == true) { handlebox = "printable"; renderBody(page_printable, "height:max-content;", ""); printQBank(2); }
@@ -461,6 +463,7 @@ function coreManager(newlocation, n1) {
     if (window.location.hash.includes("sims")) { dE("sms_edit").style.display = "block"; }
   }
   stpVid()
+  refreshScreen()
   editqllist = []
   if (location1 == "forum") { gtMsg(1); } else { gtMsg(2); forum_length = 1; forum_d = "afterbegin" }
   // console.log({ userinfo, topicJSON, topicJSONno, editorrole, adminrole, userrole, simlist, chapterlist, userdetails, curr_qlno, curr_qlid, editqllist, autosignin, testList, activeTestList, upcomingTestList, finishedTestList, testInfo, testQuestionList, testResponseList, activequestionid })
@@ -2119,20 +2122,36 @@ async function lquizinit() {
   if (docSnap.exists()) { var docJSON = docSnap.data(); }
   else { throw new Error }
 }
-async function renderBatchList() {
-  if (batchList.length <= 0) {
+async function renderAdminBatchList() {
+  if (adminBatchList.length <= 0) {
     const q = query(collection(db, "batch"));
     const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
       var tfg = doc.data()
-      batchList.push({ id: doc.id, crton: tfg.crton, delon: tfg.delon, class: tfg.class, name: tfg.name })
+      adminBatchList.push({ id: doc.id, crton: tfg.crton, delon: tfg.delon, class: tfg.class, name: tfg.name })
     })
   }
-  for (let i = 0; i < batchList.length; i++) {
-    let ele = batchList[i]
+  for (let i = 0; i < adminBatchList.length; i++) {
+    let ele = adminBatchList[i]
     var crton = new Date(ele.crton * 1000)
     var delon = new Date(ele.delon * 1000)
     dE("batchlinks").innerHTML += '<div class="tlinks-3" id = "' + ele.id + '" onclick = "window.location.hash = `#/edit_batch/' + ele.id + '`"><center><span class = "t_title">' + ele.name + '</span></center><div class = "tl"><span class = "t_stron">Created On:' + crton.toISOString() + '</span><span class ="t_endon">Ends At:' + delon.toISOString() + '</div><div class = "tl"><span>Class:' + ele.class + '</span></div></div>'
+  }
+}
+async function renderAdminTestList() {
+  if (adminTestList.length <= 0) {
+    const q = query(collection(db, "tests"));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((doc) => {
+      var tfg = doc.data()
+      adminTestList.push({ id: doc.id, strton: tfg.strton, endon: tfg.endon, batch: tfg.batch, name: tfg.title })
+    })
+  }
+  for (let i = 0; i < adminTestList.length; i++) {
+    let ele = adminTestList[i]
+    var strton = new Date(ele.strton * 1000)
+    var endon = new Date(ele.endon * 1000)
+    dE("batchlinks").innerHTML += '<div class="tlinks-3" id = "' + ele.id + '" onclick = "window.location.hash = `#/edit_tests/' + ele.id + '`"><center><span class = "t_title">' + ele.name + '</span></center><div class = "tl"><span class = "t_stron">Created On:' + strton.toISOString() + '</span><span class ="t_endon">Ends At:' + endon.toISOString() + '</div><div class = "tl"><span>Batch:' + ele.batch + '</span></div></div>'
   }
 }
 async function getTestList(batchid, userid) {
@@ -2534,6 +2553,7 @@ async function getTestInfo() {
           renderBody(page_test_end, "", "")
           dE("te_title").innerText = "You Have Already Attempted This Test"
           dE("te_msg").innerText = "Test Results will be released after Deadline."
+          window.location.hash = "#/finished/" + window.location.hash.split("attempt/")[1]
           return 0;
         }
       }
@@ -3257,7 +3277,8 @@ var curr_qlid = ""
 var editqllist = []
 var autosignin = 0
 var testList = []
-var batchList = []
+var adminBatchList = []
+var adminTestList = []
 var activeTestList = []
 var upcomingTestList = []
 var finishedTestList = []

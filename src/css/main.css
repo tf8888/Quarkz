@@ -104,8 +104,10 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: var(--black);
+  background-color: black;
   z-index: 1;
+  pointer-events: none;
+  color:white !important;
 }
 
 #overlay_div {
@@ -669,8 +671,8 @@ body {
   position: absolute;
   right: 0px;
   top: 0px;
-  width: 20vw;
-  height: 10vh;
+  width: 100px;
+  height: 60px;
   background-color: var(--bgcolor);
   text-align: center;
   border: var(--clr3) 2px solid;
@@ -985,9 +987,18 @@ body {
   height: 70vh;
   border: var(--clr3) 3px solid;
   overflow-y: scroll;
-  /* min-width: 600px; */
+  position:relative;
 }
-
+#tt_question img:hover{
+  height: 70vh !important;
+  width: 70vw !important;
+  z-index:3;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: var(--clr14) solid 5px;
+}
 #tt_timeleft,
 #tt_marksaward,
 #tt_timespent,
