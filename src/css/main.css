@@ -109,7 +109,34 @@ body {
   pointer-events: none;
   color:white !important;
 }
-
+details{
+  width:90%;
+  margin:auto;
+  align-items: center;
+}
+#report-tag{
+  display: none;
+}
+summary{
+  font-size: 4vh;
+  background-color: var(--clr8);
+  padding-left: 100px;
+  border-radius: 10px;
+  padding-right: 100px;
+  cursor: pointer;
+}
+details[open] summary{
+  border-radius: 10px 10px 0px 0px;
+}
+.summary_div {
+  display:flex;
+  flex-direction:column;
+  flex-wrap:wrap;
+  border: solid 2px;
+  border-top:0px;
+  border-color:var(--clr8);
+  padding:5px;
+}
 #overlay_div {
   color: var(--white);
   top: 50%;
@@ -139,6 +166,7 @@ body {
   font-size: 4vh;
   font-weight: bold;
   margin-left: 2vw;
+  cursor:pointer;
 }
 
 .lgn_c_1 {
@@ -386,6 +414,7 @@ body {
   color: var(--white);
   border: none;
   border-radius: 30px 30px 30px 30px;
+  cursor:pointer;
 }
 
 .tst_btn:hover {
@@ -402,6 +431,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: left;
+  cursor:pointer;
 }
 .tlinks-3{
   height: max-content;
@@ -413,6 +443,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: left;
+  cursor:pointer;
 }
 .tlinks-3 .tl{
   display: flex;
@@ -440,6 +471,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: left;
+  cursor:pointer;
 }
 
 .t_title {
@@ -584,14 +616,18 @@ body {
   flex-direction: column;
   justify-content: space-around;
 }
-
+#options_tab span, #toolbar span{
+  cursor:pointer;
+}
 .qb_mcq_exp {
   counter-reset: optno;
   display: flex;
   flex-direction: row;
   justify-content: space-around;
 }
-
+input[type=radio], input[type=checkbox]{
+  cursor:pointer;
+}
 .qbtp_q::before {
   content: counter(qno)") ";
 }
@@ -924,13 +960,17 @@ body {
 
 #dsh_btn:hover {
   background-color: var(--clr12);
+  cursor:pointer;
 }
-
+a{
+  cursor:pointer;
+}
 .dshbox {
   padding: 4vw;
   border: var(--clr10) 3px solid;
   border-radius: 30px;
   margin: 1vw;
+  cursor:pointer;
 }
 
 #lgl_container {
@@ -990,8 +1030,9 @@ body {
   position:relative;
 }
 #tt_question img:hover{
-  height: 70vh !important;
-  width: 70vw !important;
+  max-height: 50vh !important;
+  max-width: 45vw !important;
+  zoom:2;
   z-index:3;
   position: fixed;
   top: 50%;
@@ -1337,6 +1378,7 @@ circle text {
   background-size: 100% 100%;
   width: 30px;
   height: 30px;
+  cursor:pointer;
 }
 
 .tts_notvisit {
@@ -1374,6 +1416,7 @@ circle text {
   border-radius: 30px;
   margin: 5px;
   width: 160px;
+  cursor:pointer;
 }
 
 .dshbox_v2:hover {
@@ -1390,7 +1433,7 @@ circle text {
   border-radius: 100px;
   margin: 6px;
   color: var(--white);
-
+  cursor:pointer;
 }
 
 .aq_mcq {
@@ -1725,4 +1768,11 @@ circle text {
 .table1 td:last-child {
     border-bottom: 0;
   }
+}
+#fto_table_pie {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(200px, auto));
+  grid-template-rows: repeat(2, 1fr);
+  grid-gap: 1rem;
+  justify-content: space-around;
 }

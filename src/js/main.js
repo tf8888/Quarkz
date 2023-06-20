@@ -37,12 +37,10 @@ import { page_toc } from '../embeds/toc'
 import { page_topic, page_edit_topic } from "../embeds/topics";
 import { page_edit_user } from "../embeds/user";
 import { page_usernotes } from "../embeds/usernotes"
-import { saveFile, createRecorder, recordScreen } from "../js/recorder"
-import * as d3 from 'd3';
-import { sd, sha256, makeid, mobileCheck, areObjectsEqual, areEqual, getServerTime, fullEle, dE, sortObj, sortObjv2, renderMarkedMath, mergeById, qCorrector, playSoundEffect, showLS, antiCopyEle, shuffleArrayWithSeed,buildHtmlTable } from '../js/helper'
+import { sd, sha256, makeid, mobileCheck, areObjectsEqual, areEqual, getServerTime, fullEle, dE, sortObj, sortObjv2, renderMarkedMath, mergeById, qCorrector, playSoundEffect, showLS, antiCopyEle, shuffleArrayWithSeed, buildHtmlTable } from '../js/helper'
 import { sysaccess } from "./reworkui";
 import { page_batch_list, page_edit_batch } from "../embeds/admin";
-import { table } from "console";
+import Chart, { scales } from 'chart.js/auto';
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register(
@@ -1573,8 +1571,8 @@ async function updateTopicQBank(iun) {
     var a = [];
     for (var i = 0; i < editqllist.length; i++) {
       var ele = editqllist[i]
-      q.push({ qid: ele.qid, mode: ele.mode, title: ele.title, type: ele.type, op: ele.op, op1: ele.op1, op2: ele.op2, section: ele.section, pm: ele.pm, nm: ele.nm,qtopic: ele.qtopic })
-      a.push({ qid: ele.qid, hint: ele.hint, expl: ele.expl, answer: ele.answer, section: ele.section, pm: ele.pm, nm: ele.nm, type: ele.type,qtopic: ele.qtopic })
+      q.push({ qid: ele.qid, mode: ele.mode, title: ele.title, type: ele.type, op: ele.op, op1: ele.op1, op2: ele.op2, section: ele.section, pm: ele.pm, nm: ele.nm, qtopic: ele.qtopic })
+      a.push({ qid: ele.qid, hint: ele.hint, expl: ele.expl, answer: ele.answer, section: ele.section, pm: ele.pm, nm: ele.nm, type: ele.type, qtopic: ele.qtopic })
     }
     try {
       const docRef = await updateDoc(doc(db, col, id, "questions", "questions"), {
@@ -2274,72 +2272,239 @@ async function getSimpleTestReport() {
               dE("fto_correct").innerText = tT.info.correct
               dE("fto_incorrect").innerText = tT.info.incorrect
               dE("fto_unanswered").innerText = tT.info.unattempted
-              dE("fto_accuracy").innerText = tT.info.overall.acc.toString()+"%";
-              dE("fto_qsattempted").innerText = Math.floor(tT.info.overall.qc+tT.info.overall.qic).toString() +"/" +Math.floor(tT.info.overall.qc+tT.info.overall.qic+tT.info.overall.qun).toString()
+              dE("fto_accuracy").innerText = tT.info.overall.acc.toString() + "%";
+              dE("fto_qsattempted").innerText = Math.floor(tT.info.overall.qc + tT.info.overall.qic).toString() + "/" + Math.floor(tT.info.overall.qc + tT.info.overall.qic + tT.info.overall.qun).toString()
+
               testActionLogger = tT.actions
               reQW = tT.info.mList
+
+
               let hji = "<ol>"
               let missedtopics = tT.info.missedtopics
               for (var i = 0; i < missedtopics.length; i++) {
                 hji += '<li><div class = "tlinks" style = "flex-direction:row;width:25vw;justify-content:space-between;"><span class = "t_name">' + missedtopics[i] + '</span></div></li>'
               }
               dE("fto_missed").innerHTML = hji
-              try{
+
+
+              try {
                 let tablebuilder = tT.info.subjectmarks
-                tablebuilder.overall = {correct:tT.info.correct,incorrect:tT.info.incorrect,unattempted:tT.info.unattempted}
+                tablebuilder.overall = { correct: tT.info.correct, incorrect: tT.info.incorrect, unattempted: tT.info.unattempted,qc:0,qic:0,qun:0 }
                 let tablebuilder2 = []
-                var ion1 = ["Physics", "Chemistry", "Math", "Biology", "Statistics", "Computer", "Unfiled","overall"]
+                var ion1 = ["Physics", "Chemistry", "Math", "Biology", "Statistics", "Computer", "Unfiled", "overall"]
                 for (var eleX of ion1) {
                   var el2e2 = tT.info.subjectmarks[eleX]
-                  if (!areObjectsEqual(el2e2, { correct: 0, unattempted: 0, incorrect: 0, total: 0,qc:0,qic:0,qun:0 })) {
-                    let fgy = el2e2.correct + el2e2.incorrect+el2e2.unattempted
-                    tablebuilder2.push({subject:eleX,score:fgy,crr_marks:el2e2.correct,correct:el2e2.qc,incr_marks:el2e2.incorrect,incorrect:el2e2.qic,unat_marks:el2e2.unattempted,unattempted:el2e2.qun,})
+                  if (!areObjectsEqual(el2e2, { correct: 0, unattempted: 0, incorrect: 0, total: 0, qc: 0, qic: 0, qun: 0 })) {
+                    let fgy = el2e2.correct + el2e2.incorrect + el2e2.unattempted
+                    if (eleX != "overall"){
+                      tablebuilder.overall.qc += el2e2.qc
+                      tablebuilder.overall.qic = el2e2.qic
+                      tablebuilder.overall.qun = el2e2.qun
+                    }
+                    tablebuilder2.push({ subject: eleX, score: fgy, crr_marks: el2e2.correct, correct: el2e2.qc, incr_marks: el2e2.incorrect, incorrect: el2e2.qic, unat_marks: el2e2.unattempted, unattempted: el2e2.qun, })
                   }
+                } 
+                let graphtable = [...tablebuilder2]
+                for (var i = 0; i < graphtable.length; i++) {
+                  document.getElementById("fto_table_pie").insertAdjacentHTML("beforeend", "<div style = 'width:300px;height:300px'><canvas id = 'fto_tbp_" + graphtable[i].subject + "'></canvas></div>");
+                  let iop = new Chart(
+                      dE("fto_tbp_"+graphtable[i].subject),
+                      {
+                        type: 'pie',
+                        options: {
+                          plugins: {
+                              title: {
+                                  display: true,
+                                  text: 'Overview ' + graphtable[i].subject,
+                                  color: "olive"
+                              },
+                              legend: {
+                                labels: {
+                                  color: "olive"
+                                }
+                              }
+                          }
+                        },
+                        data: {
+                          labels: ["Correct", "Incorrect", "Unanswered"],
+                          
+                          datasets: [
+                            {
+                              label: "",
+                              backgroundColor: [
+                                'rgb(0,128,0)',
+                                'rgb(255,0,0)',
+                                'rgb(255, 165, 0)'
+                              ],
+                              data: [graphtable[i].correct, graphtable[i].incorrect, graphtable[i].unattempted]
+                            }
+                          ]
+                        }
+                      }
+                    )   
                 }
-                dE("fto_overview_table").appendChild(buildHtmlTable(tablebuilder2))
-              }catch{
-
-              }
-              dE("fto_rank").innerText = "0"
-              function r(t, c, ic, un, tm,m,n,o) {
-                var gf = c + ic
-                var gi = m+n+o
-                return `<div><span>` + t + `(` + gf + ` Marks)</span><div style = "width:80vw;height:30px;display:flex;flex-direction:row;overflow-x:hidden"><div style="width:` + m / gi * 80 + `vw;background-color:green;height:30px;text-align:center;color:white">` + c + `/` + tm + `</div><div style="width:` + n / gi * 80 + `vw;background-color:red;height:30px;text-align:center;color:white">` + ic + `/` + tm + `</div><div style="width:` + o/gi * 80 + `vw;background-color:orange;height:30px;text-align:center;color:black">` + o*4 + `/` + tm + `</div></div></div>`
-              }
-              var ion1 = ["Physics", "Chemistry", "Math", "Biology", "Statistics", "Computer", "Unfiled"]
-              dE("fto_percents").innerHTML = ""
-              for (var eleX of ion1) {
-                var el2e2 = tT.info.subjectmarks[eleX]
-                if (!areObjectsEqual(el2e2, { correct: 0, unattempted: 0, incorrect: 0, total: 0,qc:0,qic:0,qun:0 })) {
-                  dE("fto_percents").insertAdjacentHTML("beforeend", r(eleX, el2e2.correct, el2e2.incorrect, el2e2.unattempted, el2e2.total,el2e2.qc,el2e2.qic,el2e2.qun))
-                }
-              }
-              analyseActions(1).then(function () { 
-                function qw(t, c, ic, un, tm) {
-                  var z = tm - (c + ic)
-                  return `<div><span>` + t + `(` + sd(tm) + `)</span><div style = "width:80vw;height:30px;display:flex;flex-direction:row;"><div style="width:` + c / tm * 80 + `vw;background-color:green;height:30px;text-align:center;color:white">` + sd(c) + `</div><div style="width:` + ic / tm * 80 + `vw;background-color:red;height:30px;text-align:center;color:white">` + sd(ic) + `</div><div style="width:` + (1 - (c + ic) / tm) * 80 + `vw;background-color:orange;height:30px;text-align:center;color:black">` + sd(z) + `</div></div></div>`
-                }
-                dE("fto_timetaken").innerText = Math.floor((analysedActions.correct+analysedActions.incorrect+analysedActions.unattempted)/60).toString()+"/"+Math.floor(testInfo.timeallotted/60).toString() + "M"
-                var ion1 = ["Physics", "Chemistry", "Math", "Biology", "Statistics", "Computer", "Unfiled"]
-                dE("fto_time").innerHTML = ""
-                for (var eleX of ion1) {
-                  var eXZe2 = analysedActions.subject[eleX]
-                  if (!areObjectsEqual(eXZe2, { correct: 0, unattempted: 0, incorrect: 0, total: 0 })) {
-                    dE("fto_time").insertAdjacentHTML("beforeend", qw(eleX, eXZe2.correct, eXZe2.incorrect, eXZe2.unattempted, eXZe2.total))
-                  }
-                }
-                try{
-                  let tablebuilder3 = []
-                  var ion1 = ["Physics", "Chemistry", "Math", "Biology", "Statistics", "Computer", "Unfiled"]
-                  for (var eleX of ion1) {
-                    var el2e2 = analysedActions.subject[eleX]
-                    if (!areObjectsEqual(el2e2, { correct:0,incorrect:0,unattempted:0,total:0 })) {
-                      tablebuilder3.push({subject:eleX,correct: sd(el2e2.correct), incorrect: sd(el2e2.incorrect),unattempted: sd(el2e2.unattempted), total: sd(el2e2.correct+el2e2.incorrect+el2e2.unattempted),accuracy:Math.floor((1-tT.info.subjectmarks[eleX].qic/tT.info.subjectmarks[eleX].qc)*100).toString()+"%"})
+                let ioh = new Chart(
+                  dE("fto_table_score"),
+                  {
+                    type: 'bar',
+                    options: {
+                      plugins: {
+                          title: {
+                              display: true,
+                              text: 'Subject Wise Scores',
+                              color: "olive"
+                          },
+                          legend: {
+                            labels: {
+                              color: "olive"
+                            }
+                          }
+                      },
+                      scales: {
+                          y: {
+                            beginAtZero: true
+                          },
+                          x: {color:"olive"}
+                        }
+                    },
+                    data: {
+                      labels: tablebuilder2.map(row => row.subject),
+                      datasets: [
+                        {
+                          label: "Score",
+                          backgroundColor: "blue",
+                          data: tablebuilder2.map(row => row.score),
+                        },
+                        {
+                          label: "Correct",
+                          backgroundColor: "green",
+                          data: tablebuilder2.map(row => row.crr_marks),
+                        },
+                        {
+                          label: "Incorrect",
+                          backgroundColor: "red",
+                          data: tablebuilder2.map(row => -row.incr_marks),
+                        },
+                        {
+                          label: "Unattempted",
+                          backgroundColor: "orange",
+                          data: tablebuilder2.map(row => row.unat_marks),
+                        }
+                      ]
                     }
                   }
+                )  
+                dE("fto_overview_table").appendChild(buildHtmlTable(tablebuilder2))
+
+              } catch (e) {
+                log("error", e)
+              }
+              dE("fto_rank").innerText = "0"
+              analyseActions(1).then(function () {
+                try {
+                  let tablebuilder3 = []
+                  let tablebuilder4 = []
+                  var ion1 = ["Physics", "Chemistry", "Math", "Biology", "Statistics", "Computer", "Unfiled","overall"]
+                  analysedActions.subject.overall = { correct: 0, incorrect: 0, unattempted: 0,total:0}
+                  for (var eleX of ion1) {
+                    var el2e2 = analysedActions.subject[eleX]
+                    if (!areObjectsEqual(el2e2, { correct: 0, incorrect: 0, unattempted: 0, total: 0 })) {
+                      if (eleX != "overall"){
+                        analysedActions.subject.overall.correct += el2e2.correct
+                        analysedActions.subject.overall.incorrect += el2e2.incorrect
+                        analysedActions.subject.overall.unattempted += el2e2.unattempted
+                        analysedActions.subject.overall.total += el2e2.total
+                      }
+                      tablebuilder3.push({ subject: eleX, correct: sd(el2e2.correct), incorrect: sd(el2e2.incorrect), unattempted: sd(el2e2.unattempted), total: sd(el2e2.correct + el2e2.incorrect + el2e2.unattempted), accuracy: Math.floor((1 - tT.info.subjectmarks[eleX].qic / tT.info.subjectmarks[eleX].qc) * 100).toString() + "%" })
+                      tablebuilder4.push({ subject: eleX, correct: el2e2.correct, incorrect: el2e2.incorrect, unattempted: el2e2.unattempted, total: el2e2.correct + el2e2.incorrect + el2e2.unattempted, accuracy: Math.floor((1 - tT.info.subjectmarks[eleX].qic / tT.info.subjectmarks[eleX].qc) * 100),attempts:Math.floor(tT.info.subjectmarks[eleX].qc / (tT.info.subjectmarks[eleX].qc+tT.info.subjectmarks[eleX].qun+tT.info.subjectmarks[eleX].qic)*100)})
+                    }
+                  }
+                  let ioh = new Chart(
+                    dE("fto_table_time"),
+                    {
+                      type: 'bar',
+                      options: {
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Subject Wise Time Spent',
+                                color: "olive"
+                            },
+                            legend: {
+                              labels: {
+                                color: "olive"
+                              }
+                            }
+                        },
+                        scales: {
+                            y: {
+                              beginAtZero: true
+                            },x: {color:"olive"}
+                          }
+                      },
+                      data: {
+                        labels: tablebuilder4.map(row => row.subject),
+                        datasets: [
+                          {
+                            label: "Correct",
+                            backgroundColor: "green",
+                            data: tablebuilder4.map(row => row.correct/60),
+                          },
+                          {
+                            label: "Incorrect",
+                            backgroundColor: "red",
+                            data: tablebuilder4.map(row => row.incorrect/60),
+                          },
+                          {
+                            label: "Unattempted",
+                            backgroundColor: "orange",
+                            data: tablebuilder4.map(row =>row.unattempted/60),
+                          }
+                        ]
+                      }
+                    }
+                  )
+                  let iop = new Chart(
+                    dE("fto_table_accuracy"),
+                    {
+                      type: 'bar',
+                      options: {
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Subject Accuracy vs Attempted(%)',
+                                color: "olive"
+                            },
+                            legend: {
+                              position: 'right',
+                              labels: {
+                                color: "olive"
+                              }
+                            },
+                            scales:{
+                              y: {color:"olive"}
+                            }
+                        }
+                      },
+                      data: {
+                        labels: tablebuilder4.map(row => row.subject),
+                        
+                        datasets: [
+                          {
+                            label: "Accuracy",
+                            data: tablebuilder4.map(row => row.accuracy)
+                          },
+                          {
+                            label: "Attempts",
+                            data: tablebuilder4.map(row => row.attempts)
+                          }
+                        ]
+                      }
+                    }
+                  )   
                   dE("fto_time_table").appendChild(buildHtmlTable(tablebuilder3))
-                }catch{
-                
+                } catch {
+
                 }
               })
             }
@@ -2369,8 +2534,6 @@ async function getSimpleTestReport() {
               }
 
             }
-            questionGraph("fto_draw", data)
-
           }
           catch {
             dE("te_title").innerText = "ERROR"
@@ -2558,6 +2721,8 @@ async function getTestInfo() {
         }
       }
     }
+  } else {
+    renderBody("This test either doesnt exist or you do not have access to this test.")
   }
   try {
     docRef = doc(db, "tests", testid, "questions", "questions");
@@ -2665,12 +2830,12 @@ async function computeResult(type) {
   }
   var u = 0, c = 0, ic = 0;
   var subjectmarks = {
-    "Physics": { correct: 0, unattempted: 0, incorrect: 0, total: 0,qun:0,qc:0,qic:0 },
-    "Chemistry": { correct: 0, unattempted: 0, incorrect: 0, total: 0,qun:0,qc:0,qic:0 }, "Math": { correct: 0, unattempted: 0, incorrect: 0, total: 0 ,qun:0,qc:0,qic:0},
-    "Biology": { correct: 0, unattempted: 0, incorrect: 0, total: 0,qun:0,qc:0,qic:0 }, "Computer": { correct: 0, unattempted: 0, incorrect: 0, total: 0 ,qun:0,qc:0,qic:0},
-    "Statistics": { correct: 0, unattempted: 0, incorrect: 0, total: 0,qun:0,qc:0,qic:0 }, "Unfiled": { correct: 0, unattempted: 0, incorrect: 0, total: 0,qun:0,qc:0,qic:0 }
+    "Physics": { correct: 0, unattempted: 0, incorrect: 0, total: 0, qun: 0, qc: 0, qic: 0 },
+    "Chemistry": { correct: 0, unattempted: 0, incorrect: 0, total: 0, qun: 0, qc: 0, qic: 0 }, "Math": { correct: 0, unattempted: 0, incorrect: 0, total: 0, qun: 0, qc: 0, qic: 0 },
+    "Biology": { correct: 0, unattempted: 0, incorrect: 0, total: 0, qun: 0, qc: 0, qic: 0 }, "Computer": { correct: 0, unattempted: 0, incorrect: 0, total: 0, qun: 0, qc: 0, qic: 0 },
+    "Statistics": { correct: 0, unattempted: 0, incorrect: 0, total: 0, qun: 0, qc: 0, qic: 0 }, "Unfiled": { correct: 0, unattempted: 0, incorrect: 0, total: 0, qun: 0, qc: 0, qic: 0 }
   }
-  var overall = {qc:0,qic:0,qun:0,acc:0}
+  var overall = { qc: 0, qic: 0, qun: 0, acc: 0 }
   var missedtopics = []
   for (var i = 0; i < trA.length; i++) {
     for (var j = 0; j < trL.length; j++) {
@@ -2686,7 +2851,7 @@ async function computeResult(type) {
           subjectmarks[trA[i].section].unattempted += parseFloat(trA[i].pm)
           subjectmarks[trA[i].section].total += parseFloat(trA[i].pm)
           subjectmarks[trA[i].section].qun += 1
-          overall.qun +=1
+          overall.qun += 1
         } else {
           if (q_check.type == "correct") {
             marksList.push({ qid: trA[i].qid, marks: parseFloat(trA[i].pm), type: "correct" })
@@ -2694,23 +2859,23 @@ async function computeResult(type) {
             subjectmarks[trA[i].section].correct += parseFloat(q_check.marks)
             subjectmarks[trA[i].section].total += parseFloat(trA[i].pm)
             subjectmarks[trA[i].section].qc += 1
-            overall.qc +=1
+            overall.qc += 1
           } else {
             marksList.push({ qid: trA[i].qid, marks: parseFloat(trA[i].nm), type: "incorrect" })
             ic = ic + parseFloat(trA[i].nm)
             subjectmarks[trA[i].section].incorrect += parseFloat(trA[i].nm)
             subjectmarks[trA[i].section].total += parseFloat(trA[i].pm)
             subjectmarks[trA[i].section].qic += 1
-            overall.qic +=1
+            overall.qic += 1
             missedtopics.push(trA[i].qtopic)
           }
         }
       }
     }
   }
-  overall.acc = Math.floor((1-overall.qic/overall.qc) *100)
+  overall.acc = Math.floor((1 - overall.qic / overall.qc) * 100)
   var t = subjectmarks["Physics"].total + subjectmarks["Chemistry"].total + subjectmarks["Math"].total + subjectmarks["Biology"].total + subjectmarks["Computer"].total + subjectmarks["Statistics"].total + subjectmarks["Unfiled"].total
-  var tFinal = { correct: c, incorrect: ic, unattempted: u, mList: marksList, total: t, usermarks: c + ic, subjectmarks: subjectmarks,overall:overall,missedtopics:missedtopics }
+  var tFinal = { correct: c, incorrect: ic, unattempted: u, mList: marksList, total: t, usermarks: c + ic, subjectmarks: subjectmarks, overall: overall, missedtopics: missedtopics }
   if (type == 1) {
     if (!areObjectsEqual(tFinal, fg)) {
       log("NOTICE", "Please Wait, Marks Are Being Updated")
@@ -3155,111 +3320,9 @@ function getHTML(id) {
 function setHTML(id, html) {
   $("#" + id).summernote('code', html);
 }
-function questionGraph(ipd, data) {
-  try {
-    const margin = { top: 20, right: 20, bottom: 50, left: 50 };
-    const width = 800 - margin.left - margin.right;
-    const height = 400 - margin.top - margin.bottom;
-    dE(ipd).innerHTML = ""
-    const svg = d3
-      .select("#" + ipd)
-      .append("svg")
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
-      .append("g")
-      .attr("transform", `translate(${margin.left}, ${margin.top})`);
-
-    // Define color scale for circle fill
-    const colorScale = d3
-      .scaleOrdinal()
-      .domain(["correct", "incorrect", "unattempted"])
-      .range(["#2ecc71", "#e74c3c", "#f39c12"]);
-
-    // Define circle radius scale based on attempt time
-    const radiusScale = d3
-      .scaleLinear()
-      .domain([0, d3.max(data, (d) => d.time)])
-      .range([5, 30]);
-
-    // Define x scale for question index
-    const xScale = d3
-      .scaleLinear()
-      .domain([1, data.length])
-      .range([0, width]);
-
-    // Define y scale for attempt time
-    const yScale = d3
-      .scaleLinear()
-      .domain([0, d3.max(data, (d) => d.time)])
-      .range([height, 0]);
-    svg.append("text")
-      .attr("class", "axis-label")
-      .attr("text-anchor", "middle")
-      .attr("x", width - 120)
-      .attr("y", height + 40)
-      .attr("color", "white")
-      .text("Question Number");
-
-    svg.append("text")
-      .attr("class", "axis-label")
-      .attr("text-anchor", "middle")
-      .attr("transform", "rotate(-90)")
-      .attr("x", -innerHeight / 2 + 40)
-      .attr("y", -margin.left + 25)
-      .text("Time Taken(in s)")
-      .attr("color", "white");
-    // Draw x axis
-    svg
-      .append("g")
-      .attr("transform", `translate(0, ${height})`)
-      .call(d3.axisBottom(xScale));
-
-    // Draw y axis
-    svg.append("g").call(d3.axisLeft(yScale));
-
-    // Draw circles for each data point
-    svg
-      .selectAll("circle")
-      .data(data)
-      .enter()
-      .append("circle")
-      .attr("cx", (d, i) => xScale(i + 1))
-      .attr("cy", (d) => yScale(d.time))
-      .attr("r", (d) => radiusScale(d.time))
-      .attr("fill", (d) => {
-        return colorScale(d.type);
-      }).append("text")
-      .text(function (d) { return d.no; })
-    var circleGroups = svg.selectAll("g")
-      .data(data)
-      .enter()
-      .append("g")
-      .attr("transform", function (d) {
-        return "translate(" + xScale(d.time) + "," + yScale(d.questionNumber) + ")";
-      });
-    // add circles to each group
-    circleGroups.append("circle")
-      .attr("r", function (d) { return sizeScale(d.time); })
-      .attr("fill", function (d) {
-        if (d.result == "correct") {
-          return "green";
-        } else if (d.result == "incorrect") {
-          return "red";
-        } else {
-          return "gray";
-        }
-      });
-
-    // add labels to each group
-    circleGroups.append("text")
-      .text(function (d) { return "Q" + d.no; })
-      .attr("x", function (d) { return sizeScale(d.time) + 5; })
-      .attr("y", 5);
-  } catch { }
-}
 var Quarkz = {
   "copyright": "Mr Techtroid 2021-23",
-  "vno": "v0.6.0",
+  "vno": "v0.6.4",
   "author": "Mr Techtroid",
   "last-updated": "28/05/2023(IST)",
   "serverstatus": "firebase-online",
@@ -3312,5 +3375,13 @@ bc.onmessage = (event) => {
   }
   if (event.data == `QZCODE-REPORT`) {
     reportHandler()
+  }
+  if (event.data == `QZCODE-DARK`){
+    Chart.defaults.color = '#fff';
+    Chart.defaults.borderColor = '#fff';
+  }
+  if (event.data == `QZCODE-LIGHT`){
+    Chart.defaults.color = '#000';
+    Chart.defaults.borderColor = '#000';
   }
 };

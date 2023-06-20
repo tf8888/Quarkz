@@ -23,14 +23,14 @@
     "util": "^0.12.5"
   },
   "description": "An Online Quiz And Education Platform Built With Vanilla Javascript. \r ## NOTE\r This Repository Is Protected Under Copyright Law. Using Any File or Parts of Files From this Repository for Any Use Without Prior Consent May Result In DMCA Strikes. \r ### Copyright © 2020-22 Mr Techtroid",
-  "version": "0.6.1",
+  "version": "0.6.4",
   "author": "Mr Techtroid",
   "license": "ISC",
   "browserslist": [
     "last 5 chrome versions"
   ],
   "dependencies": {
-    "d3": "^7.8.2",
+    "chart.js": "^4.3.0",
     "firebase": "^9.17.1",
     "jquery": "^3.2.0",
     "katex": "^0.16.4",

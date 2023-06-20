@@ -170,14 +170,17 @@ window.onresize = refreshScreen;
 const toggleSwitch = document.getElementById("toggleSwitch");
 const body = document.body;
 function uiMode() {
+    const bc = new BroadcastChannel("Quarkz!");
     if (toggleSwitch.checked) {
         body.classList.add("dark_mode");
         body.classList.remove("light_mode");
         localStorage.setItem("ui", "dark");
+        bc.postMessage(`QZCODE-DARK`);
     } else {
         body.classList.add("light_mode");
         body.classList.remove("dark_mode");
         localStorage.setItem("ui", "light");
+        bc.postMessage(`QZCODE-LIGHT`);
     }
 }
 toggleSwitch.addEventListener("change", uiMode);

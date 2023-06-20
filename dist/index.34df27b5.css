@@ -100,6 +100,38 @@ body {
   color: #fff !important;
 }
 
+details {
+  width: 90%;
+  align-items: center;
+  margin: auto;
+}
+
+#report-tag {
+  display: none;
+}
+
+summary {
+  background-color: var(--clr8);
+  cursor: pointer;
+  border-radius: 10px;
+  padding-left: 100px;
+  padding-right: 100px;
+  font-size: 4vh;
+}
+
+details[open] summary {
+  border-radius: 10px 10px 0 0;
+}
+
+.summary_div {
+  border: 2px solid;
+  border-top: 0;
+  border-color: var(--clr8);
+  flex-flow: column wrap;
+  padding: 5px;
+  display: flex;
+}
+
 #overlay_div {
   color: var(--white);
   position: absolute;
@@ -125,6 +157,7 @@ body {
 }
 
 #ovr_logo {
+  cursor: pointer;
   margin-left: 2vw;
   font-size: 4vh;
   font-weight: bold;
@@ -353,6 +386,7 @@ body {
 .tst_btn {
   background-color: var(--clr6);
   color: var(--white);
+  cursor: pointer;
   border: none;
   border-radius: 30px;
   margin: 5px;
@@ -369,6 +403,7 @@ body {
   height: max-content;
   border: var(--yellow) 1px solid;
   width: 50vw;
+  cursor: pointer;
   border-radius: 100px;
   flex-direction: column;
   justify-content: left;
@@ -381,6 +416,7 @@ body {
   height: max-content;
   border: var(--yellow) 1px solid;
   width: 50vw;
+  cursor: pointer;
   border-radius: 10px;
   flex-direction: column;
   justify-content: left;
@@ -413,6 +449,7 @@ body {
   height: max-content;
   border: var(--yellow) 1px solid;
   width: 350px;
+  cursor: pointer;
   border-radius: 100px;
   flex-direction: column;
   justify-content: left;
@@ -556,11 +593,19 @@ body {
   display: flex;
 }
 
+#options_tab span, #toolbar span {
+  cursor: pointer;
+}
+
 .qb_mcq_exp {
   counter-reset: optno;
   flex-direction: row;
   justify-content: space-around;
   display: flex;
+}
+
+input[type="radio"], input[type="checkbox"] {
+  cursor: pointer;
 }
 
 .qbtp_q:before {
@@ -879,10 +924,16 @@ body {
 
 #dsh_btn:hover {
   background-color: var(--clr12);
+  cursor: pointer;
+}
+
+a {
+  cursor: pointer;
 }
 
 .dshbox {
   border: var(--clr10) 3px solid;
+  cursor: pointer;
   border-radius: 30px;
   margin: 1vw;
   padding: 4vw;
@@ -947,14 +998,15 @@ body {
 }
 
 #tt_question img:hover {
+  zoom: 2;
   z-index: 3;
   border: var(--clr14) solid 5px;
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  height: 70vh !important;
-  width: 70vw !important;
+  max-height: 50vh !important;
+  max-width: 45vw !important;
 }
 
 #tt_timeleft, #tt_marksaward, #tt_timespent, #tt_testname {
@@ -1258,6 +1310,7 @@ circle text {
 .tts_ansreview, .tts_answered, .tts_notanswer, .tts_notvisit, .tts_review {
   width: 30px;
   height: 30px;
+  cursor: pointer;
   background-size: 100% 100%;
   margin: 5px 5px 10px;
   padding: 10px;
@@ -1294,6 +1347,7 @@ circle text {
 .dshbox_v2 {
   border: var(--yellow) 1px solid;
   width: 160px;
+  cursor: pointer;
   background-color: #0000;
   border-radius: 30px;
   margin: 5px;
@@ -1309,6 +1363,7 @@ circle text {
   border: var(--yellow) 1px solid;
   width: 50vw;
   color: var(--white);
+  cursor: pointer;
   border-radius: 100px;
   margin: 6px;
   padding: 10px;
@@ -1630,6 +1685,14 @@ circle text {
   .table1 td:last-child {
     border-bottom: 0;
   }
+}
+
+#fto_table_pie {
+  grid-gap: 1rem;
+  grid-template-rows: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(200px, auto));
+  justify-content: space-around;
+  display: grid;
 }
 
 /*# sourceMappingURL=index.34df27b5.css.map */

@@ -31,7 +31,7 @@ export let page_test_instructions = `
                     <div style="margin:17px"><span class="tts_ansreview">37</span>The question(s) "Answered and Marked
                         for Review" will be considered for evalution.</div>
                 </div>
-                <li>To expand the Image, you can Hover on the Image.(Only On Desktop/Laptop Devices)</li>
+                <li>To expand the Image, you can Hover on the Image.(Only On Desktop/Laptop Devices). For Mobile Devices click on the Image.</li>
                 <li>When the timer reaches zero, the examination will end by itself. You will not be required to end or
                     submit your examination.</li>
                 <li>Make Sure To Have A Good Internet Connection. Loss in Internet Connectivity may prevent submission
