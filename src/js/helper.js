@@ -278,4 +278,18 @@ export function buildHtmlTable(arr) {
     }
     return table;
 }
-export default { sd, sha256, makeid, mobileCheck, areObjectsEqual, areEqual, getServerTime, fullEle, dE, sortObj, sortObjv2, renderMarkedMath, mergeById, qCorrector, playSoundEffect, showLS, antiCopyEle, shuffleArrayWithSeed,buildHtmlTable }
+export function studentRanker(students) {
+    // Assign rank parameter to each object
+    students.forEach((student, index) => {
+        // Check if the previous student has the same marks
+        if (index > 0 && student.marks === students[index - 1].marks) {
+          // Assign the same rank as the previous student
+          student.rank = students[index - 1].rank;
+        } else {
+          // Assign a new rank based on the current index
+          student.rank = index + 1;
+        }
+    });
+    return students
+}
+export default { sd, sha256, makeid, mobileCheck, areObjectsEqual, areEqual, getServerTime, fullEle, dE, sortObj, sortObjv2, renderMarkedMath, mergeById, qCorrector, playSoundEffect, showLS, antiCopyEle, shuffleArrayWithSeed, buildHtmlTable,studentRanker }

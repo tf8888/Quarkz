@@ -986,7 +986,7 @@ function coreManager(newlocation, n1) {
             break;
         case "about":
             handlebox = "aboutus";
-            renderBody((0, _about.page_about), "text-align: center;overflow-y: scroll;", "");
+            renderBody((0, _about.page_about), "text-align: center;height:max-content;", "");
             function lglHand() {
                 changeLocationHash("legal", 1);
             }
@@ -1025,7 +1025,7 @@ function coreManager(newlocation, n1) {
             break;
         case "register":
             handlebox = "register";
-            renderBody((0, _register.page_register), "", "");
+            renderBody((0, _register.page_register), "height:max-content;", "");
             (0, _helper.dE)("rg_in").addEventListener("click", rgbtn);
             break;
         case "testinfo":
@@ -2202,6 +2202,7 @@ function renderEditQLList(qno) {
     if (location1.includes("edit_test")) curr_qlid = op.qid;
     else curr_qlid = op.id;
     (0, _helper.dE)("aq_mode").value = op.mode;
+    (0, _helper.dE)("aq_id").value = curr_qlid;
     setHTML("aq_qtext", op.title);
     (0, _helper.dE)("aq_yurl").value = op.y_url;
     (0, _helper.dE)("aq_type").value = op.type;
@@ -2361,6 +2362,7 @@ async function prepareTopicQBank(iun) {
                 }
                 editqllist = (0, _helper.mergeById)(q, a);
                 renderEditQLList(0);
+                renderEditQLList(1);
             } else if (iun == 4) {
                 var docJSON = docSnap.data();
                 editqllist = docJSON.examinfo;
@@ -2677,7 +2679,7 @@ async function lessonRenderer(docJSON) {
     (0, _helper.dE)("report-tag").value = docJSON.id;
 // dE("tp_lsimg").src = docJSON.img
 }
-async function questionRenderer(docJSON, totalq) {
+async function questionRenderer(docJSON, totalq, pqno) {
     function iu(ele) {
         ele.style.display = "none";
     }
@@ -2694,7 +2696,7 @@ async function questionRenderer(docJSON, totalq) {
     var tpmcqcon = (0, _helper.dE)("tp_mcq_con");
     var tpmatrix = (0, _helper.dE)("tp_matrix");
     var tpanswer = (0, _helper.dE)("tp_answer");
-    (0, _helper.dE)("tp_lsno").innerHTML = "Question<span style = 'font-size:12px'>&nbsp;X of (" + totalq + ")</span>";
+    (0, _helper.dE)("tp_lsno").innerHTML = "Question<span style = 'font-size:12px'>&nbsp;" + pqno + " of (" + totalq + ")</span>";
     (0, _helper.dE)("tp_question").style.display = "flex";
     (0, _helper.dE)("tp_lesson").style.display = "none";
     (0, _helper.dE)("tp_question").setAttribute("dataid", docJSON.id);
@@ -2750,9 +2752,13 @@ async function topicHandler(type) {
     (0, _helper.dE)("tp_title").innerText = a;
     var tqQus = topicJSON.qllist[topicJSONno];
     var totalq = 0;
-    for(var i = 0; i < topicJSON.qllist.length; i++)if (topicJSON.qllist[i].mode == "question") totalq++;
+    var qno = 0;
+    for(var i = 0; i < topicJSON.qllist.length; i++){
+        if (topicJSON.qllist[i].mode == "question") totalq++;
+        if (i == topicJSONno) qno = totalq;
+    }
     if (tqQus.mode == "lesson") lessonRenderer(tqQus);
-    else if (tqQus.mode == "question") questionRenderer(tqQus, totalq);
+    else if (tqQus.mode == "question") questionRenderer(tqQus, totalq, qno);
     stpVid();
 }
 function addMCQ() {
@@ -2885,6 +2891,12 @@ async function authStateObserver(user) {
             var docJSON = docSnap.data();
             userinfo.examslist = docJSON;
             if (docJSON.ratemyapp) localStorage.setItem("rate_app", false);
+            if (docJSON.offline) {
+                (0, _auth.signOut)((0, _auth.getAuth)());
+                userdetails = [];
+                (0, _log.log)("Server Offline", "Quarkz Is Temporarily Offline for Maintainance. " + docJSON.offlinemsg);
+                return 0;
+            }
             if (docJSON.warning != "") (0, _log.log)("Notice", docJSON.warning, function() {
                 window.location.hash = "#/updates";
             }, "Release Notes");
@@ -3146,7 +3158,10 @@ async function getSimpleTestReport() {
                     reQW = tT.info.mList;
                     let hji = "<ol>";
                     let missedtopics = tT.info.missedtopics;
-                    for(var i = 0; i < missedtopics.length; i++)hji += '<li><div class = "tlinks" style = "flex-direction:row;width:25vw;justify-content:space-between;"><span class = "t_name">' + missedtopics[i] + "</span></div></li>";
+                    let unattemptedtopics = tT.info.unattemptedtopics;
+                    for(var i = 0; i < missedtopics.length; i++)hji += '<li><div class = "tlinks" style = "flex-direction:row;width:25vw;justify-content:space-between;"><span class = "t_name" style = "color:red;">' + missedtopics[i] + "</span></div></li>";
+                    for(var i = 0; i < unattemptedtopics.length; i++)hji += '<li><div class = "tlinks" style = "flex-direction:row;width:25vw;justify-content:space-between;"><span class = "t_name">' + unattemptedtopics[i] + "</span></div></li>";
+                    if (missedtopics.length == 0 && unattemptedtopics.length == 0) hji = "<span>Hoo! No Missed Concepts on This Test</span>";
                     (0, _helper.dE)("fto_missed").innerHTML = hji;
                     try {
                         let tablebuilder = tT.info.subjectmarks;
@@ -3180,7 +3195,7 @@ async function getSimpleTestReport() {
                                 qic: 0,
                                 qun: 0
                             })) {
-                                let fgy = el2e2.correct + el2e2.incorrect + el2e2.unattempted;
+                                let fgy = el2e2.correct + el2e2.incorrect;
                                 if (eleX != "overall") {
                                     tablebuilder.overall.qc += el2e2.qc;
                                     tablebuilder.overall.qic = el2e2.qic;
@@ -3392,6 +3407,11 @@ async function getSimpleTestReport() {
                                             label: "Unattempted",
                                             backgroundColor: "orange",
                                             data: tablebuilder4.map((row)=>row.unattempted / 60)
+                                        },
+                                        {
+                                            label: "Total Time Spent",
+                                            backgroundColor: "blue",
+                                            data: tablebuilder4.map((row)=>row.total / 60)
                                         }
                                     ]
                                 }
@@ -3443,11 +3463,15 @@ async function getSimpleTestReport() {
                     if (docSnap.exists()) leaderboard = docSnap.data().leaderboard;
                     (0, _helper.dE)("fto_leaderboard").innerHTML = "";
                     leaderboard = (0, _helper.sortObj)(leaderboard, "marks", 1);
-                    for(var i = 0; i < leaderboard.length; i++){
-                        var e = i + 1;
-                        if (userinfo.uuid == leaderboard[i].uid) (0, _helper.dE)("fto_rank").innerText = e;
-                        (0, _helper.dE)("fto_leaderboard").insertAdjacentHTML("beforeend", '<div class = "tlinks" style = "flex-direction:row;width:25vw;justify-content:space-between;"><span class = "t_gre">&nbsp;' + e + '</span><span class = "t_name">' + leaderboard[i].name + '</span><span class = "t_gre">&nbsp;&nbsp;' + leaderboard[i].marks + "</span></div>");
-                    }
+                    let leaderboard2 = [];
+                    leaderboard = (0, _helper.studentRanker)(leaderboard);
+                    for(var i = 0; i < leaderboard.length; i++)if (userinfo.uuid == leaderboard[i].uid) (0, _helper.dE)("fto_rank").innerText = leaderboard[i].rank;
+                    for(var i = 0; i < leaderboard.length; i++)leaderboard2.push({
+                        name: leaderboard[i].name,
+                        marks: leaderboard[i].marks,
+                        rank: leaderboard[i].rank
+                    });
+                    (0, _helper.dE)("fto_leaderboard").appendChild((0, _helper.buildHtmlTable)(leaderboard2));
                 } catch  {}
                 var data = [];
                 for(var i = 0; i < reQW.length; i++)if (analysedActions.questions[reQW[i].qid] == undefined) data.push({
@@ -3858,6 +3882,7 @@ async function computeResult(type) {
         acc: 0
     };
     var missedtopics = [];
+    var unattemptedtopics = [];
     for(var i = 0; i < trA.length; i++){
         for(var j = 0; j < trL.length; j++)if (trA[i].qid == trL[j].qid) {
             var ele = trL[j];
@@ -3874,6 +3899,7 @@ async function computeResult(type) {
                 subjectmarks[trA[i].section].total += parseFloat(trA[i].pm);
                 subjectmarks[trA[i].section].qun += 1;
                 overall.qun += 1;
+                unattemptedtopics.push(trA[i].qtopic);
             } else if (q_check.type == "correct") {
                 marksList.push({
                     qid: trA[i].qid,
@@ -3911,7 +3937,8 @@ async function computeResult(type) {
         usermarks: c + ic,
         subjectmarks: subjectmarks,
         overall: overall,
-        missedtopics: missedtopics
+        missedtopics: missedtopics,
+        unattemptedtopics: unattemptedtopics
     };
     if (type == 1) {
         if (!(0, _helper.areObjectsEqual)(tFinal, fg)) {
@@ -41106,7 +41133,7 @@ let page_about = `
             <span class="abt_det">
                 <span id="abt_email">mrtechtroid@outlook.com</span>
             </span>
-            <div style="font-size: 12px;width:400px;align-items: flex-end;">
+            <div style="font-size: 16px;width:400px;align-items: flex-end;">
                 <span>I Am Mr Techtroid The Main Developer Of <span class="sp_txt">Quarkz!</span></span>
                 <span>I Built This Website As A Way For Schools To Head Towards Online Learning</span>
                 <span>Its Built In A Way That It Is Easy For Both Teachers And Students To Use</span>
@@ -41156,7 +41183,7 @@ let page_edit_chapter = `
         <div id = "chp_qbank">
         </div>`;
 let page_chapter = `
-<span class="in_t" id="chp_chaptername">Topic</span><button class="tst_btn rpl" id="chp_edit">Edit</button>
+<span><span class="in_t" id="chp_chaptername">Topic</span><button class="tst_btn rpl" id="chp_edit">Edit</button></span>
         <div class = "flex_type" style="flex-direction: row;flex-wrap: wrap;">
             <div id="chpt_topics" class = "db_class">
                 <span style="font-size: 25px;color:yellow">Topics</span>
@@ -41487,7 +41514,7 @@ parcelHelpers.export(exports, "page_finished_test", ()=>page_finished_test);
 let page_finished_test = `
 <span style="font-size: 5vh;color:yellow" id="fti_title">Test Name</span>
 <hr color="white" width="100%">
-<div id="fto_overview" style="display: flex;flex-direction: row;flex-wrap:wrap">
+<div id="fto_overview" style="display: flex;flex-direction: row;flex-wrap:wrap;justify-content:center;">
     <div class="fto_box">
         <div class="fto_box_title">TOTAL MARKS</div>
         <div class="fto_box_content" id="fto_total">100/100</div>
@@ -41593,6 +41620,7 @@ let page_finished_test = `
 
         </div>
     </div>
+        <span style="font-size:3vh;">Legend:&nbsp;<span>Unanswered</span>&nbsp;<span style = "color:red">Incorrect</span></span>
     </div>
 </details>
 </br>
@@ -41955,6 +41983,7 @@ parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "page_register", ()=>page_register);
 let page_register = `
 <span class="in_t">Register</span>
+    <div style = "display:flex;flex-direction:row;flex-wrap:wrap;font-size:15px;">
         <div class = "db_class">
         <span style="font-size: 25px;color:yellow">Personal Info</span>
         <input type="text" id="rg_name" class="_in_reg" placeholder="Name">
@@ -41989,6 +42018,7 @@ let page_register = `
         <input type="password" id="rg_pass" class="_in_reg" placeholder="Password">
         <input type="password" id="rg_pass1" class="_in_reg" placeholder="Confirm Password">
         </div>
+        </div>
         <button class="tst_btn rpl" id="rg_in">Register</button>
 
 `;
@@ -42000,7 +42030,7 @@ parcelHelpers.export(exports, "page_settings", ()=>page_settings);
 let page_settings = `
 <span class="in_t">Settings</span>
         <hr color="white" width="100%">
-        <div class = "flex_type" style = "flex-direction: row;flex-wrap: wrap;">
+        <div class = "flex_type" style = "flex-direction: row;flex-wrap: wrap;justify-content:center;align-items:center;">
             <div id="st_accinfo" class = "db_class">
                 <span style="font-size: 25px;color:yellow">Account Info</span>
                 <button id="pass_rst_btn" class="tst_btn rpl">Reset/Change Password</button>
@@ -42023,7 +42053,7 @@ let page_settings = `
             </div>
             <div id="st_prftype" class = "db_class">
                 <span style="font-size: 25px;color:yellow">Profile Picture Type</span>
-                <div style ="display:flex;flex-direction:row;flex-wrap:wrap;">
+                <div style ="display:flex;flex-direction:row;width:330px;overflow-x:scroll;">
                 <img style = "border:2px solid #06d85f;border-radius:30px;width:100px;height:100px;" class = "prf_typ" id="prf_typ_1"></img>
                 <img style = "border:2px solid #06d85f;border-radius:30px;width:100px;height:100px;" class = "prf_typ" id="prf_typ_2"></img>
                 <img style = "border:2px solid #06d85f;border-radius:30px;width:100px;height:100px;" class = "prf_typ" id="prf_typ_3"></img>
@@ -42299,6 +42329,7 @@ let page_toc = `
         <li>You agree to use the Quarkz website in a lawful and ethical manner. You agree not to engage in any activity that could damage, disable, overburden, or impair the website, or interfere with any other user's access to the website. You agree not to post or transmit any content that is obscene, defamatory, libelous, abusive, discriminatory, or otherwise offensive. You agree not to harass or bully other users on the website.</li>
         <h3>E. Termination of Access</h3>
         <li>We reserve the right to terminate access to the Quarkz website, or any part thereof, to any user at any time, without prior notice, for any reason, including without limitation, for a violation of these terms and conditions.</li>
+        <li>We may terminate your access to the site, without cause or notice, which may result in the forfeiture and destruction of all information associated with your account. All provisions of these Terms and Conditions that by their nature should survive termination shall survive termination, including, without limitation, ownership provisions, warranty disclaimers, indemnity, and limitations of liability.</li>
         <h3>F. Age Restrictions</h3>
         <li>By creating an account on the Quarkz website, you represent and warrant that you are 13 years of age or older. If you are under 13 years of age, you must obtain permission from your guardians or parents to use the Quarkz website. We do not knowingly collect any personal information from users under 13 years of age. If we become aware that we have collected personal information from a user under 13 years of age, we will take steps to delete that information.</li>
         <h3>G. Free Use Disclaimer</h3>
@@ -42319,12 +42350,10 @@ let page_toc = `
         <h3>L. Limitation of Liability</h3>
         <li>In no event shall Quarkz be liable for any direct, indirect, incidental, special, or consequential damages arising out of or in any way connected with your use of or inability to use the site, or for any information, products, services, or related graphics obtained through the site, even if Quarkz has been advised of the possibility of such damages. Some jurisdictions do not allow the exclusion or limitation of liability for incidental or consequential damages, so the above limitation may not apply to you.</li>
         <h3>M. Governing Law and Jurisdiction</h3>
-        <li>These Terms and Conditions shall be governed by and construed in accordance with the laws of India, without giving effect to any principles of conflicts of law. You agree that any dispute arising from or relating to these Terms and Conditions or your use of the site shall be brought exclusively in the courts located in India, and you hereby consent to the personal jurisdiction and venue of such courts.</li>
-        <h3>N. Termination</h3>
-        <li>We may terminate your access to the site, without cause or notice, which may result in the forfeiture and destruction of all information associated with your account. All provisions of these Terms and Conditions that by their nature should survive termination shall survive termination, including, without limitation, ownership provisions, warranty disclaimers, indemnity, and limitations of liability.</li>
-        <h3>O. Entire Agreement</h3>
+        <li>These Terms and Conditions shall be governed by and construed in accordance with the laws of India, without giving effect to any principles of conflicts of law. You agree that any dispute arising from or relating to these Terms and Conditions or your use of the site shall be brought exclusively in the courts located in India, and you hereby consent to the personal jurisdiction and venue of such courts.</li
+        <h3>N. Entire Agreement</h3>
         <li>These Terms and Conditions constitute the entire agreement between you and Quarkz and supersedes all prior or contemporaneous agreements, representations, warranties, and understandings, whether written or oral, relating to the site.</li>
-        <h3>P. Contact Us</h3>
+        <h3>O. Contact Us</h3>
         <li>If you have any questions or comments about these Terms and Conditions or our website, please contact us through our "Contact Us" page.</li>
     </ol>
 </div>`;
@@ -42357,7 +42386,7 @@ let page_edit_topic = `
                 <option value="unfiled">Unfiled</option>
             </select>
         </div>
-        <div id="aq_test_extra" style="flex-direction: column;">
+        <div id="aq_test_extra" style="flex-direction: column;width:72vw">
             <input type="text" id="aq_tst_batches" class="_in_aq" placeholder="Batch ID">
             <input type="datetime-local" id="aq_tst_stron" class="_in_aq">
             <input type="datetime-local" id="aq_tst_endon" class="_in_aq">
@@ -42386,6 +42415,7 @@ let page_edit_topic = `
                     <input type="text" id="aq_examsyllabus" class="_in_aq" placeholder="Syllabus Link">
                 </div>
                 <div class="flex_type" id="aq_all" style="align-items: unset;" id="aq_uiad">
+                    <input type="text" id="aq_id" class="_in_aq" placeholder="ID" disabled>
                     <div class="summernote" id="aq_qtext">Question</div>
                     <input type="text" id="aq_answer" class="_in_aq" placeholder="Answer">
                     <input type="url" id="aq_yurl" class="_in_aq" placeholder="Youtube ID">
@@ -42642,6 +42672,7 @@ parcelHelpers.export(exports, "showLS", ()=>showLS);
 parcelHelpers.export(exports, "antiCopyEle", ()=>antiCopyEle);
 parcelHelpers.export(exports, "shuffleArrayWithSeed", ()=>shuffleArrayWithSeed);
 parcelHelpers.export(exports, "buildHtmlTable", ()=>buildHtmlTable);
+parcelHelpers.export(exports, "studentRanker", ()=>studentRanker);
 function sd(seconds) {
     seconds = Number(seconds);
     var d = Math.floor(seconds / 86400);
@@ -42871,6 +42902,17 @@ function buildHtmlTable(arr) {
     }
     return table;
 }
+function studentRanker(students) {
+    // Assign rank parameter to each object
+    students.forEach((student, index)=>{
+        // Check if the previous student has the same marks
+        if (index > 0 && student.marks === students[index - 1].marks) // Assign the same rank as the previous student
+        student.rank = students[index - 1].rank;
+        else // Assign a new rank based on the current index
+        student.rank = index + 1;
+    });
+    return students;
+}
 exports.default = {
     sd,
     sha256,
@@ -42890,7 +42932,8 @@ exports.default = {
     showLS,
     antiCopyEle,
     shuffleArrayWithSeed,
-    buildHtmlTable
+    buildHtmlTable,
+    studentRanker
 };
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"66uq8":[function(require,module,exports) {
@@ -44867,8 +44910,8 @@ exports.pipeline = require("f1c1769862e0e0b2");
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
-var process = require("4ff1a254c3876ff6");
 var global = arguments[3];
+var process = require("4ff1a254c3876ff6");
 "use strict";
 module.exports = Readable;
 /*<replacement>*/ var Duplex;
@@ -46705,8 +46748,8 @@ Object.defineProperty(Duplex.prototype, "destroyed", {
 // A bit simpler than readable streams.
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
 // the drain event emission and buffering.
-var global = arguments[3];
 var process = require("251f41a261b52745");
+var global = arguments[3];
 "use strict";
 module.exports = Writable;
 /* <replacement> */ function WriteReq(chunk, encoding, cb) {
@@ -49804,8 +49847,8 @@ module.exports = function(iterations, keylen) {
 };
 
 },{}],"T9r9Q":[function(require,module,exports) {
-var global = arguments[3];
 var process = require("b34af021f5a722c7");
+var global = arguments[3];
 var defaultEncoding;
 /* istanbul ignore next */ if (global.process && global.process.browser) defaultEncoding = "utf-8";
 else if (global.process && global.process.version) {
@@ -78378,8 +78421,8 @@ function compare(a, b) {
 }
 
 },{"91c0431487c6b6ab":"4Szbv","61db7950706c4c3c":"e2JgG","c2d73b38fc35a1e2":"iaxu0","caec905062917f18":"3pDum","7446e75df885a2d4":"e594P","c9564c8025a94f42":"2WyL8","be7bce3022802ebe":"fFkPV","529219c232454114":"eW7r9"}],"k3tsT":[function(require,module,exports) {
-var global = arguments[3];
 var process = require("aa68f4bbf869ce05");
+var global = arguments[3];
 "use strict";
 function oldBrowser() {
     throw new Error("secure random number generation not supported by this browser\nuse chrome, FireFox or Internet Explorer 11");

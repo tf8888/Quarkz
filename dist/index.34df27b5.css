@@ -64,12 +64,16 @@
   display: block;
 }
 
+#ovr_msg {
+  width: 90%;
+}
+
 .light_mode .it_popup #container {
   height: 90%;
   border: solid 3px var(--white);
   text-align: left;
   background-image: url("Q_Print.82411e7a.png");
-  font-size: 14px;
+  font-size: max(14px, 3vh);
   overflow-y: scroll;
 }
 
@@ -84,7 +88,7 @@ body {
   color: var(--white);
   flex-direction: column;
   font-family: Nunito;
-  font-size: 3vh;
+  font-size: max(14px, 3vh);
   display: flex;
 }
 
@@ -94,10 +98,17 @@ body {
   z-index: 1;
   pointer-events: none;
   background-color: #000;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   display: none;
   position: fixed;
   inset: 0;
   color: #fff !important;
+}
+
+#overlay img {
+  width: 90%;
 }
 
 details {
@@ -116,7 +127,7 @@ summary {
   border-radius: 10px;
   padding-left: 100px;
   padding-right: 100px;
-  font-size: 4vh;
+  font-size: max(15px, 4vh);
 }
 
 details[open] summary {
@@ -127,9 +138,8 @@ details[open] summary {
   border: 2px solid;
   border-top: 0;
   border-color: var(--clr8);
-  flex-flow: column wrap;
+  flex-wrap: wrap;
   padding: 5px;
-  display: flex;
 }
 
 #overlay_div {
@@ -141,15 +151,15 @@ details[open] summary {
 }
 
 .in_t {
-  font-size: 5vh;
+  font-size: max(20px, 5vh);
 }
 
 .in_t_2 {
-  font-size: 2vh;
+  font-size: max(12px, 2vh);
 }
 
 .in_t_3 {
-  font-size: 3vh;
+  font-size: max(14px, 3vh);
 }
 
 #legal {
@@ -159,14 +169,14 @@ details[open] summary {
 #ovr_logo {
   cursor: pointer;
   margin-left: 2vw;
-  font-size: 4vh;
+  font-size: max(15px, 3vh);
   font-weight: bold;
 }
 
 .lgn_c_1 {
   color: var(--white);
   margin: auto;
-  font-size: 14px;
+  font-size: max(14px, 3vh);
   text-decoration: none;
 }
 
@@ -192,7 +202,7 @@ details[open] summary {
   color: var(--white);
   background-color: #0000;
   outline: none;
-  font-size: 4vh;
+  font-size: max(15px, 4vh);
   text-decoration: none;
 }
 
@@ -391,7 +401,7 @@ details[open] summary {
   border-radius: 30px;
   margin: 5px;
   padding: 5px 10px;
-  font-size: 3vh;
+  font-size: max(14px, 3vh);
   text-decoration: none;
 }
 
@@ -448,7 +458,7 @@ details[open] summary {
 .tlinks_min {
   height: max-content;
   border: var(--yellow) 1px solid;
-  width: 350px;
+  width: 300px;
   cursor: pointer;
   border-radius: 100px;
   flex-direction: column;
@@ -543,7 +553,7 @@ details[open] summary {
   margin: 0;
   padding: 14px 16px;
   font-family: inherit;
-  font-size: 16px;
+  font-size: max(16px, 4vh);
 }
 
 ._in_reg {
@@ -552,7 +562,7 @@ details[open] summary {
   color: var(--white);
   background-color: #0000;
   outline: none;
-  font-size: 4vh;
+  font-size: max(16px, 4vh);
   text-decoration: none;
 }
 
@@ -562,7 +572,7 @@ details[open] summary {
   color: var(--white);
   background-color: #0000;
   outline: none;
-  font-size: 3vh;
+  font-size: max(14px, 3vh);
   text-decoration: none;
 }
 
@@ -583,7 +593,7 @@ details[open] summary {
   width: 90%;
   z-index: 1;
   counter-reset: qno;
-  font-size: 14px;
+  font-size: max(14px, 3vh);
 }
 
 .qb_mcq {
@@ -679,7 +689,7 @@ input[type="radio"], input[type="checkbox"] {
 #eqb_instr {
   text-align: left;
   width: 90%;
-  font-size: 14px;
+  font-size: max(14px, 3vh);
 }
 
 #nt_nocontrol {
@@ -727,7 +737,7 @@ input[type="radio"], input[type="checkbox"] {
   .divFooter2 {
     color: var(--clr9);
     z-index: 0;
-    font-size: 15px;
+    font-size: max(15px, 4vh);
     position: fixed;
     bottom: 5px;
     left: 50%;
@@ -835,7 +845,7 @@ input[type="radio"], input[type="checkbox"] {
 
   .qbtp_q {
     border-bottom: 1px solid #000;
-    font-size: 15px;
+    font-size: max(15px, 4vh);
     position: relative;
     color: #000 !important;
   }
@@ -872,7 +882,7 @@ input[type="radio"], input[type="checkbox"] {
   z-index: 0;
   width: 120px;
   flex-direction: column;
-  font-size: 20px;
+  font-size: max(20px, 5vh);
   display: flex;
   position: fixed;
   top: 50%;
@@ -905,7 +915,7 @@ input[type="radio"], input[type="checkbox"] {
   border-radius: 10px;
   outline: none;
   padding: 10px;
-  font-size: 18px;
+  font-size: max(18px, 4vh);
 }
 
 .ovr-scroll {
@@ -940,26 +950,17 @@ a {
 }
 
 #lgl_container {
-  width: 60vw;
+  width: 90vw;
   height: 75vh;
   border: solid 3px var(--yellow);
   text-align: left;
-  font-size: 14px;
-  overflow-y: scroll;
-}
-
-#fto_leaderboard {
-  width: 30vw;
-  height: 55vh;
-  border: solid 3px var(--yellow);
-  text-align: left;
-  font-size: 14px;
+  font-size: max(14px, 3vh);
   overflow-y: scroll;
 }
 
 #tt_timespent {
   width: 300px;
-  font-size: 14px;
+  font-size: max(14px, 3vh);
 }
 
 #tt_infobx {
@@ -1048,7 +1049,7 @@ a {
 .fto_small {
   color: var(--clr3);
   margin: 5px;
-  font-size: 12px;
+  font-size: max(12px, 2vh);
 }
 
 .t_gre {
@@ -1134,24 +1135,24 @@ a {
 
 #prf_name {
   color: var(--black);
-  font-size: 5vh;
+  font-size: max(20px, 5vh);
   font-weight: bold;
 }
 
 #abt_name {
   color: var(--white);
-  font-size: 4vh;
+  font-size: max(15px, 4vh);
   font-weight: bold;
 }
 
 .prf_det {
   color: var(--black);
-  font-size: 2vh;
+  font-size: max(12px, 2vh);
 }
 
 .abt_det {
   color: var(--clr3);
-  font-size: 2vh;
+  font-size: max(12px, 2vh);
 }
 
 #prf_phone:before {
@@ -1218,7 +1219,7 @@ circle text {
 }
 
 .material-icons {
-  font-size: 20px;
+  font-size: max(20px, 5vh);
 }
 
 .dmName {
@@ -1439,7 +1440,7 @@ circle text {
   border: solid 3px var(--white);
   text-align: left;
   background-image: url("QuarkzPrint_2.48ed3c65.png");
-  font-size: 14px;
+  font-size: max(14px, 3vh);
   overflow-y: scroll;
 }
 
@@ -1499,9 +1500,9 @@ circle text {
 }
 
 .db_class {
-  min-height: 30vh;
+  min-height: 250px;
   border: var(--clr3) solid 2px;
-  width: 400px;
+  width: 350px;
   height: max-content;
   border-radius: 10px;
   flex-direction: column;
@@ -1601,6 +1602,7 @@ circle text {
 #dmodebtn input:checked + .slider-t:before {
   content: "🌙";
   background-color: #000;
+  font-size: 18px;
   transform: translateX(26px);
 }
 

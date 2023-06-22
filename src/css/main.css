@@ -13,6 +13,7 @@ For permission requests, please contact [Mr Techtroid] at mrtechtroid@outlook.co
 */
 :root {
   font-style: Nunito;
+  
 }
 .dark_mode{
   --bgcolor: rgb(18, 34, 53);
@@ -70,12 +71,15 @@ For permission requests, please contact [Mr Techtroid] at mrtechtroid@outlook.co
 .light_mode #ovr_l_2{
   display: block;
 }
+#ovr_msg{
+  width:90%;
+}
 .light_mode .it_popup #container {
   height: 90%;
   overflow-y: scroll;
   border: solid 3px var(--white);
   text-align: left;
-  font-size: 14px;
+  font-size: max(14px,3vh);
   background-image: url("../assets/Q_Print.png");
 }
 
@@ -88,7 +92,7 @@ body {
   display: flex;
   flex-direction: column;
   font-family: Nunito;
-  font-size: 3vh;
+  font-size: max(14px,3vh);;
   background-color: var(--bgcolor);
   background-image: var(--bgimage);
   color: var(--white);
@@ -108,6 +112,12 @@ body {
   z-index: 1;
   pointer-events: none;
   color:white !important;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+#overlay img{
+  width: 90%;
 }
 details{
   width:90%;
@@ -118,7 +128,7 @@ details{
   display: none;
 }
 summary{
-  font-size: 4vh;
+  font-size: max(15px,4vh);;
   background-color: var(--clr8);
   padding-left: 100px;
   border-radius: 10px;
@@ -129,8 +139,6 @@ details[open] summary{
   border-radius: 10px 10px 0px 0px;
 }
 .summary_div {
-  display:flex;
-  flex-direction:column;
   flex-wrap:wrap;
   border: solid 2px;
   border-top:0px;
@@ -147,15 +155,15 @@ details[open] summary{
 }
 
 .in_t {
-  font-size: 5vh;
+  font-size: max(20px,5vh);;
 }
 
 .in_t_2 {
-  font-size: 2vh;
+  font-size: max(12px,2vh);;
 }
 
 .in_t_3 {
-  font-size: 3vh;
+  font-size: max(14px,3vh);
 }
 
 #legal {
@@ -163,7 +171,7 @@ details[open] summary{
 }
 
 #ovr_logo {
-  font-size: 4vh;
+  font-size: max(15px,3vh);
   font-weight: bold;
   margin-left: 2vw;
   cursor:pointer;
@@ -171,7 +179,7 @@ details[open] summary{
 
 .lgn_c_1 {
   margin: auto;
-  font-size: 14px;
+  font-size: max(14px,3vh);
   text-decoration: none;
   color: var(--white);
 }
@@ -194,7 +202,7 @@ details[open] summary{
 
 /* Login Page */
 .text_bx_1 {
-  font-size: 4vh;
+  font-size: max(15px,4vh);
   background-color: transparent;
   text-decoration: none;
   border: none;
@@ -404,7 +412,7 @@ details[open] summary{
 }
 
 .tst_btn {
-  font-size: 3vh;
+  font-size: max(14px,3vh);
   margin: 5px;
   padding: 5px;
   padding-left: 10px;
@@ -465,7 +473,7 @@ details[open] summary{
   height: max-content;
   border: var(--yellow) 1px solid;
   padding: 10px;
-  width: 350px;
+  width: 300px;
   border-radius: 100px;
   margin: 6px;
   display: flex;
@@ -559,7 +567,7 @@ details[open] summary{
 
 .dropdown .dropbtn {
   z-index: 2;
-  font-size: 16px;
+  font-size: max(16px,4vh);
   border: none;
   outline: none;
   color: var(--white);
@@ -570,7 +578,7 @@ details[open] summary{
 }
 
 ._in_reg {
-  font-size: 4vh;
+  font-size: max(16px,4vh);
   background-color: transparent;
   text-decoration: none;
   border: none;
@@ -581,7 +589,7 @@ details[open] summary{
 
 ._in_aq,
 ._in_pq {
-  font-size: 3vh;
+  font-size: max(14px,3vh);
   background-color: transparent;
   text-decoration: none;
   border: none;
@@ -605,7 +613,7 @@ details[open] summary{
 
 #eqb_add {
   width: 90%;
-  font-size: 14px;
+  font-size:max(14px,3vh);
   z-index: 1;
   counter-reset: qno;
 }
@@ -697,7 +705,7 @@ input[type=radio], input[type=checkbox]{
 #eqb_instr {
   text-align: left;
   width: 90%;
-  font-size: 14px;
+  font-size: max(14px,3vh);
 }
 #output{
   /* height: max-content; */
@@ -748,7 +756,7 @@ input[type=radio], input[type=checkbox]{
     bottom: 5px;
     left: 50%;
     transform: translateY(50%);
-    font-size: 15px;
+    font-size: max(15px,4vh);
     color: var(--clr9);
     z-index: 0;
   }
@@ -863,7 +871,7 @@ input[type=radio], input[type=checkbox]{
   .qbtp_q {
     color: black !important;
     border-bottom: black 1px solid;
-    font-size: 15px;
+    font-size: max(15px,4vh);
     position: relative;
   }
 
@@ -907,7 +915,7 @@ input[type=radio], input[type=checkbox]{
   top: 50%;
   right: 3%;
   transform: translate(-50%, -50%);
-  font-size: 20px;
+  font-size: max(20px,5vh);
   color: var(--clr7);
   z-index: 0;
   width: 120px;
@@ -941,7 +949,7 @@ input[type=radio], input[type=checkbox]{
   cursor: pointer;
   padding: 10px;
   border-radius: 10px;
-  font-size: 18px;
+  font-size: max(18px,4vh);
 }
 
 .ovr-scroll {
@@ -974,26 +982,26 @@ a{
 }
 
 #lgl_container {
-  width: 60vw;
+  width: 90vw;
   height: 75vh;
   overflow-y: scroll;
   border: solid 3px var(--yellow);
   text-align: left;
-  font-size: 14px;
+  font-size: max(14px,3vh);
 }
 
 #fto_leaderboard {
-  width: 30vw;
+  /* width: 30vw;
   height: 55vh;
   overflow-y: scroll;
   border: solid 3px var(--yellow);
   text-align: left;
-  font-size: 14px;
+  font-size: 14px; */
 
 }
 
 #tt_timespent {
-  font-size: 14px;
+  font-size: max(14px,3vh);
   width: 300px;
 }
 
@@ -1095,7 +1103,7 @@ a{
 }
 
 .fto_small {
-  font-size: 12px;
+  font-size: max(12px,2vh);
   color: var(--clr3);
   margin: 5px
 }
@@ -1183,24 +1191,24 @@ a{
 }
 
 #prf_name {
-  font-size: 5vh;
+  font-size: max(20px,5vh);
   color: var(--black);
   font-weight: bold;
 }
 
 #abt_name {
-  font-size: 4vh;
+  font-size: max(15px,4vh);
   color: var(--white);
   font-weight: bold;
 }
 
 .prf_det {
-  font-size: 2vh;
+  font-size: max(12px,2vh);
   color: var(--black)
 }
 
 .abt_det {
-  font-size: 2vh;
+  font-size: max(12px,2vh);
   color: var(--clr3)
 }
 
@@ -1271,7 +1279,7 @@ circle text {
 }
 
 .material-icons {
-  font-size: 20px;
+  font-size: max(20px,5vh);
 }
 
 .dmName {
@@ -1511,7 +1519,7 @@ circle text {
   overflow-y: scroll;
   border: solid 3px var(--white);
   text-align: left;
-  font-size: 14px;
+  font-size: max(14px,3vh);
   background-image: url("../assets/QuarkzPrint_2.png");
 }
 .popup h2 {
@@ -1576,9 +1584,9 @@ circle text {
   display: flex;
   flex-direction: column;
   overflow-y: scroll;
-  min-height: 30vh;
+  min-height: 250px;
   border: var(--clr3) solid 2px;
-  width: 400px;
+  width: 350px;
   border-radius: 10px 10px 10px 10px;
   align-items: center;
   margin: 5px;
@@ -1680,6 +1688,7 @@ circle text {
   transform: translateX(26px);
   content:"🌙";
   background-color: black;
+  font-size:18px;
 }
 
 #dmodebtn .slider-t.round {

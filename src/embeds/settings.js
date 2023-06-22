@@ -1,7 +1,7 @@
 export let page_settings = `
 <span class="in_t">Settings</span>
         <hr color="white" width="100%">
-        <div class = "flex_type" style = "flex-direction: row;flex-wrap: wrap;">
+        <div class = "flex_type" style = "flex-direction: row;flex-wrap: wrap;justify-content:center;align-items:center;">
             <div id="st_accinfo" class = "db_class">
                 <span style="font-size: 25px;color:yellow">Account Info</span>
                 <button id="pass_rst_btn" class="tst_btn rpl">Reset/Change Password</button>
@@ -24,7 +24,7 @@ export let page_settings = `
             </div>
             <div id="st_prftype" class = "db_class">
                 <span style="font-size: 25px;color:yellow">Profile Picture Type</span>
-                <div style ="display:flex;flex-direction:row;flex-wrap:wrap;">
+                <div style ="display:flex;flex-direction:row;width:330px;overflow-x:scroll;">
                 <img style = "border:2px solid #06d85f;border-radius:30px;width:100px;height:100px;" class = "prf_typ" id="prf_typ_1"></img>
                 <img style = "border:2px solid #06d85f;border-radius:30px;width:100px;height:100px;" class = "prf_typ" id="prf_typ_2"></img>
                 <img style = "border:2px solid #06d85f;border-radius:30px;width:100px;height:100px;" class = "prf_typ" id="prf_typ_3"></img>

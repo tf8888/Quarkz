@@ -37,7 +37,7 @@ import { page_toc } from '../embeds/toc'
 import { page_topic, page_edit_topic } from "../embeds/topics";
 import { page_edit_user } from "../embeds/user";
 import { page_usernotes } from "../embeds/usernotes"
-import { sd, sha256, makeid, mobileCheck, areObjectsEqual, areEqual, getServerTime, fullEle, dE, sortObj, sortObjv2, renderMarkedMath, mergeById, qCorrector, playSoundEffect, showLS, antiCopyEle, shuffleArrayWithSeed, buildHtmlTable } from '../js/helper'
+import { sd, sha256, makeid, mobileCheck, areObjectsEqual, areEqual, getServerTime, fullEle, dE, sortObj, sortObjv2, renderMarkedMath, mergeById, qCorrector, playSoundEffect, showLS, antiCopyEle, shuffleArrayWithSeed, buildHtmlTable,studentRanker } from '../js/helper'
 import { sysaccess } from "./reworkui";
 import { page_batch_list, page_edit_batch } from "../embeds/admin";
 import Chart, { scales } from 'chart.js/auto';
@@ -394,14 +394,14 @@ function coreManager(newlocation, n1) {
   }
   switch (location1) {
     case "profile": { handlebox = "profile"; renderBody(page_profile, "", ""); profileDetails(); break; }
-    case "about": handlebox = "aboutus"; renderBody(page_about, "text-align: center;overflow-y: scroll;", ""); function lglHand() { changeLocationHash("legal", 1) }; dE("lgl_btn").addEventListener("click", lglHand); break;
+    case "about": handlebox = "aboutus"; renderBody(page_about, "text-align: center;height:max-content;", ""); function lglHand() { changeLocationHash("legal", 1) }; dE("lgl_btn").addEventListener("click", lglHand); break;
     case "login": handlebox = "login"; renderBody(page_login, "justify-content: center;", ""); dE("sgn_in").addEventListener("click", signIn); function regHand() { changeLocationHash("register", 1) }; dE("reg_in").addEventListener("click", regHand); break;
     case "dashboard": handlebox = "dashboard"; renderBody(page_dashboard, "display: flex;flex-direction: row;", ""); dashboardEvents(); break;
     case "timetable": handlebox = "schedule"; renderBody(page_schedule, "", ""); showLS("s"); dE("tmt_frame").src = userinfo.timetableurl; break;
     case "logout": signOutUser(); break;
     case "mainsformulas": handlebox = "mainsformulas"; renderBody(downloads_render(download_links_list, "formulasheet"), "", ""); break;
     case "downloads": handlebox = "downloads"; renderBody(downloads_render(download_links_list, "downloads"), "", ""); break;
-    case "register": handlebox = "register"; renderBody(page_register, "", ""); dE("rg_in").addEventListener("click", rgbtn); break;
+    case "register": handlebox = "register"; renderBody(page_register, "height:max-content;", ""); dE("rg_in").addEventListener("click", rgbtn); break;
     case "testinfo": handlebox = "testinfo"; renderBody(page_test_list, "height:max-content;", ""); testlistEvents(); renderTestList("active"); break;
     case "legal": handlebox = "legal"; renderBody(page_toc, "", ""); antiCopyEle("lgl_container"); break;
     case "appinfo": handlebox = "appinfo"; renderBody(page_app_info, "", ""); renderAppInfo(); break;
@@ -1327,6 +1327,7 @@ function renderEditQLList(qno) {
     curr_qlid = op.id
   }
   dE("aq_mode").value = op.mode
+  dE("aq_id").value = curr_qlid
   setHTML("aq_qtext", op.title)
   dE("aq_yurl").value = op.y_url
   dE("aq_type").value = op.type
@@ -1488,6 +1489,7 @@ async function prepareTopicQBank(iun) {
         if (docSnap3.exists()) { var docJSON3 = docSnap3.data(); a = docJSON3.questions }
         editqllist = mergeById(q, a)
         renderEditQLList(0)
+        renderEditQLList(1)
       } else if (iun == 4) {
         var docJSON = docSnap.data();
         editqllist = docJSON.examinfo
@@ -1794,7 +1796,7 @@ async function lessonRenderer(docJSON) {
   dE("report-tag").value = docJSON.id
   // dE("tp_lsimg").src = docJSON.img
 }
-async function questionRenderer(docJSON, totalq) {
+async function questionRenderer(docJSON, totalq,pqno) {
   function iu(ele) { ele.style.display = "none" }
   function io(ele) { ele.style.display = "block" }
   function qif(ele) { ele.style.display = "flex" }
@@ -1802,7 +1804,7 @@ async function questionRenderer(docJSON, totalq) {
   var tpmcqcon = dE("tp_mcq_con")
   var tpmatrix = dE("tp_matrix")
   var tpanswer = dE("tp_answer")
-  dE("tp_lsno").innerHTML = "Question<span style = 'font-size:12px'>&nbsp;X of (" + totalq + ")</span>"
+  dE("tp_lsno").innerHTML = "Question<span style = 'font-size:12px'>&nbsp;"+pqno+" of (" + totalq + ")</span>"
   dE("tp_question").style.display = "flex"
   dE("tp_lesson").style.display = "none"
   dE("tp_question").setAttribute("dataid", docJSON.id)
@@ -1855,13 +1857,17 @@ async function topicHandler(type) {
   dE("tp_title").innerText = a
   var tqQus = topicJSON.qllist[topicJSONno]
   var totalq = 0;
+  var qno = 0;
   for (var i = 0; i < topicJSON.qllist.length; i++) {
     if (topicJSON.qllist[i].mode == "question") {
       totalq++
     }
+    if (i == topicJSONno){
+      qno = totalq
+    }
   }
   if (tqQus.mode == "lesson") { lessonRenderer(tqQus) }
-  else if (tqQus.mode == "question") { questionRenderer(tqQus, totalq) }
+  else if (tqQus.mode == "question") { questionRenderer(tqQus, totalq,qno) }
   stpVid();
 }
 function addMCQ() {
@@ -2003,6 +2009,12 @@ async function authStateObserver(user) {
       var docJSON = docSnap.data();
       userinfo.examslist = docJSON
       if (docJSON.ratemyapp) { localStorage.setItem("rate_app", false) }
+      if (docJSON.offline){
+        signOut(getAuth());
+        userdetails = []
+        log("Server Offline","Quarkz Is Temporarily Offline for Maintainance. " + docJSON.offlinemsg)
+        return 0
+      }
       if (docJSON.warning != "") {
         log("Notice", docJSON.warning, function () { window.location.hash = "#/updates" }, "Release Notes")
       }
@@ -2281,8 +2293,15 @@ async function getSimpleTestReport() {
 
               let hji = "<ol>"
               let missedtopics = tT.info.missedtopics
+              let unattemptedtopics = tT.info.unattemptedtopics
               for (var i = 0; i < missedtopics.length; i++) {
-                hji += '<li><div class = "tlinks" style = "flex-direction:row;width:25vw;justify-content:space-between;"><span class = "t_name">' + missedtopics[i] + '</span></div></li>'
+                hji += '<li><div class = "tlinks" style = "flex-direction:row;width:25vw;justify-content:space-between;"><span class = "t_name" style = "color:red;">' + missedtopics[i] + '</span></div></li>'
+              }
+              for (var i = 0; i < unattemptedtopics.length; i++) {
+                hji += '<li><div class = "tlinks" style = "flex-direction:row;width:25vw;justify-content:space-between;"><span class = "t_name">' + unattemptedtopics[i] + '</span></div></li>'
+              }
+              if (missedtopics.length == 0 && unattemptedtopics.length == 0){
+                hji = "<span>Hoo! No Missed Concepts on This Test</span>"
               }
               dE("fto_missed").innerHTML = hji
 
@@ -2295,7 +2314,7 @@ async function getSimpleTestReport() {
                 for (var eleX of ion1) {
                   var el2e2 = tT.info.subjectmarks[eleX]
                   if (!areObjectsEqual(el2e2, { correct: 0, unattempted: 0, incorrect: 0, total: 0, qc: 0, qic: 0, qun: 0 })) {
-                    let fgy = el2e2.correct + el2e2.incorrect + el2e2.unattempted
+                    let fgy = el2e2.correct + el2e2.incorrect
                     if (eleX != "overall"){
                       tablebuilder.overall.qc += el2e2.qc
                       tablebuilder.overall.qic = el2e2.qic
@@ -2459,6 +2478,11 @@ async function getSimpleTestReport() {
                             label: "Unattempted",
                             backgroundColor: "orange",
                             data: tablebuilder4.map(row =>row.unattempted/60),
+                          },
+                          {
+                            label: "Total Time Spent",
+                            backgroundColor: "blue",
+                            data: tablebuilder4.map(row =>row.total/60),
                           }
                         ]
                       }
@@ -2517,11 +2541,17 @@ async function getSimpleTestReport() {
               }
               dE("fto_leaderboard").innerHTML = ""
               leaderboard = sortObj(leaderboard, "marks", 1)
-              for (var i = 0; i < leaderboard.length; i++) {
-                var e = i + 1
-                if (userinfo.uuid == leaderboard[i].uid) { dE("fto_rank").innerText = e }
-                dE("fto_leaderboard").insertAdjacentHTML("beforeend", '<div class = "tlinks" style = "flex-direction:row;width:25vw;justify-content:space-between;"><span class = "t_gre">&nbsp;' + e + '</span><span class = "t_name">' + leaderboard[i].name + '</span><span class = "t_gre">&nbsp;&nbsp;' + leaderboard[i].marks + '</span></div>')
+              let leaderboard2 = []
+              leaderboard = studentRanker(leaderboard)
+              for (var i =0; i<leaderboard.length;i++){
+                if (userinfo.uuid == leaderboard[i].uid){
+                  dE("fto_rank").innerText = leaderboard[i].rank
+                }
               }
+              for (var i =0; i<leaderboard.length;i++){
+                leaderboard2.push({name:leaderboard[i].name,marks:leaderboard[i].marks,rank:leaderboard[i].rank})
+              }
+              dE("fto_leaderboard").appendChild(buildHtmlTable(leaderboard2))
             } catch {
 
             }
@@ -2837,6 +2867,7 @@ async function computeResult(type) {
   }
   var overall = { qc: 0, qic: 0, qun: 0, acc: 0 }
   var missedtopics = []
+  var unattemptedtopics = []
   for (var i = 0; i < trA.length; i++) {
     for (var j = 0; j < trL.length; j++) {
       if (trA[i].qid == trL[j].qid) {
@@ -2852,6 +2883,7 @@ async function computeResult(type) {
           subjectmarks[trA[i].section].total += parseFloat(trA[i].pm)
           subjectmarks[trA[i].section].qun += 1
           overall.qun += 1
+          unattemptedtopics.push(trA[i].qtopic)
         } else {
           if (q_check.type == "correct") {
             marksList.push({ qid: trA[i].qid, marks: parseFloat(trA[i].pm), type: "correct" })
@@ -2875,7 +2907,7 @@ async function computeResult(type) {
   }
   overall.acc = Math.floor((1 - overall.qic / overall.qc) * 100)
   var t = subjectmarks["Physics"].total + subjectmarks["Chemistry"].total + subjectmarks["Math"].total + subjectmarks["Biology"].total + subjectmarks["Computer"].total + subjectmarks["Statistics"].total + subjectmarks["Unfiled"].total
-  var tFinal = { correct: c, incorrect: ic, unattempted: u, mList: marksList, total: t, usermarks: c + ic, subjectmarks: subjectmarks, overall: overall, missedtopics: missedtopics }
+  var tFinal = { correct: c, incorrect: ic, unattempted: u, mList: marksList, total: t, usermarks: c + ic, subjectmarks: subjectmarks, overall: overall, missedtopics: missedtopics,unattemptedtopics:unattemptedtopics }
   if (type == 1) {
     if (!areObjectsEqual(tFinal, fg)) {
       log("NOTICE", "Please Wait, Marks Are Being Updated")

@@ -1,5 +1,6 @@
 export let page_register = `
 <span class="in_t">Register</span>
+    <div style = "display:flex;flex-direction:row;flex-wrap:wrap;font-size:15px;">
         <div class = "db_class">
         <span style="font-size: 25px;color:yellow">Personal Info</span>
         <input type="text" id="rg_name" class="_in_reg" placeholder="Name">
@@ -33,6 +34,7 @@ export let page_register = `
         <input type="text" id="rg_uname" class="_in_reg" placeholder="Email Address">
         <input type="password" id="rg_pass" class="_in_reg" placeholder="Password">
         <input type="password" id="rg_pass1" class="_in_reg" placeholder="Confirm Password">
+        </div>
         </div>
         <button class="tst_btn rpl" id="rg_in">Register</button>
 

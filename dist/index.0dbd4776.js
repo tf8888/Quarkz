@@ -160,10 +160,15 @@ function refreshScreen(e) {
     if (updatedScreenWidth < 600) {
         dE("overlay").style.display = "flex";
         dE("output").style.pointerEvents = "none";
-        dE("ovr_msg").innerText = "Your Device/Browser is Currently Not Supported, Please Use Chrome/Firefox Browser on Laptop/PC to Access This Website.";
+        dE("ovr_la_1").style.display = "none";
+        dE("ovr_la_2").style.display = "block";
+        dE("ovr_msg").innerText = "Please rotate your device to Landscape Mode to access this Website. ";
+    // dE("ovr_msg").innerText = "Your Device/Browser is Currently Not Supported, Please Use Chrome/Firefox Browser on Laptop/PC to Access This Website."
     } else {
         dE("output").style.pointerEvents = "auto";
         dE("overlay").style.display = "none";
+        dE("ovr_la_1").style.display = "block";
+        dE("ovr_la_2").style.display = "none";
     }
 }
 window.onresize = refreshScreen;

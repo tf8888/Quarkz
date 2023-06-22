@@ -15,6 +15,7 @@ export let page_toc = `
         <li>You agree to use the Quarkz website in a lawful and ethical manner. You agree not to engage in any activity that could damage, disable, overburden, or impair the website, or interfere with any other user's access to the website. You agree not to post or transmit any content that is obscene, defamatory, libelous, abusive, discriminatory, or otherwise offensive. You agree not to harass or bully other users on the website.</li>
         <h3>E. Termination of Access</h3>
         <li>We reserve the right to terminate access to the Quarkz website, or any part thereof, to any user at any time, without prior notice, for any reason, including without limitation, for a violation of these terms and conditions.</li>
+        <li>We may terminate your access to the site, without cause or notice, which may result in the forfeiture and destruction of all information associated with your account. All provisions of these Terms and Conditions that by their nature should survive termination shall survive termination, including, without limitation, ownership provisions, warranty disclaimers, indemnity, and limitations of liability.</li>
         <h3>F. Age Restrictions</h3>
         <li>By creating an account on the Quarkz website, you represent and warrant that you are 13 years of age or older. If you are under 13 years of age, you must obtain permission from your guardians or parents to use the Quarkz website. We do not knowingly collect any personal information from users under 13 years of age. If we become aware that we have collected personal information from a user under 13 years of age, we will take steps to delete that information.</li>
         <h3>G. Free Use Disclaimer</h3>
@@ -35,12 +36,10 @@ export let page_toc = `
         <h3>L. Limitation of Liability</h3>
         <li>In no event shall Quarkz be liable for any direct, indirect, incidental, special, or consequential damages arising out of or in any way connected with your use of or inability to use the site, or for any information, products, services, or related graphics obtained through the site, even if Quarkz has been advised of the possibility of such damages. Some jurisdictions do not allow the exclusion or limitation of liability for incidental or consequential damages, so the above limitation may not apply to you.</li>
         <h3>M. Governing Law and Jurisdiction</h3>
-        <li>These Terms and Conditions shall be governed by and construed in accordance with the laws of India, without giving effect to any principles of conflicts of law. You agree that any dispute arising from or relating to these Terms and Conditions or your use of the site shall be brought exclusively in the courts located in India, and you hereby consent to the personal jurisdiction and venue of such courts.</li>
-        <h3>N. Termination</h3>
-        <li>We may terminate your access to the site, without cause or notice, which may result in the forfeiture and destruction of all information associated with your account. All provisions of these Terms and Conditions that by their nature should survive termination shall survive termination, including, without limitation, ownership provisions, warranty disclaimers, indemnity, and limitations of liability.</li>
-        <h3>O. Entire Agreement</h3>
+        <li>These Terms and Conditions shall be governed by and construed in accordance with the laws of India, without giving effect to any principles of conflicts of law. You agree that any dispute arising from or relating to these Terms and Conditions or your use of the site shall be brought exclusively in the courts located in India, and you hereby consent to the personal jurisdiction and venue of such courts.</li
+        <h3>N. Entire Agreement</h3>
         <li>These Terms and Conditions constitute the entire agreement between you and Quarkz and supersedes all prior or contemporaneous agreements, representations, warranties, and understandings, whether written or oral, relating to the site.</li>
-        <h3>P. Contact Us</h3>
+        <h3>O. Contact Us</h3>
         <li>If you have any questions or comments about these Terms and Conditions or our website, please contact us through our "Contact Us" page.</li>
     </ol>
 </div>`

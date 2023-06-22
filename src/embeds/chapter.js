@@ -23,7 +23,7 @@ export let page_edit_chapter = `
         <div id = "chp_qbank">
         </div>`
 export let page_chapter = `
-<span class="in_t" id="chp_chaptername">Topic</span><button class="tst_btn rpl" id="chp_edit">Edit</button>
+<span><span class="in_t" id="chp_chaptername">Topic</span><button class="tst_btn rpl" id="chp_edit">Edit</button></span>
         <div class = "flex_type" style="flex-direction: row;flex-wrap: wrap;">
             <div id="chpt_topics" class = "db_class">
                 <span style="font-size: 25px;color:yellow">Topics</span>

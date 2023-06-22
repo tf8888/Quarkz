@@ -18,7 +18,7 @@ export let page_edit_topic = `
                 <option value="unfiled">Unfiled</option>
             </select>
         </div>
-        <div id="aq_test_extra" style="flex-direction: column;">
+        <div id="aq_test_extra" style="flex-direction: column;width:72vw">
             <input type="text" id="aq_tst_batches" class="_in_aq" placeholder="Batch ID">
             <input type="datetime-local" id="aq_tst_stron" class="_in_aq">
             <input type="datetime-local" id="aq_tst_endon" class="_in_aq">
@@ -47,6 +47,7 @@ export let page_edit_topic = `
                     <input type="text" id="aq_examsyllabus" class="_in_aq" placeholder="Syllabus Link">
                 </div>
                 <div class="flex_type" id="aq_all" style="align-items: unset;" id="aq_uiad">
+                    <input type="text" id="aq_id" class="_in_aq" placeholder="ID" disabled>
                     <div class="summernote" id="aq_qtext">Question</div>
                     <input type="text" id="aq_answer" class="_in_aq" placeholder="Answer">
                     <input type="url" id="aq_yurl" class="_in_aq" placeholder="Youtube ID">

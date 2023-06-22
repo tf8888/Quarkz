@@ -1,7 +1,7 @@
 export let page_finished_test = `
 <span style="font-size: 5vh;color:yellow" id="fti_title">Test Name</span>
 <hr color="white" width="100%">
-<div id="fto_overview" style="display: flex;flex-direction: row;flex-wrap:wrap">
+<div id="fto_overview" style="display: flex;flex-direction: row;flex-wrap:wrap;justify-content:center;">
     <div class="fto_box">
         <div class="fto_box_title">TOTAL MARKS</div>
         <div class="fto_box_content" id="fto_total">100/100</div>
@@ -107,6 +107,7 @@ export let page_finished_test = `
 
         </div>
     </div>
+        <span style="font-size:3vh;">Legend:&nbsp;<span>Unanswered</span>&nbsp;<span style = "color:red">Incorrect</span></span>
     </div>
 </details>
 </br>
