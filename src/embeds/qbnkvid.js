@@ -1,8 +1,8 @@
 export let page_qbnkvid = `
 <button id="qbnk_vid_btn" class="tst_btn rpl">Start</button>
         <button id="qbnk_vid_btn_e" class="tst_btn rpl" style="display: none;">Stop</button>
-        <span style="font-size: 5vh;color:yellow;font-family: Nunito;" id="tb_q_title">Topic Name</span>
-        <hr width="100%" color="white">
+        <span style="font-size: 5vh;color:var(--clr16);font-family: Nunito;" id="tb_q_title">Topic Name</span>
+        <hr width="100%" style="color:var(--clr18)">
         <div class="div-qbnk">Quarkz!</div>
         <img alt="Quarkz Logo" src="assets/Quarkz-T.png"
             style="position:absolute;height:100px;width: 100px;top:0;left:0;z-index: 1;">
@@ -35,18 +35,18 @@ export let page_qbnkvid = `
             </div>
         </div>
         <div id="qbnk_vid_ans" style="display: flex;flex-direction: column;align-items: center;">
-            <span style="font-size: 5vh;color:yellow;">Answer</span>
+            <span style="font-size: 5vh;color:var(--clr16);">Answer</span>
             <div id="tb_q_hint" style="width:80%;height:max-content;min-height: 12vh;"></div>
             <div id="tb_q_ans" style="height:max-content;min-height: 12vh;"></div>
             <div id="tb_q_expl" style="width:80%;height:max-content;min-height: 12vh;"></div>
         </div>
         <div id="qbnk_vid_title"
             style="display:flex;flex-direction: column;align-items: center;justify-content: center;height:60vh">
-            <span style="font-size: 15vh;color:yellow;font-family: Nunito;" id="qb_vid_ti"></span>
+            <span style="font-size: 15vh;color:var(--clr16);font-family: Nunito;" id="qb_vid_ti"></span>
         </div>
         <div id="qbnk_vid_end" style="display:flex;flex-direction: column;align-items: center;justify-content: center;">
-            <span style="font-size: 5vh;color:yellow">Thanks For Watching</span>
-            <span style="font-size: 3vh;color:yellow">Subscribe To Quarkz! For More Such Videos</span>
+            <span style="font-size: 5vh;color:var(--clr16)">Thanks For Watching</span>
+            <span style="font-size: 3vh;color:var(--clr16)">Subscribe To Quarkz! For More Such Videos</span>
 
         </div>`
 export default {page_qbnkvid}

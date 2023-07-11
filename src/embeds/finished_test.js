@@ -1,6 +1,6 @@
 export let page_finished_test = `
 <span style="font-size: 5vh;color:yellow" id="fti_title">Test Name</span>
-<hr color="white" width="100%">
+<hr style="color:var(--clr18)" width="100%">
 <div id="fto_overview" style="display: flex;flex-direction: row;flex-wrap:wrap;justify-content:center;">
     <div class="fto_box">
         <div class="fto_box_title">TOTAL MARKS</div>
@@ -37,13 +37,13 @@ export let page_finished_test = `
         <div class="fto_box_content" id="fto_qsattempted">10/23</div>
     </div>
 </div>
-<hr color="white" width="100%">
+<hr style="color:var(--clr18)" width="100%">
 <div id="fto_overview" style="display: flex;flex-direction: row;flex-wrap:wrap">
     <button class="tst_btn rpl" id="fto_detail"
         onclick='window.location.hash = "#/testreport/" + window.location.hash.split("#/finished/")[1]'>Detailed
         View</button>
 </div>
-<hr color="white" width="100%"><br>
+<hr style="color:var(--clr18)" width="100%"><br>
 <details>
     <summary><span style="font-size: 4vh;">Overview</span></summary>
     <div class = "summary_div">

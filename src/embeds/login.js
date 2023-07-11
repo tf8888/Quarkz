@@ -1,6 +1,6 @@
 export let page_login = `
 <div id="lgn_bx">
-    <span class="in_t">Welcome to Quarkz</span>
+    <span class="in_t">Welcome to Quarkz!</span>
     <input type="text" id="lg_uname" class="text_bx_1" placeholder="Username">
     <input type="password" id="lg_pass" class="text_bx_1" placeholder="Password">
     <div>

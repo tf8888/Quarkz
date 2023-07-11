@@ -1,14 +1,14 @@
 export let page_test_list = `
 <span class="in_t">Tests</span>
-        <hr color="white" width="100%">
+        <hr style="color:var(--clr18)" width="100%">
         <div><button class="tst_btn rpl" id="ti_act">Active Tests</button><button class="tst_btn rpl"
                 id="ti_fin">Finished Tests</button><button class="tst_btn rpl" id="ti_upc">Upcoming Tests</button></div>
         <div id="testlinks">
         </div>`
 
 export let page_test_v1 = `
-<div style="border: grey 2px dashed;flex-direction: row;margin:10px;" class="flex_type">
-            <div style="display: flex;flex-direction: column;width: 60vw;height:80vh;margin:10px;min-width: 300px;">
+<div style="border: grey 2px dashed;flex-direction: row;margin:10px;min-width:820px;" class="flex_type">
+            <div style="display: flex;flex-direction: column;width: 80vw;height:80vh;margin:10px;min-width: 500px;">
                 <div id="tt_extrabx" style="display: flex;flex-direction:row;height: 40px;margin:10px;">
                     <span id="tt_timeleft">00:00:00</span>
                     <span id="tt_marksaward"></span>
@@ -74,6 +74,6 @@ export let page_test_end = `
 <span class="in_t" id="te_title">The Test Has Ended</span>
         <span style="font-size:3vh;" id ="te_msg">Your Results Will Be Released After<span id="te_endtime"></span></span>
         <a class="tst_btn rpl" href="/#/dashboard">Go To Dashboard</a>
-        <hr color="white" width="100%">`
+        <hr style="color:var(--clr18)" width="100%">`
 
 export default {page_test_end,page_test_list,page_test_v1}

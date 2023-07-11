@@ -1,6 +1,6 @@
 export let page_batch_list = `
 <span class="in_t">Batches</span>
-        <hr color="white" width="100%">
+        <hr style = "color:var(--clr18)" width="100%">
         <div id="batchlinks">
         </div>`
 

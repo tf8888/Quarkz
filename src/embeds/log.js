@@ -73,9 +73,9 @@ export function report_stuff() {
             <h2 id="msg_popup_txt_report">Report Error</h2><a class="close_btn"
             onclick="document.getElementById('msg_popup_report').remove()">&times;</a>
         </center>
-        <div style = "display:flex;flex-direction:row;flex-wrap:wrap;overflow-y:scroll;height:80%;">
+        <div style = "display:flex;flex-direction:row;flex-wrap:wrap;overflow-y:scroll;height:80%;justify-content:center;">
           <div id="db_rep_les" class = "db_class">
-          <span style="font-size: 25px;color:var(--yellow)">Lesson</span>
+          <span style="font-size: 25px;color:var(--clr16)">Lesson</span>
           <div>
             <input type="checkbox" id="incorrect-video" name="problem[]" value="incorrect-video">
             <label for="wrong-answer">Incorrect/No Video</label>
@@ -90,7 +90,7 @@ export function report_stuff() {
           </div>
           </div>
         <div id="db_rep_les" class = "db_class">
-        <span style="font-size: 25px;color:var(--yellow)">Question(Question Bank/Test)</span>
+        <span style="font-size: 25px;color:var(--clr16)">Question(Question Bank/Test)</span>
           <div>
             <input type="checkbox" id="incorrect-answer-key" name="problem[]" value="incorrect-answer-key">
             <label for="wrong-answer">Incorrect Answer Key</label>
@@ -113,7 +113,7 @@ export function report_stuff() {
           </div>
           </div>
           <div id="db_rep_les" class = "db_class">
-          <span style="font-size: 25px;color:var(--yellow)">Other Issues</span>
+          <span style="font-size: 25px;color:var(--clr16)">Other Issues</span>
           <div>
             <input type="checkbox" id="other-issue" name="problem[]" value="other-issue">
             <label for="other-issue">Other Issue</label>

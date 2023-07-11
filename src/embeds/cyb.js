@@ -1,7 +1,7 @@
 export let page_cyberhunt = `<div id="cyberhunt" class="full_page flex_type">
         <div id="cyb_code" class="flex_type">
             <span class="in_t">Join Cyberhunt!</span>
-            <hr color="white" width="100%">
+            <hr style="color:var(--clr18)" width="100%">
             <span>Do You Want To Join A Cyberhunt?Enter The Cyberhunt Code Below:</span>
             <input id="cyb_cd_in" class="_in_aq" placeholder="i2a01pmzshn1">
             <button class="tst_btn rpl" id="cyb_cd_sbm"

@@ -221,17 +221,14 @@ export function antiCopyEle(id) {
 
 export function shuffleArrayWithSeed(array, seed) {
     function random(seed) {
-        var x = Math.sin(seed++) * 10000;
+        var x = Math.sin(seed++) * 10000; 
         return x - Math.floor(x);
-    }
+      }
     var m = array.length, t, i;
-
     // While there remain elements to shuffle…
     while (m) {
-
         // Pick a remaining element…
         i = Math.floor(random(seed) * m--);        // <-- MODIFIED LINE
-
         // And swap it with the current element.
         t = array[m];
         array[m] = array[i];
@@ -283,13 +280,13 @@ export function studentRanker(students) {
     students.forEach((student, index) => {
         // Check if the previous student has the same marks
         if (index > 0 && student.marks === students[index - 1].marks) {
-          // Assign the same rank as the previous student
-          student.rank = students[index - 1].rank;
+            // Assign the same rank as the previous student
+            student.rank = students[index - 1].rank;
         } else {
-          // Assign a new rank based on the current index
-          student.rank = index + 1;
+            // Assign a new rank based on the current index
+            student.rank = index + 1;
         }
     });
     return students
 }
-export default { sd, sha256, makeid, mobileCheck, areObjectsEqual, areEqual, getServerTime, fullEle, dE, sortObj, sortObjv2, renderMarkedMath, mergeById, qCorrector, playSoundEffect, showLS, antiCopyEle, shuffleArrayWithSeed, buildHtmlTable,studentRanker }
+export default { sd, sha256, makeid, mobileCheck, areObjectsEqual, areEqual, getServerTime, fullEle, dE, sortObj, sortObjv2, renderMarkedMath, mergeById, qCorrector, playSoundEffect, showLS, antiCopyEle, shuffleArrayWithSeed, buildHtmlTable, studentRanker }

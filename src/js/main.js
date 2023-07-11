@@ -42,12 +42,12 @@ import { sysaccess } from "./reworkui";
 import { page_batch_list, page_edit_batch } from "../embeds/admin";
 import Chart, { scales } from 'chart.js/auto';
 
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register(
-    new URL('../js/sw.js', import.meta.url),
-    { type: 'module' }
-  );
+// I added a function that can be used to register a service worker.
+const registerServiceWorker = async () => {
+  const swRegistration = await navigator.serviceWorker.register(new URL('../js/sw.js', import.meta.url),{type:'module'}); //notice the file name
+  return swRegistration;
 }
+registerServiceWorker()
 
 const firebaseConfig = {
   apiKey: "AIzaSyDN8T7Pmw5e-LzmC3nAHEqI0Uk7FF7y6fc",
@@ -382,6 +382,7 @@ function printableEvents() {
   })
 }
 function coreManager(newlocation, n1) {
+  showLS("d")
   if (n1 == 1) { window.location.hash = "#/" + newlocation }
   handlebox = newlocation
   location1 = window.location.hash.split("#/")[1]
@@ -410,7 +411,7 @@ function coreManager(newlocation, n1) {
     case "simlist": handlebox = "simlist"; renderBody(page_list_sims, "", ""); simEvents(); getSimList(); break;
     case "testend": handlebox = "test_end"; renderBody(page_test_end, "", ""); break;
     case "add/lesson": handlebox = "fu_lesson"; newLesson(); break;
-    case "updates": handlebox = "update"; renderBody(page_updates, "height: max-content;", ""); getUpdate(); break;
+    case "updates": handlebox = "update"; renderBody(page_updates, "height: max-content;justify-content: center;", ""); getUpdate(); break;
     case "add/tpc": handlebox = "fu_topic"; newTopic(); break;
     case "add/qubank": handlebox = "fu_topic"; newQBank(); break;
     case "add/simulation": handlebox = "fu_simulation"; newSimulation(); break;
@@ -429,13 +430,13 @@ function coreManager(newlocation, n1) {
   if (location1.includes("cyberhunt")) { handlebox = "cyberhunt"; renderBody(page_cyberhunt, "", ""); getCyberhunt() }
   if (location1.includes("notes") && !location1.includes("usernotes")) { handlebox = "notes"; renderBody(page_notes, "", ""); getPDF() }
   if (location1.includes("sims")) { handlebox = "simulations"; renderBody(page_sims, "", ""); getSimulation(); }
-  if (location1.includes("chapter")) { handlebox = "chapter"; renderBody(page_chapter, "", ""); getChapterEList() }
+  if (location1.includes("chapter")) { handlebox = "chapter"; renderBody(page_chapter, "height:max-content;", ""); getChapterEList() }
   if (location1.includes("qbanks")) { handlebox = "topic"; renderBody(page_topic, "height:max-content;", ""); topicEvents(); getTopic(2); }
   if (location1.includes("usernotes")) { handlebox = "usernotes"; renderBody(page_usernotes, "flex-direction: row;", ""); userNotesEvents(); getUserNotes(); }
   if (location1.includes("qbnk_vid")) { handlebox = "qbnk_vid"; renderBody(page_qbnkvid, "height:90vh;position: relative;", ""); dE("qbnk_vid_btn").style.display = "block"; dE("qbnk_vid_btn").addEventListener("click", prepareVideo); dE("qbnk_vid_btn_e").addEventListener("click", qbnkend); function qbnkend() { dE("watermark").style.display = "flex"; fullEle(dE("qbnk_vid")) } }
-  if (location1.includes("attempt")) { handlebox = "testv1"; renderBody(page_test_v1, "height:max-content;", ""); testEvents(); addTestEvents(); getTestInfo() }
+  if (location1.includes("attempt")) { handlebox = "testv1"; renderBody(page_test_v1, "height:max-content;overflow:scroll;align-items:inherit;", ""); testEvents(); addTestEvents(); getTestInfo() }
   if (location1.includes("finished")) { handlebox = "finishedtestinfo"; renderBody(page_finished_test, "height:max-content;", ""); getSimpleTestReport() }
-  if (location1.includes("testreport")) { handlebox = "testv1"; renderBody(page_test_v1, "height:max-content;", ""); getTestReport(); addTestEvents(); }
+  if (location1.includes("testreport")) { handlebox = "testv1"; renderBody(page_test_v1, "height:max-content;overflow:scroll;align-items:inherit;", ""); getTestReport(); addTestEvents(); }
   if (location1.includes("printable/qbank") && iorole == true) { handlebox = "printable"; renderBody(page_printable, "height:max-content;", ""); printableEvents(); var shfbtn = dE("shf_btn").addEventListener("click", shuffleQBank); printQBank(1); }
   if (location1.includes("ARIEL") && iorole == true) { handlebox = "Ariel"; renderBody(page_ariel, "", ""); }
   if (location1.includes("printable/tests") && iorole == true) { handlebox = "printable"; renderBody(page_printable, "height:max-content;", ""); printableEvents(); var shfbtn = dE("shf_btn").addEventListener("click", shuffleQBank); printQBank(3); }
@@ -466,7 +467,6 @@ function coreManager(newlocation, n1) {
   if (location1 == "forum") { gtMsg(1); } else { gtMsg(2); forum_length = 1; forum_d = "afterbegin" }
   // console.log({ userinfo, topicJSON, topicJSONno, editorrole, adminrole, userrole, simlist, chapterlist, userdetails, curr_qlno, curr_qlid, editqllist, autosignin, testList, activeTestList, upcomingTestList, finishedTestList, testInfo, testQuestionList, testResponseList, activequestionid })
   testQuestionList = []; testResponseList = []; testInfo = []; activequestionid = ""
-
 }
 async function testInstructions() {
   let docSnap = await getDoc(doc(db, 'tests', window.location.hash.split("#/instructions/")[1]))
@@ -835,7 +835,7 @@ async function getSimList(type) {
     try {
       for (let ele of simlist.biology) {
         if (ele != "") {
-          dE("sim_cont").insertAdjacentHTML('beforeend', '<span class="tlinks rpl" style = "color:lime" id="sim' + btoa(ele) + '">' + ele + '</span>')
+          dE("sim_cont").insertAdjacentHTML('beforeend', '<span class="tlinks rpl" style = "color:var(--clr10)" id="sim' + btoa(ele) + '">' + ele + '</span>')
           dE("sim" + btoa(ele)).addEventListener('click', simClicker)
         }
       }
@@ -986,19 +986,23 @@ function uNotesClicker() {
   window.location.hash = "#/usernotes/" + this.id.split("uno")[1]
 }
 async function getUserNotesList() {
-  if (userinfo.usernotes.length <= 0) {
-    userinfo.usernotes = []
-    const q = query(collection(db, "usernotes"), where("uuid", "==", userinfo.uuid));
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach((doc) => {
-      var tfg = doc.data()
-      userinfo.usernotes.push({ id: doc.id, crton: tfg.crton, lastupdated: tfg.lastupdated, title: tfg.title, type: tfg.type, uuid: tfg.uuid })
-    })
-  }
-  for (var i = 0; i < userinfo.usernotes.length; i++) {
-    dE("un_list").insertAdjacentHTML("beforeend", "<div class='t_notes' id='uno" + userinfo.usernotes[i].id + "' style='background-color: " + userinfo.usernotes[i].color + "'><span class='tntc2' id='" + userinfo.usernotes[i].id + "'>" + userinfo.usernotes[i].title + "</span></div>")
-    dE("uno" + userinfo.usernotes[i].id).addEventListener("click", uNotesClicker)
-  }
+  try{
+    if (userinfo.usernotes.length <= 0) {
+      userinfo.usernotes = []
+      const q = query(collection(db, "usernotes"), where("uuid", "==", userinfo.uuid));
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach((doc) => {
+        var tfg = doc.data()
+        userinfo.usernotes.push({ id: doc.id, crton: tfg.crton, lastupdated: tfg.lastupdated, title: tfg.title, type: tfg.type, uuid: tfg.uuid })
+      })
+    }
+  }catch{}
+  try{
+    for (var i = 0; i < userinfo.usernotes.length; i++) {
+      dE("un_list").insertAdjacentHTML("beforeend", "<div class='t_notes' id='uno" + userinfo.usernotes[i].id + "' style='background-color: " + userinfo.usernotes[i].color + "'><span class='tntc2' id='" + userinfo.usernotes[i].id + "'>" + userinfo.usernotes[i].title + "</span></div>")
+      dE("uno" + userinfo.usernotes[i].id).addEventListener("click", uNotesClicker)
+    }
+  }catch{}
   dE("un_list").insertAdjacentHTML("beforeend", "<div class='t_notes' id='unoadd'><span><center>+</center></span></div>")
   dE("unoadd").addEventListener("click", uNotesClicker)
 }
@@ -1345,7 +1349,7 @@ function renderEditQLList(qno) {
       for (var h = 0; h < op.answer.length; h++) {
         if (op.op[g] == op.answer[h]) {
           document.getElementsByClassName("aq_mcq")[g].classList.add("aq_mcq_ans")
-          document.getElementsByClassName("aq_mcq_p")[g].style.borderColor = "lime"
+          document.getElementsByClassName("aq_mcq_p")[g].style.borderColor = "var(--clr10)"
         }
       }
     }
@@ -1690,14 +1694,14 @@ async function printQBank(type) {
       var docJSON = docSnap.data(); qnos = docJSON.qllist;
       qbanktitle.innerText = docJSON.title;
       dE("pt_ins").innerHTML = `
-      <span style="font-size:18px;color:lime;">Test Information:</span>
+      <span style="font-size:18px;color:var(--clr10);">Test Information:</span>
             <ul style="font-size: 14px;color:white;">
                 <li> Time Allotted:&nbsp;<span id = "i_time">`+ docJSON.timeallotted + `</span> </li>
                 <li> Syllabus:&nbsp;<span id = "i_syllabus">`+ docJSON.syllabus + `</span> </li>
                 <li> Total Marks:&nbsp;<span id = "i_total">`+ docJSON.totalmarks + `</span> </li>
                 <li> No of Questions:&nbsp;<span id = "i_qno">`+ docJSON.questionnos + `</span></li>
             </ul>
-      <span style="font-size:18px;color:lime;">Test Specific Instructions:</span>
+      <span style="font-size:18px;color:var(--clr10);">Test Specific Instructions:</span>
       <div id = "tsi" style="font-size:14px;">`+ docJSON.instructions + `</div><hr>
     `
     }
@@ -1905,13 +1909,16 @@ function shuffleQBank() {
   }
 }
 function requestPasschange() {
+  showLS("s")
   sendPasswordResetEmail(auth, userinfo.email)
     .then(() => {
+      showLS("d")
       log("Success", "Password Reset Email sent.")
     })
     .catch((error) => {
       const errorCode = error.code;
       const errorMessage = error.message;
+      showLS("d")
       log("Failure", errorMessage)
       // ..
     });
@@ -2009,7 +2016,7 @@ async function authStateObserver(user) {
       var docJSON = docSnap.data();
       userinfo.examslist = docJSON
       if (docJSON.ratemyapp) { localStorage.setItem("rate_app", false) }
-      if (docJSON.offline){
+      if (docJSON.offline && userinfo.uuid != "shh5oUIhRpdBkEKQ3GCZwoKE9u42"){
         signOut(getAuth());
         userdetails = []
         log("Server Offline","Quarkz Is Temporarily Offline for Maintainance. " + docJSON.offlinemsg)
@@ -2698,7 +2705,7 @@ async function getTestReport() {
           const hash = crypto.createHash('sha256').update(userinfo.uuid).digest('hex');
           const user_num = parseInt(hash.slice(0, 6), 16);
           if (testInfo.randomize) {
-            testQuestionList = shuffleArrayWithSeed(testQuestionList, user_num)
+            testQuestionList.questions = shuffleArrayWithSeed(testQuestionList.questions, user_num)
           }
           docRef = doc(db, "tests", testid, "responses", auth.currentUser.uid);
           docSnap = await getDoc(docRef);
@@ -2929,7 +2936,12 @@ async function computeResult(type) {
     await updateDoc(doc(db, "tests", testid, "responses", "finished"), {
       leaderboard: arrayUnion({ "uid": userinfo.uuid, "marks": tFinal.usermarks, "name": userinfo.name }),
     })
-    renderBody(page_test_end, "", "")
+    // renderBody(page_test_end, "", "")
+    // dE("te_endtime").innerText = new Date(testInfo.endon.seconds * 1000);
+    if (gty != ""){
+      dE(gty).remove()
+    }
+    testInfo = {}
   }
 }
 function testqHandler(id, no) {
@@ -3044,7 +3056,7 @@ function testqHandler(id, no) {
                       dE("tt_marksaward").innerHTML = '<div style="color:orange">Unanswered(0)</div>'
                     } else {
                       if (q_check.type == "correct") {
-                        dE("tt_marksaward").innerHTML = '<div style="color:lime">Correct(' + q_check.marks + ')</div>'
+                        dE("tt_marksaward").innerHTML = '<div style="color:var(--clr10)">Correct(' + q_check.marks + ')</div>'
                       } else {
                         dE("tt_marksaward").innerHTML = '<div style="color:red">Incorrect(' + q_check.marks + ')</div>'
                       }
@@ -3188,6 +3200,12 @@ async function testOperator(type) {
   dE(activequestionid).classList.remove("tts_notanswer", "tts_notvisit", "tts_answered", "tts_review", "tts_ansreview")
   dE(activequestionid).classList.add(type)
   showLS("d")
+  for (var i =0;i<testQuestionList.questions.length;i++){
+    if (testQuestionList.questions[i].qid == activequestionid && type != "tts_notanswer" && type!="tts_notvisit"){
+      testqHandler(testQuestionList.questions[i+1].qid,i+2)
+      break;
+    }
+  }
 }
 async function submitTest() {
   if (!window.location.hash.includes("attempt")) {
@@ -3208,19 +3226,11 @@ async function submitTest() {
   await updateDoc(doc(db, "tests", testid, "responses", "finished"), {
     finished: arrayUnion(auth.currentUser.uid),
   }).then(computeResult(0))
-  var endat = new Date(testInfo.endon.seconds * 1000)
-  dE("te_endtime").innerText = endat;
-  testList = []
-  activeTestList = []
-  upcomingTestList = []
-  finishedTestList = []
-  testInfo = []
   testQuestionList = []
   activequestionid = ""
   dE("dsh_btn").style.display = "block"
-  dE("tp_pnt").style.display = "none"
-  clearInterval(testTimerfunction);
   window.location.hash = "#/finished/" + window.location.hash.split("attempt/")[1]
+  clearInterval(testTimerfunction);
 }
 window.onbeforeunload = function (event) {
   updatePoints()

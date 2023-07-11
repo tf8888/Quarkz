@@ -1,6 +1,6 @@
 export let page_forum = `
-<span style="font-size: 5vh;color:yellow" id="fm_title">Forum</span>
-        <hr width="100%" color="white">
+<span style="font-size: 5vh;color:var(--clr16)" id="fm_title">Forum</span>
+        <hr width="100%" style="color:var(--clr18)">
         <div style="border:hotpink 3px solid;width:80%;">
             <div id='pinned_msg'
                 style="background-color: rgb(38, 44, 31);color:rgb(21, 209, 209);overflow-y: scroll;height:30px;">Pinned

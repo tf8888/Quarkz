@@ -1,24 +1,24 @@
 export let page_jee_main = 
 `
-    <span style="font-size: 5vh;color:yellow" id="fm_title">Mains Formula Sheet</span>
-    <hr color="white" width="100%">
+    <span style="font-size: 5vh;color:var(--clr16)" id="fm_title">Mains Formula Sheet</span>
+    <hr style="color:var(--clr18)" width="100%">
     <div style="overflow-y: scroll;height:50vh;" class="flex_type">
     </div>
     <span style="font-size: 8px;">All PDF's Are Owned by their Respective Owners</span>
 `
 export let page_downloads = `
-<span style="font-size: 5vh;color:yellow" id="fm_title">Downloads</span>
-    <hr color="white" width="100%">
+<span style="font-size: 5vh;color:var(--clr16)" id="fm_title">Downloads</span>
+    <hr style="color:var(--clr18)" width="100%">
     <div style="overflow-y: scroll;height:50vh;" class="flex_type">
       
     </div>
 `
 export function downloads_render(download_links_list,rendertype){
     var jee_html = ""
-    if (rendertype == "formulasheet"){jee_html+=`<span style="font-size: 5vh;color:yellow" id="fm_title">Mains Formula Sheet</span>`}
-    else{jee_html+=`<span style="font-size: 5vh;color:yellow" id="fm_title">Downloads</span>`}
+    if (rendertype == "formulasheet"){jee_html+=`<span style="font-size: 5vh;color:var(--clr16)" id="fm_title">Mains Formula Sheet</span>`}
+    else{jee_html+=`<span style="font-size: 5vh;color:var(--clr16)" id="fm_title">Downloads</span>`}
     jee_html+= `
-    <hr color="white" width="100%">
+    <hr style="color:var(--clr18)" width="100%">
     <div style="overflow-y: scroll;height:50vh;" class="flex_type">`
     for (var i = 0;i<download_links_list.length;i++){
         if (download_links_list[i].type2 == rendertype){

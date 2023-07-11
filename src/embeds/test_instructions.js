@@ -1,10 +1,10 @@
 export let page_test_instructions = `
 <span class="in_t" id = "ti_title">Test Instructions</span>
-        <hr color="white" width="100%" id = "ti_hr">
-        <div id = "ti_i" style="width:80vw;overflow-y: scroll;border:yellow 3px solid;display: flex;flex-direction: column;">
+        <hr style="color:var(--clr18)" width="100%" id = "ti_hr">
+        <div id = "ti_i" style="width:80vw;overflow-y: scroll;border:var(--clr16) 3px solid;display: flex;flex-direction: column;">
             <span style="font-size:5vh;text-align: center;">Please Read The Instructions And Terms Carefully</span>
-            <span style="font-size:18px;color:var(--yellow)">Test Information:</span>
-            <ul style="font-size: 14px;color:var(--white);">
+            <span style="font-size:18px;color:var(--clr16)">Test Information:</span>
+            <ul style="font-size: 14px;color:var(--clr16);">
                 <li> Test Name:&nbsp;<span id = "i_name"></span></li>
                 <li> Starts From:&nbsp;<span id = "i_start"></span> </li>
                 <li> Ends At:&nbsp;<span id = "i_end"></span> </li>
@@ -13,7 +13,7 @@ export let page_test_instructions = `
                 <li> Total Marks:&nbsp;<span id = "i_total"></span> </li>
                 <li> No of Questions:&nbsp;<span id = "i_qno"></span> </li>
             </ul>
-            <span style="font-size:18px;color:var(--yellow)">General Instructions:</span>
+            <span style="font-size:18px;color:var(--clr16)">General Instructions:</span>
             <ol style="font-size: 14px;">
                 <li>The Exam Must Be Completed In 1 Sitting. You Will Be Able To Open This Test Window Only Once. </li>
                 <li>Read Every Question Carefully And Select Your Answer and Try To Answer As Many Questions As Possible
@@ -40,14 +40,14 @@ export let page_test_instructions = `
                     After Which Your Test Will End</li>
             </ol>
             <hr style = "width:95%">
-            <span style="font-size:18px;color:var(--yellow)">Navigating to a Question:</span>
+            <span style="font-size:18px;color:var(--clr16)">Navigating to a Question:</span>
             <ol style="font-size:14px;">
                 <li>To view/answer a question, do the following: Click on the question number in the Question Palette at
                     the right of your screen to go to that numbered question directly. Note that using this option does
                     NOT save your answer to the current question.</li>
             </ol>
             <hr style = "width:95%">
-            <span style="font-size:18px;color:var(--yellow)">Answering a Question:</span>
+            <span style="font-size:18px;color:var(--clr16)">Answering a Question:</span>
             <ol style="font-size:14px;">
                 Procedure for answering a multiple choice type question:
                 <li>To select you answer, click on the button of one of the options.</li>
@@ -60,16 +60,16 @@ export let page_test_instructions = `
                     answering and then follow the procedure for answering that type of question.</li>
             </ol>
             <hr style = "width:95%">
-            <span style="font-size:18px;color:var(--yellow)">Navigating through sections:</span>
+            <span style="font-size:18px;color:var(--clr16)">Navigating through sections:</span>
             <ol style="font-size:14px;">
                 <li>All Questions are Visible in the Question Pallete along under the respective sections/subjects</li>
             </ol>
             <hr style = "width:95%">
-            <span style="font-size:18px;color:var(--yellow)">Test Specific Instructions:</span>
+            <span style="font-size:18px;color:var(--clr16)">Test Specific Instructions:</span>
             <div id = "tsi" style="font-size:14px;">
             </div>
             <hr style = "width:95%">
-            <span style="font-size:18px;color:var(--yellow)">Terms And Conditions:</span>
+            <span style="font-size:18px;color:var(--clr16)">Terms And Conditions:</span>
             <span style="font-size:14px;">By Checking on "I Agree" you Agree to All Terms And Conditions:</span>
             <ol style="font-size:14px;">
                 <li>I have read and understood all the instructions. </li>

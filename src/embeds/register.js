@@ -2,7 +2,7 @@ export let page_register = `
 <span class="in_t">Register</span>
     <div style = "display:flex;flex-direction:row;flex-wrap:wrap;font-size:15px;">
         <div class = "db_class">
-        <span style="font-size: 25px;color:yellow">Personal Info</span>
+        <span style="font-size: 25px;color:var(--clr16)">Personal Info</span>
         <input type="text" id="rg_name" class="_in_reg" placeholder="Name">
         <div style = "display:flex;flex-direction:row">
         <label for="rg_dob">Date:&nbsp;&nbsp;</label>
@@ -29,7 +29,7 @@ export let page_register = `
         </div>
         </div>
         <div class = "db_class">
-        <span style="font-size: 25px;color:yellow">Account Info</span>
+        <span style="font-size: 25px;color:var(--clr16)">Account Info</span>
         <input type="tel" id="rg_mbleno" class="_in_reg" placeholder="Mobile No">
         <input type="text" id="rg_uname" class="_in_reg" placeholder="Email Address">
         <input type="password" id="rg_pass" class="_in_reg" placeholder="Password">

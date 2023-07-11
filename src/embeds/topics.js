@@ -114,8 +114,8 @@ export let page_edit_topic = `
 `
 export let page_topic = `
 <span style="font-size: 3vh;color:lime" id="tp_title">Topic Name</span>
-<span style="font-size: 4vh;color:yellow" id="tp_lsno">Lesson Name</span>
-        <hr width="100%" color="white">
+<span style="font-size: 4vh;color:var(--clr16)" id="tp_lsno">Lesson Name</span>
+        <hr width="100%" style="color:var(--clr18)">
         <div class="flex_type" style="flex-direction: row;flex-wrap: wrap;">
             <button class="tst_btn rpl" id="tp_nxt">Next</button>
             <button class="tst_btn rpl" id="tp_prv">Previous</button>
@@ -123,7 +123,7 @@ export let page_topic = `
             <button class="tst_btn rpl" id="tp_edt" style="display: none;">Edit</button>
             <button class="tst_btn rpl" id="tp_rep">Report</button>
         </div>
-        <hr width="100%" color="white">
+        <hr width="100%" style="color:var(--clr18)">
         <div id="tp_lesson" style="width: 80%;">
             <div id="tp_full_vid">
                 <!-- <iframe id = "video" style = "width:80%; height: 450px; border-style: solid; ;border-width: 10px;" hidden = "True"  allow = "autoplay"></iframe> -->
