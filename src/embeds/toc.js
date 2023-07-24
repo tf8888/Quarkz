@@ -9,10 +9,39 @@ export let page_toc = `
         <h3>B. Account Information And User Generated Content</h3>
         <li>By creating an account on the Quarkz website, you agree to provide accurate and complete information about yourself as requested in the registration form. You also agree to keep your account information up-to-date and secure. </li>
         <li>All user-generated content on the Quarkz website, including but not limited to quizzes, tests, assignments, notes, and forum posts, may be accessed by Quarkz admins or authorized moderators. When you request account deletion, no user-generated data will be deleted. Instead, the account will be unlinked from our authentication services. However, this data will continue to be accessible to ONLY Quarkz admins.
-        <h3>C. Account Information And User Generated Content</h3>
         <li>Any content uploaded, published, submitted, or posted by you on the Quarkz platform, including without limitation, text, graphics, images, videos, and audio, will be owned by you, but we are also granted a worldwide, non-exclusive, royalty-free, sublicensable, and transferable license to use, reproduce, distribute, share, display, publish, retain, make available online, and/or electronically transmit such user-generated content as well as technical information collected. You represent and warrant that you have all necessary rights to grant us this license.</li>
+        <h3>C. Free Content</h3>
+        <li> The User may be provided with certain Free Content upon registering to the Platform. Such Free Content is provided at the discretion of Quarkz! and can be modified into a paid subscription any point of time after notification to the user.</li>
         <h3>D. Code of Conduct</h3>
-        <li>You agree to use the Quarkz website in a lawful and ethical manner. You agree not to engage in any activity that could damage, disable, overburden, or impair the website, or interfere with any other user's access to the website. You agree not to post or transmit any content that is obscene, defamatory, libelous, abusive, discriminatory, or otherwise offensive. You agree not to harass or bully other users on the website.</li>
+        <li>You agree to use the Quarkz(Platform) website in a lawful and ethical manner. You agree, undertake and confirm that Your use of the Platform shall be strictly governed by the following binding principles and You agree not to:</li>
+        <ol>
+        <li> defeat, damage or interfere with any security feature of our Platform, nor attempt to do so.</li>
+        <li> cheat, use any deceptive methods or otherwise evade or violate the rules or intended operation of any software, nor attempt to do so.</li>
+        <li>alter or modify any Content of our Platform, other than information or User Content you have submitted or posted through the Platform.</li>
+        <li> reproduce, duplicate, copy, sell, trade, or exploit, for any commercial purpose, any Content or component of or any access to the Platform, without the prior written permission of Embibe, except for User Content or registration information you have submitted or posted through the Platform.
+        <li>use or attempt to use any automated system, software, or device to generate and send communications to or through the Platform nor will you annoy or harass any person through or in connection with the use of the Platform.
+        <li> use or attempt to use any engine, software, tool, agent, or other device or mechanism (including, without limitation, browsers, spiders, robots, avatars, or intelligent agents) to navigate or search the Platform other than the search engine and search agents available on the Platform.
+        <li>upload, post, transmit, share or otherwise make available through the Platform any illegal material, or any material that contains software viruses or any other computer code designed to interfere with the functionality of any computer software or hardware or telecommunications equipment.
+        <li> upload, transmit, or post any material that is obscene, sexually explicit, hateful, intimidating or threatening, or that violates the rights of Embibe or of any third party.
+        <li>use the Platform to upload, modify, publish, post, transmit, or share material that is defamatory, obscene, pornographic, paedophilic, invasive of another’s privacy
+        <li>including bodily privacy, insulting or harassing on the basis of gender, libellous,
+        <li>racially or ethnically objectionable, relating or encouraging money laundering or
+        <li>gambling, or otherwise inconsistent with or contrary to the laws in force.
+        <li>use our Platform to post, transmit, or share material that you did not create or that you do not have permission to use.
+        <li>use the Platform for any commercial use as the Platform is intended for personal, non-commercial use only except with our prior written permission.
+        <li>copy or distribute in any manner, any proprietary information for any commercial or business use, except with our prior written permission.
+        <li>modify, edit or change or otherwise make any derivative work of the paper or digital copies of any materials You have printed off or downloaded in any way.
+        <li>make unsolicited offers, advertisements, proposals, or send junk mail or spam to other Users of the Platform.
+        <li>reverse engineer, decompile, disassemble or otherwise attempt to discover the source code of the Platform or any part thereof, except and only to the extent that such activity is expressly permitted by Applicable Law.
+        <li>interfere with or damage operation of the Platform, upload or otherwise disseminate viruses, adware, spyware, worms, or other malicious code intended to interrupt, destroy or limit the functionality of any computer resource.
+        <li>not to upload, modify, publish, transmit, store, update or share any information that, — is harmful to child
+        <li>violates any law for the time being in force;
+        <li>deceives or misleads the addressee about the origin of the message or knowingly and intentionally communicates any information which is patently false or misleading in nature but may reasonably be perceived as a fact;
+        <li>impersonates another person;
+        <li>threatens the unity, integrity, defence, security or sovereignty of India, friendly relations with foreign States, or public order, or causes incitement to the commission of any cognisable offence or prevents investigation of any offence or is insulting other nation;
+        <li>is patently false and untrue, and is written or published in any form, with the intent to mislead or harass a person, entity or agency for financial gain or to cause any injury to any person;
+        <li> You agree not to engage in any activity that could damage, disable, overburden, or impair the website, or interfere with any other user's access to the website. You agree not to post or transmit any content that is obscene, defamatory, libelous, abusive, discriminatory, or otherwise offensive. You agree not to harass or bully other users on the website.</li>
+        </ol>
         <h3>E. Termination of Access</h3>
         <li>We reserve the right to terminate access to the Quarkz website, or any part thereof, to any user at any time, without prior notice, for any reason, including without limitation, for a violation of these terms and conditions.</li>
         <li>We may terminate your access to the site, without cause or notice, which may result in the forfeiture and destruction of all information associated with your account. All provisions of these Terms and Conditions that by their nature should survive termination shall survive termination, including, without limitation, ownership provisions, warranty disclaimers, indemnity, and limitations of liability.</li>

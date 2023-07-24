@@ -232,6 +232,7 @@ details[open] summary{
   border-bottom: 3px solid var(--clr17);
   outline: none;
   color: var(--clr16);
+  max-width: 80vw;
 }
 
 /* Watermark Div */
@@ -286,7 +287,6 @@ details[open] summary{
 }
 
 .full_page {
-  width: 97vw;
   height: 89vh;
   min-height: 89vh;
   /* height: max-content; */
@@ -296,8 +296,9 @@ details[open] summary{
   border-radius: 12px;
   border: 1px solid var(--clr8);
   overflow: hidden;
-  margin: 5px;
   color: var(--clr16);
+  margin-right: 5px;
+  margin-left: 5px;
   /* display: none !important; */
 }
 
@@ -497,7 +498,7 @@ details[open] summary{
   height: max-content;
   border: var(--clr17) 1px solid;
   padding: 10px;
-  width: 300px;
+  min-width:200px;
   border-radius: 100px;
   margin: 6px;
   display: flex;
@@ -527,7 +528,21 @@ details[open] summary{
   font-size: small;
   color: var(--clr3);
 }
-
+#tt_question input[type = "radio"], #tt_question input[type = "checkbox"]{
+  visibility: hidden;
+  height: 0;
+  width: 0;
+}
+#tt_question label{
+  padding:10px;
+  width: 50vw;
+  display:block;
+  background-color: var(--bgcolor);
+  padding-left: 30px;
+  border: solid 2px var(--clr12);
+  border-radius: 10px;
+  cursor: pointer;
+}
 .fqu_mcq_p,
 .tp_mcq_p,
 .lq_mcq {
@@ -657,7 +672,7 @@ details[open] summary{
   flex-direction: row;
   justify-content: space-around;
 }
-input[type=radio], input[type=checkbox]{
+input[type=radio], input[type=checkbox],select{
   cursor:pointer;
 }
 .qbtp_q::before {
@@ -1064,6 +1079,12 @@ a{
   overflow-y: scroll;
   position:relative;
 }
+#tt_question input[type="radio"]:checked + label{
+  border: var(--clr16) 3px solid;
+}
+#tt_question input[type = "checkbox"]:checked + label{
+  border: var(--clr16) 3px solid;
+}
 #tt_question img:hover{
   max-height: 50vh !important;
   max-width: 45vw !important;
@@ -1329,6 +1350,19 @@ circle text {
   background: transparent !important;
   color: var(--clr5)
 }
+.db_opt{
+  font-size: 35px !important;
+  cursor:pointer;
+  margin:5px;
+}
+#options_tab{
+  border: solid var(--clr16);
+  border-left: 2px;
+}
+#options_tab_2{
+  border: solid var(--clr16);
+  border-right: 2px;
+}
 .rpl:active {
   background-color: var(--clr12);
   background-size: 100%;
@@ -1557,7 +1591,7 @@ circle text {
 #i_name,#i_start,#i_end,#i_syllabus,#i_time,#i_total,#i_qno{
   color:var(--clr3);
 }
-#tt_question input{
+input,select{
   border: grey solid 2px;
   border-radius: 5px;
   padding: 5px;
@@ -1620,6 +1654,7 @@ circle text {
   flex-direction: column;
   overflow-y: scroll;
   min-height: 250px;
+  min-width: 230px;
   border: var(--clr3) solid 2px;
   width: 350px;
   border-radius: 10px 10px 10px 10px;

@@ -157,7 +157,7 @@ window.beforeunload = function(e) {
 function refreshScreen(e) {
     var updatedScreenWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
     // Check if screen width is less than 600px
-    if (updatedScreenWidth < 600) {
+    if (updatedScreenWidth < 350) {
         dE("overlay").style.display = "flex";
         dE("output").style.pointerEvents = "none";
         dE("ovr_la_1").style.display = "none";

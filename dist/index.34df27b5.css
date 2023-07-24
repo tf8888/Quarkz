@@ -226,6 +226,7 @@ details[open] summary {
   border: none;
   border-bottom: 3px solid var(--clr17);
   color: var(--clr16);
+  max-width: 80vw;
   background-color: #0000;
   outline: none;
   font-size: max(15px, 4vh);
@@ -281,7 +282,6 @@ details[open] summary {
 }
 
 .full_page {
-  width: 97vw;
   height: 89vh;
   min-height: 89vh;
   -webkit-backdrop-filter: blur(17px) saturate(180%);
@@ -291,7 +291,8 @@ details[open] summary {
   border: 1px solid var(--clr8);
   color: var(--clr16);
   border-radius: 12px;
-  margin: 5px;
+  margin-left: 5px;
+  margin-right: 5px;
   overflow: hidden;
 }
 
@@ -485,7 +486,7 @@ details[open] summary {
 .tlinks_min {
   height: max-content;
   border: var(--clr17) 1px solid;
-  width: 300px;
+  min-width: 200px;
   cursor: pointer;
   border-radius: 100px;
   flex-direction: column;
@@ -515,6 +516,22 @@ details[open] summary {
 .t_endon {
   color: var(--clr3);
   font-size: small;
+}
+
+#tt_question input[type="radio"], #tt_question input[type="checkbox"] {
+  visibility: hidden;
+  height: 0;
+  width: 0;
+}
+
+#tt_question label {
+  width: 50vw;
+  background-color: var(--bgcolor);
+  border: solid 2px var(--clr12);
+  cursor: pointer;
+  border-radius: 10px;
+  padding: 10px 10px 10px 30px;
+  display: block;
 }
 
 .fqu_mcq_p, .tp_mcq_p, .lq_mcq {
@@ -641,7 +658,7 @@ details[open] summary {
   display: flex;
 }
 
-input[type="radio"], input[type="checkbox"] {
+input[type="radio"], input[type="checkbox"], select {
   cursor: pointer;
 }
 
@@ -1029,6 +1046,10 @@ a {
   overflow-y: scroll;
 }
 
+#tt_question input[type="radio"]:checked + label, #tt_question input[type="checkbox"]:checked + label {
+  border: var(--clr16) 3px solid;
+}
+
 #tt_question img:hover {
   zoom: 2;
   z-index: 3;
@@ -1275,6 +1296,22 @@ circle text {
   background: none !important;
 }
 
+.db_opt {
+  cursor: pointer;
+  margin: 5px;
+  font-size: 35px !important;
+}
+
+#options_tab {
+  border: solid var(--clr16);
+  border-left: 2px;
+}
+
+#options_tab_2 {
+  border: solid var(--clr16);
+  border-right: 2px;
+}
+
 .rpl:active {
   background-color: var(--clr12);
   background-size: 100%;
@@ -1485,7 +1522,7 @@ circle text {
   color: var(--clr3);
 }
 
-#tt_question input {
+input, select {
   background-color: var(--clr8);
   border: 2px solid gray;
   border-radius: 5px;
@@ -1541,6 +1578,7 @@ circle text {
 
 .db_class {
   min-height: 250px;
+  min-width: 230px;
   border: var(--clr3) solid 2px;
   width: 350px;
   height: max-content;

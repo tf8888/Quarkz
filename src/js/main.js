@@ -12,7 +12,7 @@ and certain other noncommercial uses permitted by copyright law.
 For permission requests, please contact [Mr Techtroid] at mrtechtroid@outlook.com .
 */
 import { initializeApp } from "firebase/app";
-import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence, GoogleAuthProvider, signInWithPopup, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
+import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence, GoogleAuthProvider, signInWithPopup, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail,updateEmail } from "firebase/auth";
 import { getFirestore, orderBy, limit, writeBatch, collection, addDoc, onSnapshot, deleteDoc, arrayUnion, arrayRemove, setDoc, updateDoc, getDocs, doc, serverTimestamp, getDoc, query, where } from "firebase/firestore";
 import { getStorage, ref, uploadBytesResumable, getDownloadURL, } from 'firebase/storage';
 import { page_about } from "../embeds/about";
@@ -37,6 +37,7 @@ import { page_toc } from '../embeds/toc'
 import { page_topic, page_edit_topic } from "../embeds/topics";
 import { page_edit_user } from "../embeds/user";
 import { page_usernotes } from "../embeds/usernotes"
+import { page_store } from "../embeds/store"
 import { sd, sha256, makeid, mobileCheck, areObjectsEqual, areEqual, getServerTime, fullEle, dE, sortObj, sortObjv2, renderMarkedMath, mergeById, qCorrector, playSoundEffect, showLS, antiCopyEle, shuffleArrayWithSeed, buildHtmlTable,studentRanker } from '../js/helper'
 import { sysaccess } from "./reworkui";
 import { page_batch_list, page_edit_batch } from "../embeds/admin";
@@ -192,33 +193,11 @@ function renderBody(body, styles, s_class) {
   dE("output").style = styles
 }
 function dashboardEvents() {
-  function simHand() { changeLocationHash("simlist", 1) }
-  function cybHand() { changeLocationHash("cyberhunt", 1) }
-  function abtHand() { changeLocationHash("about", 1) }
-  function tmtHand() { changeLocationHash("timetable", 1) }
-  function prfHand() { changeLocationHash("profile", 1) }
-  function adiHand() { changeLocationHash("functions", 1) }
-  function tstinfHand() { changeLocationHash("testinfo", 1) }
-  function qbaHand() { changeLocationHash("qblist", 1) }
-  function chpHand() { changeLocationHash("chplist", 1) }
-  var simbtn = dE("sim_btn").addEventListener("click", simHand)
-  var sgnout = dE("lgt_btn").addEventListener("click", signOutUser);
-  var tmtbtn = dE("tmt_btn").addEventListener("click", tmtHand);
-  var prfbtn = dE("prf_btn").addEventListener("click", prfHand);
-  var abtbtn = dE("abt_btn").addEventListener("click", abtHand);
-  var tmtbtn = dE("tmt_btn").addEventListener("click", tmtHand);
-  var prfbtn = dE("prf_btn").addEventListener("click", prfHand);
-  var abtbtn = dE("abt_btn").addEventListener("click", abtHand);
-  var adibtn = dE("adi_btn").addEventListener("click", adiHand)
-  var cybbtn = dE("cyb_btn").addEventListener("click", cybHand)
-  var chp_btn = dE("chp_btn").addEventListener("click", chpHand)
-  var tstinfbtn = dE("tstinf_btn").addEventListener("click", tstinfHand)
   var sgnout = dE("lgt_btn").addEventListener("click", signOutUser);
   dE("dshd_uname").innerText = userinfo.email
   dE("dshd_name").innerText = userinfo.name
   dE("dshd_batch").innerText = userinfo.batchname
-
-  dE("prf_tab_img").src = getAvatarURL(userinfo.name, userinfo.gen, localStorage.getItem("prf_type"))
+  dE("prf_tab_img").src = getAvatarURL(userinfo.name, userinfo.gen, userinfo.prf_type)
   renderExams()
 }
 function simEvents() {
@@ -417,6 +396,7 @@ function coreManager(newlocation, n1) {
     case "add/simulation": handlebox = "fu_simulation"; newSimulation(); break;
     case "add/tests": handlebox = "fu_topic"; newTest(); break;
     case "add/batch": handlebox = "fu_topic"; newBatch(); break;
+    case "store": handlebox = "fu_shop";renderBody(page_store, "height:max-content;", "");break;
     case "list/batch": handlebox = "fu_batch"; renderBody(page_batch_list, "height:max-content;", ""); renderAdminBatchList(); break;
     case "list/tests": handlebox = "fu_batch"; renderBody(page_batch_list, "height:max-content;", ""); renderAdminTestList(); break;
     case "list/chptr": handlebox = "fu_batch"; renderBody(page_batch_list, "height:max-content;", ""); renderAdminChapterList(); break;
@@ -554,36 +534,17 @@ function uploadEvents() {
           document.getElementById("file_status").innerText = "Upload Complete. Copy The Link Below"
           document.getElementById("file_progress").innerText = ""
           document.getElementById("file_link_long").value = downloadURL
-          let xhr = new XMLHttpRequest();
-          xhr.open("POST", "https://firebasedynamiclinks.googleapis.com/v1/shortLinks?key=AIzaSyBxyMo6yQ20stBIOsHUgToNgm4PmCKxTX4");
-
-          xhr.setRequestHeader("Accept", "application/json");
-          xhr.setRequestHeader("Content-Type", "application/json");
-
-          xhr.onload = () => console.log(xhr.responseText);
-          xhr.onreadystatechange = async function () {
-            if (xhr.readyState === 4) {
-              console.log(xhr.response)
-              document.getElementById("file_link").value = JSON.parse(xhr.response).shortLink
-              const docRef = await addDoc(collection(db, "quarkz", "users", "uploads"), {
-                ipdetails: details,
-                ip: details.ip,
-                url: downloadURL,
-                shorturl: JSON.parse(xhr.response).shortLink,
-                name: name,
-                size: file.size,
-              });
-            }
+          async function addDocument(){
+            const docRef = await addDoc(collection(db, "quarkz", "users", "uploads"), {
+              ipdetails: details,
+              ip: details.ip,
+              url: downloadURL,
+              name: name,
+              size: file.size,
+          });
           }
-          let data = `{
-        "dynamicLinkInfo": {
-          "domainUriPrefix": "https://mttweb.page.link",
-          "link": "${downloadURL}",
-        }
-      }`;
-          xhr.send(data);
-
-        });
+          addDocument()
+        })
       }
     );
   })
@@ -608,6 +569,20 @@ async function reportHandler() {
 }
 async function settingsEvents() {
   dE("pass_rst_btn").addEventListener("click", requestPasschange);
+  dE("sub_chg_mail").addEventListener("click",async function(){
+    if (dE("inp_mail").value.match(/^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)){
+      updateEmail(auth.currentUser,dE("inp_mail").value).then(() => {
+        updateDoc(doc(db,"users",userinfo.uuid),{
+          email:dE("inp_mail").value
+        })
+        window.location.reload()
+      }).catch((error) => {
+        log("ERROR", "Something went wrong.")
+      });
+    }else{
+      log("ERROR", "Invalid Email")
+    }
+  })
   dE("sub_rat_btn").addEventListener("click", async function () {
     try {
       const docRef = await addDoc(collection(db, 'reviews'), {
@@ -656,30 +631,44 @@ async function settingsEvents() {
       }
     });
   }
-  dE("prf_typ_" + localStorage.getItem("prf_type").split("v")[1]).style.borderColor = "red"
+  if (userinfo.prf_type == null) { await updateDoc(doc(db, 'users', userinfo.uuid),{
+    prf_type: "v2"
+  })
+ }
+  dE("prf_typ_" + userinfo.prf_type.split("v")[1]).style.borderColor = "red"
   dE("prf_typ_1").src = getAvatarURL(userinfo.name, userinfo.gen, "v1")
   dE("prf_typ_2").src = getAvatarURL(userinfo.name, userinfo.gen, "v2")
   dE("prf_typ_3").src = getAvatarURL(userinfo.name, userinfo.gen, "v3")
-  dE("prf_typ_1").addEventListener("click", function () {
+  dE("prf_typ_1").addEventListener("click", async function () {
     dE("prf_typ_1").style.borderColor = "red"
     dE("prf_typ_2").style.borderColor = "#06d85f"
     dE("prf_typ_3").style.borderColor = "#06d85f"
-    localStorage.setItem("prf_type", "v1")
+    await updateDoc(doc(db, 'users', userinfo.uuid),{
+      prf_type: "v1"
+    })
+    userinfo.prf_type = "v1"
+    // localStorage.setItem("prf_type", "v1")
   })
-  dE("prf_typ_2").addEventListener("click", function () {
+  dE("prf_typ_2").addEventListener("click", async function () {
     dE("prf_typ_1").style.borderColor = "#06d85f"
     dE("prf_typ_2").style.borderColor = "red"
     dE("prf_typ_3").style.borderColor = "#06d85f"
-    localStorage.setItem("prf_type", "v2")
+    await updateDoc(doc(db, 'users', userinfo.uuid),{
+      prf_type: "v2"
+    })
+    userinfo.prf_type = "v2"
   })
-  dE("prf_typ_3").addEventListener("click", function () {
+  dE("prf_typ_3").addEventListener("click", async function () {
     dE("prf_typ_1").style.borderColor = "#06d85f"
     dE("prf_typ_2").style.borderColor = "#06d85f"
     dE("prf_typ_3").style.borderColor = "red"
-    localStorage.setItem("prf_type", "v3")
+    await updateDoc(doc(db, 'users', userinfo.uuid),{
+      prf_type: "v3"
+    })
+    userinfo.prf_type = "v3"
   })
 }
-if (localStorage.getItem("prf_type") == null) { localStorage.setItem("prf_type", "v2") }
+
 // -----------------------
 // SIMULATIONS
 // Creates A Blank Simulation
@@ -1953,7 +1942,7 @@ async function profileDetails() {
   //   dE("prf_tab_t_t_img").classList.remove("prf_male", "prf_female")
   //   dE("prf_tab_t_t_img").classList.add("prf_female")
   // }
-  dE("prf_tab_t_t_img").src = getAvatarURL(userinfo.name, userinfo.gen, localStorage.getItem("prf_type"))
+  dE("prf_tab_t_t_img").src = getAvatarURL(userinfo.name, userinfo.gen, userinfo.prf_type)
 }
 function renderExams() {
   for (let i = 0; i < userinfo.examslist.examinfo.length; i++) {
@@ -2238,7 +2227,7 @@ function renderTestList(type) {
   for (var ele of renList) {
     var strson = new Date(ele.strton * 1000)
     var endson = new Date(ele.endon * 1000)
-    var output = '<div class="tlinks-3" id = "' + ele.testid + '"><center><span class = "t_title">' + ele.title + '</span></center><div class = "tl"><span class = "t_stron">Starts At:' + strson.toISOString() + '</span><span class ="t_endon">Ends At:' + endson.toISOString() + '</div><div class = "tl"><span>Marks:' + ele.marks + '</span><span>Allotted Time:' + parseInt(ele.alotted) / 60 + '&nbsp;Mins</span><span>Questions:' + ele.qno + '</span></div></div>'
+    var output = '<div class="tlinks-3" id = "' + ele.testid + '"><center><span class = "t_title">' + ele.title + '</span></center><div class = "tl"><span class = "t_stron">Starts At:' + strson.toLocaleString() + '</span><span class ="t_endon">Ends At:' + endson.toLocaleString() + '</div><div class = "tl"><span>Marks:' + ele.marks + '</span><span>Allotted Time:' + parseInt(ele.alotted) / 60 + '&nbsp;Mins</span><span>Questions:' + ele.qno + '</span></div></div>'
     if (type != "finished") {
       dE("testlinks").insertAdjacentHTML('beforeend', output)
       dE(ele.testid).addEventListener('click', testClicker)
@@ -2972,14 +2961,16 @@ function testqHandler(id, no) {
       if (ele.type == "mcq") {
         var qop = ele.op;
         for (let ele1 of qop) {
-          asi += '<li><input type="radio" class = "q_ans" value = "' + ele1 + '" name = "q_op">' + ele1 + '</input></li>'
+          let yt = Math.floor(Math.random()*100000)
+          asi += '<span><input type="radio" class = "q_ans" id = "mcq_'+yt+'" value = "' + ele1 + '" name = "q_op"></input><label for = "mcq_'+yt+'"><li>'+ele1+'</li></label></span>'
         }
         var qrt = '<ol class = "qb_mcq" type = "A">' + asi + '</ol>'
       }
       if (ele.type == "mcq_multiple" || ele.type == "mcq_multiple_partial") {
         var qop = ele.op;
         for (let ele1 of qop) {
-          asi += '<li><input type="checkbox" class = "q_ans" value = "' + ele1 + '" name = "q_op">' + ele1 + '</input></li>'
+          let yt = Math.floor(Math.random()*100000)
+          asi += '<span><input type="checkbox" class = "q_ans" id = "mcq_'+yt+'" value = "' + ele1 + '" name = "q_op"><label for = "mcq_'+yt+'"><li>'+ele1+'</li></label></input></span>'
         }
         var qrt = '<ol class = "qb_mcq" type = "A">' + asi + '</ol>'
       }
@@ -3364,7 +3355,7 @@ function setHTML(id, html) {
 }
 var Quarkz = {
   "copyright": "Mr Techtroid 2021-23",
-  "vno": "v0.6.4",
+  "vno": "v0.6.6",
   "author": "Mr Techtroid",
   "last-updated": "28/05/2023(IST)",
   "serverstatus": "firebase-online",
