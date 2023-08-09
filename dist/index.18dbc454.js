@@ -588,6 +588,7 @@ var _printable = require("../embeds/printable");
 var _profile = require("../embeds/profile");
 var _qbnkvid = require("../embeds/qbnkvid");
 var _register = require("../embeds/register");
+var _analytics = require("../embeds/analytics");
 var _settings = require("../embeds/settings");
 var _sims = require("../embeds/sims");
 var _testInstructions = require("../embeds/test_instructions");
@@ -597,6 +598,7 @@ var _topics = require("../embeds/topics");
 var _user = require("../embeds/user");
 var _usernotes = require("../embeds/usernotes");
 var _store = require("../embeds/store");
+var _vidchat = require("../embeds/vidchat");
 var _helper = require("../js/helper");
 var _reworkui = require("./reworkui");
 var _admin = require("../embeds/admin");
@@ -1261,6 +1263,11 @@ function coreManager(newlocation, n1) {
         prepareBatch();
         (0, _helper.dE)("aq_batch_save").addEventListener("click", updateBatch);
     }
+    // if (location1.includes("vid_chat")) { handlebox = "fu_vidchat"; renderBody(page_vidchat, "", ""); prepareVideoChat(); }
+    if (location1.includes("site-analytics") && iorole == true) {
+        handlebox = "fu_analytics";
+        renderBody((0, _analytics.page_analytics), "", "");
+    }
     if (iorole) {
         if (window.location.hash.includes("dashboard")) (0, _helper.dE)("adminonly").style.display = "flex";
         if (window.location.hash.includes("topic") || window.location.hash.includes("qbanks")) {
@@ -1322,6 +1329,116 @@ window.ifcls = function() {
     document.getElementById("tempIF_G").remove();
 };
 window.user_rate_value = 0;
+function prepareVideoChat() {
+// const servers = {
+//   iceServers: [
+//     {
+//       urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'],
+//     },
+//   ],
+//   iceCandidatePoolSize: 10,
+// };
+// let pc = new RTCPeerConnection(servers)
+// let localstream = null
+// let remotestream = null
+// const webcamButton = document.getElementById('webcamButton');
+// const webcamVideo = document.getElementById('webcamVideo');
+// const callButton = document.getElementById('callButton');
+// const callInput = document.getElementById('callInput');
+// const answerButton = document.getElementById('answerButton');
+// const remoteVideo = document.getElementById('remoteVideo');
+// const hangupButton = document.getElementById('hangupButton');
+// webcamButton.onclick = async () => {
+//   localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+//   remoteStream = new MediaStream();
+//   // Push tracks from local stream to peer connection
+//   localStream.getTracks().forEach((track) => {
+//     pc.addTrack(track, localStream);
+//   });
+//   // Pull tracks from remote stream, add to video stream
+//   pc.ontrack = (event) => {
+//     event.streams[0].getTracks().forEach((track) => {
+//       remoteStream.addTrack(track);
+//     });
+//   };
+//   webcamVideo.srcObject = localStream;
+//   remoteVideo.srcObject = remoteStream;
+//   callButton.disabled = false;
+//   answerButton.disabled = false;
+//   webcamButton.disabled = true;
+// };
+// // 2. Create an offer
+// callButton.onclick = async () => {
+//   // Reference Firestore collections for signaling
+//   let docSnap = await getDoc(doc(db, 'vidchat', window.location.hash.split("vid_chat/")[1]))
+//   if (docSnap.exists()) {
+//     var docJSON = docSnap.data();
+//   }
+//   const callDoc = firestore.collection('calls').doc();
+//   const offerCandidates = callDoc.collection('offerCandidates');
+//   const answerCandidates = callDoc.collection('answerCandidates');
+//   callInput.value = callDoc.id;
+//   // Get candidates for caller, save to db
+//   pc.onicecandidate = async (event) => {
+//     event.candidate && offerCandidates.add(event.candidate.toJSON()) && await addDoc(doc(db, 'vidchat', docRef.id, "offerCandidates"), {json: event.candidate.toJSON()});
+//   };
+//   // Create offer
+//   const offerDescription = await pc.createOffer();
+//   await pc.setLocalDescription(offerDescription);
+//   const offer = {
+//     sdp: offerDescription.sdp,
+//     type: offerDescription.type,
+//   };
+//   await await setDoc(doc(db, 'vidchat', docRef.id), {offer: offer})
+//   // Listen for remote answer
+//   callDoc.onSnapshot((snapshot) => {
+//     const data = snapshot.data();
+//     if (!pc.currentRemoteDescription && data?.answer) {
+//       const answerDescription = new RTCSessionDescription(data.answer);
+//       pc.setRemoteDescription(answerDescription);
+//     }
+//   });
+//   // When answered, add candidate to peer connection
+//   answerCandidates.onSnapshot((snapshot) => {
+//     snapshot.docChanges().forEach((change) => {
+//       if (change.type === 'added') {
+//         const candidate = new RTCIceCandidate(change.doc.data());
+//         pc.addIceCandidate(candidate);
+//       }
+//     });
+//   });
+//   hangupButton.disabled = false;
+// };
+// // 3. Answer the call with the unique ID
+// answerButton.onclick = async () => {
+//   const callId = callInput.value;
+//   const callDoc = firestore.collection('calls').doc(callId);
+//   const answerCandidates = callDoc.collection('answerCandidates');
+//   const offerCandidates = callDoc.collection('offerCandidates');
+//   pc.onicecandidate = (event) => {
+//     event.candidate && answerCandidates.add(event.candidate.toJSON());
+//   };
+//   const callData = (await callDoc.get()).data();
+//   const offerDescription = callData.offer;
+//   await pc.setRemoteDescription(new RTCSessionDescription(offerDescription));
+//   const answerDescription = await pc.createAnswer();
+//   await pc.setLocalDescription(answerDescription);
+//   const answer = {
+//     type: answerDescription.type,
+//     sdp: answerDescription.sdp,
+//   };
+//   await callDoc.update({ answer });
+//   offerCandidates.onSnapshot((snapshot) => {
+//     snapshot.docChanges().forEach((change) => {
+//       console.log(change);
+//       if (change.type === 'added') {
+//         let data = change.doc.data();
+//         pc.addIceCandidate(new RTCIceCandidate(data));
+//       }
+//     });
+//   });
+// };
+}
 function uploadEvents() {
     document.getElementById("file").addEventListener("change", async function() {
         var details = await (await fetch("https://ipapi.co/json/")).json();
@@ -1390,7 +1507,19 @@ async function reportHandler() {
     });
 }
 async function settingsEvents() {
-    (0, _helper.dE)("pass_rst_btn").addEventListener("click", requestPasschange);
+    // dE("pass_rst_btn").addEventListener("click", requestPasschange);
+    (0, _helper.dE)("sub_chg_pass").addEventListener("click", async function() {
+        if ((0, _helper.dE)("inp_new_pass").value.length < 8) (0, _log.log)("Warning", "Password should be at least 8 characters long");
+        if ((0, _helper.dE)("inp_new_pass").value == (0, _helper.dE)("inp_retype_pass").value) (0, _auth.updatePassword)(auth.currentUser, (0, _helper.dE)("inp_new_pass").value).then(()=>{
+            (0, _log.log)("Warning", "Password Reset Successful");
+        }).catch((error)=>{
+            (0, _log.log)("Warning", "Password Reset Failed");
+        // ...
+        });
+        else (0, _log.log)("Warning", "New Password and Confirm password dont match.");
+        (0, _helper.dE)("inp_new_pass").value = "";
+        (0, _helper.dE)("inp_retype_pass").value = "";
+    });
     (0, _helper.dE)("sub_chg_mail").addEventListener("click", async function() {
         if ((0, _helper.dE)("inp_mail").value.match(/^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)) (0, _auth.updateEmail)(auth.currentUser, (0, _helper.dE)("inp_mail").value).then(()=>{
             (0, _firestore.updateDoc)((0, _firestore.doc)(db, "users", userinfo.uuid), {
@@ -2320,6 +2449,7 @@ async function prepareTopicQBank(iun) {
                 (0, _helper.dE)("aq_tpclevel").value = docJSON.level;
                 (0, _helper.dE)("aq_tpc_subj").value = docJSON.subject;
                 (0, _helper.dE)("aq_randomize").checked = docJSON.randomize;
+                (0, _helper.dE)("aq_blockresult").checked = docJSON.blockresult;
                 (0, _helper.dE)("aq_tst_batches").value = docJSON.batch.toString();
                 function dateparser(var1) {
                     var now = new Date(var1);
@@ -2329,6 +2459,7 @@ async function prepareTopicQBank(iun) {
                 (0, _helper.dE)("aq_tst_stron").value = dateparser(docJSON.strton.seconds * 1000);
                 (0, _helper.dE)("aq_tst_endon").value = dateparser(docJSON.endon.seconds * 1000);
                 (0, _helper.dE)("aq_tst_timealotted").value = docJSON.timeallotted;
+                (0, _helper.dE)("aq_tst_passpercentage").value = docJSON.passpercentage;
                 (0, _helper.dE)("aq_tst_syllabi").value = docJSON.syllabus;
                 setHTML("aq_add_test_instr", docJSON.instructions);
                 let docSnap2 = await (0, _firestore.getDoc)((0, _firestore.doc)(db, "tests", id, "questions", "questions"));
@@ -2405,9 +2536,11 @@ async function updateTopicQBank(iun) {
             const docRef = await (0, _firestore.updateDoc)((0, _firestore.doc)(db, col, id), {
                 title: (0, _helper.dE)("aq_tpcname").value,
                 timeallotted: (0, _helper.dE)("aq_tst_timealotted").value,
+                passpercentage: (0, _helper.dE)("aq_tst_passpercentage").value,
                 syllabus: (0, _helper.dE)("aq_tst_syllabi").value,
                 instructions: getHTML("aq_add_test_instr"),
                 randomize: (0, _helper.dE)("aq_randomize").checked,
+                blockresult: (0, _helper.dE)("aq_blockresult").checked,
                 strton: fgio,
                 endon: fgio2,
                 batch: wer,
@@ -3112,6 +3245,10 @@ async function getSimpleTestReport() {
         testInfo = docSnap.data();
         var attempted = 0;
         (0, _helper.dE)("fti_title").innerText = testInfo.title;
+        if (testInfo.blockresult == 1) {
+            (0, _helper.dE)("output").innerHTML = "Quiz Admin has blocked viewing of results.";
+            return 0;
+        }
         docRef = (0, _firestore.doc)(db, "tests", testid, "responses", "finished");
         docSnap = await (0, _firestore.getDoc)(docRef);
         if (docSnap.exists()) {
@@ -3140,6 +3277,9 @@ async function getSimpleTestReport() {
                     (0, _helper.dE)("fto_unanswered").innerText = tT.info.unattempted;
                     (0, _helper.dE)("fto_accuracy").innerText = tT.info.overall.acc.toString() + "%";
                     (0, _helper.dE)("fto_qsattempted").innerText = Math.floor(tT.info.overall.qc + tT.info.overall.qic).toString() + "/" + Math.floor(tT.info.overall.qc + tT.info.overall.qic + tT.info.overall.qun).toString();
+                    if (tT.info.usermarks / tT.info.total * 100 >= testInfo.passpercentage) (0, _helper.dE)("fto_passed").innerText = "You Have Passed The Test";
+                    else if (tT.info.usermarks / tT.info.total * 100 < testInfo.passpercentage) (0, _helper.dE)("fto_passed").innerText = "You Have Failed The Test. Pass Percentage:" + testInfo.passpercentage;
+                    else (0, _helper.dE)("fto_passed").innerText = "No Pass/Fail Criteria For This Test";
                     testActionLogger = tT.actions;
                     reQW = tT.info.mList;
                     let hji = "<ol>";
@@ -3607,6 +3747,10 @@ async function getTestReport() {
         testInfo = docSnap.data();
         var attempted = 0;
         (0, _helper.dE)("tt_testname").innerText = testInfo.title;
+        if (testInfo.blockresult == 1) {
+            (0, _helper.dE)("output").innerHTML = "Quiz Admin has blocked viewing of results.";
+            return 0;
+        }
         docRef = (0, _firestore.doc)(db, "tests", testid, "responses", "finished");
         docSnap = await (0, _firestore.getDoc)(docRef);
         if (docSnap.exists()) {
@@ -4497,7 +4641,7 @@ function setHTML(id, html) {
 }
 var Quarkz = {
     "copyright": "Mr Techtroid 2021-23",
-    "vno": "v0.6.6",
+    "vno": "v0.6.7",
     "author": "Mr Techtroid",
     "last-updated": "28/05/2023(IST)",
     "serverstatus": "firebase-online"
@@ -4556,7 +4700,7 @@ bc.onmessage = (event)=>{
     }
 };
 
-},{"firebase/app":"aM3Fo","firebase/auth":"79vzg","firebase/firestore":"8A4BC","firebase/storage":"8WX7E","../embeds/about":"gCJDO","../embeds/chapter":"fMnHP","../embeds/cyb":"6uKbY","../embeds/dashboard":"hkEZ0","../embeds/downloads":"g2MAL","../embeds/finished_test":"3VUaP","../embeds/forum":"bKen7","../embeds/functions":"kxrBw","../embeds/log":"l4cy5","../embeds/login":"6nKCl","../embeds/printable":"95h6E","../embeds/profile":"2MtJU","../embeds/qbnkvid":"chYH6","../embeds/register":"kcVux","../embeds/settings":"fvpoO","../embeds/sims":"7kmTm","../embeds/test_instructions":"7hktz","../embeds/tests":"7y3N8","../embeds/toc":"kt253","../embeds/topics":"eSIhy","../embeds/user":"enRwb","../embeds/usernotes":"71ul5","../js/helper":"lVRAz","./reworkui":"66uq8","../embeds/admin":"1R5ZA","ed93fa361f9b766c":"iujZH","13dadf19fac08ed3":"hagNj","chart.js/auto":"d8NN9","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","../embeds/store":"1j99F"}],"aM3Fo":[function(require,module,exports) {
+},{"firebase/app":"aM3Fo","firebase/auth":"79vzg","firebase/firestore":"8A4BC","firebase/storage":"8WX7E","../embeds/about":"gCJDO","../embeds/chapter":"fMnHP","../embeds/cyb":"6uKbY","../embeds/dashboard":"hkEZ0","../embeds/downloads":"g2MAL","../embeds/finished_test":"3VUaP","../embeds/forum":"bKen7","../embeds/functions":"kxrBw","../embeds/log":"l4cy5","../embeds/login":"6nKCl","../embeds/printable":"95h6E","../embeds/profile":"2MtJU","../embeds/qbnkvid":"chYH6","../embeds/register":"kcVux","../embeds/settings":"fvpoO","../embeds/sims":"7kmTm","../embeds/test_instructions":"7hktz","../embeds/tests":"7y3N8","../embeds/toc":"kt253","../embeds/topics":"eSIhy","../embeds/user":"enRwb","../embeds/usernotes":"71ul5","../js/helper":"lVRAz","./reworkui":"66uq8","../embeds/admin":"1R5ZA","ed93fa361f9b766c":"iujZH","13dadf19fac08ed3":"hagNj","chart.js/auto":"d8NN9","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","../embeds/store":"1j99F","../embeds/analytics":"37dkr","../embeds/vidchat":"kShrL"}],"aM3Fo":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _app = require("@firebase/app");
@@ -5830,8 +5974,8 @@ parcelHelpers.export(exports, "validateCallback", ()=>validateCallback);
 parcelHelpers.export(exports, "validateContextObject", ()=>validateContextObject);
 parcelHelpers.export(exports, "validateIndexedDBOpenable", ()=>validateIndexedDBOpenable);
 parcelHelpers.export(exports, "validateNamespace", ()=>validateNamespace);
-var global = arguments[3];
 var process = require("5b35771edbb20914");
+var global = arguments[3];
 const CONSTANTS = {
     /**
      * @define {boolean} Whether this is the client Node.js SDK.
@@ -41124,7 +41268,7 @@ let page_about = `
             <span class="abt_det">
                 <span id="abt_email">mrtechtroid@outlook.com</span>
             </span>
-            <div style="font-size: 16px;width:400px;align-items: flex-end;">
+            <div style="font-size: 16px;max-width:400px;align-items: flex-end;">
                 <span>I Am Mr Techtroid The Main Developer Of <span class="sp_txt">Quarkz!</span></span>
                 <span>I Built This Website As A Way For Schools To Head Towards Online Learning</span>
                 <span>Its Built In A Way That It Is Easy For Both Teachers And Students To Use</span>
@@ -41276,6 +41420,7 @@ let page_dashboard = `
                     onclick="window.open('https://discord.gg/XKTtqaSW', '_blank');" viewBox="0 -28.5 256 256" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMidYMid">
                     <g><path d="M216.856339,16.5966031 C200.285002,8.84328665 182.566144,3.2084988 164.041564,0 C161.766523,4.11318106 159.108624,9.64549908 157.276099,14.0464379 C137.583995,11.0849896 118.072967,11.0849896 98.7430163,14.0464379 C96.9108417,9.64549908 94.1925838,4.11318106 91.8971895,0 C73.3526068,3.2084988 55.6133949,8.86399117 39.0420583,16.6376612 C5.61752293,67.146514 -3.4433191,116.400813 1.08711069,164.955721 C23.2560196,181.510915 44.7403634,191.567697 65.8621325,198.148576 C71.0772151,190.971126 75.7283628,183.341335 79.7352139,175.300261 C72.104019,172.400575 64.7949724,168.822202 57.8887866,164.667963 C59.7209612,163.310589 61.5131304,161.891452 63.2445898,160.431257 C105.36741,180.133187 151.134928,180.133187 192.754523,160.431257 C194.506336,161.891452 196.298154,163.310589 198.110326,164.667963 C191.183787,168.842556 183.854737,172.420929 176.223542,175.320965 C180.230393,183.341335 184.861538,190.991831 190.096624,198.16893 C211.238746,191.588051 232.743023,181.531619 254.911949,164.955721 C260.227747,108.668201 245.831087,59.8662432 216.856339,16.5966031 Z M85.4738752,135.09489 C72.8290281,135.09489 62.4592217,123.290155 62.4592217,108.914901 C62.4592217,94.5396472 72.607595,82.7145587 85.4738752,82.7145587 C98.3405064,82.7145587 108.709962,94.5189427 108.488529,108.914901 C108.508531,123.290155 98.3405064,135.09489 85.4738752,135.09489 Z M170.525237,135.09489 C157.88039,135.09489 147.510584,123.290155 147.510584,108.914901 C147.510584,94.5396472 157.658606,82.7145587 170.525237,82.7145587 C183.391518,82.7145587 193.761324,94.5189427 193.539891,108.914901 C193.539891,123.290155 183.391518,135.09489 170.525237,135.09489 Z" fill="#5865F2" fill-rule="nonzero">
                     </path></g></svg>
+                    <span style = "font-size:10px;color:grey;">Copyright 2023 Quarkz! by MTTOne</span>
                     </div>
             <div id="db_study_resources" class = "db_class">
                 <span style="font-size: 25px;color:var(--clr16)">Additional Study Resources</span>
@@ -41305,7 +41450,7 @@ let page_dashboard = `
 `;
 let page_bug_report = `
 <iframe id="bgrep_frame"
-            src="https://docs.google.com/forms/d/e/1FAIpQLSeo2JZDaBApBiTeXmAnkVX60hSuJGHJkd9jsF9ePg0iM9ufjA/viewform?embedded=true"
+            src="https://docs.google.com/forms/d/e/1FAIpQLSeo2JZDaBApBiTeXmAnkVX60hSuJGHJkd9jsF9ePg0iM9ufjA/formResponse?embedded=true&entry.1599248323=Quarkz!&entry.1645606077=` + Date.now() + `"
             frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>`;
 let page_app_info = `
 <span class="in_t">App Info</span>
@@ -41549,6 +41694,9 @@ let page_finished_test = `
     <summary><span style="font-size: 4vh;">Overview</span></summary>
     <div class = "summary_div">
     <div>
+    <center><span id = "fto_passed" style="font-size:3vh;">You Have Passed The Test</span></center>
+    </div>
+    <div>
     <span style="font-size:3vh;">This is a quick snapshot of your performance measured in terms of attempts that
             were correct, incorrect, unattempted. The individual subject-Wise analysis will help you gaze your
             performance on a subject level.</span>
@@ -41675,6 +41823,7 @@ let page_functions = `
             <div id="fc_misc" class = "db_class">
                 <span style="font-size: 25px;color:var(--clr16);">Misc</span>
                 <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/edit_exams'">Edit Exams</div>
+                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/site-analytics'">Site Analytics</div>
             </div>
         </div>
 `;
@@ -42019,10 +42168,6 @@ let page_settings = `
 <span class="in_t">Settings</span>
         <hr style="color:var(--clr18)" width="100%">
         <div class = "flex_type" style = "flex-direction: row;flex-wrap: wrap;justify-content:center;align-items:center;">
-            <div id="st_accinfo" class = "db_class">
-                <span style="font-size: 25px;color:var(--clr16);">Account Info</span>
-                <button id="pass_rst_btn" class="tst_btn rpl">Reset/Change Password</button>
-            </div>
             <div id="st_rateapp" class = "db_class">
                 <span style="font-size: 25px;color:var(--clr16);">Rate Our App!</span>
                 <div id="stars">
@@ -42056,10 +42201,9 @@ let page_settings = `
             </div>
             <div id="st_changepass" class = "db_class">
                 <span style="font-size: 25px;color:var(--clr16);">Change Password</span>
-                <span>Old Password: <input id = "inp_old_pass" type = "password" value = ""></input></span>
                 <span>New Password: <input id = "inp_new_pass" type = "password" value = ""></input></span>
                 <span>Retype Password: <input id = "inp_retype_pass" type = "password" value = ""></input></span>
-                <button id="sub_chg_mail" class="tst_btn rpl">Update Email</button>
+                <button id="sub_chg_pass" class="tst_btn rpl">Update Password</button>
             </div>
         </div>`;
 exports.default = {
@@ -42091,21 +42235,23 @@ let page_edit_sims = `
 
 `;
 let page_sims = `
-<span class="in_t">Simulations</span>
+<div style = "display:flex;flex-direction:row;flex-wrap:wrap;"><span class="in_t">Simulations</span><button class="tst_btn rpl" id="sms_edit" style="display: none;" onclick='window.location.hash = "#/edit_sim/" + window.location.hash.split("#/sims/")[1]'>Edit Sim</button></div>
         <hr style="color:var(--clr18)" width="100%">
-        <div style="display: flex;flex-direction: row;flex-wrap: wrap;"><span class="in_t" id="sms_name">Sim
-                Name</span><span style="font-size: 2vh;" id="sms_prov">Sim Name</span><button class="tst_btn rpl" id="sms_edit" style="display: none;"
-                onclick='window.location.hash = "#/edit_sim/" + window.location.hash.split("#/sims/")[1]'>Edit
-                Sim</button></div>
-        <div>
             <iframe id="sim_frame" frameborder="0"
-                style="width:80vw;height:70vh;background-color: black;color:var(--clr18);scroll-behavior: smooth;"></iframe>
+                style="width:90vw;height:70vh;background-color: black;color:var(--clr18);scroll-behavior: smooth;"></iframe>
+        <div style="display: flex;flex-direction: row;flex-wrap: wrap;width:100%;margin-left:5vw;">
+        <ul style="font-size: 14px;color:var(--clr16);">
+                <li> Simulation:&nbsp;<span id = "sms_name"></span></li>
+                <li> Provider:&nbsp;<span id = "sms_prov"></span> </li>
+        </ul>
+        </div>
+        <div>
         </div>
         `;
 let page_list_sims = `
 <span class="in_t">Simulations List</span>
         <hr style="color:var(--clr18)" width="100%">
-        <div style="display: flex;flex-direction: row;flex-wrap: wrap;">
+        <div style="display: flex;flex-direction: row;flex-wrap: wrap;justify-content:center;">
             <button class="tst_btn rpl" id="psims">Physics</button>
             <button class="tst_btn rpl" id="csims">Chemistry</button>
             <button class="tst_btn rpl" id="msims">Maths</button>
@@ -42422,8 +42568,11 @@ let page_edit_topic = `
             <input type="datetime-local" id="aq_tst_endon" class="_in_aq">
             <input type="text" id="aq_tst_syllabi" class="_in_aq" placeholder="Syllabus">
             <input type="number" id="aq_tst_timealotted" class="_in_aq" placeholder="Time Alloted">
+            <input type="number" id="aq_tst_passpercentage" class="_in_aq" placeholder="Pass Percentage" value = "33">
             <div><input type="checkbox" id="aq_randomize" name="aq_randomise" value="randomize">
             <label for="aq_randomize">Randomise Questions</label></div>
+            <div><input type="checkbox" id="aq_blockresult" name="aq_randomise" value="randomize">
+            <label for="aq_blockresult">Block Result</label></div>
             <div class="summernote" id="aq_add_test_instr">Additional Test Instructions</div>
         </div>
         <div id="lqadd" style="display: flex;flex-direction: row;margin:10px;height: 50vh;">
@@ -42445,7 +42594,7 @@ let page_edit_topic = `
                     <input type="text" id="aq_examsyllabus" class="_in_aq" placeholder="Syllabus Link">
                 </div>
                 <div class="flex_type" id="aq_all" style="align-items: unset;" id="aq_uiad">
-                    <input type="text" id="aq_id" class="_in_aq" placeholder="ID" disabled>
+                    <input type="text" id="aq_id" class="_in_aq" placeholder="ID" disabled style="color:grey">
                     <div class="summernote" id="aq_qtext">Question</div>
                     <input type="text" id="aq_answer" class="_in_aq" placeholder="Answer">
                     <input type="url" id="aq_yurl" class="_in_aq" placeholder="Youtube ID">
@@ -43175,8 +43324,8 @@ exports.constants = {
 };
 
 },{"6d7fc0dc5de28bcc":"8hjhE","f44f80586868fcdc":"2WyL8","69ad8819e07e917e":"k1utz","975f0ee803b7bc7b":"busIB","845f1c258f278f9b":"g38Hg","eb3b967cf515d387":"d4idn","657f7974a39648c1":"hwD3y","88bbea401533a54f":"jbRNy","c23eebf13b558da3":"9Rcg1","5477e994dfe71234":"h9Rdh","c1bd70025e2af238":"k3tsT"}],"8hjhE":[function(require,module,exports) {
-var process = require("b055ad262129c80");
 var global = arguments[3];
+var process = require("b055ad262129c80");
 "use strict";
 // limit of Crypto.getRandomValues()
 // https://developer.mozilla.org/en-US/docs/Web/API/Crypto/getRandomValues
@@ -44940,8 +45089,8 @@ exports.pipeline = require("ce590b3502823b4");
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
-var process = require("3e432ca2944df1d");
 var global = arguments[3];
+var process = require("3e432ca2944df1d");
 "use strict";
 module.exports = Readable;
 /*<replacement>*/ var Duplex;
@@ -91925,6 +92074,57 @@ WARNING: No Items are at Sale Currently. Please Try Later.
 `;
 exports.default = {
     page_store
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"37dkr":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_analytics", ()=>page_analytics);
+let page_analytics = `
+
+
+
+
+`;
+exports.default = {
+    page_analytics
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"kShrL":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_vidchat", ()=>page_vidchat);
+let page_vidchat = `
+<h2>1. Start your Webcam</h2>
+    <div class="videos">
+      <span>
+        <h3>Local Stream</h3>
+        <video id="webcamVideo" autoplay playsinline></video>
+      </span>
+      <span>
+        <h3>Remote Stream</h3>
+        <video id="remoteVideo" autoplay playsinline></video>
+      </span>
+
+
+    </div>
+
+    <button id="webcamButton">Start webcam</button>
+    <h2>2. Create a new Call</h2>
+    <button id="callButton" disabled>Create Call (offer)</button>
+
+    <h2>3. Join a Call</h2>
+    <p>Answer the call from a different browser window or device</p>
+    
+    <input id="callInput" />
+    <button id="answerButton" disabled>Answer</button>
+
+    <h2>4. Hangup</h2>
+
+    <button id="hangupButton" disabled>Hangup</button>
+`;
+exports.default = {
+    page_vidchat
 };
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["9tRox","1SICI"], "1SICI", "parcelRequire43c0")

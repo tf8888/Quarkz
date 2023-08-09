@@ -48,6 +48,9 @@ export let page_finished_test = `
     <summary><span style="font-size: 4vh;">Overview</span></summary>
     <div class = "summary_div">
     <div>
+    <center><span id = "fto_passed" style="font-size:3vh;">You Have Passed The Test</span></center>
+    </div>
+    <div>
     <span style="font-size:3vh;">This is a quick snapshot of your performance measured in terms of attempts that
             were correct, incorrect, unattempted. The individual subject-Wise analysis will help you gaze your
             performance on a subject level.</span>

@@ -17,22 +17,24 @@ export let page_edit_sims = `
 
 `
 export let page_sims = `
-<span class="in_t">Simulations</span>
+<div style = "display:flex;flex-direction:row;flex-wrap:wrap;"><span class="in_t">Simulations</span><button class="tst_btn rpl" id="sms_edit" style="display: none;" onclick='window.location.hash = "#/edit_sim/" + window.location.hash.split("#/sims/")[1]'>Edit Sim</button></div>
         <hr style="color:var(--clr18)" width="100%">
-        <div style="display: flex;flex-direction: row;flex-wrap: wrap;"><span class="in_t" id="sms_name">Sim
-                Name</span><span style="font-size: 2vh;" id="sms_prov">Sim Name</span><button class="tst_btn rpl" id="sms_edit" style="display: none;"
-                onclick='window.location.hash = "#/edit_sim/" + window.location.hash.split("#/sims/")[1]'>Edit
-                Sim</button></div>
-        <div>
             <iframe id="sim_frame" frameborder="0"
-                style="width:80vw;height:70vh;background-color: black;color:var(--clr18);scroll-behavior: smooth;"></iframe>
+                style="width:90vw;height:70vh;background-color: black;color:var(--clr18);scroll-behavior: smooth;"></iframe>
+        <div style="display: flex;flex-direction: row;flex-wrap: wrap;width:100%;margin-left:5vw;">
+        <ul style="font-size: 14px;color:var(--clr16);">
+                <li> Simulation:&nbsp;<span id = "sms_name"></span></li>
+                <li> Provider:&nbsp;<span id = "sms_prov"></span> </li>
+        </ul>
+        </div>
+        <div>
         </div>
         `
 
 export let page_list_sims = `
 <span class="in_t">Simulations List</span>
         <hr style="color:var(--clr18)" width="100%">
-        <div style="display: flex;flex-direction: row;flex-wrap: wrap;">
+        <div style="display: flex;flex-direction: row;flex-wrap: wrap;justify-content:center;">
             <button class="tst_btn rpl" id="psims">Physics</button>
             <button class="tst_btn rpl" id="csims">Chemistry</button>
             <button class="tst_btn rpl" id="msims">Maths</button>

@@ -221,6 +221,8 @@ details[open] summary{
   display: flex;
   flex-direction: row;
   overflow-y: auto;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 /* Login Page */
@@ -459,7 +461,7 @@ details[open] summary{
   border: var(--clr17) 1px solid;
   padding: 10px;
   width: 50vw;
-  border-radius: 100px;
+  border-radius: 10px;
   margin: 6px;
   display: flex;
   flex-direction: column;
@@ -499,7 +501,7 @@ details[open] summary{
   border: var(--clr17) 1px solid;
   padding: 10px;
   min-width:200px;
-  border-radius: 100px;
+  border-radius: 10px;
   margin: 6px;
   display: flex;
   flex-direction: column;
@@ -707,7 +709,11 @@ input[type=radio], input[type=checkbox],select{
 #qb_title {
   color: var(--clr5);
 }
-
+#un_list{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 #abt_img {
   border-radius: 50%;
   width: 250px;
@@ -1456,10 +1462,10 @@ circle text {
 
 .t_notes {
   width: 20vw;
-  height: 5vh;
   border: 3px var(--clr16) solid;
   color: var(--clr16);
-  margin: 3px;
+  margin: 5px;
+  padding:5px;
 }
 
 .tts_notanswer {
@@ -1591,7 +1597,10 @@ circle text {
 #i_name,#i_start,#i_end,#i_syllabus,#i_time,#i_total,#i_qno{
   color:var(--clr3);
 }
-input,select{
+#tp_qtext img{
+  max-width: 70vw !important;
+}
+input,select,textarea{
   border: grey solid 2px;
   border-radius: 5px;
   padding: 5px;

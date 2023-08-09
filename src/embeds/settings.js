@@ -2,10 +2,6 @@ export let page_settings = `
 <span class="in_t">Settings</span>
         <hr style="color:var(--clr18)" width="100%">
         <div class = "flex_type" style = "flex-direction: row;flex-wrap: wrap;justify-content:center;align-items:center;">
-            <div id="st_accinfo" class = "db_class">
-                <span style="font-size: 25px;color:var(--clr16);">Account Info</span>
-                <button id="pass_rst_btn" class="tst_btn rpl">Reset/Change Password</button>
-            </div>
             <div id="st_rateapp" class = "db_class">
                 <span style="font-size: 25px;color:var(--clr16);">Rate Our App!</span>
                 <div id="stars">
@@ -39,10 +35,9 @@ export let page_settings = `
             </div>
             <div id="st_changepass" class = "db_class">
                 <span style="font-size: 25px;color:var(--clr16);">Change Password</span>
-                <span>Old Password: <input id = "inp_old_pass" type = "password" value = ""></input></span>
                 <span>New Password: <input id = "inp_new_pass" type = "password" value = ""></input></span>
                 <span>Retype Password: <input id = "inp_retype_pass" type = "password" value = ""></input></span>
-                <button id="sub_chg_mail" class="tst_btn rpl">Update Email</button>
+                <button id="sub_chg_pass" class="tst_btn rpl">Update Password</button>
             </div>
         </div>`
 

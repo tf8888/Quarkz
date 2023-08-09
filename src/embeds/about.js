@@ -6,7 +6,7 @@ export let page_about = `
             <span class="abt_det">
                 <span id="abt_email">mrtechtroid@outlook.com</span>
             </span>
-            <div style="font-size: 16px;width:400px;align-items: flex-end;">
+            <div style="font-size: 16px;max-width:400px;align-items: flex-end;">
                 <span>I Am Mr Techtroid The Main Developer Of <span class="sp_txt">Quarkz!</span></span>
                 <span>I Built This Website As A Way For Schools To Head Towards Online Learning</span>
                 <span>Its Built In A Way That It Is Easy For Both Teachers And Students To Use</span>

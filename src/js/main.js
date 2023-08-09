@@ -12,7 +12,7 @@ and certain other noncommercial uses permitted by copyright law.
 For permission requests, please contact [Mr Techtroid] at mrtechtroid@outlook.com .
 */
 import { initializeApp } from "firebase/app";
-import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence, GoogleAuthProvider, signInWithPopup, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail,updateEmail } from "firebase/auth";
+import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence, GoogleAuthProvider, signInWithPopup, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, updateEmail, updatePassword } from "firebase/auth";
 import { getFirestore, orderBy, limit, writeBatch, collection, addDoc, onSnapshot, deleteDoc, arrayUnion, arrayRemove, setDoc, updateDoc, getDocs, doc, serverTimestamp, getDoc, query, where } from "firebase/firestore";
 import { getStorage, ref, uploadBytesResumable, getDownloadURL, } from 'firebase/storage';
 import { page_about } from "../embeds/about";
@@ -29,6 +29,7 @@ import { page_printable } from "../embeds/printable";
 import { page_profile } from "../embeds/profile";
 import { page_qbnkvid } from "../embeds/qbnkvid";
 import { page_register } from "../embeds/register";
+import { page_analytics } from "../embeds/analytics";
 import { page_settings } from "../embeds/settings";
 import { page_sims, page_edit_sims, page_list_sims } from "../embeds/sims";
 import { page_test_instructions } from "../embeds/test_instructions";
@@ -38,14 +39,15 @@ import { page_topic, page_edit_topic } from "../embeds/topics";
 import { page_edit_user } from "../embeds/user";
 import { page_usernotes } from "../embeds/usernotes"
 import { page_store } from "../embeds/store"
-import { sd, sha256, makeid, mobileCheck, areObjectsEqual, areEqual, getServerTime, fullEle, dE, sortObj, sortObjv2, renderMarkedMath, mergeById, qCorrector, playSoundEffect, showLS, antiCopyEle, shuffleArrayWithSeed, buildHtmlTable,studentRanker } from '../js/helper'
+import { page_vidchat } from "../embeds/vidchat";
+import { sd, sha256, makeid, mobileCheck, areObjectsEqual, areEqual, getServerTime, fullEle, dE, sortObj, sortObjv2, renderMarkedMath, mergeById, qCorrector, playSoundEffect, showLS, antiCopyEle, shuffleArrayWithSeed, buildHtmlTable, studentRanker } from '../js/helper'
 import { sysaccess } from "./reworkui";
 import { page_batch_list, page_edit_batch } from "../embeds/admin";
 import Chart, { scales } from 'chart.js/auto';
 
 // I added a function that can be used to register a service worker.
 const registerServiceWorker = async () => {
-  const swRegistration = await navigator.serviceWorker.register(new URL('../js/sw.js', import.meta.url),{type:'module'}); //notice the file name
+  const swRegistration = await navigator.serviceWorker.register(new URL('../js/sw.js', import.meta.url), { type: 'module' }); //notice the file name
   return swRegistration;
 }
 registerServiceWorker()
@@ -396,7 +398,7 @@ function coreManager(newlocation, n1) {
     case "add/simulation": handlebox = "fu_simulation"; newSimulation(); break;
     case "add/tests": handlebox = "fu_topic"; newTest(); break;
     case "add/batch": handlebox = "fu_topic"; newBatch(); break;
-    case "store": handlebox = "fu_shop";renderBody(page_store, "height:max-content;", "");break;
+    case "store": handlebox = "fu_shop"; renderBody(page_store, "height:max-content;", ""); break;
     case "list/batch": handlebox = "fu_batch"; renderBody(page_batch_list, "height:max-content;", ""); renderAdminBatchList(); break;
     case "list/tests": handlebox = "fu_batch"; renderBody(page_batch_list, "height:max-content;", ""); renderAdminTestList(); break;
     case "list/chptr": handlebox = "fu_batch"; renderBody(page_batch_list, "height:max-content;", ""); renderAdminChapterList(); break;
@@ -431,6 +433,8 @@ function coreManager(newlocation, n1) {
   if (location1.includes("edit_qubank") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll"); dE("aq_qbc_save").addEventListener("click", function () { updateTopicQBank(2) }); edittopicEvents(); prepareTopicQBank(2) }
   if (location1.includes("edit_exams") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll"); dE("aq_exam_save").addEventListener("click", function () { updateTopicQBank(4) }); edittopicEvents(); prepareTopicQBank(4) }
   if (location1.includes("edit_batch") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_batch, "", ""); prepareBatch(); dE("aq_batch_save").addEventListener("click", updateBatch) }
+  // if (location1.includes("vid_chat")) { handlebox = "fu_vidchat"; renderBody(page_vidchat, "", ""); prepareVideoChat(); }
+  if (location1.includes("site-analytics") && iorole == true) { handlebox = "fu_analytics"; renderBody(page_analytics, "", ""); }
   if (iorole) {
     if (window.location.hash.includes("dashboard")) {
       dE("adminonly").style.display = "flex";
@@ -495,6 +499,139 @@ window.ifcls = function () {
   document.getElementById('tempIF_G').remove();
 }
 window.user_rate_value = 0;
+function prepareVideoChat() {
+  // const servers = {
+  //   iceServers: [
+  //     {
+  //       urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'],
+  //     },
+  //   ],
+  //   iceCandidatePoolSize: 10,
+  // };
+  // let pc = new RTCPeerConnection(servers)
+  // let localstream = null
+  // let remotestream = null
+  // const webcamButton = document.getElementById('webcamButton');
+  // const webcamVideo = document.getElementById('webcamVideo');
+  // const callButton = document.getElementById('callButton');
+  // const callInput = document.getElementById('callInput');
+  // const answerButton = document.getElementById('answerButton');
+  // const remoteVideo = document.getElementById('remoteVideo');
+  // const hangupButton = document.getElementById('hangupButton');
+  // webcamButton.onclick = async () => {
+  //   localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+  //   remoteStream = new MediaStream();
+  
+  //   // Push tracks from local stream to peer connection
+  //   localStream.getTracks().forEach((track) => {
+  //     pc.addTrack(track, localStream);
+  //   });
+  
+  //   // Pull tracks from remote stream, add to video stream
+  //   pc.ontrack = (event) => {
+  //     event.streams[0].getTracks().forEach((track) => {
+  //       remoteStream.addTrack(track);
+  //     });
+  //   };
+  
+  //   webcamVideo.srcObject = localStream;
+  //   remoteVideo.srcObject = remoteStream;
+  
+  //   callButton.disabled = false;
+  //   answerButton.disabled = false;
+  //   webcamButton.disabled = true;
+  // };
+  
+  // // 2. Create an offer
+  // callButton.onclick = async () => {
+  //   // Reference Firestore collections for signaling
+  //   let docSnap = await getDoc(doc(db, 'vidchat', window.location.hash.split("vid_chat/")[1]))
+  //   if (docSnap.exists()) {
+  //     var docJSON = docSnap.data();
+  //   }
+  //   const callDoc = firestore.collection('calls').doc();
+  //   const offerCandidates = callDoc.collection('offerCandidates');
+  //   const answerCandidates = callDoc.collection('answerCandidates');
+  
+  //   callInput.value = callDoc.id;
+  
+  //   // Get candidates for caller, save to db
+  //   pc.onicecandidate = async (event) => {
+  //     event.candidate && offerCandidates.add(event.candidate.toJSON()) && await addDoc(doc(db, 'vidchat', docRef.id, "offerCandidates"), {json: event.candidate.toJSON()});
+  //   };
+  
+  //   // Create offer
+  //   const offerDescription = await pc.createOffer();
+  //   await pc.setLocalDescription(offerDescription);
+  
+  //   const offer = {
+  //     sdp: offerDescription.sdp,
+  //     type: offerDescription.type,
+  //   };
+  
+  //   await await setDoc(doc(db, 'vidchat', docRef.id), {offer: offer})
+  
+  //   // Listen for remote answer
+  //   callDoc.onSnapshot((snapshot) => {
+  //     const data = snapshot.data();
+  //     if (!pc.currentRemoteDescription && data?.answer) {
+  //       const answerDescription = new RTCSessionDescription(data.answer);
+  //       pc.setRemoteDescription(answerDescription);
+  //     }
+  //   });
+  
+  //   // When answered, add candidate to peer connection
+  //   answerCandidates.onSnapshot((snapshot) => {
+  //     snapshot.docChanges().forEach((change) => {
+  //       if (change.type === 'added') {
+  //         const candidate = new RTCIceCandidate(change.doc.data());
+  //         pc.addIceCandidate(candidate);
+  //       }
+  //     });
+  //   });
+  
+  //   hangupButton.disabled = false;
+  // };
+  
+  // // 3. Answer the call with the unique ID
+  // answerButton.onclick = async () => {
+  //   const callId = callInput.value;
+    
+  //   const callDoc = firestore.collection('calls').doc(callId);
+  //   const answerCandidates = callDoc.collection('answerCandidates');
+  //   const offerCandidates = callDoc.collection('offerCandidates');
+  
+  //   pc.onicecandidate = (event) => {
+  //     event.candidate && answerCandidates.add(event.candidate.toJSON());
+  //   };
+  
+  //   const callData = (await callDoc.get()).data();
+  
+  //   const offerDescription = callData.offer;
+  //   await pc.setRemoteDescription(new RTCSessionDescription(offerDescription));
+  
+  //   const answerDescription = await pc.createAnswer();
+  //   await pc.setLocalDescription(answerDescription);
+  
+  //   const answer = {
+  //     type: answerDescription.type,
+  //     sdp: answerDescription.sdp,
+  //   };
+  
+  //   await callDoc.update({ answer });
+  
+  //   offerCandidates.onSnapshot((snapshot) => {
+  //     snapshot.docChanges().forEach((change) => {
+  //       console.log(change);
+  //       if (change.type === 'added') {
+  //         let data = change.doc.data();
+  //         pc.addIceCandidate(new RTCIceCandidate(data));
+  //       }
+  //     });
+  //   });
+  // };
+
+}
 function uploadEvents() {
   document.getElementById("file").addEventListener("change", async function () {
     var details = await (await fetch('https://ipapi.co/json/')).json();
@@ -534,14 +671,14 @@ function uploadEvents() {
           document.getElementById("file_status").innerText = "Upload Complete. Copy The Link Below"
           document.getElementById("file_progress").innerText = ""
           document.getElementById("file_link_long").value = downloadURL
-          async function addDocument(){
+          async function addDocument() {
             const docRef = await addDoc(collection(db, "quarkz", "users", "uploads"), {
               ipdetails: details,
               ip: details.ip,
               url: downloadURL,
               name: name,
               size: file.size,
-          });
+            });
           }
           addDocument()
         })
@@ -568,18 +705,36 @@ async function reportHandler() {
   })
 }
 async function settingsEvents() {
-  dE("pass_rst_btn").addEventListener("click", requestPasschange);
-  dE("sub_chg_mail").addEventListener("click",async function(){
-    if (dE("inp_mail").value.match(/^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)){
-      updateEmail(auth.currentUser,dE("inp_mail").value).then(() => {
-        updateDoc(doc(db,"users",userinfo.uuid),{
-          email:dE("inp_mail").value
+  // dE("pass_rst_btn").addEventListener("click", requestPasschange);
+  dE("sub_chg_pass").addEventListener("click", async function () {
+    if (dE("inp_new_pass").value.length < 8) {
+      log("Warning", 'Password should be at least 8 characters long');
+    }
+    if (dE("inp_new_pass").value == dE("inp_retype_pass").value) {
+      updatePassword(auth.currentUser, dE("inp_new_pass").value).then(() => {
+        log("Warning", 'Password Reset Successful');
+      }).catch((error) => {
+        log("Warning", 'Password Reset Failed');
+        // ...
+      });
+
+    } else {
+      log("Warning", 'New Password and Confirm password dont match.');
+    }
+    dE("inp_new_pass").value = ""
+    dE("inp_retype_pass").value = ""
+  })
+  dE("sub_chg_mail").addEventListener("click", async function () {
+    if (dE("inp_mail").value.match(/^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)) {
+      updateEmail(auth.currentUser, dE("inp_mail").value).then(() => {
+        updateDoc(doc(db, "users", userinfo.uuid), {
+          email: dE("inp_mail").value
         })
         window.location.reload()
       }).catch((error) => {
         log("ERROR", "Something went wrong.")
       });
-    }else{
+    } else {
       log("ERROR", "Invalid Email")
     }
   })
@@ -631,10 +786,11 @@ async function settingsEvents() {
       }
     });
   }
-  if (userinfo.prf_type == null) { await updateDoc(doc(db, 'users', userinfo.uuid),{
-    prf_type: "v2"
-  })
- }
+  if (userinfo.prf_type == null) {
+    await updateDoc(doc(db, 'users', userinfo.uuid), {
+      prf_type: "v2"
+    })
+  }
   dE("prf_typ_" + userinfo.prf_type.split("v")[1]).style.borderColor = "red"
   dE("prf_typ_1").src = getAvatarURL(userinfo.name, userinfo.gen, "v1")
   dE("prf_typ_2").src = getAvatarURL(userinfo.name, userinfo.gen, "v2")
@@ -643,7 +799,7 @@ async function settingsEvents() {
     dE("prf_typ_1").style.borderColor = "red"
     dE("prf_typ_2").style.borderColor = "#06d85f"
     dE("prf_typ_3").style.borderColor = "#06d85f"
-    await updateDoc(doc(db, 'users', userinfo.uuid),{
+    await updateDoc(doc(db, 'users', userinfo.uuid), {
       prf_type: "v1"
     })
     userinfo.prf_type = "v1"
@@ -653,7 +809,7 @@ async function settingsEvents() {
     dE("prf_typ_1").style.borderColor = "#06d85f"
     dE("prf_typ_2").style.borderColor = "red"
     dE("prf_typ_3").style.borderColor = "#06d85f"
-    await updateDoc(doc(db, 'users', userinfo.uuid),{
+    await updateDoc(doc(db, 'users', userinfo.uuid), {
       prf_type: "v2"
     })
     userinfo.prf_type = "v2"
@@ -662,7 +818,7 @@ async function settingsEvents() {
     dE("prf_typ_1").style.borderColor = "#06d85f"
     dE("prf_typ_2").style.borderColor = "#06d85f"
     dE("prf_typ_3").style.borderColor = "red"
-    await updateDoc(doc(db, 'users', userinfo.uuid),{
+    await updateDoc(doc(db, 'users', userinfo.uuid), {
       prf_type: "v3"
     })
     userinfo.prf_type = "v3"
@@ -975,7 +1131,7 @@ function uNotesClicker() {
   window.location.hash = "#/usernotes/" + this.id.split("uno")[1]
 }
 async function getUserNotesList() {
-  try{
+  try {
     if (userinfo.usernotes.length <= 0) {
       userinfo.usernotes = []
       const q = query(collection(db, "usernotes"), where("uuid", "==", userinfo.uuid));
@@ -985,13 +1141,13 @@ async function getUserNotesList() {
         userinfo.usernotes.push({ id: doc.id, crton: tfg.crton, lastupdated: tfg.lastupdated, title: tfg.title, type: tfg.type, uuid: tfg.uuid })
       })
     }
-  }catch{}
-  try{
+  } catch { }
+  try {
     for (var i = 0; i < userinfo.usernotes.length; i++) {
       dE("un_list").insertAdjacentHTML("beforeend", "<div class='t_notes' id='uno" + userinfo.usernotes[i].id + "' style='background-color: " + userinfo.usernotes[i].color + "'><span class='tntc2' id='" + userinfo.usernotes[i].id + "'>" + userinfo.usernotes[i].title + "</span></div>")
       dE("uno" + userinfo.usernotes[i].id).addEventListener("click", uNotesClicker)
     }
-  }catch{}
+  } catch { }
   dE("un_list").insertAdjacentHTML("beforeend", "<div class='t_notes' id='unoadd'><span><center>+</center></span></div>")
   dE("unoadd").addEventListener("click", uNotesClicker)
 }
@@ -1463,6 +1619,7 @@ async function prepareTopicQBank(iun) {
         dE("aq_tpclevel").value = docJSON.level
         dE("aq_tpc_subj").value = docJSON.subject
         dE("aq_randomize").checked = docJSON.randomize
+        dE("aq_blockresult").checked = docJSON.blockresult
         dE("aq_tst_batches").value = docJSON.batch.toString()
         function dateparser(var1) {
           var now = new Date(var1);
@@ -1472,6 +1629,7 @@ async function prepareTopicQBank(iun) {
         dE("aq_tst_stron").value = dateparser(docJSON.strton.seconds * 1000)
         dE("aq_tst_endon").value = dateparser(docJSON.endon.seconds * 1000)
         dE("aq_tst_timealotted").value = docJSON.timeallotted
+        dE("aq_tst_passpercentage").value = docJSON.passpercentage
         dE("aq_tst_syllabi").value = docJSON.syllabus
         setHTML("aq_add_test_instr", docJSON.instructions)
         let docSnap2 = await getDoc(doc(db, "tests", id, "questions", "questions"))
@@ -1551,9 +1709,11 @@ async function updateTopicQBank(iun) {
       const docRef = await updateDoc(doc(db, col, id), {
         title: dE("aq_tpcname").value,
         timeallotted: dE("aq_tst_timealotted").value,
+        passpercentage: dE("aq_tst_passpercentage").value,
         syllabus: dE("aq_tst_syllabi").value,
         instructions: getHTML("aq_add_test_instr"),
         randomize: dE("aq_randomize").checked,
+        blockresult: dE("aq_blockresult").checked,
         strton: fgio,
         endon: fgio2,
         batch: wer,
@@ -1789,7 +1949,7 @@ async function lessonRenderer(docJSON) {
   dE("report-tag").value = docJSON.id
   // dE("tp_lsimg").src = docJSON.img
 }
-async function questionRenderer(docJSON, totalq,pqno) {
+async function questionRenderer(docJSON, totalq, pqno) {
   function iu(ele) { ele.style.display = "none" }
   function io(ele) { ele.style.display = "block" }
   function qif(ele) { ele.style.display = "flex" }
@@ -1797,7 +1957,7 @@ async function questionRenderer(docJSON, totalq,pqno) {
   var tpmcqcon = dE("tp_mcq_con")
   var tpmatrix = dE("tp_matrix")
   var tpanswer = dE("tp_answer")
-  dE("tp_lsno").innerHTML = "Question<span style = 'font-size:12px'>&nbsp;"+pqno+" of (" + totalq + ")</span>"
+  dE("tp_lsno").innerHTML = "Question<span style = 'font-size:12px'>&nbsp;" + pqno + " of (" + totalq + ")</span>"
   dE("tp_question").style.display = "flex"
   dE("tp_lesson").style.display = "none"
   dE("tp_question").setAttribute("dataid", docJSON.id)
@@ -1855,12 +2015,12 @@ async function topicHandler(type) {
     if (topicJSON.qllist[i].mode == "question") {
       totalq++
     }
-    if (i == topicJSONno){
+    if (i == topicJSONno) {
       qno = totalq
     }
   }
   if (tqQus.mode == "lesson") { lessonRenderer(tqQus) }
-  else if (tqQus.mode == "question") { questionRenderer(tqQus, totalq,qno) }
+  else if (tqQus.mode == "question") { questionRenderer(tqQus, totalq, qno) }
   stpVid();
 }
 function addMCQ() {
@@ -2005,10 +2165,10 @@ async function authStateObserver(user) {
       var docJSON = docSnap.data();
       userinfo.examslist = docJSON
       if (docJSON.ratemyapp) { localStorage.setItem("rate_app", false) }
-      if (docJSON.offline && userinfo.uuid != "shh5oUIhRpdBkEKQ3GCZwoKE9u42"){
+      if (docJSON.offline && userinfo.uuid != "shh5oUIhRpdBkEKQ3GCZwoKE9u42") {
         signOut(getAuth());
         userdetails = []
-        log("Server Offline","Quarkz Is Temporarily Offline for Maintainance. " + docJSON.offlinemsg)
+        log("Server Offline", "Quarkz Is Temporarily Offline for Maintainance. " + docJSON.offlinemsg)
         return 0
       }
       if (docJSON.warning != "") {
@@ -2248,6 +2408,10 @@ async function getSimpleTestReport() {
     testInfo = docSnap.data()
     var attempted = 0;
     dE("fti_title").innerText = testInfo.title
+    if (testInfo.blockresult == 1) {
+      dE("output").innerHTML = "Quiz Admin has blocked viewing of results."
+      return 0
+    }
     docRef = doc(db, "tests", testid, "responses", "finished");
     docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
@@ -2283,6 +2447,13 @@ async function getSimpleTestReport() {
               dE("fto_accuracy").innerText = tT.info.overall.acc.toString() + "%";
               dE("fto_qsattempted").innerText = Math.floor(tT.info.overall.qc + tT.info.overall.qic).toString() + "/" + Math.floor(tT.info.overall.qc + tT.info.overall.qic + tT.info.overall.qun).toString()
 
+              if (tT.info.usermarks / tT.info.total * 100 >= testInfo.passpercentage) {
+                dE("fto_passed").innerText = "You Have Passed The Test"
+              } else if (tT.info.usermarks / tT.info.total * 100 < testInfo.passpercentage) {
+                dE("fto_passed").innerText = "You Have Failed The Test. Pass Percentage:" + testInfo.passpercentage
+              } else {
+                dE("fto_passed").innerText = "No Pass/Fail Criteria For This Test"
+              }
               testActionLogger = tT.actions
               reQW = tT.info.mList
 
@@ -2296,7 +2467,7 @@ async function getSimpleTestReport() {
               for (var i = 0; i < unattemptedtopics.length; i++) {
                 hji += '<li><div class = "tlinks" style = "flex-direction:row;width:25vw;justify-content:space-between;"><span class = "t_name">' + unattemptedtopics[i] + '</span></div></li>'
               }
-              if (missedtopics.length == 0 && unattemptedtopics.length == 0){
+              if (missedtopics.length == 0 && unattemptedtopics.length == 0) {
                 hji = "<span>Hoo! No Missed Concepts on This Test</span>"
               }
               dE("fto_missed").innerHTML = hji
@@ -2304,59 +2475,59 @@ async function getSimpleTestReport() {
 
               try {
                 let tablebuilder = tT.info.subjectmarks
-                tablebuilder.overall = { correct: tT.info.correct, incorrect: tT.info.incorrect, unattempted: tT.info.unattempted,qc:0,qic:0,qun:0 }
+                tablebuilder.overall = { correct: tT.info.correct, incorrect: tT.info.incorrect, unattempted: tT.info.unattempted, qc: 0, qic: 0, qun: 0 }
                 let tablebuilder2 = []
                 var ion1 = ["Physics", "Chemistry", "Math", "Biology", "Statistics", "Computer", "Unfiled", "overall"]
                 for (var eleX of ion1) {
                   var el2e2 = tT.info.subjectmarks[eleX]
                   if (!areObjectsEqual(el2e2, { correct: 0, unattempted: 0, incorrect: 0, total: 0, qc: 0, qic: 0, qun: 0 })) {
                     let fgy = el2e2.correct + el2e2.incorrect
-                    if (eleX != "overall"){
+                    if (eleX != "overall") {
                       tablebuilder.overall.qc += el2e2.qc
                       tablebuilder.overall.qic = el2e2.qic
                       tablebuilder.overall.qun = el2e2.qun
                     }
                     tablebuilder2.push({ subject: eleX, score: fgy, crr_marks: el2e2.correct, correct: el2e2.qc, incr_marks: el2e2.incorrect, incorrect: el2e2.qic, unat_marks: el2e2.unattempted, unattempted: el2e2.qun, })
                   }
-                } 
+                }
                 let graphtable = [...tablebuilder2]
                 for (var i = 0; i < graphtable.length; i++) {
                   document.getElementById("fto_table_pie").insertAdjacentHTML("beforeend", "<div style = 'width:300px;height:300px'><canvas id = 'fto_tbp_" + graphtable[i].subject + "'></canvas></div>");
                   let iop = new Chart(
-                      dE("fto_tbp_"+graphtable[i].subject),
-                      {
-                        type: 'pie',
-                        options: {
-                          plugins: {
-                              title: {
-                                  display: true,
-                                  text: 'Overview ' + graphtable[i].subject,
-                                  color: "olive"
-                              },
-                              legend: {
-                                labels: {
-                                  color: "olive"
-                                }
-                              }
-                          }
-                        },
-                        data: {
-                          labels: ["Correct", "Incorrect", "Unanswered"],
-                          
-                          datasets: [
-                            {
-                              label: "",
-                              backgroundColor: [
-                                'rgb(0,128,0)',
-                                'rgb(255,0,0)',
-                                'rgb(255, 165, 0)'
-                              ],
-                              data: [graphtable[i].correct, graphtable[i].incorrect, graphtable[i].unattempted]
+                    dE("fto_tbp_" + graphtable[i].subject),
+                    {
+                      type: 'pie',
+                      options: {
+                        plugins: {
+                          title: {
+                            display: true,
+                            text: 'Overview ' + graphtable[i].subject,
+                            color: "olive"
+                          },
+                          legend: {
+                            labels: {
+                              color: "olive"
                             }
-                          ]
+                          }
                         }
+                      },
+                      data: {
+                        labels: ["Correct", "Incorrect", "Unanswered"],
+
+                        datasets: [
+                          {
+                            label: "",
+                            backgroundColor: [
+                              'rgb(0,128,0)',
+                              'rgb(255,0,0)',
+                              'rgb(255, 165, 0)'
+                            ],
+                            data: [graphtable[i].correct, graphtable[i].incorrect, graphtable[i].unattempted]
+                          }
+                        ]
                       }
-                    )   
+                    }
+                  )
                 }
                 let ioh = new Chart(
                   dE("fto_table_score"),
@@ -2364,23 +2535,23 @@ async function getSimpleTestReport() {
                     type: 'bar',
                     options: {
                       plugins: {
-                          title: {
-                              display: true,
-                              text: 'Subject Wise Scores',
-                              color: "olive"
-                          },
-                          legend: {
-                            labels: {
-                              color: "olive"
-                            }
+                        title: {
+                          display: true,
+                          text: 'Subject Wise Scores',
+                          color: "olive"
+                        },
+                        legend: {
+                          labels: {
+                            color: "olive"
                           }
+                        }
                       },
                       scales: {
-                          y: {
-                            beginAtZero: true
-                          },
-                          x: {color:"olive"}
-                        }
+                        y: {
+                          beginAtZero: true
+                        },
+                        x: { color: "olive" }
+                      }
                     },
                     data: {
                       labels: tablebuilder2.map(row => row.subject),
@@ -2408,7 +2579,7 @@ async function getSimpleTestReport() {
                       ]
                     }
                   }
-                )  
+                )
                 dE("fto_overview_table").appendChild(buildHtmlTable(tablebuilder2))
 
               } catch (e) {
@@ -2419,19 +2590,19 @@ async function getSimpleTestReport() {
                 try {
                   let tablebuilder3 = []
                   let tablebuilder4 = []
-                  var ion1 = ["Physics", "Chemistry", "Math", "Biology", "Statistics", "Computer", "Unfiled","overall"]
-                  analysedActions.subject.overall = { correct: 0, incorrect: 0, unattempted: 0,total:0}
+                  var ion1 = ["Physics", "Chemistry", "Math", "Biology", "Statistics", "Computer", "Unfiled", "overall"]
+                  analysedActions.subject.overall = { correct: 0, incorrect: 0, unattempted: 0, total: 0 }
                   for (var eleX of ion1) {
                     var el2e2 = analysedActions.subject[eleX]
                     if (!areObjectsEqual(el2e2, { correct: 0, incorrect: 0, unattempted: 0, total: 0 })) {
-                      if (eleX != "overall"){
+                      if (eleX != "overall") {
                         analysedActions.subject.overall.correct += el2e2.correct
                         analysedActions.subject.overall.incorrect += el2e2.incorrect
                         analysedActions.subject.overall.unattempted += el2e2.unattempted
                         analysedActions.subject.overall.total += el2e2.total
                       }
                       tablebuilder3.push({ subject: eleX, correct: sd(el2e2.correct), incorrect: sd(el2e2.incorrect), unattempted: sd(el2e2.unattempted), total: sd(el2e2.correct + el2e2.incorrect + el2e2.unattempted), accuracy: Math.floor((1 - tT.info.subjectmarks[eleX].qic / tT.info.subjectmarks[eleX].qc) * 100).toString() + "%" })
-                      tablebuilder4.push({ subject: eleX, correct: el2e2.correct, incorrect: el2e2.incorrect, unattempted: el2e2.unattempted, total: el2e2.correct + el2e2.incorrect + el2e2.unattempted, accuracy: Math.floor((1 - tT.info.subjectmarks[eleX].qic / tT.info.subjectmarks[eleX].qc) * 100),attempts:Math.floor(tT.info.subjectmarks[eleX].qc / (tT.info.subjectmarks[eleX].qc+tT.info.subjectmarks[eleX].qun+tT.info.subjectmarks[eleX].qic)*100)})
+                      tablebuilder4.push({ subject: eleX, correct: el2e2.correct, incorrect: el2e2.incorrect, unattempted: el2e2.unattempted, total: el2e2.correct + el2e2.incorrect + el2e2.unattempted, accuracy: Math.floor((1 - tT.info.subjectmarks[eleX].qic / tT.info.subjectmarks[eleX].qc) * 100), attempts: Math.floor(tT.info.subjectmarks[eleX].qc / (tT.info.subjectmarks[eleX].qc + tT.info.subjectmarks[eleX].qun + tT.info.subjectmarks[eleX].qic) * 100) })
                     }
                   }
                   let ioh = new Chart(
@@ -2440,22 +2611,22 @@ async function getSimpleTestReport() {
                       type: 'bar',
                       options: {
                         plugins: {
-                            title: {
-                                display: true,
-                                text: 'Subject Wise Time Spent',
-                                color: "olive"
-                            },
-                            legend: {
-                              labels: {
-                                color: "olive"
-                              }
+                          title: {
+                            display: true,
+                            text: 'Subject Wise Time Spent',
+                            color: "olive"
+                          },
+                          legend: {
+                            labels: {
+                              color: "olive"
                             }
+                          }
                         },
                         scales: {
-                            y: {
-                              beginAtZero: true
-                            },x: {color:"olive"}
-                          }
+                          y: {
+                            beginAtZero: true
+                          }, x: { color: "olive" }
+                        }
                       },
                       data: {
                         labels: tablebuilder4.map(row => row.subject),
@@ -2463,22 +2634,22 @@ async function getSimpleTestReport() {
                           {
                             label: "Correct",
                             backgroundColor: "green",
-                            data: tablebuilder4.map(row => row.correct/60),
+                            data: tablebuilder4.map(row => row.correct / 60),
                           },
                           {
                             label: "Incorrect",
                             backgroundColor: "red",
-                            data: tablebuilder4.map(row => row.incorrect/60),
+                            data: tablebuilder4.map(row => row.incorrect / 60),
                           },
                           {
                             label: "Unattempted",
                             backgroundColor: "orange",
-                            data: tablebuilder4.map(row =>row.unattempted/60),
+                            data: tablebuilder4.map(row => row.unattempted / 60),
                           },
                           {
                             label: "Total Time Spent",
                             backgroundColor: "blue",
-                            data: tablebuilder4.map(row =>row.total/60),
+                            data: tablebuilder4.map(row => row.total / 60),
                           }
                         ]
                       }
@@ -2490,25 +2661,25 @@ async function getSimpleTestReport() {
                       type: 'bar',
                       options: {
                         plugins: {
-                            title: {
-                                display: true,
-                                text: 'Subject Accuracy vs Attempted(%)',
-                                color: "olive"
-                            },
-                            legend: {
-                              position: 'right',
-                              labels: {
-                                color: "olive"
-                              }
-                            },
-                            scales:{
-                              y: {color:"olive"}
+                          title: {
+                            display: true,
+                            text: 'Subject Accuracy vs Attempted(%)',
+                            color: "olive"
+                          },
+                          legend: {
+                            position: 'right',
+                            labels: {
+                              color: "olive"
                             }
+                          },
+                          scales: {
+                            y: { color: "olive" }
+                          }
                         }
                       },
                       data: {
                         labels: tablebuilder4.map(row => row.subject),
-                        
+
                         datasets: [
                           {
                             label: "Accuracy",
@@ -2521,7 +2692,7 @@ async function getSimpleTestReport() {
                         ]
                       }
                     }
-                  )   
+                  )
                   dE("fto_time_table").appendChild(buildHtmlTable(tablebuilder3))
                 } catch {
 
@@ -2539,13 +2710,13 @@ async function getSimpleTestReport() {
               leaderboard = sortObj(leaderboard, "marks", 1)
               let leaderboard2 = []
               leaderboard = studentRanker(leaderboard)
-              for (var i =0; i<leaderboard.length;i++){
-                if (userinfo.uuid == leaderboard[i].uid){
+              for (var i = 0; i < leaderboard.length; i++) {
+                if (userinfo.uuid == leaderboard[i].uid) {
                   dE("fto_rank").innerText = leaderboard[i].rank
                 }
               }
-              for (var i =0; i<leaderboard.length;i++){
-                leaderboard2.push({name:leaderboard[i].name,marks:leaderboard[i].marks,rank:leaderboard[i].rank})
+              for (var i = 0; i < leaderboard.length; i++) {
+                leaderboard2.push({ name: leaderboard[i].name, marks: leaderboard[i].marks, rank: leaderboard[i].rank })
               }
               dE("fto_leaderboard").appendChild(buildHtmlTable(leaderboard2))
             } catch {
@@ -2663,6 +2834,10 @@ async function getTestReport() {
     testInfo = docSnap.data()
     var attempted = 0;
     dE("tt_testname").innerText = testInfo.title
+    if (testInfo.blockresult == 1) {
+      dE("output").innerHTML = "Quiz Admin has blocked viewing of results."
+      return 0
+    }
     docRef = doc(db, "tests", testid, "responses", "finished");
     docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
@@ -2903,7 +3078,7 @@ async function computeResult(type) {
   }
   overall.acc = Math.floor((1 - overall.qic / overall.qc) * 100)
   var t = subjectmarks["Physics"].total + subjectmarks["Chemistry"].total + subjectmarks["Math"].total + subjectmarks["Biology"].total + subjectmarks["Computer"].total + subjectmarks["Statistics"].total + subjectmarks["Unfiled"].total
-  var tFinal = { correct: c, incorrect: ic, unattempted: u, mList: marksList, total: t, usermarks: c + ic, subjectmarks: subjectmarks, overall: overall, missedtopics: missedtopics,unattemptedtopics:unattemptedtopics }
+  var tFinal = { correct: c, incorrect: ic, unattempted: u, mList: marksList, total: t, usermarks: c + ic, subjectmarks: subjectmarks, overall: overall, missedtopics: missedtopics, unattemptedtopics: unattemptedtopics }
   if (type == 1) {
     if (!areObjectsEqual(tFinal, fg)) {
       log("NOTICE", "Please Wait, Marks Are Being Updated")
@@ -2927,7 +3102,7 @@ async function computeResult(type) {
     })
     // renderBody(page_test_end, "", "")
     // dE("te_endtime").innerText = new Date(testInfo.endon.seconds * 1000);
-    if (gty != ""){
+    if (gty != "") {
       dE(gty).remove()
     }
     testInfo = {}
@@ -2961,16 +3136,16 @@ function testqHandler(id, no) {
       if (ele.type == "mcq") {
         var qop = ele.op;
         for (let ele1 of qop) {
-          let yt = Math.floor(Math.random()*100000)
-          asi += '<span><input type="radio" class = "q_ans" id = "mcq_'+yt+'" value = "' + ele1 + '" name = "q_op"></input><label for = "mcq_'+yt+'"><li>'+ele1+'</li></label></span>'
+          let yt = Math.floor(Math.random() * 100000)
+          asi += '<span><input type="radio" class = "q_ans" id = "mcq_' + yt + '" value = "' + ele1 + '" name = "q_op"></input><label for = "mcq_' + yt + '"><li>' + ele1 + '</li></label></span>'
         }
         var qrt = '<ol class = "qb_mcq" type = "A">' + asi + '</ol>'
       }
       if (ele.type == "mcq_multiple" || ele.type == "mcq_multiple_partial") {
         var qop = ele.op;
         for (let ele1 of qop) {
-          let yt = Math.floor(Math.random()*100000)
-          asi += '<span><input type="checkbox" class = "q_ans" id = "mcq_'+yt+'" value = "' + ele1 + '" name = "q_op"><label for = "mcq_'+yt+'"><li>'+ele1+'</li></label></input></span>'
+          let yt = Math.floor(Math.random() * 100000)
+          asi += '<span><input type="checkbox" class = "q_ans" id = "mcq_' + yt + '" value = "' + ele1 + '" name = "q_op"><label for = "mcq_' + yt + '"><li>' + ele1 + '</li></label></input></span>'
         }
         var qrt = '<ol class = "qb_mcq" type = "A">' + asi + '</ol>'
       }
@@ -3191,9 +3366,9 @@ async function testOperator(type) {
   dE(activequestionid).classList.remove("tts_notanswer", "tts_notvisit", "tts_answered", "tts_review", "tts_ansreview")
   dE(activequestionid).classList.add(type)
   showLS("d")
-  for (var i =0;i<testQuestionList.questions.length;i++){
-    if (testQuestionList.questions[i].qid == activequestionid && type != "tts_notanswer" && type!="tts_notvisit"){
-      testqHandler(testQuestionList.questions[i+1].qid,i+2)
+  for (var i = 0; i < testQuestionList.questions.length; i++) {
+    if (testQuestionList.questions[i].qid == activequestionid && type != "tts_notanswer" && type != "tts_notvisit") {
+      testqHandler(testQuestionList.questions[i + 1].qid, i + 2)
       break;
     }
   }
@@ -3355,7 +3530,7 @@ function setHTML(id, html) {
 }
 var Quarkz = {
   "copyright": "Mr Techtroid 2021-23",
-  "vno": "v0.6.6",
+  "vno": "v0.6.7",
   "author": "Mr Techtroid",
   "last-updated": "28/05/2023(IST)",
   "serverstatus": "firebase-online",
@@ -3409,11 +3584,11 @@ bc.onmessage = (event) => {
   if (event.data == `QZCODE-REPORT`) {
     reportHandler()
   }
-  if (event.data == `QZCODE-DARK`){
+  if (event.data == `QZCODE-DARK`) {
     Chart.defaults.color = '#fff';
     Chart.defaults.borderColor = '#fff';
   }
-  if (event.data == `QZCODE-LIGHT`){
+  if (event.data == `QZCODE-LIGHT`) {
     Chart.defaults.color = '#000';
     Chart.defaults.borderColor = '#000';
   }

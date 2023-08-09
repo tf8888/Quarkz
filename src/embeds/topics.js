@@ -24,8 +24,11 @@ export let page_edit_topic = `
             <input type="datetime-local" id="aq_tst_endon" class="_in_aq">
             <input type="text" id="aq_tst_syllabi" class="_in_aq" placeholder="Syllabus">
             <input type="number" id="aq_tst_timealotted" class="_in_aq" placeholder="Time Alloted">
+            <input type="number" id="aq_tst_passpercentage" class="_in_aq" placeholder="Pass Percentage" value = "33">
             <div><input type="checkbox" id="aq_randomize" name="aq_randomise" value="randomize">
             <label for="aq_randomize">Randomise Questions</label></div>
+            <div><input type="checkbox" id="aq_blockresult" name="aq_randomise" value="randomize">
+            <label for="aq_blockresult">Block Result</label></div>
             <div class="summernote" id="aq_add_test_instr">Additional Test Instructions</div>
         </div>
         <div id="lqadd" style="display: flex;flex-direction: row;margin:10px;height: 50vh;">
@@ -47,7 +50,7 @@ export let page_edit_topic = `
                     <input type="text" id="aq_examsyllabus" class="_in_aq" placeholder="Syllabus Link">
                 </div>
                 <div class="flex_type" id="aq_all" style="align-items: unset;" id="aq_uiad">
-                    <input type="text" id="aq_id" class="_in_aq" placeholder="ID" disabled>
+                    <input type="text" id="aq_id" class="_in_aq" placeholder="ID" disabled style="color:grey">
                     <div class="summernote" id="aq_qtext">Question</div>
                     <input type="text" id="aq_answer" class="_in_aq" placeholder="Answer">
                     <input type="url" id="aq_yurl" class="_in_aq" placeholder="Youtube ID">
