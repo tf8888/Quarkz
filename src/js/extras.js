@@ -12,21 +12,21 @@ and certain other noncommercial uses permitted by copyright law.
 
 For permission requests, please contact [Mr Techtroid] at mrtechtroid@outlook.com .
 */
-function changeColor(ele){
-    c = ele.firstChild
-    if(ele.target !== this) {
-    if (document.getElementById("aq_type").value == "mcq"){
+function changeColor(ele) {
+  c = ele.firstChild
+  if (ele.target !== this) {
+    if (document.getElementById("aq_type").value == "mcq") {
       for (var i = 0; i < document.getElementsByClassName("aq_mcq").length; i++) {
         document.getElementsByClassName("aq_mcq")[i].classList.remove("aq_mcq_ans")
         document.getElementsByClassName("aq_mcq_p")[i].style.borderColor = "yellow"
       }
       c.classList.add("aq_mcq_ans")
       ele.style.borderColor = "lime"
-    }else {
-      if (c.classList.contains("aq_mcq_ans")){
+    } else {
+      if (c.classList.contains("aq_mcq_ans")) {
         c.classList.remove("aq_mcq_ans")
         ele.style.borderColor = "yellow"
-      }else {
+      } else {
         c.classList.add("aq_mcq_ans")
         ele.style.borderColor = "lime"
       }
@@ -47,7 +47,7 @@ function watchonYT(vidID) {
 }
 
 function onPlayerReady(event) {
-//   event.target.playVideo();
+  //   event.target.playVideo();
   if (video_id == "4YKpBYo61Cs") {
     player.setVolume(25)
   }
@@ -58,20 +58,20 @@ function onPlayerStateChange(event) {
   if (event.data == YT.PlayerState.PLAYING && !yt_done) {
     yt_done = true;
   }
-  if (event.data == YT.PlayerState.PLAYING){
+  if (event.data == YT.PlayerState.PLAYING) {
     dE('yt_progressBar').style.display = "block"
-      var playerTotalTime = player.getDuration();
+    var playerTotalTime = player.getDuration();
 
-      mytimer = setInterval(function() {
-        var playerCurrentTime = player.getCurrentTime();
-        var playerTimeDifference = (playerCurrentTime / playerTotalTime) * 100;
-        var progressBarWidth = playerTimeDifference + "%"
-        dE('yt_progressBar_in').style.width =  progressBarWidth
-      }, 1000);        
-    } else {
-      clearTimeout(mytimer);
-      dE('yt_progressBar').style.display = "none"
-    }
+    mytimer = setInterval(function () {
+      var playerCurrentTime = player.getCurrentTime();
+      var playerTimeDifference = (playerCurrentTime / playerTotalTime) * 100;
+      var progressBarWidth = playerTimeDifference + "%"
+      dE('yt_progressBar_in').style.width = progressBarWidth
+    }, 1000);
+  } else {
+    clearTimeout(mytimer);
+    dE('yt_progressBar').style.display = "none"
+  }
 }
 function stopVideo() {
   player.stopVideo();
@@ -91,7 +91,7 @@ function volumechange() {
     document.getElementById("mute").innerText = "volume_down"
   }
   if (player.getVolume() == 0) {
-    document.getElementById("mute").innerText= "volume_off"
+    document.getElementById("mute").innerText = "volume_off"
   }
 }
 
@@ -101,11 +101,11 @@ function volumetype() {
     document.getElementById("mute").innerText = "volume_up"
   } else {
     player.mute()
-    document.getElementById("mute").innerText= "volume_off"
+    document.getElementById("mute").innerText = "volume_off"
   }
 
 }
-function fullscreen(){
+function fullscreen() {
   if (
     document.fullscreenElement ||
     document.webkitFullscreenElement ||
@@ -136,46 +136,46 @@ function fullscreen(){
     document.getElementById("player").style.height = "90vh"
   }
 }
-function mcqchose(ele){
-    if (document.getElementById("tp_question").getAttribute("qtype") == "mcq"){
-      for (var i = 0; i < document.getElementsByClassName("tp_mcq_p").length; i++) {
-        document.getElementsByClassName("tp_mcq_p")[i].classList.remove("aq_mcq_ans")
-        document.getElementsByClassName("tp_mcq_p")[i].style.borderColor = "yellow"
-      }
+function mcqchose(ele) {
+  if (document.getElementById("tp_question").getAttribute("qtype") == "mcq") {
+    for (var i = 0; i < document.getElementsByClassName("tp_mcq_p").length; i++) {
+      document.getElementsByClassName("tp_mcq_p")[i].classList.remove("aq_mcq_ans")
+      document.getElementsByClassName("tp_mcq_p")[i].style.borderColor = "yellow"
+    }
+    ele.classList.add("aq_mcq_ans")
+    ele.style.borderColor = "lime"
+  } else {
+    if (ele.classList.contains("aq_mcq_ans")) {
+      ele.classList.remove("aq_mcq_ans")
+      ele.style.borderColor = "yellow"
+    } else {
       ele.classList.add("aq_mcq_ans")
       ele.style.borderColor = "lime"
-    }else {
-      if (ele.classList.contains("aq_mcq_ans")){
-        ele.classList.remove("aq_mcq_ans")
-        ele.style.borderColor = "yellow"
-      }else {
-        ele.classList.add("aq_mcq_ans")
-        ele.style.borderColor = "lime"
-      }
     }
+  }
 };
 
-if (screen.width < "300px"){
+if (screen.width < "300px") {
   document.getElementById("overlay").style.display = "block"
 }
-function updateUI(){
-  if (dE("pt_ins").style.display == "block"){
+function updateUI() {
+  if (dE("pt_ins").style.display == "block") {
     dE("pt_ins").style.display = "none"
-  }else{
+  } else {
     dE("pt_ins").style.display = "block"
   }
 }
-function dE(id){return document.getElementById(id)}
+function dE(id) { return document.getElementById(id) }
 
 function sleep(ms) {
   return new Promise(val => setTimeout(val, ms));
 }
-async function idElementPrint(ref,uname){
+async function idElementPrint(ref, uname) {
   iframe = dE("un_print_iframe")
   const pri = iframe.contentWindow;
   const csspage = document.querySelector('link[rel="stylesheet"]').href
   pri.document.open();
-  pri.document.write('<head><link rel="stylesheet" href="'+csspage+'" onload = "print()"><style>body{border: 3px solid black;font-family:Nunito;}</style></head>')
+  pri.document.write('<head><link rel="stylesheet" href="' + csspage + '" onload = "print()"><style>body{border: 3px solid black;font-family:Nunito;}</style></head>')
   pri.document.write(ref.innerHTML);
   pri.document.write('<div class="divFooter2" style = "text-align:center;">By ' + uname + ' @ Quarkz!</div>')
   pri.document.close();
@@ -189,35 +189,36 @@ function examlog(examname, dates, examinfo, syllabus) {
   dE("exam_einfo").href = examinfo
   dE("exam_syl").href = syllabus
 }
- function showqLS(type) {
+function showqLS(type) {
   // Get the loading spinner element
   let loadingSpinner = document.getElementById('loading-spinner');
-  if (type == "s"){
-      loadingSpinner.style.display = 'block';
-  }else{
-      loadingSpinner.style.display = 'none';
+  if (type == "s") {
+    loadingSpinner.style.display = 'block';
+  } else {
+    loadingSpinner.style.display = 'none';
   }
 }
 
-window.beforeunload = function(e){
-  if (localStorage.getItem("isFirstTab") == `true`){localStorage.removeItem("isFirstTab")}
+window.beforeunload = function (e) {
+  if (localStorage.getItem("isFirstTab") == `true`) { localStorage.removeItem("isFirstTab") }
 }
-function refreshScreen(e){
+function refreshScreen(e) {
   var updatedScreenWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
-    // Check if screen width is less than 600px
-    if (updatedScreenWidth < 350) {
-      dE("overlay").style.display = "flex"
-      dE("output").style.pointerEvents = "none"
-      dE("ovr_la_1").style.display = "none"
-      dE("ovr_la_2").style.display = "block"
-      dE("ovr_msg").innerText = "Please rotate your device to Landscape Mode to access this Website. "
-      // dE("ovr_msg").innerText = "Your Device/Browser is Currently Not Supported, Please Use Chrome/Firefox Browser on Laptop/PC to Access This Website."
-    }else{
-      dE("output").style.pointerEvents = "auto"
-      dE("overlay").style.display = "none"
-      dE("ovr_la_1").style.display = "block"
-      dE("ovr_la_2").style.display = "none"
-}}
+  // Check if screen width is less than 600px
+  if (updatedScreenWidth < 350) {
+    dE("overlay").style.display = "flex"
+    dE("output").style.pointerEvents = "none"
+    dE("ovr_la_1").style.display = "none"
+    dE("ovr_la_2").style.display = "block"
+    dE("ovr_msg").innerText = "Please rotate your device to Landscape Mode to access this Website. "
+    // dE("ovr_msg").innerText = "Your Device/Browser is Currently Not Supported, Please Use Chrome/Firefox Browser on Laptop/PC to Access This Website."
+  } else {
+    dE("output").style.pointerEvents = "auto"
+    dE("overlay").style.display = "none"
+    dE("ovr_la_1").style.display = "block"
+    dE("ovr_la_2").style.display = "none"
+  }
+}
 window.onresize = refreshScreen
 const toggleSwitch = document.getElementById('toggleSwitch');
 const body = document.body;
@@ -226,20 +227,99 @@ function uiMode() {
   if (toggleSwitch.checked) {
     body.classList.add('dark_mode');
     body.classList.remove('light_mode');
-    localStorage.setItem("ui","dark")
+    localStorage.setItem("ui", "dark")
     bc.postMessage(`QZCODE-DARK`);
   } else {
     body.classList.add('light_mode');
     body.classList.remove('dark_mode');
-    localStorage.setItem("ui","light")
+    localStorage.setItem("ui", "light")
     bc.postMessage(`QZCODE-LIGHT`);
   }
 }
 toggleSwitch.addEventListener('change', uiMode);
-if (localStorage.getItem("ui") == "light"){
+if (localStorage.getItem("ui") == "light") {
   toggleSwitch.checked = false
   uiMode()
-}else{
+} else {
   toggleSwitch.checked = true
   uiMode()
+}
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'en',
+    autoDisplay: false
+  }, 'google_translate_element');
+}
+function changeLanguageByButtonClick() {
+  var language = document.querySelector('input[type=radio][name=trans_lang]:checked');
+  var selectField = document.querySelector("#google_translate_element select");
+  for (var i = 0; i < selectField.children.length; i++) {
+    var option = selectField.children[i];
+    // find desired langauge and change the former language of the hidden selection-field 
+    if (option.value == language.value) {
+      selectField.selectedIndex = i;
+      // trigger change event afterwards to make google-lib translate this side
+      selectField.dispatchEvent(new Event('change'));
+      break;
+    }
+  }
+}
+var codeEditorTimeOut
+var codeEditorOutput = []
+function executeJSCodeHunt(code_editor,cd_args,i) {
+  const workerModuleText =
+    `self.addEventListener('message', async ({data: {id, fn}}) => self.postMessage({id, value: await eval(\`\${fn}\`)}));`;
+
+  const workerModuleSpecifier = URL.createObjectURL(
+    new Blob([workerModuleText], { type: 'text/javascript' }),
+  );
+
+  const worker = new Worker(workerModuleSpecifier, { type: 'module' });
+
+  worker.addEventListener('message', ({ data: { id, value } }) => {
+    // dE("code_console").insertAdjacentHTML("beforeend",value)
+    clearTimeout(codeEditorTimeOut)
+    codeEditorOutput[i] = value
+    worker.terminate()
+  });
+
+  function notOnMyThread(fn) {
+    return new Promise(resolve => {
+      const id = window.crypto.randomUUID();
+      worker.addEventListener(id, ({ detail }) => resolve(detail), { once: true });
+      worker.postMessage({ id, fn: fn.toString() });
+    });
+  }
+  notOnMyThread(`${code_editor.getValue().replaceAll(/\n/g, '')};execute("`+cd_args+`")`)
+  codeEditorTimeOut = setTimeout(function(){
+      worker.terminate()
+  },1000)
+}
+function evaluateJSCode(cd_input,cd_output){
+  testpass = 0;
+  codeEditorOutput = []
+  document.getElementById("code_console").innerHTML = ""
+  document.getElementById("code_console").insertAdjacentHTML("beforeend","<span style = 'color:yellow'>Initialising Evalulation</span><br>")
+  for (let i =0 ;i < cd_input.length;i++){
+    codeEditorOutput.push("")
+    executeJSCodeHunt(window.code_editor,cd_input[i],i)
+  }
+  document.getElementById("code_console").insertAdjacentHTML("beforeend","<span style = 'color:yellow'>Running Tests (Approx time - 10sec)</span><br>")
+  setTimeout(function(){
+    for (let i =0 ;i < cd_input.length;i++){
+      if (codeEditorOutput[i] == cd_output[i]){
+        testpass +=1;
+      }else{
+        break;
+      }
+    }
+    if (testpass == cd_input.length){
+      document.getElementById("code_console").insertAdjacentHTML("beforeend","<span style = 'color:green'>Success - All Tests Passed</span><br>")
+    }else{
+      document.getElementById("code_console").insertAdjacentHTML("beforeend","<span style = 'color:red'>Failed - Test Case #" + (testpass+1).toString() + "</span><br>")
+      document.getElementById("code_console").insertAdjacentHTML("beforeend","<span style = 'color:white'>Input: "+cd_input[testpass]+"</span><br>")
+      document.getElementById("code_console").insertAdjacentHTML("beforeend","<span style = 'color:white'>Expected Output: "+cd_output[testpass]+"</span><br>")
+      document.getElementById("code_console").insertAdjacentHTML("beforeend","<span style = 'color:green'>Your Output: "+codeEditorOutput[testpass]+"</span><br>")
+    }
+  },10000)
 }

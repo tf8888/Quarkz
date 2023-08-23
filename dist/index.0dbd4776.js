@@ -196,5 +196,84 @@ if (localStorage.getItem("ui") == "light") {
     toggleSwitch.checked = true;
     uiMode();
 }
+function googleTranslateElementInit() {
+    new google.translate.TranslateElement({
+        pageLanguage: "en",
+        autoDisplay: false
+    }, "google_translate_element");
+}
+function changeLanguageByButtonClick() {
+    var language = document.querySelector("input[type=radio][name=trans_lang]:checked");
+    var selectField = document.querySelector("#google_translate_element select");
+    for(var i = 0; i < selectField.children.length; i++){
+        var option = selectField.children[i];
+        // find desired langauge and change the former language of the hidden selection-field 
+        if (option.value == language.value) {
+            selectField.selectedIndex = i;
+            // trigger change event afterwards to make google-lib translate this side
+            selectField.dispatchEvent(new Event("change"));
+            break;
+        }
+    }
+}
+var codeEditorTimeOut;
+var codeEditorOutput = [];
+function executeJSCodeHunt(code_editor, cd_args, i) {
+    const workerModuleText = `self.addEventListener('message', async ({data: {id, fn}}) => self.postMessage({id, value: await eval(\`\${fn}\`)}));`;
+    const workerModuleSpecifier = URL.createObjectURL(new Blob([
+        workerModuleText
+    ], {
+        type: "text/javascript"
+    }));
+    const worker = new Worker(workerModuleSpecifier, {
+        type: "module"
+    });
+    worker.addEventListener("message", ({ data: { id , value  }  })=>{
+        // dE("code_console").insertAdjacentHTML("beforeend",value)
+        clearTimeout(codeEditorTimeOut);
+        codeEditorOutput[i] = value;
+        worker.terminate();
+    });
+    function notOnMyThread(fn) {
+        return new Promise((resolve)=>{
+            const id = window.crypto.randomUUID();
+            worker.addEventListener(id, ({ detail  })=>resolve(detail), {
+                once: true
+            });
+            worker.postMessage({
+                id,
+                fn: fn.toString()
+            });
+        });
+    }
+    notOnMyThread(`${code_editor.getValue().replaceAll(/\n/g, "")};execute("` + cd_args + `")`);
+    codeEditorTimeOut = setTimeout(function() {
+        worker.terminate();
+    }, 1000);
+}
+function evaluateJSCode(cd_input, cd_output) {
+    testpass = 0;
+    codeEditorOutput = [];
+    document.getElementById("code_console").innerHTML = "";
+    document.getElementById("code_console").insertAdjacentHTML("beforeend", "<span style = 'color:yellow'>Initialising Evalulation</span><br>");
+    for(let i = 0; i < cd_input.length; i++){
+        codeEditorOutput.push("");
+        executeJSCodeHunt(window.code_editor, cd_input[i], i);
+    }
+    document.getElementById("code_console").insertAdjacentHTML("beforeend", "<span style = 'color:yellow'>Running Tests (Approx time - 10sec)</span><br>");
+    setTimeout(function() {
+        for(let i = 0; i < cd_input.length; i++){
+            if (codeEditorOutput[i] == cd_output[i]) testpass += 1;
+            else break;
+        }
+        if (testpass == cd_input.length) document.getElementById("code_console").insertAdjacentHTML("beforeend", "<span style = 'color:green'>Success - All Tests Passed</span><br>");
+        else {
+            document.getElementById("code_console").insertAdjacentHTML("beforeend", "<span style = 'color:red'>Failed - Test Case #" + (testpass + 1).toString() + "</span><br>");
+            document.getElementById("code_console").insertAdjacentHTML("beforeend", "<span style = 'color:white'>Input: " + cd_input[testpass] + "</span><br>");
+            document.getElementById("code_console").insertAdjacentHTML("beforeend", "<span style = 'color:white'>Expected Output: " + cd_output[testpass] + "</span><br>");
+            document.getElementById("code_console").insertAdjacentHTML("beforeend", "<span style = 'color:green'>Your Output: " + codeEditorOutput[testpass] + "</span><br>");
+        }
+    }, 10000);
+}
 
 //# sourceMappingURL=index.0dbd4776.js.map

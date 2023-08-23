@@ -1,12 +1,13 @@
 export let page_dashboard = `
 <div id="options_tab"
                 style="display: flex;flex-direction: column;align-items:center;justify-content: space-evenly;width: 150px;height:100%;">
-                <span class="material-symbols-outlined rpl rpl-2 db_opt" onclick="window.location = '#/settings'">settings</span>
-                <span class="material-symbols-outlined rpl rpl-2 db_opt" onclick="window.location = '#/about'">info</span>
-                <span class="material-symbols-outlined rpl rpl-2 db_opt" onclick="window.location = '#/updates'">notifications</span>
-                <span class="material-symbols-outlined rpl rpl-2 db_opt" onclick="window.location = '#/profile'">account_circle</span>
-                <span class="material-symbols-outlined rpl rpl-2 db_opt" onclick="window.location = '#/store'">shopping_cart</span>
-                <span class="material-symbols-outlined rpl rpl-2 db_opt" id="lgt_btn">logout</span>
+                <span class="material-symbols-outlined rpl rpl-2 db_opt" translate="no" onclick="window.location = '#/settings'">settings</span>
+                <span class="material-symbols-outlined rpl rpl-2 db_opt" translate="no" onclick="window.location = '#/about'">info</span>
+                <span class="material-symbols-outlined rpl rpl-2 db_opt" translate="no" onclick="window.location = '#/updates'">notifications</span>
+                <span class="material-symbols-outlined rpl rpl-2 db_opt" translate="no" onclick="window.location = '#/profile'">account_circle</span>
+                <span class="material-symbols-outlined rpl rpl-2 db_opt" translate="no" onclick="window.location = '#/store'">shopping_cart</span>
+                <span class="material-symbols-outlined rpl rpl-2 db_opt" translate="no" onclick="window.location = '#/codehunt'">code</span>
+                <span class="material-symbols-outlined rpl rpl-2 db_opt" translate="no" id="lgt_btn">logout</span>
             </div>
         <div
             style="display: flex;flex-direction: row;flex-wrap: wrap;margin-left: 10px;align-items: flex-start;height:100%;margin-top: 15px;justify-content: space-evenly;overflow-y: scroll;">
@@ -47,12 +48,12 @@ export let page_dashboard = `
         </div>
 <div id="options_tab_2"
         style="display: flex;flex-direction: column;align-items:center;justify-content: space-evenly;width: 150px;height:100%;">
-        <span class="material-symbols-outlined rpl rpl-2 db_opt" onclick="window.location = '#/timetable'">calendar_month</span>
-        <span class="material-symbols-outlined rpl rpl-2 db_opt" onclick="window.location = '#/chplist'">menu_book</span>
-        <span class="material-symbols-outlined rpl rpl-2 db_opt" onclick="window.location = '#/testinfo'">glyphs</span>
-        <span class="material-symbols-outlined rpl rpl-2 db_opt" onclick="window.location = '#/simlist'">play_circle</span>
-        <span class="material-symbols-outlined rpl rpl-2 db_opt" onclick="window.location = '#/usernotes'">edit_note</span>
-        <span class="material-symbols-outlined rpl rpl-2 db_opt" id = "adminonly" onclick="window.location = '#/functions'">admin_panel_settings</span>
+        <span class="material-symbols-outlined rpl rpl-2 db_opt" translate="no" onclick="window.location = '#/timetable'">calendar_month</span>
+        <span class="material-symbols-outlined rpl rpl-2 db_opt" translate="no" onclick="window.location = '#/chplist'">menu_book</span>
+        <span class="material-symbols-outlined rpl rpl-2 db_opt" translate="no" onclick="window.location = '#/testinfo'">glyphs</span>
+        <span class="material-symbols-outlined rpl rpl-2 db_opt" translate="no" onclick="window.location = '#/simlist'">play_circle</span>
+        <span class="material-symbols-outlined rpl rpl-2 db_opt" translate="no" onclick="window.location = '#/usernotes'">edit_note</span>
+        <span class="material-symbols-outlined rpl rpl-2 db_opt" translate="no" id = "adminonly" onclick="window.location = '#/functions'">admin_panel_settings</span>
 </div>
 `
 

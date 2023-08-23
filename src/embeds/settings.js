@@ -26,7 +26,11 @@ export let page_settings = `
             <div id="st_langtype" class = "db_class">
                 <span style="font-size: 25px;color:var(--clr16);">Languages</span>
                 <span style = "font-size:max(12px,2vh)">You can use this website in your language of choice.</span>
-                <span><input type = "radio" value = "en" checked disabled>English</input></span>
+                <span><input name = "trans_lang" type = "radio" value = "en" checked onclick = "changeLanguageByButtonClick()">English</input></span>
+                <span><input name = "trans_lang" type = "radio" value = "hi" onclick = "changeLanguageByButtonClick()">Hindi</input></span>
+                <span><input name = "trans_lang" type = "radio" value = "ru" onclick = "changeLanguageByButtonClick()">Russian</input></span>
+                <span><input name = "trans_lang" type = "radio" value = "es" onclick = "changeLanguageByButtonClick()">Spanish</input></span>
+                <span style = "font-size:12px">Powered by Google</span>
             </div>
             <div id="st_changemail" class = "db_class">
                 <span style="font-size: 25px;color:var(--clr16);">Change Email</span>

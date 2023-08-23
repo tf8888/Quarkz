@@ -82,6 +82,7 @@ For permission requests, please contact [Mr Techtroid] at mrtechtroid@outlook.co
                 alt="Quarkz Logo"></span>
         <div id="w_holder" class="no-print">
             <span id="spoints"></span>
+            <!-- <div id = "google_translate_element"></div> -->
             <div id="dmodebtn">
                 <label class="switch">
                     <input type="checkbox" id="toggleSwitch">
@@ -96,8 +97,20 @@ For permission requests, please contact [Mr Techtroid] at mrtechtroid@outlook.co
     </div>
     <input value="" id="report-tag">
     <div id="loading-spinner" class="loading-spinner"></div>
+    <div id = "google_translate_element" style="display: none;"></div>
     <script src="js/main.js" type="module"></script>
     <script src="js/extras.js"></script>
+    <!-- <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/ace-builds@1.24.1/src-min-noconflict/ace.min.js" type="text/javascript" charset="utf-8"></script>
+
+    <script>
+        function setupEditor(){
+            var editor = ace.edit("code_editor");
+            editor.setTheme("ace/theme/monokai");
+            editor.session.setMode("ace/mode/javascript");
+            return editor
+        }
+    </script>
 </body>
 
 </html>

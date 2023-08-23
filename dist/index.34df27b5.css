@@ -1506,6 +1506,25 @@ circle text {
   overflow-y: scroll;
 }
 
+.store_card {
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(17px) saturate(180%);
+  height: 20vh;
+  max-width: 250px;
+  width: 250px;
+  height: 35vh;
+  background-color: #111928bf;
+  border: 1px solid #fff;
+  border-radius: 12px;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+  margin: 10px;
+  display: flex;
+  overflow: hidden;
+}
+
 .popup h2 {
   color: var(--clr17);
   margin-top: 0;
@@ -1564,7 +1583,7 @@ input, select, textarea {
 }
 
 #toolbar {
-  z-index: 3;
+  z-index: 10;
   width: 30vw;
   color: var(--clr16);
   border-radius: 0 0 12px 12px;
@@ -1771,6 +1790,18 @@ input, select, textarea {
   grid-template-columns: repeat(2, minmax(200px, auto));
   justify-content: space-around;
   display: grid;
+}
+
+.goog-logo-link {
+  display: none !important;
+}
+
+.goog-te-gadget {
+  color: #0000 !important;
+}
+
+.goog-te-gadget a, .skiptranslate {
+  display: none !important;
 }
 
 /*# sourceMappingURL=index.34df27b5.css.map */

@@ -38,12 +38,13 @@ import { page_toc } from '../embeds/toc'
 import { page_topic, page_edit_topic } from "../embeds/topics";
 import { page_edit_user } from "../embeds/user";
 import { page_usernotes } from "../embeds/usernotes"
-import { page_store } from "../embeds/store"
+import { page_store,page_store_edit } from "../embeds/store"
 import { page_vidchat } from "../embeds/vidchat";
 import { sd, sha256, makeid, mobileCheck, areObjectsEqual, areEqual, getServerTime, fullEle, dE, sortObj, sortObjv2, renderMarkedMath, mergeById, qCorrector, playSoundEffect, showLS, antiCopyEle, shuffleArrayWithSeed, buildHtmlTable, studentRanker } from '../js/helper'
 import { sysaccess } from "./reworkui";
 import { page_batch_list, page_edit_batch } from "../embeds/admin";
 import Chart, { scales } from 'chart.js/auto';
+import { page_ch_solver,page_ch_list } from "../embeds/codehunt";
 
 // I added a function that can be used to register a service worker.
 const registerServiceWorker = async () => {
@@ -335,6 +336,30 @@ function userNotesEvents() {
     window.print()
   })
 }
+async function codeproblemEvents(){
+  window.code_editor = window.setupEditor()
+  dE("btn_code_run").addEventListener("click",function(){
+    executeJSCodeHunt(window.code_editor)
+  })
+  dE("btn_code_report").addEventListener("click",report_stuff)
+  try{
+    let docSnap = await getDoc(doc(db, 'codehunt', window.location.hash.split("#/codehunt/problem")[1]))
+    if (docSnap.exists()) {
+      docJSON = docSnap.data()
+      dE("cdh_name").innerText = docJSON.name;
+      dE("cdh_tag").innerText = docJSON.tag;
+      dE("cdh_difficulty").innerText = docJSON.difficulty;
+      dE("cdh_description").innerHTML = docJSON.description;
+      dE("btn_code_submit").addEventListener("click",function(){
+        evaluateJSCode(docJSON.submit_input,docJSON.submit_output)
+      })
+      dE("btn_code_solution").addEventListener("click",function(){
+        window.code_editor.setValue(docJSON.solution)
+      })
+    }
+  }catch{}
+  
+}
 function dshHand() { changeLocationHash("dashboard", 1) }
 var dshbtn = dE("dsh_btn").addEventListener("click", dshHand);
 function printableEvents() {
@@ -398,7 +423,9 @@ function coreManager(newlocation, n1) {
     case "add/simulation": handlebox = "fu_simulation"; newSimulation(); break;
     case "add/tests": handlebox = "fu_topic"; newTest(); break;
     case "add/batch": handlebox = "fu_topic"; newBatch(); break;
-    case "store": handlebox = "fu_shop"; renderBody(page_store, "height:max-content;", ""); break;
+    case "add/store_item": handlebox = "fu_storeitem"; newStoreItem(); break;
+    case "codehunt": handlebox = "fu_code_problemlist"; renderBody(page_ch_list, "", "");renderCodeProblemList();break
+    case "store": handlebox = "fu_shop"; renderBody(page_store, "height:max-content;", "");renderStore(); break;
     case "list/batch": handlebox = "fu_batch"; renderBody(page_batch_list, "height:max-content;", ""); renderAdminBatchList(); break;
     case "list/tests": handlebox = "fu_batch"; renderBody(page_batch_list, "height:max-content;", ""); renderAdminTestList(); break;
     case "list/chptr": handlebox = "fu_batch"; renderBody(page_batch_list, "height:max-content;", ""); renderAdminChapterList(); break;
@@ -433,6 +460,7 @@ function coreManager(newlocation, n1) {
   if (location1.includes("edit_qubank") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll"); dE("aq_qbc_save").addEventListener("click", function () { updateTopicQBank(2) }); edittopicEvents(); prepareTopicQBank(2) }
   if (location1.includes("edit_exams") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll"); dE("aq_exam_save").addEventListener("click", function () { updateTopicQBank(4) }); edittopicEvents(); prepareTopicQBank(4) }
   if (location1.includes("edit_batch") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_batch, "", ""); prepareBatch(); dE("aq_batch_save").addEventListener("click", updateBatch) }
+  if (location1.includes("codehunt/problem")){renderBody(page_ch_solver,"","");codeproblemEvents()}
   // if (location1.includes("vid_chat")) { handlebox = "fu_vidchat"; renderBody(page_vidchat, "", ""); prepareVideoChat(); }
   if (location1.includes("site-analytics") && iorole == true) { handlebox = "fu_analytics"; renderBody(page_analytics, "", ""); }
   if (iorole) {
@@ -1038,6 +1066,56 @@ async function newBatch() {
     creMng("edit_batch/" + docRef.id, 1)
   } catch {
   }
+}
+async function newStoreItem() {
+  try {
+    const docRef = await addDoc(collection(db, 'store'), {
+      name: "Store Item",
+      price: "1000",
+      bannerlink: "https://store.mtt.one",
+      affiliatelink: "https://affiliate.mtt.one",
+      crton: serverTimestamp(),
+      p:0,
+      
+    })
+    creMng("edit_batch/" + docRef.id, 1)
+  } catch {
+  }
+}
+async function renderStore(){
+    if (userinfo.storeitems.length <= 0) {
+      userinfo.storeitems = []
+      const q = query(collection(db, "store"));
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach((doc) => {
+        var tfg = doc.data()
+        userinfo.storeitems.push({ id: doc.id, crton: tfg.crton, name:tfg.name,price:tfg.price,bannerlink:tfg.bannerlink,affiliatelink:tfg.affiliatelink })
+      })
+    }
+  
+  for (var i = 0; i < userinfo.storeitems.length; i++) {
+    dE("store_list").insertAdjacentHTML("beforeend", `<a style="width:max-content;height:max-content;" href = "`+userinfo.storeitems[i].affiliatelink+`" target = "_blank" id = "sl`+userinfo.storeitems[i].id+`"><div class = "store_card" style = "background:url('`+userinfo.storeitems[i].bannerlink+`');background-size: cover;"><div style = "position:fixed;bottom:0vh;margin:0px;padding:10px;width:100%;background-color:var(--bgcolor);height:max-content;display:flex;flex-direction:column;align-items:center;"><span style = "font-size: 14px">`+userinfo.storeitems[i].name+`</span><span style = "font-size: 12px;color:grey;">`+userinfo.storeitems[i].price+`/-</span></div></div></a>`)
+  }
+}
+
+async function renderCodeProblemList(){
+  if (userinfo.codeitems.length <= 0) {
+    userinfo.codeitems = []
+    const q = query(collection(db, "codehunt"),where("active", "==", "1"),limit(6));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((doc) => {
+      var tfg = doc.data()
+      userinfo.codeitems.push({ id: doc.id, crton: tfg.crton, name:tfg.name,difficulty:tfg.difficulty})
+    })
+  }
+
+for (var i = 0; i < userinfo.codeitems.length; i++) {
+  dE("prb_list").insertAdjacentHTML("beforeend", `<div id = "sl`+userinfo.codeitems[i].id+`" class = "tlinks-3" style = "background-size: cover;"><span class = "t_title">`+userinfo.codeitems[i].name+`</span><span style = "font-size: 12px;color:grey;">`+userinfo.codeitems[i].difficulty+`</span></div>`)
+  let h = userinfo.codeitems[i].id 
+  dE("sl"+userinfo.codeitems[i].id).addEventListener("click",function(){
+    window.location.hash = "#/codehunt/problem/"+h
+  })
+}
 }
 async function prepareBatch() {
   var docRef = doc(db, 'batch', window.location.hash.split("edit_batch/")[1])
@@ -2123,6 +2201,8 @@ async function authStateObserver(user) {
       userinfo = docJSON
       userinfo.uuid = user.uid
       batchno = userinfo.batch
+      userinfo.storeitems = []
+      userinfo.codeitems = []
       userrole = userinfo.roles['user']
       editorrole = userinfo.roles['editor']
       adminrole = userinfo.roles['admin']
@@ -3530,9 +3610,9 @@ function setHTML(id, html) {
 }
 var Quarkz = {
   "copyright": "Mr Techtroid 2021-23",
-  "vno": "v0.6.7",
+  "vno": "v0.6.8",
   "author": "Mr Techtroid",
-  "last-updated": "28/05/2023(IST)",
+  "last-updated": "23/08/2023(IST)",
   "serverstatus": "firebase-online",
 }
 var handlebox = "login";

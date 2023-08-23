@@ -42,6 +42,7 @@ export let page_edit_topic = `
                     <option value="question">Question</option>
                     <option value="lesson">Lesson</option>
                     <option value="exam">Exam</option>
+                    <option value="store">Store Item</option>
                 </select>
                 <div class="flex_type" id="aq_exams">
                     <input type="text" id="aq_examname" class="_in_aq" placeholder="Exam Names">
