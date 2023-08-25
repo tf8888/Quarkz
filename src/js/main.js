@@ -345,7 +345,7 @@ async function codeproblemEvents(){
   try{
     let docSnap = await getDoc(doc(db, 'codehunt', window.location.hash.split("#/codehunt/problem")[1]))
     if (docSnap.exists()) {
-      docJSON = docSnap.data()
+      let docJSON = docSnap.data()
       dE("cdh_name").innerText = docJSON.name;
       dE("cdh_tag").innerText = docJSON.tag;
       dE("cdh_difficulty").innerText = docJSON.difficulty;

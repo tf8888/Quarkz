@@ -931,7 +931,7 @@ async function codeproblemEvents() {
     try {
         let docSnap = await (0, _firestore.getDoc)((0, _firestore.doc)(db, "codehunt", window.location.hash.split("#/codehunt/problem")[1]));
         if (docSnap.exists()) {
-            docJSON = docSnap.data();
+            let docJSON = docSnap.data();
             (0, _helper.dE)("cdh_name").innerText = docJSON.name;
             (0, _helper.dE)("cdh_tag").innerText = docJSON.tag;
             (0, _helper.dE)("cdh_difficulty").innerText = docJSON.difficulty;
@@ -1664,12 +1664,12 @@ async function prepareSimulation() {
     try {
         let docSnap = await (0, _firestore.getDoc)((0, _firestore.doc)(db, "sims", window.location.hash.split("edit_sim/")[1]));
         if (docSnap.exists()) {
-            var docJSON1 = docSnap.data();
-            (0, _helper.dE)("aq_simname").value = docJSON1.name;
-            (0, _helper.dE)("aq_simprov").value = docJSON1.provider;
-            (0, _helper.dE)("aq_simurl").value = docJSON1.url;
-            (0, _helper.dE)("aq_simlicense").value = docJSON1.license;
-            (0, _helper.dE)("aq_simsubj").value = docJSON1.subject;
+            var docJSON = docSnap.data();
+            (0, _helper.dE)("aq_simname").value = docJSON.name;
+            (0, _helper.dE)("aq_simprov").value = docJSON.provider;
+            (0, _helper.dE)("aq_simurl").value = docJSON.url;
+            (0, _helper.dE)("aq_simlicense").value = docJSON.license;
+            (0, _helper.dE)("aq_simsubj").value = docJSON.subject;
         }
     } catch  {}
 }
@@ -1717,10 +1717,10 @@ async function getSimulation() {
     var docRef = (0, _firestore.doc)(db, "sims", simid);
     var docSnap = await (0, _firestore.getDoc)(docRef);
     if (docSnap.exists()) {
-        var docJSON1 = docSnap.data();
-        (0, _helper.dE)("sms_name").innerText = docJSON1.name;
-        (0, _helper.dE)("sms_prov").innerText = docJSON1.provider;
-        (0, _helper.dE)("sim_frame").src = docJSON1.url;
+        var docJSON = docSnap.data();
+        (0, _helper.dE)("sms_name").innerText = docJSON.name;
+        (0, _helper.dE)("sms_prov").innerText = docJSON.provider;
+        (0, _helper.dE)("sim_frame").src = docJSON.url;
         (0, _helper.dE)("sim_frame").onload = showqLS("a");
     } else {
         creMng("error_page", 1);
@@ -1748,8 +1748,8 @@ async function getSimList(type) {
         var docRef = (0, _firestore.doc)(db, "sims", "sims");
         var docSnap = await (0, _firestore.getDoc)(docRef);
         if (docSnap.exists()) {
-            var docJSON1 = docSnap.data();
-            simlist = docJSON1;
+            var docJSON = docSnap.data();
+            simlist = docJSON;
         } else {
             creMng("error_page", 1);
             throw new Error;
@@ -2093,7 +2093,7 @@ var forum_d = "afterbegin";
 // ----------------------
 // QBANK VIDEO
 // Slide Controller For QBANK Video
-function vidSlideController(docJSON1) {
+function vidSlideController(docJSON) {
     function iu(ele) {
         ele.style.display = "none";
     }
@@ -2107,30 +2107,30 @@ function vidSlideController(docJSON1) {
     var tpmatrix = (0, _helper.dE)("tb_q_matrix");
     var tpanswer = (0, _helper.dE)("tb_q_answer");
     tpmcqcon.innerHTML = "";
-    (0, _helper.dE)("tb_q_qtext").innerHTML = docJSON1.title + "<span class = 'sp_txt'>(" + docJSON1.type + ")</span>";
+    (0, _helper.dE)("tb_q_qtext").innerHTML = docJSON.title + "<span class = 'sp_txt'>(" + docJSON.type + ")</span>";
     // dE("tb_q_img").src = docJSON.img
-    if (docJSON1.type == "mcq" || docJSON1.type == "mcq_multiple" || docJSON1.type == "mcq_multiple_partial") {
+    if (docJSON.type == "mcq" || docJSON.type == "mcq_multiple" || docJSON.type == "mcq_multiple_partial") {
         qif(tpmcqcon);
         iu(tpmatrix);
         iu(tpanswer);
-        var qop = docJSON1.op;
+        var qop = docJSON.op;
         var asi = "";
         for (let ele1 of qop)asi += '<div class="tb_q_mcq_p rpl">' + ele1 + "</div>";
         (0, _helper.dE)("tb_q_mcq_con").insertAdjacentHTML("beforeend", asi);
-    } else if (docJSON1.type == "matrix") {
+    } else if (docJSON.type == "matrix") {
         iu(tpmcqcon);
         io(tpmatrix);
         iu(tpanswer);
-        var qop1 = docJSON1.op1;
-        var qop2 = docJSON1.op2;
+        var qop1 = docJSON.op1;
+        var qop2 = docJSON.op2;
         var qopn1 = qop1.length;
         for(var i = 0; i < qopn1; i++)document.getElementsByClassName("tp_i1")[i].innerHTML = qop1[i];
         for(var i = 0; i < qopn1; i++)document.getElementsByClassName("tp_i2")[i].innerHTML = qop2[i];
-    } else if (docJSON1.type == "numerical" || docJSON1.type == "fill") {
+    } else if (docJSON.type == "numerical" || docJSON.type == "fill") {
         iu(tpmcqcon);
         iu(tpmatrix);
         io(tpanswer);
-    } else if (docJSON1.type == "taf") {
+    } else if (docJSON.type == "taf") {
         qif(tpmcqcon);
         iu(tpmatrix);
         iu(tpanswer);
@@ -2152,15 +2152,15 @@ async function prepareVideo() {
     try {
         let docSnap = await (0, _firestore.getDoc)((0, _firestore.doc)(db, "qbank", window.location.hash.split("qbnk_vid/")[1]));
         if (docSnap.exists()) {
-            var docJSON1 = docSnap.data();
-            (0, _helper.dE)("tb_q_title").innerText = docJSON1.name;
-            (0, _helper.dE)("qb_vid_ti").innerText = docJSON1.name;
+            var docJSON = docSnap.data();
+            (0, _helper.dE)("tb_q_title").innerText = docJSON.name;
+            (0, _helper.dE)("qb_vid_ti").innerText = docJSON.name;
             (0, _helper.dE)("qbnk_vid_q").style.display = "none";
             (0, _helper.dE)("qbnk_vid_ans").style.display = "none";
             (0, _helper.dE)("qbnk_vid_title").style.display = "flex";
             (0, _helper.dE)("qbnk_vid_end").style.display = "none";
             (0, _helper.dE)("watermark").style.display = "none";
-            let qllist = docJSON1.qllist;
+            let qllist = docJSON.qllist;
             let stream = await recordScreen();
             let mimeType = "video/mp4";
             (0, _helper.fullEle)((0, _helper.dE)("qbnk_vid"));
@@ -2459,8 +2459,8 @@ async function newQBank() {
 async function prepareEditExam() {
     let docSnap = await (0, _firestore.getDoc)((0, _firestore.doc)(db, "quarkz", "exams"));
     if (docSnap.exists()) {
-        var docJSON1 = docSnap.data();
-        editqllist = docJSON1.examinfo;
+        var docJSON = docSnap.data();
+        editqllist = docJSON.examinfo;
         renderEditQLList(0);
     }
 }
@@ -2528,33 +2528,33 @@ async function prepareTopicQBank(iun) {
         let docSnap = await (0, _firestore.getDoc)((0, _firestore.doc)(db, col, id));
         if (docSnap.exists()) {
             if (iun == 1 || iun == 2) {
-                var docJSON1 = docSnap.data();
-                (0, _helper.dE)("aq_tpcname").value = docJSON1.name;
-                (0, _helper.dE)("aq_tpclevel").value = docJSON1.level;
-                (0, _helper.dE)("aq_tpc_subj").value = docJSON1.subject;
-                (0, _helper.dE)("aq_tpc_chapterid").value = docJSON1.chid;
-                editqllist = docJSON1.qllist;
+                var docJSON = docSnap.data();
+                (0, _helper.dE)("aq_tpcname").value = docJSON.name;
+                (0, _helper.dE)("aq_tpclevel").value = docJSON.level;
+                (0, _helper.dE)("aq_tpc_subj").value = docJSON.subject;
+                (0, _helper.dE)("aq_tpc_chapterid").value = docJSON.chid;
+                editqllist = docJSON.qllist;
                 renderEditQLList(0);
                 renderEditQLList(1);
             } else if (iun == 3) {
-                var docJSON1 = docSnap.data();
-                (0, _helper.dE)("aq_tpcname").value = docJSON1.title;
-                (0, _helper.dE)("aq_tpclevel").value = docJSON1.level;
-                (0, _helper.dE)("aq_tpc_subj").value = docJSON1.subject;
-                (0, _helper.dE)("aq_randomize").checked = docJSON1.randomize;
-                (0, _helper.dE)("aq_blockresult").checked = docJSON1.blockresult;
-                (0, _helper.dE)("aq_tst_batches").value = docJSON1.batch.toString();
+                var docJSON = docSnap.data();
+                (0, _helper.dE)("aq_tpcname").value = docJSON.title;
+                (0, _helper.dE)("aq_tpclevel").value = docJSON.level;
+                (0, _helper.dE)("aq_tpc_subj").value = docJSON.subject;
+                (0, _helper.dE)("aq_randomize").checked = docJSON.randomize;
+                (0, _helper.dE)("aq_blockresult").checked = docJSON.blockresult;
+                (0, _helper.dE)("aq_tst_batches").value = docJSON.batch.toString();
                 function dateparser(var1) {
                     var now = new Date(var1);
                     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
                     return now.toISOString().slice(0, 16);
                 }
-                (0, _helper.dE)("aq_tst_stron").value = dateparser(docJSON1.strton.seconds * 1000);
-                (0, _helper.dE)("aq_tst_endon").value = dateparser(docJSON1.endon.seconds * 1000);
-                (0, _helper.dE)("aq_tst_timealotted").value = docJSON1.timeallotted;
-                (0, _helper.dE)("aq_tst_passpercentage").value = docJSON1.passpercentage;
-                (0, _helper.dE)("aq_tst_syllabi").value = docJSON1.syllabus;
-                setHTML("aq_add_test_instr", docJSON1.instructions);
+                (0, _helper.dE)("aq_tst_stron").value = dateparser(docJSON.strton.seconds * 1000);
+                (0, _helper.dE)("aq_tst_endon").value = dateparser(docJSON.endon.seconds * 1000);
+                (0, _helper.dE)("aq_tst_timealotted").value = docJSON.timeallotted;
+                (0, _helper.dE)("aq_tst_passpercentage").value = docJSON.passpercentage;
+                (0, _helper.dE)("aq_tst_syllabi").value = docJSON.syllabus;
+                setHTML("aq_add_test_instr", docJSON.instructions);
                 let docSnap2 = await (0, _firestore.getDoc)((0, _firestore.doc)(db, "tests", id, "questions", "questions"));
                 let docSnap3 = await (0, _firestore.getDoc)((0, _firestore.doc)(db, "tests", id, "questions", "answers"));
                 let q = [];
@@ -2571,8 +2571,8 @@ async function prepareTopicQBank(iun) {
                 renderEditQLList(0);
                 renderEditQLList(1);
             } else if (iun == 4) {
-                var docJSON1 = docSnap.data();
-                editqllist = docJSON1.examinfo;
+                var docJSON = docSnap.data();
+                editqllist = docJSON.examinfo;
                 renderEditQLList(0);
                 renderEditQLList(1);
             }
@@ -2709,14 +2709,14 @@ async function getTopic(type) {
     var topicno = window.location.hash.split(urlC)[1];
     var docRef = (0, _firestore.doc)(db, fireID, topicno);
     var docSnap = await (0, _firestore.getDoc)(docRef);
-    if (docSnap.exists()) var docJSON1 = docSnap.data();
+    if (docSnap.exists()) var docJSON = docSnap.data();
     else {
         creMng("error_page", 1);
         throw new Error;
     }
     topicJSON = {};
-    topicJSON.title = docJSON1.name;
-    topicJSON.qllist = docJSON1.qllist;
+    topicJSON.title = docJSON.name;
+    topicJSON.qllist = docJSON.qllist;
     topicHandler(3);
 }
 // /#/chapter
@@ -2727,19 +2727,19 @@ async function getChapterEList() {
     (0, _helper.dE)("chp_tpc_list").innerHTML = "";
     var docRef = (0, _firestore.doc)(db, "chapter", window.location.hash.split("#/chapter/")[1]);
     var docSnap = await (0, _firestore.getDoc)(docRef);
-    var iupa, docJSON1;
+    var iupa, docJSON;
     var poll = "";
     if (docSnap.exists()) {
-        var docJSON1 = docSnap.data();
-        (0, _helper.dE)("chp_chaptername").innerText = docJSON1.name;
+        var docJSON = docSnap.data();
+        (0, _helper.dE)("chp_chaptername").innerText = docJSON.name;
         try {
-            for (let ele of docJSON1.qbanks){
+            for (let ele of docJSON.qbanks){
                 (0, _helper.dE)("chp_qbk_list").insertAdjacentHTML("beforeend", '<span class="tlinks_min rpl" style = "color:pink" id="chpqbk' + btoa(ele.id) + '">' + ele.title + "</span>");
                 (0, _helper.dE)("chpqbk" + btoa(ele.id)).addEventListener("click", qbkclicker);
             }
         } catch  {}
         try {
-            for (let ele of docJSON1.topics){
+            for (let ele of docJSON.topics){
                 (0, _helper.dE)("chp_tpc_list").insertAdjacentHTML("beforeend", '<span class="tlinks_min rpl" style = "color:pink" id="chptpc' + btoa(ele.id) + '">' + ele.title + "</span>");
                 (0, _helper.dE)("chptpc" + btoa(ele.id)).addEventListener("click", tpcclicker);
             }
@@ -2777,28 +2777,28 @@ async function printQBank(type) {
         var docRef = (0, _firestore.doc)(db, fireID, qbankno);
         var docSnap = await (0, _firestore.getDoc)(docRef);
         if (docSnap.exists()) {
-            var docJSON1 = docSnap.data();
-            qnos = docJSON1.qllist;
-            qbanktitle.innerText = docJSON1.name;
+            var docJSON = docSnap.data();
+            qnos = docJSON.qllist;
+            qbanktitle.innerText = docJSON.name;
         }
     } else if (type == 3) {
         var qlist, alist;
         var docRef = (0, _firestore.doc)(db, fireID, qbankno);
         var docSnap = await (0, _firestore.getDoc)(docRef);
         if (docSnap.exists()) {
-            var docJSON1 = docSnap.data();
-            qnos = docJSON1.qllist;
-            qbanktitle.innerText = docJSON1.title;
+            var docJSON = docSnap.data();
+            qnos = docJSON.qllist;
+            qbanktitle.innerText = docJSON.title;
             (0, _helper.dE)("pt_ins").innerHTML = `
       <span style="font-size:18px;color:var(--clr10);">Test Information:</span>
             <ul style="font-size: 14px;color:white;">
-                <li> Time Allotted:&nbsp;<span id = "i_time">` + docJSON1.timeallotted + `</span> </li>
-                <li> Syllabus:&nbsp;<span id = "i_syllabus">` + docJSON1.syllabus + `</span> </li>
-                <li> Total Marks:&nbsp;<span id = "i_total">` + docJSON1.totalmarks + `</span> </li>
-                <li> No of Questions:&nbsp;<span id = "i_qno">` + docJSON1.questionnos + `</span></li>
+                <li> Time Allotted:&nbsp;<span id = "i_time">` + docJSON.timeallotted + `</span> </li>
+                <li> Syllabus:&nbsp;<span id = "i_syllabus">` + docJSON.syllabus + `</span> </li>
+                <li> Total Marks:&nbsp;<span id = "i_total">` + docJSON.totalmarks + `</span> </li>
+                <li> No of Questions:&nbsp;<span id = "i_qno">` + docJSON.questionnos + `</span></li>
             </ul>
       <span style="font-size:18px;color:var(--clr10);">Test Specific Instructions:</span>
-      <div id = "tsi" style="font-size:14px;">` + docJSON1.instructions + `</div><hr>
+      <div id = "tsi" style="font-size:14px;">` + docJSON.instructions + `</div><hr>
     `;
         }
         var docRef2 = (0, _firestore.doc)(db, fireID, qbankno, "questions", "questions");
@@ -2821,15 +2821,15 @@ async function printQBank(type) {
     var qnos, qtitle, qtype, qimg;
     for (let ele of qnos){
         if (ele.mode == "question") {
-            var docJSON1 = ele;
+            var docJSON = ele;
             ele.id = ele.qid || ele.id;
-            qtitle = docJSON1.title;
-            qtype = docJSON1.type;
-            qimg = docJSON1.img;
+            qtitle = docJSON.title;
+            qtype = docJSON.type;
+            qimg = docJSON.img;
             if (qimg == undefined) qimg = "";
-            var expl = '<div class = "q_ans_expl" style = "font-weight:bold;color:green;font-size:10px;flex-direction:row;display:none;">Explaination:' + docJSON1.expl + "</div>";
+            var expl = '<div class = "q_ans_expl" style = "font-weight:bold;color:green;font-size:10px;flex-direction:row;display:none;">Explaination:' + docJSON.expl + "</div>";
             var ans = "<div style = 'font-weight:bold;color:green;font-size:10px;flex-direction:row;display:none' class = 'q_ans_1'>Answer:";
-            var inhtml = '<div class = "qbtp_q"><div id = "' + ele.id + '">' + qtitle + '<div class = "qb_q_ty">(' + qtype + ")(" + docJSON1.pm + "/" + docJSON1.nm + ")</div></div>";
+            var inhtml = '<div class = "qbtp_q"><div id = "' + ele.id + '">' + qtitle + '<div class = "qb_q_ty">(' + qtype + ")(" + docJSON.pm + "/" + docJSON.nm + ")</div></div>";
             (0, _helper.dE)("eqb_add").insertAdjacentHTML("beforeend", inhtml);
             if (qimg != "") {
                 var iwo = '<div class = "qb_img"><img src = "' + qimg + '"></div>';
@@ -2837,10 +2837,10 @@ async function printQBank(type) {
             }
             var asi = "";
             if (qtype == "mcq" || qtype == "mcq_multiple" || qtype == "mcq_multiple_partial") {
-                var qop = docJSON1.op;
+                var qop = docJSON.op;
                 for (let ele1 of qop)asi += "<div class = 'qb_mcq_opt'>" + ele1 + "</div>";
                 var qrt = '<div class = "qb_mcq_exp" type = "a">' + asi + "</div>";
-                for (let ele1 of docJSON1.answer)ans += "<div class = 'qb_mcq_ans'>" + ele1 + "</div>";
+                for (let ele1 of docJSON.answer)ans += "<div class = 'qb_mcq_ans'>" + ele1 + "</div>";
             }
             if (qtype == "taf") qrt = '<ol class = "qb_mcq_exp" type = "a"><li>True</li><li>False</li></ol>';
             if (qtype == "explain" || qtype == "numerical" || qtype == "fill") {
@@ -2848,8 +2848,8 @@ async function printQBank(type) {
                 ans += ele.answer.toString() + "</span>";
             }
             if (qtype == "matrix") {
-                var qop1 = docJSON1.op1;
-                var qop2 = docJSON1.op2;
+                var qop1 = docJSON.op1;
+                var qop2 = docJSON.op2;
                 var qopn1 = qop1.length;
                 for(var i = 0; i < qopn1; i++)asi += "<tr><td>" + qop1[i] + "</td><td>" + qop2[i] + "</td>";
                 qrt = "<table>" + asi + "</table>";
@@ -2859,36 +2859,36 @@ async function printQBank(type) {
             (0, _helper.dE)(ele.id).insertAdjacentHTML("beforeend", expl);
             renderMathInElement((0, _helper.dE)("eqb_add"));
         } else if (ele.mode == "lesson") {
-            var docJSON1 = ele;
-            qtitle = docJSON1.title;
-            qtype = docJSON1.type;
-            qimg = docJSON1.img;
+            var docJSON = ele;
+            qtitle = docJSON.title;
+            qtype = docJSON.type;
+            qimg = docJSON.img;
             var src_url;
-            if (docJSON1.y_url == "") src_url = "";
-            else src_url = "https://api.qrserver.com/v1/create-qr-code/?size=50x50&data=https://www.youtube.com/watch?v=" + docJSON1.y_url;
+            if (docJSON.y_url == "") src_url = "";
+            else src_url = "https://api.qrserver.com/v1/create-qr-code/?size=50x50&data=https://www.youtube.com/watch?v=" + docJSON.y_url;
             var inhtml = '<div class = "les_q"><div id = "' + ele.id + '"><div style = "display:flex;flex-direction:row;justify-content: space-between;"><div style = "font-size:18px;">' + qtitle + '</div><img style = "float:right" src="' + src_url + '"></div><hr color="white" width="100%"></div>';
             (0, _helper.dE)("eqb_add").insertAdjacentHTML("beforeend", inhtml);
-            var expl = '<div class = "les_expl" style = "">' + docJSON1.expl + '</div><hr color="white" width="100%">';
+            var expl = '<div class = "les_expl" style = "">' + docJSON.expl + '</div><hr color="white" width="100%">';
             (0, _helper.dE)(ele.id).insertAdjacentHTML("beforeend", expl);
             renderMathInElement((0, _helper.dE)("eqb_add"));
         }
     }
     (0, _helper.dE)("eqb_add").insertAdjacentHTML("beforeend", "<br></br>");
 }
-async function lessonRenderer(docJSON1) {
+async function lessonRenderer(docJSON) {
     (0, _helper.dE)("tp_question").style.display = "none";
     (0, _helper.dE)("tp_lesson").style.display = "block";
-    if (docJSON1.y_url == "") (0, _helper.dE)("tp_full_vid").style.display = "none";
+    if (docJSON.y_url == "") (0, _helper.dE)("tp_full_vid").style.display = "none";
     else {
         (0, _helper.dE)("tp_full_vid").style.display = "flex";
-        loadVid(docJSON1.y_url);
+        loadVid(docJSON.y_url);
     }
-    (0, _helper.dE)("tp_lsno").innerText = docJSON1.title;
-    (0, _helper.dE)("tp_expl").innerHTML = docJSON1.expl;
-    (0, _helper.dE)("report-tag").value = docJSON1.id;
+    (0, _helper.dE)("tp_lsno").innerText = docJSON.title;
+    (0, _helper.dE)("tp_expl").innerHTML = docJSON.expl;
+    (0, _helper.dE)("report-tag").value = docJSON.id;
 // dE("tp_lsimg").src = docJSON.img
 }
-async function questionRenderer(docJSON1, totalq, pqno) {
+async function questionRenderer(docJSON, totalq, pqno) {
     function iu(ele) {
         ele.style.display = "none";
     }
@@ -2908,34 +2908,34 @@ async function questionRenderer(docJSON1, totalq, pqno) {
     (0, _helper.dE)("tp_lsno").innerHTML = "Question<span style = 'font-size:12px'>&nbsp;" + pqno + " of (" + totalq + ")</span>";
     (0, _helper.dE)("tp_question").style.display = "flex";
     (0, _helper.dE)("tp_lesson").style.display = "none";
-    (0, _helper.dE)("tp_question").setAttribute("dataid", docJSON1.id);
-    (0, _helper.dE)("tp_question").setAttribute("qtype", docJSON1.type);
-    (0, _helper.dE)("report-tag").value = docJSON1.id;
+    (0, _helper.dE)("tp_question").setAttribute("dataid", docJSON.id);
+    (0, _helper.dE)("tp_question").setAttribute("qtype", docJSON.type);
+    (0, _helper.dE)("report-tag").value = docJSON.id;
     tpmcqcon.innerHTML = "";
-    (0, _helper.dE)("tp_qtext").innerHTML = docJSON1.title;
+    (0, _helper.dE)("tp_qtext").innerHTML = docJSON.title;
     // dE("tp_img").src = ""
-    if (docJSON1.type == "mcq" || docJSON1.type == "mcq_multiple" || docJSON1.type == "mcq_multiple_partial") {
+    if (docJSON.type == "mcq" || docJSON.type == "mcq_multiple" || docJSON.type == "mcq_multiple_partial") {
         qif(tpmcqcon);
         iu(tpmatrix);
         iu(tpanswer);
-        var qop = docJSON1.op;
+        var qop = docJSON.op;
         var asi = "";
         for (let ele1 of qop)asi += '<div class="tp_mcq_p rpl" onclick = "mcqchose(this)">' + ele1 + "</div>";
         (0, _helper.dE)("tp_mcq_con").insertAdjacentHTML("beforeend", asi);
-    } else if (docJSON1.type == "matrix") {
+    } else if (docJSON.type == "matrix") {
         iu(tpmcqcon);
         io(tpmatrix);
         iu(tpanswer);
-        var qop1 = docJSON1.op1;
-        var qop2 = docJSON1.op2;
+        var qop1 = docJSON.op1;
+        var qop2 = docJSON.op2;
         var qopn1 = qop1.length;
         for(var i = 0; i < qopn1; i++)document.getElementsByClassName("tp_i1")[i].innerText = qop1[i];
         for(var i = 0; i < qopn1; i++)document.getElementsByClassName("tp_i2")[i].innerText = qop2[i];
-    } else if (docJSON1.type == "numerical" || docJSON1.type == "fill") {
+    } else if (docJSON.type == "numerical" || docJSON.type == "fill") {
         iu(tpmcqcon);
         iu(tpmatrix);
         io(tpanswer);
-    } else if (docJSON1.type == "taf") {
+    } else if (docJSON.type == "taf") {
         qif(tpmcqcon);
         iu(tpmatrix);
         iu(tpanswer);
@@ -3055,8 +3055,8 @@ async function authStateObserver(user) {
         var docRef = (0, _firestore.doc)(db, "users", user.uid);
         var docSnap = await (0, _firestore.getDoc)(docRef);
         if (docSnap.exists()) {
-            var docJSON1 = docSnap.data();
-            userinfo = docJSON1;
+            var docJSON = docSnap.data();
+            userinfo = docJSON;
             userinfo.uuid = user.uid;
             batchno = userinfo.batch;
             userinfo.storeitems = [];
@@ -3065,9 +3065,9 @@ async function authStateObserver(user) {
             editorrole = userinfo.roles["editor"];
             adminrole = userinfo.roles["admin"];
             (0, _helper.dE)("spoints").innerText = userinfo.spoints;
-            if (docJSON1.usernotes == undefined) userinfo.usernotes = [];
+            if (docJSON.usernotes == undefined) userinfo.usernotes = [];
         }
-        if (docJSON1.deleted == true) {
+        if (docJSON.deleted == true) {
             (0, _log.log)("Warning", "User Account Has Been Deleted");
             signOutUser();
         }
@@ -3075,21 +3075,21 @@ async function authStateObserver(user) {
             var docRef = (0, _firestore.doc)(db, "batch", batchno);
             var docSnap = await (0, _firestore.getDoc)(docRef);
             if (docSnap.exists()) {
-                var docJSON1 = docSnap.data();
-                userinfo.batchname = docJSON1.name;
-                userinfo.timetable = docJSON1.timetable;
+                var docJSON = docSnap.data();
+                userinfo.batchname = docJSON.name;
+                userinfo.timetable = docJSON.timetable;
                 getTestList(batchno, user.uid);
-                userinfo.timetableurl = "https://calendar.google.com/calendar/embed??height=600&wkst=2&bgcolor=%23ffffff&ctz=Asia%2FKolkata&showTitle=0&showCalendars=0&showTabs=0&showPrint=0&showDate=1&src=" + docJSON1.timetable + "%40group.calendar.google.com&amp;ctz=Asia%2FKolkata";
-                if (docJSON1.delon.seconds <= parseInt(Date.now() / 1000)) {
+                userinfo.timetableurl = "https://calendar.google.com/calendar/embed??height=600&wkst=2&bgcolor=%23ffffff&ctz=Asia%2FKolkata&showTitle=0&showCalendars=0&showTabs=0&showPrint=0&showDate=1&src=" + docJSON.timetable + "%40group.calendar.google.com&amp;ctz=Asia%2FKolkata";
+                if (docJSON.delon.seconds <= parseInt(Date.now() / 1000)) {
                     (0, _log.log)("Warning", "This Batch Has Been Deleted");
                     signOutUser();
                     window.reload();
                     throw new Error("DENIED");
                 }
-                for(var i = 0; i < docJSON1.chlist.length; i++)chapterlist.push({
-                    name: docJSON1.chlist[i].name,
-                    id: docJSON1.chlist[i].id,
-                    subject: docJSON1.chlist[i].subject
+                for(var i = 0; i < docJSON.chlist.length; i++)chapterlist.push({
+                    name: docJSON.chlist[i].name,
+                    id: docJSON.chlist[i].id,
+                    subject: docJSON.chlist[i].subject
                 });
             }
         } catch  {}
@@ -3102,16 +3102,16 @@ async function authStateObserver(user) {
         var docRef = (0, _firestore.doc)(db, "quarkz", "exams");
         var docSnap = await (0, _firestore.getDoc)(docRef);
         if (docSnap.exists()) {
-            var docJSON1 = docSnap.data();
-            userinfo.examslist = docJSON1;
-            if (docJSON1.ratemyapp) localStorage.setItem("rate_app", false);
-            if (docJSON1.offline && userinfo.uuid != "shh5oUIhRpdBkEKQ3GCZwoKE9u42") {
+            var docJSON = docSnap.data();
+            userinfo.examslist = docJSON;
+            if (docJSON.ratemyapp) localStorage.setItem("rate_app", false);
+            if (docJSON.offline && userinfo.uuid != "shh5oUIhRpdBkEKQ3GCZwoKE9u42") {
                 (0, _auth.signOut)((0, _auth.getAuth)());
                 userdetails = [];
-                (0, _log.log)("Server Offline", "Quarkz Is Temporarily Offline for Maintainance. " + docJSON1.offlinemsg);
+                (0, _log.log)("Server Offline", "Quarkz Is Temporarily Offline for Maintainance. " + docJSON.offlinemsg);
                 return 0;
             }
-            if (docJSON1.warning != "") (0, _log.log)("Notice", docJSON1.warning, function() {
+            if (docJSON.warning != "") (0, _log.log)("Notice", docJSON.warning, function() {
                 window.location.hash = "#/updates";
             }, "Release Notes");
         }
@@ -3207,7 +3207,7 @@ async function lquizinit() {
     lquizcode = location1.split("livequiz")[1];
     var docRef = (0, _firestore.doc)(db, "livequiz", lquizcode);
     var docSnap = await (0, _firestore.getDoc)(docRef);
-    if (docSnap.exists()) var docJSON1 = docSnap.data();
+    if (docSnap.exists()) var docJSON = docSnap.data();
     else throw new Error;
 }
 async function renderAdminBatchList() {
@@ -45190,8 +45190,8 @@ exports.pipeline = require("ce590b3502823b4");
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
-var process = require("3e432ca2944df1d");
 var global = arguments[3];
+var process = require("3e432ca2944df1d");
 "use strict";
 module.exports = Readable;
 /*<replacement>*/ var Duplex;
@@ -47028,8 +47028,8 @@ Object.defineProperty(Duplex.prototype, "destroyed", {
 // A bit simpler than readable streams.
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
 // the drain event emission and buffering.
-var process = require("62eaf9240176a82a");
 var global = arguments[3];
+var process = require("62eaf9240176a82a");
 "use strict";
 module.exports = Writable;
 /* <replacement> */ function WriteReq(chunk, encoding, cb) {
@@ -50127,8 +50127,8 @@ module.exports = function(iterations, keylen) {
 };
 
 },{}],"T9r9Q":[function(require,module,exports) {
-var global = arguments[3];
 var process = require("2b885cada18ff430");
+var global = arguments[3];
 var defaultEncoding;
 /* istanbul ignore next */ if (global.process && global.process.browser) defaultEncoding = "utf-8";
 else if (global.process && global.process.version) {
@@ -78701,8 +78701,8 @@ function compare(a, b) {
 }
 
 },{"96fb9b2f6750834a":"4Szbv","1b8c45d37d900c35":"e2JgG","c87367ab291092f2":"iaxu0","35d67ec2478cf4d6":"3pDum","f8caae6e7d4d6567":"e594P","e5400ba285150c22":"2WyL8","65eedc9f6297963":"fFkPV","446b20c2e1062b85":"eW7r9"}],"k3tsT":[function(require,module,exports) {
-var process = require("8ca93fa32364873");
 var global = arguments[3];
+var process = require("8ca93fa32364873");
 "use strict";
 function oldBrowser() {
     throw new Error("secure random number generation not supported by this browser\nuse chrome, FireFox or Internet Explorer 11");
