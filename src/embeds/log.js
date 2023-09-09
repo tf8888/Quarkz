@@ -89,8 +89,8 @@ export function report_stuff() {
             <label for="confusing-image">Wrong/Incomplete/No Image(s) or Video(s)</label>
           </div>
           </div>
-        <div id="db_rep_les" class = "db_class">
-        <span style="font-size: 25px;color:var(--clr16)">Question(Question Bank/Test)</span>
+        <div id="db_rep_qbk" class = "db_class">
+        <span style="font-size: 25px;color:var(--clr16)">Question Bank/Tests</span>
           <div>
             <input type="checkbox" id="incorrect-answer-key" name="problem[]" value="incorrect-answer-key">
             <label for="wrong-answer">Incorrect Answer Key</label>
@@ -112,7 +112,7 @@ export function report_stuff() {
             <label for="confusing-image">Wrong/Incomplete/No Image(s) or Video(s)</label>
           </div>
           </div>
-          <div id="db_rep_les" class = "db_class">
+          <div id="db_rep_oth" class = "db_class">
           <span style="font-size: 25px;color:var(--clr16)">Other Issues</span>
           <div>
             <input type="checkbox" id="other-issue" name="problem[]" value="other-issue">
@@ -129,6 +129,15 @@ export function report_stuff() {
   dE("output").insertAdjacentHTML("beforeend", html)
   dE("msg_popup_report").style.visibility = "visible"
   dE("msg_popup_report").style.opacity = "1"
+  if (window.location.hash.includes("topic")){
+    dE("db_rep_les").style.display = "flex"
+    dE("db_rep_qbk").style.display = "none"
+    dE("db_rep_oth").style.display = "flex"
+  }else if (window.location.hash.includes("qbank") || window.location.hash.includes("testreport")){
+    dE("db_rep_les").style.display = "none"
+    dE("db_rep_qbk").style.display = "flex"
+    dE("db_rep_oth").style.display = "flex"
+  }
   const bc = new BroadcastChannel("Quarkz!");
   let isFirstTab = true;
   bc.postMessage(`QZCODE-REPORT`);

@@ -1,6 +1,6 @@
 export let page_toc = `
-<span class="in_t">Terms And Conditions</span>
-        <span class="sp_txt">Copyright 2021-23 Quarkz By Mr Techtroid</span>
+<span class="in_t" style = "text-align:center">Terms And Conditions</span>
+        <span class="sp_txt" style = "text-align:center">Copyright 2021-23 Quarkz By Mr Techtroid</span>
         <span class="in_t_2">Last Updated: 04 April 2023(IST)</span>
 <div id="lgl_container">
     <ol>

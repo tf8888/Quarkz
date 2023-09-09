@@ -64,7 +64,7 @@ export let page_bug_report = `
 
 export let page_app_info = `
 <span class="in_t">App Info</span>
-        <pre id="ren_appinf"></pre>`
+        <code style = "width:100%" id="ren_appinf"></code>`
 
 export let page_schedule = `
 <span class="in_t">Schedule</span>
@@ -74,7 +74,12 @@ export let error_page = `
 <span class="in_t">404</span>
         <hr style="color:var(--clr18)" width="100%">
         <span style="font-size: 3vh;">You don't have access to this page.</span>
-        <a class="tst_btn rpl" href="/#/dashboard">Go To Dashboard</a>`
+        <div style = "display:flex;flex-direction:row;flex-wrap:wrap;justify-content:center;">
+        <a class="tst_btn rpl"  onclick = "history.back()">Go Back</a>
+        <a class="tst_btn rpl"  href="/#/dashboard">Dashboard</a>
+        <a class="tst_btn rpl"  href="/#/login">Login</a>
+        </div>
+        `
 
 export let page_notes = `
 <div style="position: fixed;width:100%;">

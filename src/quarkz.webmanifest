@@ -6,6 +6,7 @@
     "start_url": "/",
     "name": "Quarkz!",
     "short_name": "Quarkz!",
+    "orientation":  "landscape",
     "categories": ["edu app", "education", "jee","neet","learning","educational"],
     "description": "An Online Educational Learning App providing Courses For JEE,NEET Preparations.",
     "icons": [

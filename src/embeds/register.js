@@ -4,12 +4,12 @@ export let page_register = `
         <div class = "db_class">
         <span style="font-size: max(14px,3vh);color:var(--clr16)">Personal Info</span>
         <input type="text" id="rg_name" class="_in_reg" placeholder="Name">
-        <div style = "display:flex;flex-direction:row;align-items:center;">
-        <label style = "font-size:16px;" for="rg_dob">Date:&nbsp;&nbsp;</label>
+        <div style = "display:flex;flex-direction:row;align-items:center;flex-wrap:wrap;">
+        <label style = "font-size:20px;" for="rg_dob">Date of Birth:&nbsp;&nbsp;</label>
         <input name = "rg_dob" type="date" id="rg_dob" class="_in_reg">
         </div>
         <div style = "display:flex;flex-direction:row;align-items:center;">
-        <label style = "font-size:16px;" for="class">Class:&nbsp;&nbsp;</label>
+        <label style = "font-size:20px;" for="class">Class:&nbsp;&nbsp;</label>
         <select name="class" id="rg_class">
             <option value="6">6</option>
             <option value="7">7</option>
@@ -21,7 +21,7 @@ export let page_register = `
         </select>
         </div>
         <div style = "display:flex;flex-direction:row;align-items:center;">
-        <label style = "font-size:16px;" for="gender">Gender:&nbsp;&nbsp;</label>
+        <label style = "font-size:20px;" for="gender">Gender:&nbsp;&nbsp;</label>
         <select name="gender" id="rg_gender">
             <option value="Male">Male</option>
             <option value="Female">Female</option>

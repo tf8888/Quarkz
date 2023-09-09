@@ -132,12 +132,44 @@ body {
   right: 0;
   bottom: 0;
   background-color: black;
-  z-index: 1;
+  z-index: 10;
   pointer-events: none;
   color:white !important;
   align-items: center;
   justify-content: center;
   flex-direction: column;
+}
+.ace_gutter{
+  z-index: 0;
+}
+#toasts{
+  position: fixed;
+  top:10px;
+  right:10px;
+  z-index:10;
+}
+#toasts:where(.toast,.column){
+  display:flex;
+  align-items: center;
+}
+#toasts .toast{
+  width: 300px;
+  position:relative;
+  overflow:hidden;
+  list-style: none;
+  border-radius:3px;
+  padding:15px 15px;
+  margin-bottom:10px;
+  background:var(--clr11);
+  justify-content: space-between;
+  border: var(--clr16) solid 1px;
+  display:flex;
+  flex-direction: column;
+}
+#toasts .toasttimer{
+  height:1px;
+  width:0%;
+  background-color: #ccc;
 }
 #overlay img{
   width: 90%;
@@ -626,6 +658,7 @@ details[open] summary{
   border-bottom: 3px solid var(--clr10);
   outline: none;
   color: var(--clr16);
+  width:300px;
 }
 
 ._in_aq,
@@ -1577,6 +1610,7 @@ circle text {
   height: 70vh;
   position: relative;
   transition: all 5s ease-in-out;
+  z-index: 10;
 }
 .it_popup h2{
   margin:0px;
@@ -1892,6 +1926,6 @@ input,select,textarea{
 .goog-te-gadget a{
   display: none !important;
 }
-.skiptranslate{
+/* .skiptranslate{
   display: none !important;
-}
+} */

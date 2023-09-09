@@ -17,9 +17,9 @@ export let page_ch_solver = `
             
             You can return the answer in any order.
             </div>
+            <hr>
         </div>
-        <hr>
-        <span style = "font-size:12px">Current Limitations: When variable is passed, interpreter assumes all variables as "string" and hence they need to be type casted to give correct output. Currently only JS is allowed for coding. Also the code written should be written in Modular JS, and it will be run as a script tag with type "module". </span>
+        <span style = "font-size:12px">Current Limitations: When variable is passed, interpreter assumes all variables as "string" and hence they need to be type casted to give correct output.</span>
     </div>
     <div style = "width:50%;overflow-y:scroll;margin:10px;border: 1px solid grey;padding:10px;">
     <div style = "width:100%;display:flex;flex-direction:row;align-items:center;border:1px solid grey;border-radius:5px;">
@@ -27,7 +27,6 @@ export let page_ch_solver = `
         <option value="js">Javascript</option>
         <option value="py">Python</option>
     </select>
-    <button class = "tst_btn" id = "btn_code_run">Run</button>
     <button class = "tst_btn" id = "btn_code_submit">Submit</button>
     </div>
     <div style = "height:40vh;border: 1px solid grey;border-radius:5px;margin:10px;" id = "code_editor">

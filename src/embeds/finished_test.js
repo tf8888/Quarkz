@@ -1,5 +1,5 @@
 export let page_finished_test = `
-<span style="font-size: 5vh;color:yellow" id="fti_title">Test Name</span>
+<span style="font-size: 5vh;color:yellow;text-align:center;" id="fti_title">Test Name</span>
 <hr style="color:var(--clr18)" width="100%">
 <div id="fto_overview" style="display: flex;flex-direction: row;flex-wrap:wrap;justify-content:center;">
     <div class="fto_box">

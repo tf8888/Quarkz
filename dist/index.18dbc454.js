@@ -725,11 +725,13 @@ function signUp() {
 function creMng(a, b) {
     coreManager(a, b);
 }
-function renderBody(body, styles, s_class) {
+function renderBody(body, styles, s_class, translate) {
     (0, _helper.dE)("output").style = "";
+    (0, _helper.dE)("output").removeAttribute("translate");
     (0, _helper.dE)("output").classList.remove("ovr-scroll");
     (0, _helper.dE)("output").innerHTML = body;
     if (s_class != undefined && s_class != "") (0, _helper.dE)("output").classList.add(s_class);
+    if (translate != undefined && translate != "" && translate == "1") (0, _helper.dE)("output").setAttribute("translate", "no");
     (0, _helper.dE)("output").style = styles;
 }
 function dashboardEvents() {
@@ -924,9 +926,6 @@ function userNotesEvents() {
 }
 async function codeproblemEvents() {
     window.code_editor = window.setupEditor();
-    (0, _helper.dE)("btn_code_run").addEventListener("click", function() {
-        executeJSCodeHunt(window.code_editor);
-    });
     (0, _helper.dE)("btn_code_report").addEventListener("click", (0, _log.report_stuff));
     try {
         let docSnap = await (0, _firestore.getDoc)((0, _firestore.doc)(db, "codehunt", window.location.hash.split("#/codehunt/problem")[1]));
@@ -936,11 +935,13 @@ async function codeproblemEvents() {
             (0, _helper.dE)("cdh_tag").innerText = docJSON.tag;
             (0, _helper.dE)("cdh_difficulty").innerText = docJSON.difficulty;
             (0, _helper.dE)("cdh_description").innerHTML = docJSON.description;
+            window.code_editor.setValue("function execute(" + docJSON.args + "){\n\n}");
             (0, _helper.dE)("btn_code_submit").addEventListener("click", function() {
                 evaluateJSCode(docJSON.submit_input, docJSON.submit_output);
             });
             (0, _helper.dE)("btn_code_solution").addEventListener("click", function() {
                 window.code_editor.setValue(docJSON.solution);
+                code_editor.setValue(code_editor.getValue().replaceAll("\\n", "\n"));
             });
         }
     } catch  {}
@@ -988,7 +989,7 @@ function coreManager(newlocation, n1) {
             break;
         case "login":
             handlebox = "login";
-            renderBody((0, _login.page_login), "justify-content: center;", "");
+            renderBody((0, _login.page_login), "justify-content: center;", "", "1");
             (0, _helper.dE)("sgn_in").addEventListener("click", signIn);
             function regHand() {
                 changeLocationHash("register", 1);
@@ -1019,7 +1020,7 @@ function coreManager(newlocation, n1) {
             break;
         case "register":
             handlebox = "register";
-            renderBody((0, _register.page_register), "height:max-content;", "");
+            renderBody((0, _register.page_register), "height:max-content;", "", "1");
             (0, _helper.dE)("rg_in").addEventListener("click", rgbtn);
             break;
         case "testinfo":
@@ -1051,7 +1052,7 @@ function coreManager(newlocation, n1) {
             break;
         case "simlist":
             handlebox = "simlist";
-            renderBody((0, _sims.page_list_sims), "", "");
+            renderBody((0, _sims.page_list_sims), "", "", "1");
             simEvents();
             getSimList();
             break;
@@ -1161,18 +1162,18 @@ function coreManager(newlocation, n1) {
     }
     if (location1.includes("chapter")) {
         handlebox = "chapter";
-        renderBody((0, _chapter.page_chapter), "height:max-content;", "");
+        renderBody((0, _chapter.page_chapter), "height:max-content;", "", "1");
         getChapterEList();
     }
     if (location1.includes("qbanks")) {
         handlebox = "topic";
-        renderBody((0, _topics.page_topic), "height:max-content;", "");
+        renderBody((0, _topics.page_topic), "height:max-content;", "", "1");
         topicEvents();
         getTopic(2);
     }
     if (location1.includes("usernotes")) {
         handlebox = "usernotes";
-        renderBody((0, _usernotes.page_usernotes), "flex-direction: row;", "");
+        renderBody((0, _usernotes.page_usernotes), "flex-direction: row;", "", "1");
         userNotesEvents();
         getUserNotes();
     }
@@ -1189,7 +1190,7 @@ function coreManager(newlocation, n1) {
     }
     if (location1.includes("attempt")) {
         handlebox = "testv1";
-        renderBody((0, _tests.page_test_v1), "height:max-content;overflow:scroll;align-items:inherit;", "");
+        renderBody((0, _tests.page_test_v1), "height:max-content;overflow:scroll;align-items:inherit;", "", "1");
         testEvents();
         addTestEvents();
         getTestInfo();
@@ -1201,7 +1202,7 @@ function coreManager(newlocation, n1) {
     }
     if (location1.includes("testreport")) {
         handlebox = "testv1";
-        renderBody((0, _tests.page_test_v1), "height:max-content;overflow:scroll;align-items:inherit;", "");
+        renderBody((0, _tests.page_test_v1), "height:max-content;overflow:scroll;align-items:inherit;", "", "1");
         getTestReport();
         addTestEvents();
     }
@@ -1246,18 +1247,18 @@ function coreManager(newlocation, n1) {
     }
     if (location1.includes("edit_sim") && iorole == true) {
         handlebox = "fu_simulation";
-        renderBody((0, _sims.page_edit_sims), "", "ovr-scroll");
+        renderBody((0, _sims.page_edit_sims), "", "ovr-scroll", "1");
         (0, _helper.dE)("aq_sims_save").addEventListener("click", updateSimulationWeb);
         prepareSimulation();
     }
     if (location1.includes("edit_lesson") && iorole == true) {
         handlebox = "fu_simulation";
-        renderBody((0, _sims.page_edit_sims), "", "ovr-scroll");
+        renderBody((0, _sims.page_edit_sims), "", "ovr-scroll", "1");
         prepareLesson();
     }
     if (location1.includes("edit_tpc") && iorole == true) {
         handlebox = "fu_topic";
-        renderBody((0, _topics.page_edit_topic), "", "ovr-scroll");
+        renderBody((0, _topics.page_edit_topic), "", "ovr-scroll", "1");
         (0, _helper.dE)("aq_tpc_save").addEventListener("click", function() {
             updateTopicQBank(1);
         });
@@ -1266,7 +1267,7 @@ function coreManager(newlocation, n1) {
     }
     if (location1.includes("edit_test") && iorole == true) {
         handlebox = "fu_topic";
-        renderBody((0, _topics.page_edit_topic), "", "ovr-scroll");
+        renderBody((0, _topics.page_edit_topic), "", "ovr-scroll", "1");
         (0, _helper.dE)("aq_tst_save").addEventListener("click", function() {
             updateTopicQBank(3);
         });
@@ -1275,7 +1276,7 @@ function coreManager(newlocation, n1) {
     }
     if (location1.includes("edit_qubank") && iorole == true) {
         handlebox = "fu_topic";
-        renderBody((0, _topics.page_edit_topic), "", "ovr-scroll");
+        renderBody((0, _topics.page_edit_topic), "", "ovr-scroll", "1");
         (0, _helper.dE)("aq_qbc_save").addEventListener("click", function() {
             updateTopicQBank(2);
         });
@@ -1284,7 +1285,7 @@ function coreManager(newlocation, n1) {
     }
     if (location1.includes("edit_exams") && iorole == true) {
         handlebox = "fu_topic";
-        renderBody((0, _topics.page_edit_topic), "", "ovr-scroll");
+        renderBody((0, _topics.page_edit_topic), "", "ovr-scroll", "1");
         (0, _helper.dE)("aq_exam_save").addEventListener("click", function() {
             updateTopicQBank(4);
         });
@@ -4580,7 +4581,7 @@ function loadVid(videoId) {
     else window.player.loadVideoById(videoId);
 }
 function renderAppInfo() {
-    (0, _helper.dE)("ren_appinf").textContent = JSON.stringify(Quarkz, undefined, 2);
+    (0, _helper.dE)("ren_appinf").textContent = JSON.stringify(Quarkz, undefined, 4);
 }
 $(document).ready(function() {
     $(".summernote").summernote({
@@ -4736,11 +4737,12 @@ function setHTML(id, html) {
 }
 var Quarkz = {
     "copyright": "Mr Techtroid 2021-23",
-    "vno": "v0.6.8",
+    "vno": "v0.6.9",
     "author": "Mr Techtroid",
     "last-updated": "23/08/2023(IST)",
     "serverstatus": "firebase-online"
 };
+if (document.location.origin == "https://quarkz.netlify.app") document.location = "https://quarkz.mtt.one";
 var handlebox = "login";
 var location1 = window.location.hash.split("#/")[1];
 var userinfo;
@@ -6069,8 +6071,8 @@ parcelHelpers.export(exports, "validateCallback", ()=>validateCallback);
 parcelHelpers.export(exports, "validateContextObject", ()=>validateContextObject);
 parcelHelpers.export(exports, "validateIndexedDBOpenable", ()=>validateIndexedDBOpenable);
 parcelHelpers.export(exports, "validateNamespace", ()=>validateNamespace);
-var global = arguments[3];
 var process = require("5b35771edbb20914");
+var global = arguments[3];
 const CONSTANTS = {
     /**
      * @define {boolean} Whether this is the client Node.js SDK.
@@ -41550,7 +41552,7 @@ let page_bug_report = `
             frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>`;
 let page_app_info = `
 <span class="in_t">App Info</span>
-        <pre id="ren_appinf"></pre>`;
+        <code style = "width:100%" id="ren_appinf"></code>`;
 let page_schedule = `
 <span class="in_t">Schedule</span>
         <iframe id="tmt_frame" width="100%" height="90%" frameborder="0" scrolling="no" onload = "showqLS('q')"></iframe>`;
@@ -41558,7 +41560,12 @@ let error_page = `
 <span class="in_t">404</span>
         <hr style="color:var(--clr18)" width="100%">
         <span style="font-size: 3vh;">You don't have access to this page.</span>
-        <a class="tst_btn rpl" href="/#/dashboard">Go To Dashboard</a>`;
+        <div style = "display:flex;flex-direction:row;flex-wrap:wrap;justify-content:center;">
+        <a class="tst_btn rpl"  onclick = "history.back()">Go Back</a>
+        <a class="tst_btn rpl"  href="/#/dashboard">Dashboard</a>
+        <a class="tst_btn rpl"  href="/#/login">Login</a>
+        </div>
+        `;
 let page_notes = `
 <div style="position: fixed;width:100%;">
             <iframe id="nt_id" style="width: 100%;height: 90vh;"></iframe>
@@ -41741,7 +41748,7 @@ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "page_finished_test", ()=>page_finished_test);
 let page_finished_test = `
-<span style="font-size: 5vh;color:yellow" id="fti_title">Test Name</span>
+<span style="font-size: 5vh;color:yellow;text-align:center;" id="fti_title">Test Name</span>
 <hr style="color:var(--clr18)" width="100%">
 <div id="fto_overview" style="display: flex;flex-direction: row;flex-wrap:wrap;justify-content:center;">
     <div class="fto_box">
@@ -42021,8 +42028,8 @@ function report_stuff() {
             <label for="confusing-image">Wrong/Incomplete/No Image(s) or Video(s)</label>
           </div>
           </div>
-        <div id="db_rep_les" class = "db_class">
-        <span style="font-size: 25px;color:var(--clr16)">Question(Question Bank/Test)</span>
+        <div id="db_rep_qbk" class = "db_class">
+        <span style="font-size: 25px;color:var(--clr16)">Question Bank/Tests</span>
           <div>
             <input type="checkbox" id="incorrect-answer-key" name="problem[]" value="incorrect-answer-key">
             <label for="wrong-answer">Incorrect Answer Key</label>
@@ -42044,7 +42051,7 @@ function report_stuff() {
             <label for="confusing-image">Wrong/Incomplete/No Image(s) or Video(s)</label>
           </div>
           </div>
-          <div id="db_rep_les" class = "db_class">
+          <div id="db_rep_oth" class = "db_class">
           <span style="font-size: 25px;color:var(--clr16)">Other Issues</span>
           <div>
             <input type="checkbox" id="other-issue" name="problem[]" value="other-issue">
@@ -42061,6 +42068,15 @@ function report_stuff() {
     dE("output").insertAdjacentHTML("beforeend", html);
     dE("msg_popup_report").style.visibility = "visible";
     dE("msg_popup_report").style.opacity = "1";
+    if (window.location.hash.includes("topic")) {
+        dE("db_rep_les").style.display = "flex";
+        dE("db_rep_qbk").style.display = "none";
+        dE("db_rep_oth").style.display = "flex";
+    } else if (window.location.hash.includes("qbank") || window.location.hash.includes("testreport")) {
+        dE("db_rep_les").style.display = "none";
+        dE("db_rep_qbk").style.display = "flex";
+        dE("db_rep_oth").style.display = "flex";
+    }
     const bc = new BroadcastChannel("Quarkz!");
     let isFirstTab = true;
     bc.postMessage(`QZCODE-REPORT`);
@@ -42220,12 +42236,12 @@ let page_register = `
         <div class = "db_class">
         <span style="font-size: max(14px,3vh);color:var(--clr16)">Personal Info</span>
         <input type="text" id="rg_name" class="_in_reg" placeholder="Name">
-        <div style = "display:flex;flex-direction:row;align-items:center;">
-        <label style = "font-size:16px;" for="rg_dob">Date:&nbsp;&nbsp;</label>
+        <div style = "display:flex;flex-direction:row;align-items:center;flex-wrap:wrap;">
+        <label style = "font-size:20px;" for="rg_dob">Date of Birth:&nbsp;&nbsp;</label>
         <input name = "rg_dob" type="date" id="rg_dob" class="_in_reg">
         </div>
         <div style = "display:flex;flex-direction:row;align-items:center;">
-        <label style = "font-size:16px;" for="class">Class:&nbsp;&nbsp;</label>
+        <label style = "font-size:20px;" for="class">Class:&nbsp;&nbsp;</label>
         <select name="class" id="rg_class">
             <option value="6">6</option>
             <option value="7">7</option>
@@ -42237,7 +42253,7 @@ let page_register = `
         </select>
         </div>
         <div style = "display:flex;flex-direction:row;align-items:center;">
-        <label style = "font-size:16px;" for="gender">Gender:&nbsp;&nbsp;</label>
+        <label style = "font-size:20px;" for="gender">Gender:&nbsp;&nbsp;</label>
         <select name="gender" id="rg_gender">
             <option value="Male">Male</option>
             <option value="Female">Female</option>
@@ -42560,8 +42576,8 @@ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "page_toc", ()=>page_toc);
 let page_toc = `
-<span class="in_t">Terms And Conditions</span>
-        <span class="sp_txt">Copyright 2021-23 Quarkz By Mr Techtroid</span>
+<span class="in_t" style = "text-align:center">Terms And Conditions</span>
+        <span class="sp_txt" style = "text-align:center">Copyright 2021-23 Quarkz By Mr Techtroid</span>
         <span class="in_t_2">Last Updated: 04 April 2023(IST)</span>
 <div id="lgl_container">
     <ol>
@@ -43425,8 +43441,8 @@ exports.constants = {
 };
 
 },{"6d7fc0dc5de28bcc":"8hjhE","f44f80586868fcdc":"2WyL8","69ad8819e07e917e":"k1utz","975f0ee803b7bc7b":"busIB","845f1c258f278f9b":"g38Hg","eb3b967cf515d387":"d4idn","657f7974a39648c1":"hwD3y","88bbea401533a54f":"jbRNy","c23eebf13b558da3":"9Rcg1","5477e994dfe71234":"h9Rdh","c1bd70025e2af238":"k3tsT"}],"8hjhE":[function(require,module,exports) {
-var global = arguments[3];
 var process = require("b055ad262129c80");
+var global = arguments[3];
 "use strict";
 // limit of Crypto.getRandomValues()
 // https://developer.mozilla.org/en-US/docs/Web/API/Crypto/getRandomValues
@@ -47028,8 +47044,8 @@ Object.defineProperty(Duplex.prototype, "destroyed", {
 // A bit simpler than readable streams.
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
 // the drain event emission and buffering.
-var global = arguments[3];
 var process = require("62eaf9240176a82a");
+var global = arguments[3];
 "use strict";
 module.exports = Writable;
 /* <replacement> */ function WriteReq(chunk, encoding, cb) {
@@ -50127,8 +50143,8 @@ module.exports = function(iterations, keylen) {
 };
 
 },{}],"T9r9Q":[function(require,module,exports) {
-var process = require("2b885cada18ff430");
 var global = arguments[3];
+var process = require("2b885cada18ff430");
 var defaultEncoding;
 /* istanbul ignore next */ if (global.process && global.process.browser) defaultEncoding = "utf-8";
 else if (global.process && global.process.version) {
@@ -78701,8 +78717,8 @@ function compare(a, b) {
 }
 
 },{"96fb9b2f6750834a":"4Szbv","1b8c45d37d900c35":"e2JgG","c87367ab291092f2":"iaxu0","35d67ec2478cf4d6":"3pDum","f8caae6e7d4d6567":"e594P","e5400ba285150c22":"2WyL8","65eedc9f6297963":"fFkPV","446b20c2e1062b85":"eW7r9"}],"k3tsT":[function(require,module,exports) {
-var global = arguments[3];
 var process = require("8ca93fa32364873");
+var global = arguments[3];
 "use strict";
 function oldBrowser() {
     throw new Error("secure random number generation not supported by this browser\nuse chrome, FireFox or Internet Explorer 11");
@@ -92262,9 +92278,9 @@ let page_ch_solver = `
             
             You can return the answer in any order.
             </div>
+            <hr>
         </div>
-        <hr>
-        <span style = "font-size:12px">Current Limitations: When variable is passed, interpreter assumes all variables as "string" and hence they need to be type casted to give correct output. Currently only JS is allowed for coding. Also the code written should be written in Modular JS, and it will be run as a script tag with type "module". </span>
+        <span style = "font-size:12px">Current Limitations: When variable is passed, interpreter assumes all variables as "string" and hence they need to be type casted to give correct output.</span>
     </div>
     <div style = "width:50%;overflow-y:scroll;margin:10px;border: 1px solid grey;padding:10px;">
     <div style = "width:100%;display:flex;flex-direction:row;align-items:center;border:1px solid grey;border-radius:5px;">
@@ -92272,7 +92288,6 @@ let page_ch_solver = `
         <option value="js">Javascript</option>
         <option value="py">Python</option>
     </select>
-    <button class = "tst_btn" id = "btn_code_run">Run</button>
     <button class = "tst_btn" id = "btn_code_submit">Submit</button>
     </div>
     <div style = "height:40vh;border: 1px solid grey;border-radius:5px;margin:10px;" id = "code_editor">

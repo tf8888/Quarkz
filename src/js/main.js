@@ -188,11 +188,13 @@ function signUp() {
 function creMng(a, b) {
   coreManager(a, b)
 }
-function renderBody(body, styles, s_class) {
+function renderBody(body, styles, s_class,translate) {
   dE("output").style = ""
+  dE("output").removeAttribute("translate")
   dE("output").classList.remove("ovr-scroll")
   dE("output").innerHTML = body;
   if (s_class != undefined && s_class != "") { dE("output").classList.add(s_class) }
+  if (translate != undefined && translate != "" && translate == "1") { dE("output").setAttribute("translate","no") }
   dE("output").style = styles
 }
 function dashboardEvents() {
@@ -338,9 +340,6 @@ function userNotesEvents() {
 }
 async function codeproblemEvents(){
   window.code_editor = window.setupEditor()
-  dE("btn_code_run").addEventListener("click",function(){
-    executeJSCodeHunt(window.code_editor)
-  })
   dE("btn_code_report").addEventListener("click",report_stuff)
   try{
     let docSnap = await getDoc(doc(db, 'codehunt', window.location.hash.split("#/codehunt/problem")[1]))
@@ -350,11 +349,13 @@ async function codeproblemEvents(){
       dE("cdh_tag").innerText = docJSON.tag;
       dE("cdh_difficulty").innerText = docJSON.difficulty;
       dE("cdh_description").innerHTML = docJSON.description;
+      window.code_editor.setValue("function execute("+docJSON.args+"){\n\n}")
       dE("btn_code_submit").addEventListener("click",function(){
         evaluateJSCode(docJSON.submit_input,docJSON.submit_output)
       })
       dE("btn_code_solution").addEventListener("click",function(){
         window.code_editor.setValue(docJSON.solution)
+        code_editor.setValue(code_editor.getValue().replaceAll("\\n",'\n'))
       })
     }
   }catch{}
@@ -402,19 +403,19 @@ function coreManager(newlocation, n1) {
   switch (location1) {
     case "profile": { handlebox = "profile"; renderBody(page_profile, "", ""); profileDetails(); break; }
     case "about": handlebox = "aboutus"; renderBody(page_about, "text-align: center;height:max-content;", ""); function lglHand() { changeLocationHash("legal", 1) }; dE("lgl_btn").addEventListener("click", lglHand); break;
-    case "login": handlebox = "login"; renderBody(page_login, "justify-content: center;", ""); dE("sgn_in").addEventListener("click", signIn); function regHand() { changeLocationHash("register", 1) }; dE("reg_in").addEventListener("click", regHand); break;
+    case "login": handlebox = "login"; renderBody(page_login, "justify-content: center;", "","1"); dE("sgn_in").addEventListener("click", signIn); function regHand() { changeLocationHash("register", 1) }; dE("reg_in").addEventListener("click", regHand); break;
     case "dashboard": handlebox = "dashboard"; renderBody(page_dashboard, "display: flex;flex-direction: row;", ""); dashboardEvents(); break;
     case "timetable": handlebox = "schedule"; renderBody(page_schedule, "", ""); showLS("s"); dE("tmt_frame").src = userinfo.timetableurl; break;
     case "logout": signOutUser(); break;
     case "mainsformulas": handlebox = "mainsformulas"; renderBody(downloads_render(download_links_list, "formulasheet"), "", ""); break;
     case "downloads": handlebox = "downloads"; renderBody(downloads_render(download_links_list, "downloads"), "", ""); break;
-    case "register": handlebox = "register"; renderBody(page_register, "height:max-content;", ""); dE("rg_in").addEventListener("click", rgbtn); break;
+    case "register": handlebox = "register"; renderBody(page_register, "height:max-content;", "","1"); dE("rg_in").addEventListener("click", rgbtn); break;
     case "testinfo": handlebox = "testinfo"; renderBody(page_test_list, "height:max-content;", ""); testlistEvents(); renderTestList("active"); break;
     case "legal": handlebox = "legal"; renderBody(page_toc, "", ""); antiCopyEle("lgl_container"); break;
     case "appinfo": handlebox = "appinfo"; renderBody(page_app_info, "", ""); renderAppInfo(); break;
     case "forum": handlebox = "forum"; renderBody(page_forum, "", ""); var fmsend = dE("fm_send").addEventListener("click", sndMsg); gtMsg(); getPinned(); break;
     case "bugreport": handlebox = "bugreport"; renderBody(page_bug_report, "", ""); break;
-    case "simlist": handlebox = "simlist"; renderBody(page_list_sims, "", ""); simEvents(); getSimList(); break;
+    case "simlist": handlebox = "simlist"; renderBody(page_list_sims, "", "","1"); simEvents(); getSimList(); break;
     case "testend": handlebox = "test_end"; renderBody(page_test_end, "", ""); break;
     case "add/lesson": handlebox = "fu_lesson"; newLesson(); break;
     case "updates": handlebox = "update"; renderBody(page_updates, "height: max-content;justify-content: center;", ""); getUpdate(); break;
@@ -439,13 +440,13 @@ function coreManager(newlocation, n1) {
   if (location1.includes("cyberhunt")) { handlebox = "cyberhunt"; renderBody(page_cyberhunt, "", ""); getCyberhunt() }
   if (location1.includes("notes") && !location1.includes("usernotes")) { handlebox = "notes"; renderBody(page_notes, "", ""); getPDF() }
   if (location1.includes("sims")) { handlebox = "simulations"; renderBody(page_sims, "", ""); getSimulation(); }
-  if (location1.includes("chapter")) { handlebox = "chapter"; renderBody(page_chapter, "height:max-content;", ""); getChapterEList() }
-  if (location1.includes("qbanks")) { handlebox = "topic"; renderBody(page_topic, "height:max-content;", ""); topicEvents(); getTopic(2); }
-  if (location1.includes("usernotes")) { handlebox = "usernotes"; renderBody(page_usernotes, "flex-direction: row;", ""); userNotesEvents(); getUserNotes(); }
+  if (location1.includes("chapter")) { handlebox = "chapter"; renderBody(page_chapter, "height:max-content;", "","1"); getChapterEList() }
+  if (location1.includes("qbanks")) { handlebox = "topic"; renderBody(page_topic, "height:max-content;", "","1"); topicEvents(); getTopic(2); }
+  if (location1.includes("usernotes")) { handlebox = "usernotes"; renderBody(page_usernotes, "flex-direction: row;", "","1"); userNotesEvents(); getUserNotes(); }
   if (location1.includes("qbnk_vid")) { handlebox = "qbnk_vid"; renderBody(page_qbnkvid, "height:90vh;position: relative;", ""); dE("qbnk_vid_btn").style.display = "block"; dE("qbnk_vid_btn").addEventListener("click", prepareVideo); dE("qbnk_vid_btn_e").addEventListener("click", qbnkend); function qbnkend() { dE("watermark").style.display = "flex"; fullEle(dE("qbnk_vid")) } }
-  if (location1.includes("attempt")) { handlebox = "testv1"; renderBody(page_test_v1, "height:max-content;overflow:scroll;align-items:inherit;", ""); testEvents(); addTestEvents(); getTestInfo() }
+  if (location1.includes("attempt")) { handlebox = "testv1"; renderBody(page_test_v1, "height:max-content;overflow:scroll;align-items:inherit;", "","1"); testEvents(); addTestEvents(); getTestInfo() }
   if (location1.includes("finished")) { handlebox = "finishedtestinfo"; renderBody(page_finished_test, "height:max-content;", ""); getSimpleTestReport() }
-  if (location1.includes("testreport")) { handlebox = "testv1"; renderBody(page_test_v1, "height:max-content;overflow:scroll;align-items:inherit;", ""); getTestReport(); addTestEvents(); }
+  if (location1.includes("testreport")) { handlebox = "testv1"; renderBody(page_test_v1, "height:max-content;overflow:scroll;align-items:inherit;", "","1"); getTestReport(); addTestEvents(); }
   if (location1.includes("printable/qbank") && iorole == true) { handlebox = "printable"; renderBody(page_printable, "height:max-content;", ""); printableEvents(); var shfbtn = dE("shf_btn").addEventListener("click", shuffleQBank); printQBank(1); }
   if (location1.includes("ARIEL") && iorole == true) { handlebox = "Ariel"; renderBody(page_ariel, "", ""); }
   if (location1.includes("printable/tests") && iorole == true) { handlebox = "printable"; renderBody(page_printable, "height:max-content;", ""); printableEvents(); var shfbtn = dE("shf_btn").addEventListener("click", shuffleQBank); printQBank(3); }
@@ -453,12 +454,12 @@ function coreManager(newlocation, n1) {
   if (location1.includes("users") && iorole == true) { handlebox = "users"; renderBody(page_edit_user, "", ""); userUpdate() }
   if (location1.includes("topic")) { handlebox = "topic"; renderBody(page_topic, "height: max-content;", ""); topicEvents(); getTopic(1); }
   if (location1.includes("printable/topic") && iorole == true) { handlebox = "printable"; renderBody(page_printable, "height:max-content;", ""); printQBank(2); }
-  if (location1.includes("edit_sim") && iorole == true) { handlebox = "fu_simulation"; renderBody(page_edit_sims, "", "ovr-scroll"); dE("aq_sims_save").addEventListener("click", updateSimulationWeb); prepareSimulation() }
-  if (location1.includes("edit_lesson") && iorole == true) { handlebox = "fu_simulation"; renderBody(page_edit_sims, "", "ovr-scroll"); prepareLesson() }
-  if (location1.includes("edit_tpc") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll"); dE("aq_tpc_save").addEventListener("click", function () { updateTopicQBank(1) }); edittopicEvents(); prepareTopicQBank(1) }
-  if (location1.includes("edit_test") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll"); dE("aq_tst_save").addEventListener("click", function () { updateTopicQBank(3) }); edittopicEvents(); prepareTopicQBank(3) }
-  if (location1.includes("edit_qubank") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll"); dE("aq_qbc_save").addEventListener("click", function () { updateTopicQBank(2) }); edittopicEvents(); prepareTopicQBank(2) }
-  if (location1.includes("edit_exams") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll"); dE("aq_exam_save").addEventListener("click", function () { updateTopicQBank(4) }); edittopicEvents(); prepareTopicQBank(4) }
+  if (location1.includes("edit_sim") && iorole == true) { handlebox = "fu_simulation"; renderBody(page_edit_sims, "", "ovr-scroll","1"); dE("aq_sims_save").addEventListener("click", updateSimulationWeb); prepareSimulation() }
+  if (location1.includes("edit_lesson") && iorole == true) { handlebox = "fu_simulation"; renderBody(page_edit_sims, "", "ovr-scroll","1"); prepareLesson() }
+  if (location1.includes("edit_tpc") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll","1"); dE("aq_tpc_save").addEventListener("click", function () { updateTopicQBank(1) }); edittopicEvents(); prepareTopicQBank(1) }
+  if (location1.includes("edit_test") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll","1"); dE("aq_tst_save").addEventListener("click", function () { updateTopicQBank(3) }); edittopicEvents(); prepareTopicQBank(3) }
+  if (location1.includes("edit_qubank") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll","1"); dE("aq_qbc_save").addEventListener("click", function () { updateTopicQBank(2) }); edittopicEvents(); prepareTopicQBank(2) }
+  if (location1.includes("edit_exams") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll","1"); dE("aq_exam_save").addEventListener("click", function () { updateTopicQBank(4) }); edittopicEvents(); prepareTopicQBank(4) }
   if (location1.includes("edit_batch") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_batch, "", ""); prepareBatch(); dE("aq_batch_save").addEventListener("click", updateBatch) }
   if (location1.includes("codehunt/problem")){renderBody(page_ch_solver,"","");codeproblemEvents()}
   // if (location1.includes("vid_chat")) { handlebox = "fu_vidchat"; renderBody(page_vidchat, "", ""); prepareVideoChat(); }
@@ -3569,7 +3570,7 @@ function loadVid(videoId) {
   } else { window.player.loadVideoById(videoId); }
 }
 function renderAppInfo() {
-  dE("ren_appinf").textContent = JSON.stringify(Quarkz, undefined, 2);
+  dE("ren_appinf").textContent = JSON.stringify(Quarkz, undefined, 4);
 }
 
 $(document).ready(function () {
@@ -3610,10 +3611,13 @@ function setHTML(id, html) {
 }
 var Quarkz = {
   "copyright": "Mr Techtroid 2021-23",
-  "vno": "v0.6.8",
+  "vno": "v0.6.9",
   "author": "Mr Techtroid",
   "last-updated": "23/08/2023(IST)",
   "serverstatus": "firebase-online",
+}
+if (document.location.origin == "https://quarkz.netlify.app"){
+  document.location = "https://quarkz.mtt.one"
 }
 var handlebox = "login";
 var location1 = window.location.hash.split("#/")[1]
