@@ -38,17 +38,16 @@ import { page_toc } from '../embeds/toc'
 import { page_topic, page_edit_topic } from "../embeds/topics";
 import { page_edit_user } from "../embeds/user";
 import { page_usernotes } from "../embeds/usernotes"
-import { page_store,page_store_edit } from "../embeds/store"
-import { page_vidchat } from "../embeds/vidchat";
-import { sd, sha256, makeid, mobileCheck, areObjectsEqual, areEqual, getServerTime, fullEle, dE, sortObj, sortObjv2, renderMarkedMath, mergeById, qCorrector, playSoundEffect, showLS, antiCopyEle, shuffleArrayWithSeed, buildHtmlTable, studentRanker } from '../js/helper'
+import { page_store, page_store_edit } from "../embeds/store"
+import { page_vidchat, page_createvidchat } from "../embeds/vidchat";
+import { sd, sha256, makeid, mobileCheck, areObjectsEqual, areEqual, getServerTime, fullEle, dE, sortObj, sortObjv2, renderMarkedMath, mergeById, qCorrector, playSoundEffect, showLS, antiCopyEle, shuffleArrayWithSeed, buildHtmlTable, studentRanker,getAvatarURL } from '../js/helper'
 import { sysaccess } from "./reworkui";
 import { page_batch_list, page_edit_batch } from "../embeds/admin";
 import Chart, { scales } from 'chart.js/auto';
-import { page_ch_solver,page_ch_list } from "../embeds/codehunt";
+import { page_ch_solver, page_ch_list } from "../embeds/codehunt";
 
-// I added a function that can be used to register a service worker.
 const registerServiceWorker = async () => {
-  const swRegistration = await navigator.serviceWorker.register(new URL('../js/sw.js', import.meta.url), { type: 'module' }); //notice the file name
+  const swRegistration = await navigator.serviceWorker.register(new URL('../js/sw.js', import.meta.url), { type: 'module' }); 
   return swRegistration;
 }
 registerServiceWorker()
@@ -74,39 +73,7 @@ setPersistence(auth, browserLocalPersistence)
   });
 
 const storage = getStorage();
-function getInitials(name) {
-  let initials = '';
-  const words = name.split(' ');
-  for (let i = 0; i < words.length; i++) {
-    const word = words[i];
-    if (word.length > 0) {
-      initials += word[0].toUpperCase();
-    }
-  }
-  return initials;
-}
-function getAvatarURL(name, gen, ver) {
-  // Import the crypto module for hashing
-  const crypto = require('crypto');
-  // Hash the seed string using SHA-256 algorithm
-  const hash = crypto.createHash('sha256').update(name).digest('hex');
-  // Take the first 6 digits of the hash and convert to number
-  const num = parseInt(hash.slice(0, 6), 16);
-  // Return the 6-digit number
-  if (ver == undefined || ver == "") { ver == "v2" }
-  let initials = getInitials(name);
-  if (ver == "v1") {
-    return "https://ui-avatars.com/api/?background=random&size=100&bold=true&name=" + getInitials(userinfo.name)
-  } else if (ver == "v2") {
-    if (gen == "Male") {
-      return "https://api.dicebear.com/5.x/avataaars/svg?top%5B%5D=dreads01,dreads02,eyepatch,frizzle,shortCurly,shortFlat,shortRound,shortWaved,sides,theCaesar,theCaesarAndSidePart,turban&seed=" + initials + num.toString()
-    } else {
-      return "https://api.dicebear.com/5.x/avataaars/svg?facialHairProbability=0&top%5B%5D=bigHair,bob,bun,curly,curvy,dreads,frida,fro,hijab,longButNotTooLong,miaWallace,shaggy,shaggyMullet,shavedSides,straightAndStrand,straight01,straight02&seed=" + initials + num.toString()
-    }
-  } else if (ver == "v3") {
-    return "https://api.dicebear.com/6.x/bottts/svg?seed=" + initials + num.toString()
-  }
-}
+
 // Login Page
 // Sign In A User
 async function signIn() {
@@ -117,22 +84,25 @@ async function signIn() {
       const user = userCredential.user;
       userdetails.email = email
       creMng("dashboard", 1);
+      addToast("success","Login Successful!")
     })
     .catch((error) => {
       const errorCode = error.code;
       const errorMessage = error.message;
-      dE("lgn_err").style.display = "block"
+      addToast("error","Login Denied. Wrong Username or Password.")
       dE("lg_pass").value = ""
     });
 }
+
 // Sign Out A User
 function signOutUser() {
-  // Sign out of Firebase.
   signOut(getAuth());
   userdetails = []
   creMng("login", 1);
+  addToast("success","Logout Successful!")
   window.location.reload()
 }
+
 // Register A User
 function signUp() {
   var email = dE("rg_uname").value;
@@ -142,18 +112,16 @@ function signUp() {
   var stclass = dE("rg_class").value;
   var stgender = dE("rg_gender").value;
   if (email == "" || password == "" || name == "" || mblno == "" || stclass == "") {
-    alert("Details Cannot Be Empty")
+    addToast("error","Details Cannot Be Empty")
   }
   if (password != dE("rg_pass1").value) {
+    addToast("error","Passwords dont match.")
   }
   else {
     createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
-        // Signed in 
         const user = userCredential.user;
-        // ...
         async function a() {
-          // Add a new message entry to the Firebase database.
           try {
             await setDoc(doc(db, 'users', user.uid), {
               name: name,
@@ -171,12 +139,13 @@ function signUp() {
             });
           }
           catch (error) {
-            console.error('Error Adding New User', error);
+            addToast("error",'Error Adding New User'+ error);
           }
         }
         a();
       })
       .catch((error) => {
+        addToast("error",'Error Adding New User'+ error);
         const errorCode = error.code;
         const errorMessage = error.message;
         // ..
@@ -188,17 +157,16 @@ function signUp() {
 function creMng(a, b) {
   coreManager(a, b)
 }
-function renderBody(body, styles, s_class,translate) {
+function renderBody(body, styles, s_class, translate) {
   dE("output").style = ""
   dE("output").removeAttribute("translate")
   dE("output").classList.remove("ovr-scroll")
   dE("output").innerHTML = body;
   if (s_class != undefined && s_class != "") { dE("output").classList.add(s_class) }
-  if (translate != undefined && translate != "" && translate == "1") { dE("output").setAttribute("translate","no") }
+  if (translate != undefined && translate != "" && translate == "1") { dE("output").setAttribute("translate", "no") }
   dE("output").style = styles
 }
 function dashboardEvents() {
-  var sgnout = dE("lgt_btn").addEventListener("click", signOutUser);
   dE("dshd_uname").innerText = userinfo.email
   dE("dshd_name").innerText = userinfo.name
   dE("dshd_batch").innerText = userinfo.batchname
@@ -220,8 +188,8 @@ function simEvents() {
   var co_sims = dE("cosims").addEventListener("click", cosims)
   var s_sims = dE("ssims").addEventListener("click", ssims)
   var u_sims = dE("usims").addEventListener("click", usims)
-
 }
+
 function chapterEvents() {
   function pchb() { renderCList("physics") }
   function cchb() { renderCList("chemistry") }
@@ -239,8 +207,10 @@ function chapterEvents() {
   var u_chb = dE("uchb").addEventListener("click", uchb)
 }
 document.addEventListener('copy', function (e) {
-  e.clipboardData.setData('text/plain', "It is forbidden to copy content from Quarkz!");
-  e.preventDefault();
+  if (!userinfo.roles['admin'] && !userinfo.roles['editor']){
+    e.clipboardData.setData('text/plain', "It is forbidden to copy content from Quarkz!");
+    e.preventDefault();
+  }
 });
 function addTestEvents() {
   function qpaper() {
@@ -253,11 +223,6 @@ function addTestEvents() {
     qp_test("Question Paper", html)
   }
   function qinstr() {
-    function dateparser(var1) {
-      var now = new Date(var1);
-      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-      return now.toISOString().slice(0, 16);
-    }
     qp_test("Test Instructions", page_test_instructions)
     dE("tsi").innerHTML = testInfo.instructions
     dE("i_name").innerHTML = testInfo.title
@@ -338,10 +303,10 @@ function userNotesEvents() {
     window.print()
   })
 }
-async function codeproblemEvents(){
+async function codeproblemEvents() {
   window.code_editor = window.setupEditor()
-  dE("btn_code_report").addEventListener("click",report_stuff)
-  try{
+  dE("btn_code_report").addEventListener("click", report_stuff)
+  try {
     let docSnap = await getDoc(doc(db, 'codehunt', window.location.hash.split("#/codehunt/problem")[1]))
     if (docSnap.exists()) {
       let docJSON = docSnap.data()
@@ -349,17 +314,17 @@ async function codeproblemEvents(){
       dE("cdh_tag").innerText = docJSON.tag;
       dE("cdh_difficulty").innerText = docJSON.difficulty;
       dE("cdh_description").innerHTML = docJSON.description;
-      window.code_editor.setValue("function execute("+docJSON.args+"){\n\n}")
-      dE("btn_code_submit").addEventListener("click",function(){
-        evaluateJSCode(docJSON.submit_input,docJSON.submit_output)
+      window.code_editor.setValue("function execute(" + docJSON.args + "){\n\n}")
+      dE("btn_code_submit").addEventListener("click", function () {
+        evaluateJSCode(docJSON.submit_input, docJSON.submit_output)
       })
-      dE("btn_code_solution").addEventListener("click",function(){
+      dE("btn_code_solution").addEventListener("click", function () {
         window.code_editor.setValue(docJSON.solution)
-        code_editor.setValue(code_editor.getValue().replaceAll("\\n",'\n'))
+        code_editor.setValue(code_editor.getValue().replaceAll("\\n", '\n'))
       })
     }
-  }catch{}
-  
+  } catch { }
+
 }
 function dshHand() { changeLocationHash("dashboard", 1) }
 var dshbtn = dE("dsh_btn").addEventListener("click", dshHand);
@@ -403,19 +368,19 @@ function coreManager(newlocation, n1) {
   switch (location1) {
     case "profile": { handlebox = "profile"; renderBody(page_profile, "", ""); profileDetails(); break; }
     case "about": handlebox = "aboutus"; renderBody(page_about, "text-align: center;height:max-content;", ""); function lglHand() { changeLocationHash("legal", 1) }; dE("lgl_btn").addEventListener("click", lglHand); break;
-    case "login": handlebox = "login"; renderBody(page_login, "justify-content: center;", "","1"); dE("sgn_in").addEventListener("click", signIn); function regHand() { changeLocationHash("register", 1) }; dE("reg_in").addEventListener("click", regHand); break;
+    case "login": handlebox = "login"; renderBody(page_login, "justify-content: center;", "", "1"); dE("sgn_in").addEventListener("click", signIn); function regHand() { changeLocationHash("register", 1) }; dE("reg_in").addEventListener("click", regHand); break;
     case "dashboard": handlebox = "dashboard"; renderBody(page_dashboard, "display: flex;flex-direction: row;", ""); dashboardEvents(); break;
     case "timetable": handlebox = "schedule"; renderBody(page_schedule, "", ""); showLS("s"); dE("tmt_frame").src = userinfo.timetableurl; break;
     case "logout": signOutUser(); break;
     case "mainsformulas": handlebox = "mainsformulas"; renderBody(downloads_render(download_links_list, "formulasheet"), "", ""); break;
     case "downloads": handlebox = "downloads"; renderBody(downloads_render(download_links_list, "downloads"), "", ""); break;
-    case "register": handlebox = "register"; renderBody(page_register, "height:max-content;", "","1"); dE("rg_in").addEventListener("click", rgbtn); break;
+    case "register": handlebox = "register"; renderBody(page_register, "height:max-content;", "", "1"); dE("rg_in").addEventListener("click", rgbtn); break;
     case "testinfo": handlebox = "testinfo"; renderBody(page_test_list, "height:max-content;", ""); testlistEvents(); renderTestList("active"); break;
     case "legal": handlebox = "legal"; renderBody(page_toc, "", ""); antiCopyEle("lgl_container"); break;
     case "appinfo": handlebox = "appinfo"; renderBody(page_app_info, "", ""); renderAppInfo(); break;
     case "forum": handlebox = "forum"; renderBody(page_forum, "", ""); var fmsend = dE("fm_send").addEventListener("click", sndMsg); gtMsg(); getPinned(); break;
     case "bugreport": handlebox = "bugreport"; renderBody(page_bug_report, "", ""); break;
-    case "simlist": handlebox = "simlist"; renderBody(page_list_sims, "", "","1"); simEvents(); getSimList(); break;
+    case "simlist": handlebox = "simlist"; renderBody(page_list_sims, "", "", "1"); simEvents(); getSimList(); break;
     case "testend": handlebox = "test_end"; renderBody(page_test_end, "", ""); break;
     case "add/lesson": handlebox = "fu_lesson"; newLesson(); break;
     case "updates": handlebox = "update"; renderBody(page_updates, "height: max-content;justify-content: center;", ""); getUpdate(); break;
@@ -425,8 +390,9 @@ function coreManager(newlocation, n1) {
     case "add/tests": handlebox = "fu_topic"; newTest(); break;
     case "add/batch": handlebox = "fu_topic"; newBatch(); break;
     case "add/store_item": handlebox = "fu_storeitem"; newStoreItem(); break;
-    case "codehunt": handlebox = "fu_code_problemlist"; renderBody(page_ch_list, "", "");renderCodeProblemList();break
-    case "store": handlebox = "fu_shop"; renderBody(page_store, "height:max-content;", "");renderStore(); break;
+    case "add/codehunt": handlebox = "fu_codehunt"; newCodeHunt();break;
+    case "codehunt": handlebox = "fu_code_problemlist"; renderBody(page_ch_list, "", ""); renderCodeProblemList(); break
+    case "store": handlebox = "fu_shop"; renderBody(page_store, "height:max-content;", ""); renderStore(); break;
     case "list/batch": handlebox = "fu_batch"; renderBody(page_batch_list, "height:max-content;", ""); renderAdminBatchList(); break;
     case "list/tests": handlebox = "fu_batch"; renderBody(page_batch_list, "height:max-content;", ""); renderAdminTestList(); break;
     case "list/chptr": handlebox = "fu_batch"; renderBody(page_batch_list, "height:max-content;", ""); renderAdminChapterList(); break;
@@ -439,14 +405,15 @@ function coreManager(newlocation, n1) {
   if (location1.includes("instructions")) { handlebox = "test_instructions"; renderBody(page_test_instructions, "", ""); testInstructions(); }
   if (location1.includes("cyberhunt")) { handlebox = "cyberhunt"; renderBody(page_cyberhunt, "", ""); getCyberhunt() }
   if (location1.includes("notes") && !location1.includes("usernotes")) { handlebox = "notes"; renderBody(page_notes, "", ""); getPDF() }
+  if (location1.includes("create_vidchat")) { handlebox = "notes"; renderBody(page_createvidchat, "height:max-content;", ""); initCreateVidChat(); }
   if (location1.includes("sims")) { handlebox = "simulations"; renderBody(page_sims, "", ""); getSimulation(); }
-  if (location1.includes("chapter")) { handlebox = "chapter"; renderBody(page_chapter, "height:max-content;", "","1"); getChapterEList() }
-  if (location1.includes("qbanks")) { handlebox = "topic"; renderBody(page_topic, "height:max-content;", "","1"); topicEvents(); getTopic(2); }
-  if (location1.includes("usernotes")) { handlebox = "usernotes"; renderBody(page_usernotes, "flex-direction: row;", "","1"); userNotesEvents(); getUserNotes(); }
+  if (location1.includes("chapter")) { handlebox = "chapter"; renderBody(page_chapter, "height:max-content;", "", "1"); getChapterEList() }
+  if (location1.includes("qbanks")) { handlebox = "topic"; renderBody(page_topic, "height:max-content;", "", "1"); topicEvents(); getTopic(2); }
+  if (location1.includes("usernotes")) { handlebox = "usernotes"; renderBody(page_usernotes, "flex-direction: row;", "", "1"); userNotesEvents(); getUserNotes(); }
   if (location1.includes("qbnk_vid")) { handlebox = "qbnk_vid"; renderBody(page_qbnkvid, "height:90vh;position: relative;", ""); dE("qbnk_vid_btn").style.display = "block"; dE("qbnk_vid_btn").addEventListener("click", prepareVideo); dE("qbnk_vid_btn_e").addEventListener("click", qbnkend); function qbnkend() { dE("watermark").style.display = "flex"; fullEle(dE("qbnk_vid")) } }
-  if (location1.includes("attempt")) { handlebox = "testv1"; renderBody(page_test_v1, "height:max-content;overflow:scroll;align-items:inherit;", "","1"); testEvents(); addTestEvents(); getTestInfo() }
+  if (location1.includes("attempt")) { handlebox = "testv1"; renderBody(page_test_v1, "height:max-content;overflow:scroll;align-items:inherit;", "", "1"); testEvents(); addTestEvents(); getTestInfo() }
   if (location1.includes("finished")) { handlebox = "finishedtestinfo"; renderBody(page_finished_test, "height:max-content;", ""); getSimpleTestReport() }
-  if (location1.includes("testreport")) { handlebox = "testv1"; renderBody(page_test_v1, "height:max-content;overflow:scroll;align-items:inherit;", "","1"); getTestReport(); addTestEvents(); }
+  if (location1.includes("testreport")) { handlebox = "testv1"; renderBody(page_test_v1, "height:max-content;overflow:scroll;align-items:inherit;", "", "1"); getTestReport(); addTestEvents(); }
   if (location1.includes("printable/qbank") && iorole == true) { handlebox = "printable"; renderBody(page_printable, "height:max-content;", ""); printableEvents(); var shfbtn = dE("shf_btn").addEventListener("click", shuffleQBank); printQBank(1); }
   if (location1.includes("ARIEL") && iorole == true) { handlebox = "Ariel"; renderBody(page_ariel, "", ""); }
   if (location1.includes("printable/tests") && iorole == true) { handlebox = "printable"; renderBody(page_printable, "height:max-content;", ""); printableEvents(); var shfbtn = dE("shf_btn").addEventListener("click", shuffleQBank); printQBank(3); }
@@ -454,22 +421,22 @@ function coreManager(newlocation, n1) {
   if (location1.includes("users") && iorole == true) { handlebox = "users"; renderBody(page_edit_user, "", ""); userUpdate() }
   if (location1.includes("topic")) { handlebox = "topic"; renderBody(page_topic, "height: max-content;", ""); topicEvents(); getTopic(1); }
   if (location1.includes("printable/topic") && iorole == true) { handlebox = "printable"; renderBody(page_printable, "height:max-content;", ""); printQBank(2); }
-  if (location1.includes("edit_sim") && iorole == true) { handlebox = "fu_simulation"; renderBody(page_edit_sims, "", "ovr-scroll","1"); dE("aq_sims_save").addEventListener("click", updateSimulationWeb); prepareSimulation() }
-  if (location1.includes("edit_lesson") && iorole == true) { handlebox = "fu_simulation"; renderBody(page_edit_sims, "", "ovr-scroll","1"); prepareLesson() }
-  if (location1.includes("edit_tpc") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll","1"); dE("aq_tpc_save").addEventListener("click", function () { updateTopicQBank(1) }); edittopicEvents(); prepareTopicQBank(1) }
-  if (location1.includes("edit_test") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll","1"); dE("aq_tst_save").addEventListener("click", function () { updateTopicQBank(3) }); edittopicEvents(); prepareTopicQBank(3) }
-  if (location1.includes("edit_qubank") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll","1"); dE("aq_qbc_save").addEventListener("click", function () { updateTopicQBank(2) }); edittopicEvents(); prepareTopicQBank(2) }
-  if (location1.includes("edit_exams") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll","1"); dE("aq_exam_save").addEventListener("click", function () { updateTopicQBank(4) }); edittopicEvents(); prepareTopicQBank(4) }
+  if (location1.includes("edit_sim") && iorole == true) { handlebox = "fu_simulation"; renderBody(page_edit_sims, "", "ovr-scroll", "1"); dE("aq_sims_save").addEventListener("click", updateSimulationWeb); prepareSimulation() }
+  if (location1.includes("edit_lesson") && iorole == true) { handlebox = "fu_simulation"; renderBody(page_edit_sims, "", "ovr-scroll", "1"); prepareLesson() }
+  if (location1.includes("edit_tpc") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll", "1"); dE("aq_tpc_save").addEventListener("click", function () { updateTopicQBank(1) }); edittopicEvents(); prepareTopicQBank(1) }
+  if (location1.includes("edit_test") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll", "1"); dE("aq_tst_save").addEventListener("click", function () { updateTopicQBank(3) }); edittopicEvents(); prepareTopicQBank(3) }
+  if (location1.includes("edit_qubank") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll", "1"); dE("aq_qbc_save").addEventListener("click", function () { updateTopicQBank(2) }); edittopicEvents(); prepareTopicQBank(2) }
+  if (location1.includes("edit_exams") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll", "1"); dE("aq_exam_save").addEventListener("click", function () { updateTopicQBank(4) }); edittopicEvents(); prepareTopicQBank(4) }
   if (location1.includes("edit_batch") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_batch, "", ""); prepareBatch(); dE("aq_batch_save").addEventListener("click", updateBatch) }
-  if (location1.includes("codehunt/problem")){renderBody(page_ch_solver,"","");codeproblemEvents()}
-  // if (location1.includes("vid_chat")) { handlebox = "fu_vidchat"; renderBody(page_vidchat, "", ""); prepareVideoChat(); }
+  if (location1.includes("codehunt/problem")) { renderBody(page_ch_solver, "", ""); codeproblemEvents() }
+  if (location1.includes("vid_chat")) { handlebox = "fu_vidchat"; renderBody(page_vidchat, "", ""); prepareVideoChat(); }
   if (location1.includes("site-analytics") && iorole == true) { handlebox = "fu_analytics"; renderBody(page_analytics, "", ""); }
   if (iorole) {
     if (window.location.hash.includes("dashboard")) {
       dE("adminonly").style.display = "flex";
     }
     if (window.location.hash.includes("topic") || window.location.hash.includes("qbanks")) {
-      dE("tp_pnt").style.display = "block";
+      // dE("tp_pnt").style.display = "block";
       dE("tp_edt").style.display = "block";
     }
     if (window.location.hash.includes("sims")) { dE("sms_edit").style.display = "block"; }
@@ -484,11 +451,6 @@ function coreManager(newlocation, n1) {
 async function testInstructions() {
   let docSnap = await getDoc(doc(db, 'tests', window.location.hash.split("#/instructions/")[1]))
   if (docSnap.exists()) {
-    function dateparser(var1) {
-      var now = new Date(var1);
-      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-      return now.toISOString().slice(0, 16);
-    }
     dE("i_name").innerHTML = docSnap.data().title
     dE("i_start").innerHTML = dateparser(docSnap.data().strton.seconds * 1000)
     dE("i_end").innerHTML = dateparser(docSnap.data().endon.seconds * 1000)
@@ -514,6 +476,48 @@ async function testInstructions() {
     dE("tin_start").innerText = "Test Has Not Started Yet."
   }
 }
+async function initCreateVidChat() {
+  if (window.location.hash.split("create_vidchat/")[1] == "") {
+    dE("vdc_create").style.display = "block"
+    dE("vdc_update").style.display = "none"
+    dE("vdc_create").addEventListener("click", async function () {
+      let stron = new Date(dE("vdc_stron").value)
+      const docRef = await addDoc(collection(db, "vidchat"), {
+        name: dE("vdc_tpcname").value,
+        stron: stron,
+        duration: dE("vdc_duration").value,
+        status: "notstarted",
+        ended: false,
+
+      });
+      dE("vdc_meetid").value = docRef.id
+    })
+  } else {
+    dE("vdc_create").style.display = "none"
+    dE("vdc_update").style.display = "block"
+    let docSnap = await getDoc(doc(db, 'vidchat', window.location.hash.split("create_vidchat/")[1]))
+    if (docSnap.exists()) {
+      var docJSON = docSnap.data()
+      dE("vdc_tpcname").value = docJSON.name
+      dE("vdc_duration").value = docJSON.duration
+      dE("vdc_stron").value = dateparser(docJSON.stron.seconds * 1000)
+      dE("vdc_meetid").value = window.location.hash.split("create_vidchat/")[1]
+      if (docJSON.ended == "true") {
+        dE("vdc_update").disabled = "true"
+        dE("vdc_update").style.display = "none"
+        addToast("warning", "Meeting has already ended, hence Meeting Details cannot be changed.", 10000)
+      }
+    }
+    dE("vdc_update").addEventListener("click", async function () {
+      let stron = new Date(dE("vdc_stron").value)
+      const docRef = await updateDoc(collection(db, "vidchat"), {
+        name: dE("vdc_tpcname").value,
+        stron: stron,
+        duration: dE("vdc_duration").value
+      });
+    })
+  }
+}
 async function getUpdate() {
   let docSnap = await getDoc(doc(db, 'usernotes', 'releasenotes'))
   if (docSnap.exists()) {
@@ -528,138 +532,187 @@ window.ifcls = function () {
   document.getElementById('tempIF_G').remove();
 }
 window.user_rate_value = 0;
-function prepareVideoChat() {
-  // const servers = {
-  //   iceServers: [
-  //     {
-  //       urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'],
-  //     },
-  //   ],
-  //   iceCandidatePoolSize: 10,
-  // };
-  // let pc = new RTCPeerConnection(servers)
-  // let localstream = null
-  // let remotestream = null
-  // const webcamButton = document.getElementById('webcamButton');
-  // const webcamVideo = document.getElementById('webcamVideo');
-  // const callButton = document.getElementById('callButton');
-  // const callInput = document.getElementById('callInput');
-  // const answerButton = document.getElementById('answerButton');
-  // const remoteVideo = document.getElementById('remoteVideo');
-  // const hangupButton = document.getElementById('hangupButton');
-  // webcamButton.onclick = async () => {
-  //   localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-  //   remoteStream = new MediaStream();
-  
-  //   // Push tracks from local stream to peer connection
-  //   localStream.getTracks().forEach((track) => {
-  //     pc.addTrack(track, localStream);
-  //   });
-  
-  //   // Pull tracks from remote stream, add to video stream
-  //   pc.ontrack = (event) => {
-  //     event.streams[0].getTracks().forEach((track) => {
-  //       remoteStream.addTrack(track);
-  //     });
-  //   };
-  
-  //   webcamVideo.srcObject = localStream;
-  //   remoteVideo.srcObject = remoteStream;
-  
-  //   callButton.disabled = false;
-  //   answerButton.disabled = false;
-  //   webcamButton.disabled = true;
-  // };
-  
-  // // 2. Create an offer
-  // callButton.onclick = async () => {
-  //   // Reference Firestore collections for signaling
-  //   let docSnap = await getDoc(doc(db, 'vidchat', window.location.hash.split("vid_chat/")[1]))
-  //   if (docSnap.exists()) {
-  //     var docJSON = docSnap.data();
-  //   }
-  //   const callDoc = firestore.collection('calls').doc();
-  //   const offerCandidates = callDoc.collection('offerCandidates');
-  //   const answerCandidates = callDoc.collection('answerCandidates');
-  
-  //   callInput.value = callDoc.id;
-  
-  //   // Get candidates for caller, save to db
-  //   pc.onicecandidate = async (event) => {
-  //     event.candidate && offerCandidates.add(event.candidate.toJSON()) && await addDoc(doc(db, 'vidchat', docRef.id, "offerCandidates"), {json: event.candidate.toJSON()});
-  //   };
-  
-  //   // Create offer
-  //   const offerDescription = await pc.createOffer();
-  //   await pc.setLocalDescription(offerDescription);
-  
-  //   const offer = {
-  //     sdp: offerDescription.sdp,
-  //     type: offerDescription.type,
-  //   };
-  
-  //   await await setDoc(doc(db, 'vidchat', docRef.id), {offer: offer})
-  
-  //   // Listen for remote answer
-  //   callDoc.onSnapshot((snapshot) => {
-  //     const data = snapshot.data();
-  //     if (!pc.currentRemoteDescription && data?.answer) {
-  //       const answerDescription = new RTCSessionDescription(data.answer);
-  //       pc.setRemoteDescription(answerDescription);
-  //     }
-  //   });
-  
-  //   // When answered, add candidate to peer connection
-  //   answerCandidates.onSnapshot((snapshot) => {
-  //     snapshot.docChanges().forEach((change) => {
-  //       if (change.type === 'added') {
-  //         const candidate = new RTCIceCandidate(change.doc.data());
-  //         pc.addIceCandidate(candidate);
-  //       }
-  //     });
-  //   });
-  
-  //   hangupButton.disabled = false;
-  // };
-  
-  // // 3. Answer the call with the unique ID
-  // answerButton.onclick = async () => {
-  //   const callId = callInput.value;
-    
-  //   const callDoc = firestore.collection('calls').doc(callId);
-  //   const answerCandidates = callDoc.collection('answerCandidates');
-  //   const offerCandidates = callDoc.collection('offerCandidates');
-  
-  //   pc.onicecandidate = (event) => {
-  //     event.candidate && answerCandidates.add(event.candidate.toJSON());
-  //   };
-  
-  //   const callData = (await callDoc.get()).data();
-  
-  //   const offerDescription = callData.offer;
-  //   await pc.setRemoteDescription(new RTCSessionDescription(offerDescription));
-  
-  //   const answerDescription = await pc.createAnswer();
-  //   await pc.setLocalDescription(answerDescription);
-  
-  //   const answer = {
-  //     type: answerDescription.type,
-  //     sdp: answerDescription.sdp,
-  //   };
-  
-  //   await callDoc.update({ answer });
-  
-  //   offerCandidates.onSnapshot((snapshot) => {
-  //     snapshot.docChanges().forEach((change) => {
-  //       console.log(change);
-  //       if (change.type === 'added') {
-  //         let data = change.doc.data();
-  //         pc.addIceCandidate(new RTCIceCandidate(data));
-  //       }
-  //     });
-  //   });
-  // };
+let localStream = null
+let remoteStream = null
+let pc = null
+let captureStream = null
+let videoSender = null
+let audioSender = null
+async function prepareVideoChat() {
+  let docSnap = await getDoc(doc(db, 'vidchat', window.location.hash.split("vid_chat/")[1]))
+  if (docSnap.exists()) {
+    callData = docSnap.data()
+    dE("vid_title").innerText = callData.name
+    let datenow = Date.now()
+    if (callData.status != "notstarted" || callData.status != "callstarted"){
+      // window.location.hash = "#/dashboard"
+      // addToast("error","Meeting has already started/ended"+JSON.stringify(callData))
+      // return 0
+    }else if (callData.stron.seconds - datenow/1000 >= 300){
+      window.location.hash = "#/dashboard"
+      addToast("error","You can join the meeting at "+dateparser(callData.stron.seconds*1000))
+      return 0
+    }
+  } else {
+    addToast("error", "Please Check Meeting ID")
+    return
+  }
+  const servers = {
+    iceServers: [
+      {
+        urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'],
+      },
+    ],
+    iceCandidatePoolSize: 10,
+  };
+  pc = new RTCPeerConnection(servers)
+  const webcamButton = document.getElementById('webcamButton');
+  const webcamVideo = document.getElementById('webcamVideo');
+  const callButton = document.getElementById('callButton');
+  const answerButton = document.getElementById('answerButton');
+  const remoteVideo = document.getElementById('remoteVideo');
+  const hangupButton = document.getElementById('hangupButton');
+  const screenButton = document.getElementById('screenButton');
+  screenButton.onclick = async () => {
+    if (screenButton.getAttribute("on") == "false" || screenButton.getAttribute("on") == undefined) {
+      captureStream = await navigator.mediaDevices.getDisplayMedia({
+        video: {
+          cursor: "always",
+          height: 1000,
+          width: 1200
+        },
+        audio: false
+      });
+      videoSender.replaceTrack(captureStream.getVideoTracks()[0])
+      screenButton.setAttribute("on", "true")
+    } else {
+      videoSender.replaceTrack(localStream.getVideoTracks()[0]);
+      screenButton.setAttribute("on", "false")
+    }
+  }
+  webcamButton.onclick = async () => {
+    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    remoteStream = new MediaStream();
 
+    // Push tracks from local stream to peer connection
+    var camVideoTrack = localStream.getVideoTracks()[0];
+    var camAudioTrack = localStream.getAudioTracks()[0];
+    videoSender = pc.addTrack(camVideoTrack, localStream);
+    audioSender = pc.addTrack(camAudioTrack, localStream);
+
+    // Pull tracks from remote stream, add to video stream
+    pc.ontrack = (event) => {
+      event.streams[0].getTracks().forEach((track) => {
+        remoteStream.addTrack(track);
+      });
+    };
+
+    webcamVideo.srcObject = localStream;
+    remoteVideo.srcObject = remoteStream;
+
+    callButton.disabled = false;
+    hangupButton.disabled = false;
+    webcamButton.disabled = true;
+  };
+  hangupButton.onclick = async() => {
+    await updateDoc(doc(db, "vidchat", document.location.hash.split("#/vid_chat/")[1]), {
+      status: "callended"
+    });
+    pc.close();
+    addToast("success","Meeting Ended",5000)
+  }
+  callButton.onclick = async () => {
+    let docId = document.location.hash.split("#/vid_chat/")[1]
+    if (docId == "") {
+      addToast("error", "Please Check Meeting ID")
+      return
+    }
+    let docSnap = await getDoc(doc(db, 'vidchat', docId))
+    if (docSnap.exists()) {
+      callData = docSnap.data()
+      if (callData.status == "callstarted") {
+        let callId = document.location.hash.split("#/vid_chat/")[1]
+        pc.onicecandidate = async (event) => {
+          event.candidate && await updateDoc(doc(db, "vidchat", callId), {
+            answerCandidates: event.candidate.toJSON()
+          });;
+        };
+        let callData = {}
+        let docSnap = await getDoc(doc(db, 'vidchat', callId))
+        if (docSnap.exists()) {
+          callData = docSnap.data()
+        }
+
+        const offerDescription = callData.offer;
+        await pc.setRemoteDescription(new RTCSessionDescription(offerDescription));
+
+        const answerDescription = await pc.createAnswer();
+        await pc.setLocalDescription(answerDescription);
+
+        const answer = {
+          type: answerDescription.type,
+          sdp: answerDescription.sdp,
+        };
+
+        await updateDoc(doc(db, "vidchat", callId), {
+          answer: answer,
+          status:"personjoined"
+        })
+        const unsub = onSnapshot(doc(db, "vidchat", docId), (doc) => {
+          const data = doc.data();
+          console.log("Current data: ", doc.data());
+          if (data?.status == "callended"){
+            pc.close();
+            addToast("success","Meeting Ended",5000)
+          }
+          if (data?.offerCandidates) {
+            let data = change.doc.data();
+            pc.addIceCandidate(new RTCIceCandidate(data));
+          }
+        });
+      } else if (callData.status == "notstarted") {
+        // Get candidates for caller, save to db
+        pc.onicecandidate = async event => {
+          event.candidate && await updateDoc(doc(db, "vidchat", docId), {
+            offerCandidates: event.candidate.toJSON(),
+          });
+        };
+
+        // Create offer
+        const offerDescription = await pc.createOffer();
+        await pc.setLocalDescription(offerDescription);
+
+        const offer = {
+          sdp: offerDescription.sdp,
+          type: offerDescription.type,
+        };
+
+        await updateDoc(doc(db, "vidchat", docId), {
+          offer: offer,
+          status: "callstarted"
+        });
+        const unsub = onSnapshot(doc(db, "vidchat", docId), (doc) => {
+          const data = doc.data();
+          console.log("Current data: ", doc.data());
+          if (!pc.currentRemoteDescription && data?.answer) {
+            const answerDescription = new RTCSessionDescription(data.answer);
+            pc.setRemoteDescription(answerDescription);
+          }
+          if (data?.status == "callended"){
+            pc.close();
+            addToast("success","Meeting Ended",5000)
+          }
+          if (data?.answerCandidates) {
+            const candidate = new RTCIceCandidate(data.answerCandidates);
+            pc.addIceCandidate(candidate);
+          }
+        });
+      }
+    } else {
+      addToast("error", "Please Check Meeting ID")
+      return
+    }
+  }
 }
 function uploadEvents() {
   document.getElementById("file").addEventListener("change", async function () {
@@ -737,18 +790,18 @@ async function settingsEvents() {
   // dE("pass_rst_btn").addEventListener("click", requestPasschange);
   dE("sub_chg_pass").addEventListener("click", async function () {
     if (dE("inp_new_pass").value.length < 8) {
-      log("Warning", 'Password should be at least 8 characters long');
+      addToast("warning", 'Password should be at least 8 characters long');
     }
     if (dE("inp_new_pass").value == dE("inp_retype_pass").value) {
       updatePassword(auth.currentUser, dE("inp_new_pass").value).then(() => {
-        log("Warning", 'Password Reset Successful');
+        addToast("success", 'Password Reset Successful');
       }).catch((error) => {
-        log("Warning", 'Password Reset Failed');
+        addToast("warning", 'Password Reset Failed');
         // ...
       });
 
     } else {
-      log("Warning", 'New Password and Confirm password dont match.');
+      addToast("warning", 'New Password and Confirm password dont match.');
     }
     dE("inp_new_pass").value = ""
     dE("inp_retype_pass").value = ""
@@ -759,12 +812,13 @@ async function settingsEvents() {
         updateDoc(doc(db, "users", userinfo.uuid), {
           email: dE("inp_mail").value
         })
+        addToast("success", "Email Change was Successful")
         window.location.reload()
       }).catch((error) => {
-        log("ERROR", "Something went wrong.")
+        addToast("warning", "Something went wrong.")
       });
     } else {
-      log("ERROR", "Invalid Email")
+      addToast("warning", "Invalid Email")
     }
   })
   dE("sub_rat_btn").addEventListener("click", async function () {
@@ -775,11 +829,12 @@ async function settingsEvents() {
         comments: document.getElementById("rate_comment").value,
         type: "rating",
       })
+      localStorage.setItem("rate_app", "true")
+      addToast("success","Thank You for your Valuable Feedback.")
+      dE("st_rateapp").style.display = "none";
     } catch {
+      addToast("warning","Your Feedback was not Submitted.")
     }
-    localStorage.setItem("rate_app", "true")
-    log("Thank You", "Thank You for your Valuable Feedback.")
-    dE("st_rateapp").style.display = "none";
   })
   dE("st_rateapp").style.display = "flex"
   if (localStorage.getItem("rate_app") == "true") {
@@ -1076,47 +1131,67 @@ async function newStoreItem() {
       bannerlink: "https://store.mtt.one",
       affiliatelink: "https://affiliate.mtt.one",
       crton: serverTimestamp(),
-      p:0,
-      
+      p: 0,
+
     })
-    creMng("edit_batch/" + docRef.id, 1)
+    creMng("edit_store/" + docRef.id, 1)
   } catch {
   }
 }
-async function renderStore(){
-    if (userinfo.storeitems.length <= 0) {
-      userinfo.storeitems = []
-      const q = query(collection(db, "store"));
-      const querySnapshot = await getDocs(q);
-      querySnapshot.forEach((doc) => {
-        var tfg = doc.data()
-        userinfo.storeitems.push({ id: doc.id, crton: tfg.crton, name:tfg.name,price:tfg.price,bannerlink:tfg.bannerlink,affiliatelink:tfg.affiliatelink })
-      })
-    }
-  
-  for (var i = 0; i < userinfo.storeitems.length; i++) {
-    dE("store_list").insertAdjacentHTML("beforeend", `<a style="width:max-content;height:max-content;" href = "`+userinfo.storeitems[i].affiliatelink+`" target = "_blank" id = "sl`+userinfo.storeitems[i].id+`"><div class = "store_card" style = "background:url('`+userinfo.storeitems[i].bannerlink+`');background-size: cover;"><div style = "position:fixed;bottom:0vh;margin:0px;padding:10px;width:100%;background-color:var(--bgcolor);height:max-content;display:flex;flex-direction:column;align-items:center;"><span style = "font-size: 14px">`+userinfo.storeitems[i].name+`</span><span style = "font-size: 12px;color:grey;">`+userinfo.storeitems[i].price+`/-</span></div></div></a>`)
+async function newCodeHunt(){
+  try {
+    const docRef = await addDoc(collection(db, 'store'), {
+      active: "0",
+      args: "num",
+      crton: serverTimestamp(),
+      description: "Given a random <code>num</code>, print the number.",
+      difficulty: "easy",
+      explanation: "Nothing to say",
+      name: "Random Number?",
+      solution: "function execute(val1){\n    val1 = parseInt(val1) * 2;\n    return val1;\n}",
+      tag: "First Problem",
+      submit_input: ["1","2","3","4"],
+      submit_output: ["2","4","6","8"],
+      p: 0,
+    })
+    creMng("edit_codehunt/" + docRef.id, 1)
+  } catch {
   }
 }
-
-async function renderCodeProblemList(){
-  if (userinfo.codeitems.length <= 0) {
-    userinfo.codeitems = []
-    const q = query(collection(db, "codehunt"),where("active", "==", "1"),limit(6));
+async function renderStore() {
+  if (userinfo.storeitems.length <= 0) {
+    userinfo.storeitems = []
+    const q = query(collection(db, "store"));
     const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
       var tfg = doc.data()
-      userinfo.codeitems.push({ id: doc.id, crton: tfg.crton, name:tfg.name,difficulty:tfg.difficulty})
+      userinfo.storeitems.push({ id: doc.id, crton: tfg.crton, name: tfg.name, price: tfg.price, bannerlink: tfg.bannerlink, affiliatelink: tfg.affiliatelink })
     })
   }
 
-for (var i = 0; i < userinfo.codeitems.length; i++) {
-  dE("prb_list").insertAdjacentHTML("beforeend", `<div id = "sl`+userinfo.codeitems[i].id+`" class = "tlinks-3" style = "background-size: cover;"><span class = "t_title">`+userinfo.codeitems[i].name+`</span><span style = "font-size: 12px;color:grey;">`+userinfo.codeitems[i].difficulty+`</span></div>`)
-  let h = userinfo.codeitems[i].id 
-  dE("sl"+userinfo.codeitems[i].id).addEventListener("click",function(){
-    window.location.hash = "#/codehunt/problem/"+h
-  })
+  for (var i = 0; i < userinfo.storeitems.length; i++) {
+    dE("store_list").insertAdjacentHTML("beforeend", `<a style="width:max-content;height:max-content;" href = "` + userinfo.storeitems[i].affiliatelink + `" target = "_blank" id = "sl` + userinfo.storeitems[i].id + `"><div class = "store_card" style = "background:url('` + userinfo.storeitems[i].bannerlink + `');background-size: cover;"><div style = "position:fixed;bottom:0vh;margin:0px;padding:10px;width:100%;background-color:var(--bgcolor);height:max-content;display:flex;flex-direction:column;align-items:center;"><span style = "font-size: 14px">` + userinfo.storeitems[i].name + `</span><span style = "font-size: 12px;color:grey;">` + userinfo.storeitems[i].price + `/-</span></div></div></a>`)
+  }
 }
+
+async function renderCodeProblemList() {
+  if (userinfo.codeitems.length <= 0) {
+    userinfo.codeitems = []
+    const q = query(collection(db, "codehunt"), where("active", "==", "1"), limit(6));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((doc) => {
+      var tfg = doc.data()
+      userinfo.codeitems.push({ id: doc.id, crton: tfg.crton, name: tfg.name, difficulty: tfg.difficulty })
+    })
+  }
+
+  for (var i = 0; i < userinfo.codeitems.length; i++) {
+    dE("prb_list").insertAdjacentHTML("beforeend", `<div id = "sl` + userinfo.codeitems[i].id + `" class = "tlinks-3" style = "background-size: cover;"><span class = "t_title">` + userinfo.codeitems[i].name + `</span><span style = "font-size: 12px;color:grey;">` + userinfo.codeitems[i].difficulty + `</span></div>`)
+    let h = userinfo.codeitems[i].id
+    dE("sl" + userinfo.codeitems[i].id).addEventListener("click", function () {
+      window.location.hash = "#/codehunt/problem/" + h
+    })
+  }
 }
 async function prepareBatch() {
   var docRef = doc(db, 'batch', window.location.hash.split("edit_batch/")[1])
@@ -1126,11 +1201,6 @@ async function prepareBatch() {
     dE("aq_batname").value = docRef.name;
     dE("aq_class").value = docRef.class;
     dE("aq_timetable").value = docRef.timetable;
-    function dateparser(var1) {
-      var now = new Date(var1);
-      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-      return now.toISOString().slice(0, 16);
-    }
     dE("aq_tst_delon").value = dateparser(docRef.delon.seconds * 1000)
   }
 }
@@ -1198,7 +1268,6 @@ async function getUserNotes() {
         dE("un_rendermode").innerHTML = '<option value="edit">edit</option><option value="preview">preview</option>'
         dE("un_rendermode").value = "edit";
         dE("un_save").style.display = "block"
-        dE("un_colorpicker").style.display = "block"
         dE("un_viewership").style.display = "block"
         dE("un_title").style.display = "block"
       }
@@ -1700,11 +1769,6 @@ async function prepareTopicQBank(iun) {
         dE("aq_randomize").checked = docJSON.randomize
         dE("aq_blockresult").checked = docJSON.blockresult
         dE("aq_tst_batches").value = docJSON.batch.toString()
-        function dateparser(var1) {
-          var now = new Date(var1);
-          now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-          return now.toISOString().slice(0, 16);
-        }
         dE("aq_tst_stron").value = dateparser(docJSON.strton.seconds * 1000)
         dE("aq_tst_endon").value = dateparser(docJSON.endon.seconds * 1000)
         dE("aq_tst_timealotted").value = docJSON.timeallotted
@@ -2005,9 +2069,8 @@ async function printQBank(type) {
       } else {
         src_url = "https://api.qrserver.com/v1/create-qr-code/?size=50x50&data=https://www.youtube.com/watch?v=" + docJSON.y_url
       }
-      var inhtml = '<div class = "les_q"><div id = "' + ele.id + '"><div style = "display:flex;flex-direction:row;justify-content: space-between;"><div style = "font-size:18px;">' + qtitle + '</div><img style = "float:right" src="' + src_url + '"></div><hr color="white" width="100%"></div>'
+      var inhtml = '<div class = "les_q"><div id = "' + ele.id + '"><div style = "display:flex;flex-direction:row;justify-content: space-between;"><div style = "font-size:18px;">' + qtitle + '</div><img style = "float:right" src="' + src_url + '"></div><hr width="100%"></div>'
       dE("eqb_add").insertAdjacentHTML('beforeend', inhtml);
-      var expl = '<div class = "les_expl" style = "">' + docJSON.expl + '</div><hr color="white" width="100%">'
       dE(ele.id).insertAdjacentHTML('beforeend', expl)
       renderMathInElement(dE('eqb_add'));
     }
@@ -2253,7 +2316,8 @@ async function authStateObserver(user) {
         return 0
       }
       if (docJSON.warning != "") {
-        log("Notice", docJSON.warning, function () { window.location.hash = "#/updates" }, "Release Notes")
+        addToast("notice",docJSON.warning,10000)
+        // log("Notice", docJSON.warning, function () { window.location.hash = "#/updates" }, "Release Notes")
       }
     }
     creMng(window.location.hash.split("#/")[1], 1)
@@ -3616,7 +3680,7 @@ var Quarkz = {
   "last-updated": "23/08/2023(IST)",
   "serverstatus": "firebase-online",
 }
-if (document.location.origin == "https://quarkz.netlify.app"){
+if (document.location.origin == "https://quarkz.netlify.app") {
   document.location = "https://quarkz.mtt.one"
 }
 var handlebox = "login";

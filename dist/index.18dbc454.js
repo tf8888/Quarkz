@@ -605,9 +605,8 @@ var _admin = require("../embeds/admin");
 var _auto = require("chart.js/auto");
 var _autoDefault = parcelHelpers.interopDefault(_auto);
 var _codehunt = require("../embeds/codehunt");
-// I added a function that can be used to register a service worker.
 const registerServiceWorker = async ()=>{
-    const swRegistration = await navigator.serviceWorker.register(require("ed93fa361f9b766c")); //notice the file name
+    const swRegistration = await navigator.serviceWorker.register(require("ed93fa361f9b766c"));
     return swRegistration;
 };
 registerServiceWorker();
@@ -627,31 +626,6 @@ const auth = (0, _auth.getAuth)();
     return (0, _auth.signInWithEmailAndPassword)(auth, email, password);
 }).catch((error)=>{});
 const storage = (0, _storage.getStorage)();
-function getInitials(name) {
-    let initials = "";
-    const words = name.split(" ");
-    for(let i = 0; i < words.length; i++){
-        const word = words[i];
-        if (word.length > 0) initials += word[0].toUpperCase();
-    }
-    return initials;
-}
-function getAvatarURL(name, gen, ver) {
-    // Import the crypto module for hashing
-    const crypto = require("13dadf19fac08ed3");
-    // Hash the seed string using SHA-256 algorithm
-    const hash = crypto.createHash("sha256").update(name).digest("hex");
-    // Take the first 6 digits of the hash and convert to number
-    const num = parseInt(hash.slice(0, 6), 16);
-    // Return the 6-digit number
-    if (ver == undefined || ver == "") ver;
-    let initials = getInitials(name);
-    if (ver == "v1") return "https://ui-avatars.com/api/?background=random&size=100&bold=true&name=" + getInitials(userinfo.name);
-    else if (ver == "v2") {
-        if (gen == "Male") return "https://api.dicebear.com/5.x/avataaars/svg?top%5B%5D=dreads01,dreads02,eyepatch,frizzle,shortCurly,shortFlat,shortRound,shortWaved,sides,theCaesar,theCaesarAndSidePart,turban&seed=" + initials + num.toString();
-        else return "https://api.dicebear.com/5.x/avataaars/svg?facialHairProbability=0&top%5B%5D=bigHair,bob,bun,curly,curvy,dreads,frida,fro,hijab,longButNotTooLong,miaWallace,shaggy,shaggyMullet,shavedSides,straightAndStrand,straight01,straight02&seed=" + initials + num.toString();
-    } else if (ver == "v3") return "https://api.dicebear.com/6.x/bottts/svg?seed=" + initials + num.toString();
-}
 // Login Page
 // Sign In A User
 async function signIn() {
@@ -661,19 +635,20 @@ async function signIn() {
         const user = userCredential.user;
         userdetails.email = email1;
         creMng("dashboard", 1);
+        addToast("success", "Login Successful!");
     }).catch((error)=>{
         const errorCode = error.code;
         const errorMessage = error.message;
-        (0, _helper.dE)("lgn_err").style.display = "block";
+        addToast("error", "Login Denied. Wrong Username or Password.");
         (0, _helper.dE)("lg_pass").value = "";
     });
 }
 // Sign Out A User
 function signOutUser() {
-    // Sign out of Firebase.
     (0, _auth.signOut)((0, _auth.getAuth)());
     userdetails = [];
     creMng("login", 1);
+    addToast("success", "Logout Successful!");
     window.location.reload();
 }
 // Register A User
@@ -684,14 +659,11 @@ function signUp() {
     var mblno = (0, _helper.dE)("rg_mbleno").value;
     var stclass = (0, _helper.dE)("rg_class").value;
     var stgender = (0, _helper.dE)("rg_gender").value;
-    if (email1 == "" || password1 == "" || name == "" || mblno == "" || stclass == "") alert("Details Cannot Be Empty");
-    if (password1 != (0, _helper.dE)("rg_pass1").value) ;
+    if (email1 == "" || password1 == "" || name == "" || mblno == "" || stclass == "") addToast("error", "Details Cannot Be Empty");
+    if (password1 != (0, _helper.dE)("rg_pass1").value) addToast("error", "Passwords dont match.");
     else (0, _auth.createUserWithEmailAndPassword)(auth, email1, password1).then((userCredential)=>{
-        // Signed in 
         const user = userCredential.user;
-        // ...
         async function a() {
-            // Add a new message entry to the Firebase database.
             try {
                 await (0, _firestore.setDoc)((0, _firestore.doc)(db, "users", user.uid), {
                     name: name,
@@ -710,11 +682,12 @@ function signUp() {
                     window.location.reload();
                 });
             } catch (error) {
-                console.error("Error Adding New User", error);
+                addToast("error", "Error Adding New User" + error);
             }
         }
         a();
     }).catch((error)=>{
+        addToast("error", "Error Adding New User" + error);
         const errorCode = error.code;
         const errorMessage = error.message;
     // ..
@@ -735,11 +708,10 @@ function renderBody(body, styles, s_class, translate) {
     (0, _helper.dE)("output").style = styles;
 }
 function dashboardEvents() {
-    var sgnout = (0, _helper.dE)("lgt_btn").addEventListener("click", signOutUser);
     (0, _helper.dE)("dshd_uname").innerText = userinfo.email;
     (0, _helper.dE)("dshd_name").innerText = userinfo.name;
     (0, _helper.dE)("dshd_batch").innerText = userinfo.batchname;
-    (0, _helper.dE)("prf_tab_img").src = getAvatarURL(userinfo.name, userinfo.gen, userinfo.prf_type);
+    (0, _helper.dE)("prf_tab_img").src = (0, _helper.getAvatarURL)(userinfo.name, userinfo.gen, userinfo.prf_type);
     renderExams();
 }
 function simEvents() {
@@ -803,8 +775,10 @@ function chapterEvents() {
     var u_chb = (0, _helper.dE)("uchb").addEventListener("click", uchb);
 }
 document.addEventListener("copy", function(e) {
-    e.clipboardData.setData("text/plain", "It is forbidden to copy content from Quarkz!");
-    e.preventDefault();
+    if (!userinfo.roles["admin"] && !userinfo.roles["editor"]) {
+        e.clipboardData.setData("text/plain", "It is forbidden to copy content from Quarkz!");
+        e.preventDefault();
+    }
 });
 function addTestEvents() {
     function qpaper() {
@@ -817,11 +791,6 @@ function addTestEvents() {
         (0, _log.qp_test)("Question Paper", html);
     }
     function qinstr() {
-        function dateparser(var1) {
-            var now = new Date(var1);
-            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-            return now.toISOString().slice(0, 16);
-        }
         (0, _log.qp_test)("Test Instructions", (0, _testInstructions.page_test_instructions));
         (0, _helper.dE)("tsi").innerHTML = testInfo.instructions;
         (0, _helper.dE)("i_name").innerHTML = testInfo.title;
@@ -1093,6 +1062,10 @@ function coreManager(newlocation, n1) {
             handlebox = "fu_storeitem";
             newStoreItem();
             break;
+        case "add/codehunt":
+            handlebox = "fu_codehunt";
+            newCodeHunt();
+            break;
         case "codehunt":
             handlebox = "fu_code_problemlist";
             renderBody((0, _codehunt.page_ch_list), "", "");
@@ -1154,6 +1127,11 @@ function coreManager(newlocation, n1) {
         handlebox = "notes";
         renderBody((0, _dashboard.page_notes), "", "");
         getPDF();
+    }
+    if (location1.includes("create_vidchat")) {
+        handlebox = "notes";
+        renderBody((0, _vidchat.page_createvidchat), "height:max-content;", "");
+        initCreateVidChat();
     }
     if (location1.includes("sims")) {
         handlebox = "simulations";
@@ -1302,17 +1280,19 @@ function coreManager(newlocation, n1) {
         renderBody((0, _codehunt.page_ch_solver), "", "");
         codeproblemEvents();
     }
-    // if (location1.includes("vid_chat")) { handlebox = "fu_vidchat"; renderBody(page_vidchat, "", ""); prepareVideoChat(); }
+    if (location1.includes("vid_chat")) {
+        handlebox = "fu_vidchat";
+        renderBody((0, _vidchat.page_vidchat), "", "");
+        prepareVideoChat();
+    }
     if (location1.includes("site-analytics") && iorole == true) {
         handlebox = "fu_analytics";
         renderBody((0, _analytics.page_analytics), "", "");
     }
     if (iorole) {
         if (window.location.hash.includes("dashboard")) (0, _helper.dE)("adminonly").style.display = "flex";
-        if (window.location.hash.includes("topic") || window.location.hash.includes("qbanks")) {
-            (0, _helper.dE)("tp_pnt").style.display = "block";
-            (0, _helper.dE)("tp_edt").style.display = "block";
-        }
+        if (window.location.hash.includes("topic") || window.location.hash.includes("qbanks")) // dE("tp_pnt").style.display = "block";
+        (0, _helper.dE)("tp_edt").style.display = "block";
         if (window.location.hash.includes("sims")) (0, _helper.dE)("sms_edit").style.display = "block";
     }
     stpVid();
@@ -1333,11 +1313,6 @@ function coreManager(newlocation, n1) {
 async function testInstructions() {
     let docSnap = await (0, _firestore.getDoc)((0, _firestore.doc)(db, "tests", window.location.hash.split("#/instructions/")[1]));
     if (docSnap.exists()) {
-        function dateparser(var1) {
-            var now = new Date(var1);
-            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-            return now.toISOString().slice(0, 16);
-        }
         (0, _helper.dE)("i_name").innerHTML = docSnap.data().title;
         (0, _helper.dE)("i_start").innerHTML = dateparser(docSnap.data().strton.seconds * 1000);
         (0, _helper.dE)("i_end").innerHTML = dateparser(docSnap.data().endon.seconds * 1000);
@@ -1358,6 +1333,47 @@ async function testInstructions() {
         (0, _helper.dE)("tin_start").innerText = "Test Has Not Started Yet.";
     }
 }
+async function initCreateVidChat() {
+    if (window.location.hash.split("create_vidchat/")[1] == "") {
+        (0, _helper.dE)("vdc_create").style.display = "block";
+        (0, _helper.dE)("vdc_update").style.display = "none";
+        (0, _helper.dE)("vdc_create").addEventListener("click", async function() {
+            let stron = new Date((0, _helper.dE)("vdc_stron").value);
+            const docRef = await (0, _firestore.addDoc)((0, _firestore.collection)(db, "vidchat"), {
+                name: (0, _helper.dE)("vdc_tpcname").value,
+                stron: stron,
+                duration: (0, _helper.dE)("vdc_duration").value,
+                status: "notstarted",
+                ended: false
+            });
+            (0, _helper.dE)("vdc_meetid").value = docRef.id;
+        });
+    } else {
+        (0, _helper.dE)("vdc_create").style.display = "none";
+        (0, _helper.dE)("vdc_update").style.display = "block";
+        let docSnap = await (0, _firestore.getDoc)((0, _firestore.doc)(db, "vidchat", window.location.hash.split("create_vidchat/")[1]));
+        if (docSnap.exists()) {
+            var docJSON = docSnap.data();
+            (0, _helper.dE)("vdc_tpcname").value = docJSON.name;
+            (0, _helper.dE)("vdc_duration").value = docJSON.duration;
+            (0, _helper.dE)("vdc_stron").value = dateparser(docJSON.stron.seconds * 1000);
+            (0, _helper.dE)("vdc_meetid").value = window.location.hash.split("create_vidchat/")[1];
+            if (docJSON.ended == "true") {
+                (0, _helper.dE)("vdc_update").disabled = "true";
+                (0, _helper.dE)("vdc_update").style.display = "none";
+                addToast("warning", "Meeting has already ended, hence Meeting Details cannot be changed.", 10000);
+            }
+        }
+        (0, _helper.dE)("vdc_update").addEventListener("click", async function() {
+            let stron = new Date((0, _helper.dE)("vdc_stron").value);
+            const docRef = await (0, _firestore.updateDoc)((0, _firestore.collection)(db, "vidchat"), {
+                name: (0, _helper.dE)("vdc_tpcname").value,
+                stron: stron,
+                duration: (0, _helper.dE)("vdc_duration").value
+            });
+        });
+    }
+}
 async function getUpdate() {
     let docSnap = await (0, _firestore.getDoc)((0, _firestore.doc)(db, "usernotes", "releasenotes"));
     if (docSnap.exists()) (0, _helper.dE)("rel_list").innerHTML = docSnap.data().notes;
@@ -1368,115 +1384,177 @@ window.ifcls = function() {
     document.getElementById("tempIF_G").remove();
 };
 window.user_rate_value = 0;
-function prepareVideoChat() {
-// const servers = {
-//   iceServers: [
-//     {
-//       urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'],
-//     },
-//   ],
-//   iceCandidatePoolSize: 10,
-// };
-// let pc = new RTCPeerConnection(servers)
-// let localstream = null
-// let remotestream = null
-// const webcamButton = document.getElementById('webcamButton');
-// const webcamVideo = document.getElementById('webcamVideo');
-// const callButton = document.getElementById('callButton');
-// const callInput = document.getElementById('callInput');
-// const answerButton = document.getElementById('answerButton');
-// const remoteVideo = document.getElementById('remoteVideo');
-// const hangupButton = document.getElementById('hangupButton');
-// webcamButton.onclick = async () => {
-//   localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-//   remoteStream = new MediaStream();
-//   // Push tracks from local stream to peer connection
-//   localStream.getTracks().forEach((track) => {
-//     pc.addTrack(track, localStream);
-//   });
-//   // Pull tracks from remote stream, add to video stream
-//   pc.ontrack = (event) => {
-//     event.streams[0].getTracks().forEach((track) => {
-//       remoteStream.addTrack(track);
-//     });
-//   };
-//   webcamVideo.srcObject = localStream;
-//   remoteVideo.srcObject = remoteStream;
-//   callButton.disabled = false;
-//   answerButton.disabled = false;
-//   webcamButton.disabled = true;
-// };
-// // 2. Create an offer
-// callButton.onclick = async () => {
-//   // Reference Firestore collections for signaling
-//   let docSnap = await getDoc(doc(db, 'vidchat', window.location.hash.split("vid_chat/")[1]))
-//   if (docSnap.exists()) {
-//     var docJSON = docSnap.data();
-//   }
-//   const callDoc = firestore.collection('calls').doc();
-//   const offerCandidates = callDoc.collection('offerCandidates');
-//   const answerCandidates = callDoc.collection('answerCandidates');
-//   callInput.value = callDoc.id;
-//   // Get candidates for caller, save to db
-//   pc.onicecandidate = async (event) => {
-//     event.candidate && offerCandidates.add(event.candidate.toJSON()) && await addDoc(doc(db, 'vidchat', docRef.id, "offerCandidates"), {json: event.candidate.toJSON()});
-//   };
-//   // Create offer
-//   const offerDescription = await pc.createOffer();
-//   await pc.setLocalDescription(offerDescription);
-//   const offer = {
-//     sdp: offerDescription.sdp,
-//     type: offerDescription.type,
-//   };
-//   await await setDoc(doc(db, 'vidchat', docRef.id), {offer: offer})
-//   // Listen for remote answer
-//   callDoc.onSnapshot((snapshot) => {
-//     const data = snapshot.data();
-//     if (!pc.currentRemoteDescription && data?.answer) {
-//       const answerDescription = new RTCSessionDescription(data.answer);
-//       pc.setRemoteDescription(answerDescription);
-//     }
-//   });
-//   // When answered, add candidate to peer connection
-//   answerCandidates.onSnapshot((snapshot) => {
-//     snapshot.docChanges().forEach((change) => {
-//       if (change.type === 'added') {
-//         const candidate = new RTCIceCandidate(change.doc.data());
-//         pc.addIceCandidate(candidate);
-//       }
-//     });
-//   });
-//   hangupButton.disabled = false;
-// };
-// // 3. Answer the call with the unique ID
-// answerButton.onclick = async () => {
-//   const callId = callInput.value;
-//   const callDoc = firestore.collection('calls').doc(callId);
-//   const answerCandidates = callDoc.collection('answerCandidates');
-//   const offerCandidates = callDoc.collection('offerCandidates');
-//   pc.onicecandidate = (event) => {
-//     event.candidate && answerCandidates.add(event.candidate.toJSON());
-//   };
-//   const callData = (await callDoc.get()).data();
-//   const offerDescription = callData.offer;
-//   await pc.setRemoteDescription(new RTCSessionDescription(offerDescription));
-//   const answerDescription = await pc.createAnswer();
-//   await pc.setLocalDescription(answerDescription);
-//   const answer = {
-//     type: answerDescription.type,
-//     sdp: answerDescription.sdp,
-//   };
-//   await callDoc.update({ answer });
-//   offerCandidates.onSnapshot((snapshot) => {
-//     snapshot.docChanges().forEach((change) => {
-//       console.log(change);
-//       if (change.type === 'added') {
-//         let data = change.doc.data();
-//         pc.addIceCandidate(new RTCIceCandidate(data));
-//       }
-//     });
-//   });
-// };
+let localStream = null;
+let remoteStream = null;
+let pc = null;
+let captureStream = null;
+let videoSender = null;
+let audioSender = null;
+async function prepareVideoChat() {
+    let docSnap = await (0, _firestore.getDoc)((0, _firestore.doc)(db, "vidchat", window.location.hash.split("vid_chat/")[1]));
+    if (docSnap.exists()) {
+        callData = docSnap.data();
+        (0, _helper.dE)("vid_title").innerText = callData.name;
+        let datenow = Date.now();
+        if (callData.status != "notstarted" || callData.status != "callstarted") ;
+        else if (callData.stron.seconds - datenow / 1000 >= 300) {
+            window.location.hash = "#/dashboard";
+            addToast("error", "You can join the meeting at " + dateparser(callData.stron.seconds * 1000));
+            return 0;
+        }
+    } else {
+        addToast("error", "Please Check Meeting ID");
+        return;
+    }
+    const servers = {
+        iceServers: [
+            {
+                urls: [
+                    "stun:stun1.l.google.com:19302",
+                    "stun:stun2.l.google.com:19302"
+                ]
+            }
+        ],
+        iceCandidatePoolSize: 10
+    };
+    pc = new RTCPeerConnection(servers);
+    const webcamButton = document.getElementById("webcamButton");
+    const webcamVideo = document.getElementById("webcamVideo");
+    const callButton = document.getElementById("callButton");
+    const answerButton = document.getElementById("answerButton");
+    const remoteVideo = document.getElementById("remoteVideo");
+    const hangupButton = document.getElementById("hangupButton");
+    const screenButton = document.getElementById("screenButton");
+    screenButton.onclick = async ()=>{
+        if (screenButton.getAttribute("on") == "false" || screenButton.getAttribute("on") == undefined) {
+            captureStream = await navigator.mediaDevices.getDisplayMedia({
+                video: {
+                    cursor: "always",
+                    height: 1000,
+                    width: 1200
+                },
+                audio: false
+            });
+            videoSender.replaceTrack(captureStream.getVideoTracks()[0]);
+            screenButton.setAttribute("on", "true");
+        } else {
+            videoSender.replaceTrack(localStream.getVideoTracks()[0]);
+            screenButton.setAttribute("on", "false");
+        }
+    };
+    webcamButton.onclick = async ()=>{
+        localStream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: true
+        });
+        remoteStream = new MediaStream();
+        // Push tracks from local stream to peer connection
+        var camVideoTrack = localStream.getVideoTracks()[0];
+        var camAudioTrack = localStream.getAudioTracks()[0];
+        videoSender = pc.addTrack(camVideoTrack, localStream);
+        audioSender = pc.addTrack(camAudioTrack, localStream);
+        // Pull tracks from remote stream, add to video stream
+        pc.ontrack = (event)=>{
+            event.streams[0].getTracks().forEach((track)=>{
+                remoteStream.addTrack(track);
+            });
+        };
+        webcamVideo.srcObject = localStream;
+        remoteVideo.srcObject = remoteStream;
+        callButton.disabled = false;
+        hangupButton.disabled = false;
+        webcamButton.disabled = true;
+    };
+    hangupButton.onclick = async ()=>{
+        await (0, _firestore.updateDoc)((0, _firestore.doc)(db, "vidchat", document.location.hash.split("#/vid_chat/")[1]), {
+            status: "callended"
+        });
+        pc.close();
+        addToast("success", "Meeting Ended", 5000);
+    };
+    callButton.onclick = async ()=>{
+        let docId = document.location.hash.split("#/vid_chat/")[1];
+        if (docId == "") {
+            addToast("error", "Please Check Meeting ID");
+            return;
+        }
+        let docSnap = await (0, _firestore.getDoc)((0, _firestore.doc)(db, "vidchat", docId));
+        if (docSnap.exists()) {
+            callData = docSnap.data();
+            if (callData.status == "callstarted") {
+                let callId = document.location.hash.split("#/vid_chat/")[1];
+                pc.onicecandidate = async (event)=>{
+                    event.candidate && await (0, _firestore.updateDoc)((0, _firestore.doc)(db, "vidchat", callId), {
+                        answerCandidates: event.candidate.toJSON()
+                    });
+                };
+                let callData1 = {};
+                let docSnap = await (0, _firestore.getDoc)((0, _firestore.doc)(db, "vidchat", callId));
+                if (docSnap.exists()) callData1 = docSnap.data();
+                const offerDescription = callData1.offer;
+                await pc.setRemoteDescription(new RTCSessionDescription(offerDescription));
+                const answerDescription = await pc.createAnswer();
+                await pc.setLocalDescription(answerDescription);
+                const answer = {
+                    type: answerDescription.type,
+                    sdp: answerDescription.sdp
+                };
+                await (0, _firestore.updateDoc)((0, _firestore.doc)(db, "vidchat", callId), {
+                    answer: answer,
+                    status: "personjoined"
+                });
+                const unsub = (0, _firestore.onSnapshot)((0, _firestore.doc)(db, "vidchat", docId), (doc)=>{
+                    const data = doc.data();
+                    console.log("Current data: ", doc.data());
+                    if (data?.status == "callended") {
+                        pc.close();
+                        addToast("success", "Meeting Ended", 5000);
+                    }
+                    if (data?.offerCandidates) {
+                        let data = change.doc.data();
+                        pc.addIceCandidate(new RTCIceCandidate(data));
+                    }
+                });
+            } else if (callData.status == "notstarted") {
+                // Get candidates for caller, save to db
+                pc.onicecandidate = async (event)=>{
+                    event.candidate && await (0, _firestore.updateDoc)((0, _firestore.doc)(db, "vidchat", docId), {
+                        offerCandidates: event.candidate.toJSON()
+                    });
+                };
+                // Create offer
+                const offerDescription = await pc.createOffer();
+                await pc.setLocalDescription(offerDescription);
+                const offer = {
+                    sdp: offerDescription.sdp,
+                    type: offerDescription.type
+                };
+                await (0, _firestore.updateDoc)((0, _firestore.doc)(db, "vidchat", docId), {
+                    offer: offer,
+                    status: "callstarted"
+                });
+                const unsub = (0, _firestore.onSnapshot)((0, _firestore.doc)(db, "vidchat", docId), (doc)=>{
+                    const data = doc.data();
+                    console.log("Current data: ", doc.data());
+                    if (!pc.currentRemoteDescription && data?.answer) {
+                        const answerDescription = new RTCSessionDescription(data.answer);
+                        pc.setRemoteDescription(answerDescription);
+                    }
+                    if (data?.status == "callended") {
+                        pc.close();
+                        addToast("success", "Meeting Ended", 5000);
+                    }
+                    if (data?.answerCandidates) {
+                        const candidate = new RTCIceCandidate(data.answerCandidates);
+                        pc.addIceCandidate(candidate);
+                    }
+                });
+            }
+        } else {
+            addToast("error", "Please Check Meeting ID");
+            return;
+        }
+    };
 }
 function uploadEvents() {
     document.getElementById("file").addEventListener("change", async function() {
@@ -1548,14 +1626,14 @@ async function reportHandler() {
 async function settingsEvents() {
     // dE("pass_rst_btn").addEventListener("click", requestPasschange);
     (0, _helper.dE)("sub_chg_pass").addEventListener("click", async function() {
-        if ((0, _helper.dE)("inp_new_pass").value.length < 8) (0, _log.log)("Warning", "Password should be at least 8 characters long");
+        if ((0, _helper.dE)("inp_new_pass").value.length < 8) addToast("warning", "Password should be at least 8 characters long");
         if ((0, _helper.dE)("inp_new_pass").value == (0, _helper.dE)("inp_retype_pass").value) (0, _auth.updatePassword)(auth.currentUser, (0, _helper.dE)("inp_new_pass").value).then(()=>{
-            (0, _log.log)("Warning", "Password Reset Successful");
+            addToast("success", "Password Reset Successful");
         }).catch((error)=>{
-            (0, _log.log)("Warning", "Password Reset Failed");
+            addToast("warning", "Password Reset Failed");
         // ...
         });
-        else (0, _log.log)("Warning", "New Password and Confirm password dont match.");
+        else addToast("warning", "New Password and Confirm password dont match.");
         (0, _helper.dE)("inp_new_pass").value = "";
         (0, _helper.dE)("inp_retype_pass").value = "";
     });
@@ -1564,11 +1642,12 @@ async function settingsEvents() {
             (0, _firestore.updateDoc)((0, _firestore.doc)(db, "users", userinfo.uuid), {
                 email: (0, _helper.dE)("inp_mail").value
             });
+            addToast("success", "Email Change was Successful");
             window.location.reload();
         }).catch((error)=>{
-            (0, _log.log)("ERROR", "Something went wrong.");
+            addToast("warning", "Something went wrong.");
         });
-        else (0, _log.log)("ERROR", "Invalid Email");
+        else addToast("warning", "Invalid Email");
     });
     (0, _helper.dE)("sub_rat_btn").addEventListener("click", async function() {
         try {
@@ -1578,10 +1657,12 @@ async function settingsEvents() {
                 comments: document.getElementById("rate_comment").value,
                 type: "rating"
             });
-        } catch  {}
-        localStorage.setItem("rate_app", "true");
-        (0, _log.log)("Thank You", "Thank You for your Valuable Feedback.");
-        (0, _helper.dE)("st_rateapp").style.display = "none";
+            localStorage.setItem("rate_app", "true");
+            addToast("success", "Thank You for your Valuable Feedback.");
+            (0, _helper.dE)("st_rateapp").style.display = "none";
+        } catch  {
+            addToast("warning", "Your Feedback was not Submitted.");
+        }
     });
     (0, _helper.dE)("st_rateapp").style.display = "flex";
     if (localStorage.getItem("rate_app") == "true") (0, _helper.dE)("st_rateapp").style.display = "none";
@@ -1613,9 +1694,9 @@ async function settingsEvents() {
         prf_type: "v2"
     });
     (0, _helper.dE)("prf_typ_" + userinfo.prf_type.split("v")[1]).style.borderColor = "red";
-    (0, _helper.dE)("prf_typ_1").src = getAvatarURL(userinfo.name, userinfo.gen, "v1");
-    (0, _helper.dE)("prf_typ_2").src = getAvatarURL(userinfo.name, userinfo.gen, "v2");
-    (0, _helper.dE)("prf_typ_3").src = getAvatarURL(userinfo.name, userinfo.gen, "v3");
+    (0, _helper.dE)("prf_typ_1").src = (0, _helper.getAvatarURL)(userinfo.name, userinfo.gen, "v1");
+    (0, _helper.dE)("prf_typ_2").src = (0, _helper.getAvatarURL)(userinfo.name, userinfo.gen, "v2");
+    (0, _helper.dE)("prf_typ_3").src = (0, _helper.getAvatarURL)(userinfo.name, userinfo.gen, "v3");
     (0, _helper.dE)("prf_typ_1").addEventListener("click", async function() {
         (0, _helper.dE)("prf_typ_1").style.borderColor = "red";
         (0, _helper.dE)("prf_typ_2").style.borderColor = "#06d85f";
@@ -1830,7 +1911,36 @@ async function newStoreItem() {
             crton: (0, _firestore.serverTimestamp)(),
             p: 0
         });
-        creMng("edit_batch/" + docRef.id, 1);
+        creMng("edit_store/" + docRef.id, 1);
+    } catch  {}
+}
+async function newCodeHunt() {
+    try {
+        const docRef = await (0, _firestore.addDoc)((0, _firestore.collection)(db, "store"), {
+            active: "0",
+            args: "num",
+            crton: (0, _firestore.serverTimestamp)(),
+            description: "Given a random <code>num</code>, print the number.",
+            difficulty: "easy",
+            explanation: "Nothing to say",
+            name: "Random Number?",
+            solution: "function execute(val1){\n    val1 = parseInt(val1) * 2;\n    return val1;\n}",
+            tag: "First Problem",
+            submit_input: [
+                "1",
+                "2",
+                "3",
+                "4"
+            ],
+            submit_output: [
+                "2",
+                "4",
+                "6",
+                "8"
+            ],
+            p: 0
+        });
+        creMng("edit_codehunt/" + docRef.id, 1);
     } catch  {}
 }
 async function renderStore() {
@@ -1883,11 +1993,6 @@ async function prepareBatch() {
         (0, _helper.dE)("aq_batname").value = docRef.name;
         (0, _helper.dE)("aq_class").value = docRef.class;
         (0, _helper.dE)("aq_timetable").value = docRef.timetable;
-        function dateparser(var1) {
-            var now = new Date(var1);
-            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-            return now.toISOString().slice(0, 16);
-        }
         (0, _helper.dE)("aq_tst_delon").value = dateparser(docRef.delon.seconds * 1000);
     }
 }
@@ -1957,7 +2062,6 @@ async function getUserNotes() {
                 (0, _helper.dE)("un_rendermode").innerHTML = '<option value="edit">edit</option><option value="preview">preview</option>';
                 (0, _helper.dE)("un_rendermode").value = "edit";
                 (0, _helper.dE)("un_save").style.display = "block";
-                (0, _helper.dE)("un_colorpicker").style.display = "block";
                 (0, _helper.dE)("un_viewership").style.display = "block";
                 (0, _helper.dE)("un_title").style.display = "block";
             }
@@ -2066,12 +2170,12 @@ async function gtMsg(type) {
         (0, _helper.dE)("forum_live").innerHTML = "";
         recentMessagesQuery = (0, _firestore.query)((0, _firestore.collection)((0, _firestore.getFirestore)(), "forum"), (0, _firestore.orderBy)("sgndon", "desc"), (0, _firestore.limit)(10));
         reMSG = (0, _firestore.onSnapshot)(recentMessagesQuery, function(snapshot) {
-            snapshot.docChanges().forEach(function(change) {
-                if (change.type === "removed") deleteMessage(change.doc.id);
-                else if (change.type == "added") {
+            snapshot.docChanges().forEach(function(change1) {
+                if (change1.type === "removed") deleteMessage(change1.doc.id);
+                else if (change1.type == "added") {
                     if (forum_length >= 11) forum_d = "beforeend";
-                    var message = change.doc.data();
-                    displayMessage(change.doc.id, "", message.name, message.message, message.userid);
+                    var message = change1.doc.data();
+                    displayMessage(change1.doc.id, "", message.name, message.message, message.userid);
                     forum_length = forum_length + 1;
                 }
             });
@@ -2545,11 +2649,6 @@ async function prepareTopicQBank(iun) {
                 (0, _helper.dE)("aq_randomize").checked = docJSON.randomize;
                 (0, _helper.dE)("aq_blockresult").checked = docJSON.blockresult;
                 (0, _helper.dE)("aq_tst_batches").value = docJSON.batch.toString();
-                function dateparser(var1) {
-                    var now = new Date(var1);
-                    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-                    return now.toISOString().slice(0, 16);
-                }
                 (0, _helper.dE)("aq_tst_stron").value = dateparser(docJSON.strton.seconds * 1000);
                 (0, _helper.dE)("aq_tst_endon").value = dateparser(docJSON.endon.seconds * 1000);
                 (0, _helper.dE)("aq_tst_timealotted").value = docJSON.timeallotted;
@@ -2867,9 +2966,9 @@ async function printQBank(type) {
             var src_url;
             if (docJSON.y_url == "") src_url = "";
             else src_url = "https://api.qrserver.com/v1/create-qr-code/?size=50x50&data=https://www.youtube.com/watch?v=" + docJSON.y_url;
-            var inhtml = '<div class = "les_q"><div id = "' + ele.id + '"><div style = "display:flex;flex-direction:row;justify-content: space-between;"><div style = "font-size:18px;">' + qtitle + '</div><img style = "float:right" src="' + src_url + '"></div><hr color="white" width="100%"></div>';
+            var inhtml = '<div class = "les_q"><div id = "' + ele.id + '"><div style = "display:flex;flex-direction:row;justify-content: space-between;"><div style = "font-size:18px;">' + qtitle + '</div><img style = "float:right" src="' + src_url + '"></div><hr width="100%"></div>';
             (0, _helper.dE)("eqb_add").insertAdjacentHTML("beforeend", inhtml);
-            var expl = '<div class = "les_expl" style = "">' + docJSON.expl + '</div><hr color="white" width="100%">';
+            var expl = '<div class = "les_expl" style = "">' + docJSON.expl + '</div><hr width="100%">';
             (0, _helper.dE)(ele.id).insertAdjacentHTML("beforeend", expl);
             renderMathInElement((0, _helper.dE)("eqb_add"));
         }
@@ -3039,7 +3138,7 @@ async function profileDetails() {
     //   dE("prf_tab_t_t_img").classList.remove("prf_male", "prf_female")
     //   dE("prf_tab_t_t_img").classList.add("prf_female")
     // }
-    (0, _helper.dE)("prf_tab_t_t_img").src = getAvatarURL(userinfo.name, userinfo.gen, userinfo.prf_type);
+    (0, _helper.dE)("prf_tab_t_t_img").src = (0, _helper.getAvatarURL)(userinfo.name, userinfo.gen, userinfo.prf_type);
 }
 function renderExams() {
     for(let i = 0; i < userinfo.examslist.examinfo.length; i++){
@@ -3112,9 +3211,7 @@ async function authStateObserver(user) {
                 (0, _log.log)("Server Offline", "Quarkz Is Temporarily Offline for Maintainance. " + docJSON.offlinemsg);
                 return 0;
             }
-            if (docJSON.warning != "") (0, _log.log)("Notice", docJSON.warning, function() {
-                window.location.hash = "#/updates";
-            }, "Release Notes");
+            if (docJSON.warning != "") addToast("notice", docJSON.warning, 10000);
         }
         creMng(window.location.hash.split("#/")[1], 1);
     } else {
@@ -6071,8 +6168,8 @@ parcelHelpers.export(exports, "validateCallback", ()=>validateCallback);
 parcelHelpers.export(exports, "validateContextObject", ()=>validateContextObject);
 parcelHelpers.export(exports, "validateIndexedDBOpenable", ()=>validateIndexedDBOpenable);
 parcelHelpers.export(exports, "validateNamespace", ()=>validateNamespace);
-var process = require("5b35771edbb20914");
 var global = arguments[3];
+var process = require("5b35771edbb20914");
 const CONSTANTS = {
     /**
      * @define {boolean} Whether this is the client Node.js SDK.
@@ -41497,10 +41594,10 @@ let page_dashboard = `
                 <span class="material-symbols-outlined rpl rpl-2 db_opt" translate="no" onclick="window.location = '#/profile'">account_circle</span>
                 <span class="material-symbols-outlined rpl rpl-2 db_opt" translate="no" onclick="window.location = '#/store'">shopping_cart</span>
                 <span class="material-symbols-outlined rpl rpl-2 db_opt" translate="no" onclick="window.location = '#/codehunt'">code</span>
-                <span class="material-symbols-outlined rpl rpl-2 db_opt" translate="no" id="lgt_btn">logout</span>
+                <span class="material-symbols-outlined rpl rpl-2 db_opt" translate="no" onclick="window.location = '#/logout'">logout</span>
             </div>
         <div
-            style="display: flex;flex-direction: row;flex-wrap: wrap;margin-left: 10px;align-items: flex-start;height:100%;margin-top: 15px;justify-content: space-evenly;overflow-y: scroll;">
+            style="display: flex;flex-direction: row;flex-wrap: wrap;margin-left: 10px;align-items: flex-start;height:100%;margin-top: 15px;justify-content: space-evenly;overflow-y: scroll;margin-bottom:10px;">
             <div id="db_exam_info" class = "db_class" style="max-height: 30vh;">
                 <span style="font-size: 25px;color:var(--clr16)">Exam Info</span>
                 <div id="db_exam_list"></div>
@@ -41509,12 +41606,12 @@ let page_dashboard = `
                 <span style="font-size: 25px;color:var(--clr16)">We're on Social Media</span>
                 <span style="font-size: 14px;color:grey;margin-left: 10px;">Follow us, & share with your friends. It motivates us to keep
                     working hard for you to bring new features. </span>
-                <img style="width:50px;" alt="Youtube Logo" style = "cursor:pointer;" class="rpl rpl-2"
+                <img style="width:50px;cursor:pointer;" alt="Youtube Logo" class="rpl rpl-2"
                     onclick="window.open('https://www.youtube.com/@quarkz./', '_blank');"
                     src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAABaCAMAAABHRa6wAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAACcFBMVEUAAAD/Ly//BQX/AAD/ExP/MDD/LS3/LCz/PDz/Z2f/X1//EhL/CAj/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/CAj/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/R0f/Q0P/Wlr/QED/Vlb/PT3/UlL/PDz/UFD/Ojr/Tk7/OTn/TEz/ODj/S0v/Nzf/Skr/Nzf/SUn/Njb/SEj/Njb/SEj/Njb/R0f/NTX/R0f/NTX/R0f/NTX/Rkb/NTX/NTX/AAD/AAD/AAD/CAj/Hh7/HBz/HBz/Gxv/Gxv/Ghr/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/FBT/HR3/AAD/AQH/BQX/wcH/EBD/////jY3/X1//7+//MzP/x8f/DQ3/mZn/Zmb/9vb/Ojr/0ND/EhL/oqL/dXX/+vr/QkL/1dX/GRn/qKj/fHz/SUn/3Nz/Hh7/sbH/paX/S0s8CEr+AAAAsHRSTlMAAAAAAAAAAAAAAAAABhMhKzdCUVlkbnqHjpidpqi3us7C1tnP3uLl7uzn18W2saV8ZVtQRjYBHDxaq8HT5vP98uivXkAiBidyrN3ksnkvCpenGaG5VfWCqhXb+kNxs8bp9ESQjLjN8OP5AQ4JIBYxJkE4VUhlVnJlgHSOgJiKoZOpnrKftKu9r8LA9/bYAQ4bJC88R1BYYnB6goqQlZykp7WzvL69xcrJzNrZxqmjGt/aNR4AAAABYktHRLUzDlpLAAAAB3RJTUUH5wEdCycyRsErbAAAAv5JREFUaN7dmudXE1EQxR8bu0KiKCSgggFi1KhRUexKVEQFxV6xYa/Yu2LBrkjvKE0CtmcZe+/df8nNCgfhgLi7z9xznE/58ub+srtvd97MZewP4SNJBl8/o6lzF/+u3QICzZag4O49eoaE9rKGhUfYbLbe9j5y2PvKPyPC+1kdoSH9BwwMDrKYnQGDBg+JHGoy+vkaJMmHqQtpWNTwEYGWkaNGjxk7juuP8dFWh8vinDBxUoyhRe3JsVOmCtBsNqbFxU9vnmJGwr/Uro+Zs5r+97O9I++JOU1cBZP35D0R2Vh/rnf1OXc21Pf3tj7n8b/rG72v3+AuGOYhAHj9kzgfos8X1Om3wuhzvrAWIBYFkFALsAgFsFhS9GNQ+pwbFYAlOIBEBcCMA1iqACzDASz31CqtV+AAlHeRAajPPZVBFBJgJXYT/NoGiUiAJBlgFRJgtQzgQgJYZYA1ahfdFgiwtg1ru07tojt374kjaMfar1e9iOi+MIANrIP6RSTHA0EAG9kmbQD08JEQgM1si0YAosdPBABsZcmaAYie6gfYxrbrACB6phdgB9upC4Cev9AHsIvt1gdA9PKVHoA9bK9eAKLXOgD2sf36AYjeaAY4wA6KAKC37zQCHGKHhQAQvf+gCeAISxEEQPRRC8BRdkwYANEn9bmOsxMCAYg+q82Vyk4KBaAvX9XlOsVOiwUg+qYq1xnxAETfVeQ6+x8CqL0F8IdQ7Db8oTZXKv5FlCIMQOOrGP4xgn+O4QUJvCSDF6Xwshx+MEnWASDkaAY/nMKP5/AGBbxFA29Swdt0+EYlvFULb1bD2/XwgQV8ZAMfWsHHdvjBJXx0Cx9ew8f3eAMD3MIBN7HgbTxwIxPeyoU3s+HtfHhDI97SqVwFrKm1jsJj63VaXI6w6HMiRM/bLzjikv7O1tsofCSp48W0S+kZmVnZObl5+QWFRcUll6+UlpVXVF6tcrura67JUVPtdlddr6woLyu9cbOkuKiwID8vNyc7KzMj/VZap5aMzT8BRpXwJFof0ooAAAAldEVYdGRhdGU6Y3JlYXRlADIwMjMtMDEtMjlUMTE6Mzk6NTArMDA6MDCGz66vAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDIzLTAxLTI5VDExOjM5OjUwKzAwOjAw95IWEwAAACB0RVh0c29mdHdhcmUAaHR0cHM6Ly9pbWFnZW1hZ2ljay5vcme8zx2dAAAAGHRFWHRUaHVtYjo6RG9jdW1lbnQ6OlBhZ2VzADGn/7svAAAAF3RFWHRUaHVtYjo6SW1hZ2U6OkhlaWdodAA5MDwVcVIAAAAXdEVYdFRodW1iOjpJbWFnZTo6V2lkdGgAMTI40I0R3QAAABl0RVh0VGh1bWI6Ok1pbWV0eXBlAGltYWdlL3BuZz+yVk4AAAARdEVYdFRodW1iOjpTaXplADE1NDVC02RgawAAABZ0RVh0VGh1bWI6OlVSSQBmaWxlOi8vUE5HOqYqZyIAAAAASUVORK5CYII=">
                 <span style="font-size: 25px;color:var(--clr16)">Join Our Discord Server</span>
                     <span style="font-size: 14px;color:grey;margin-left: 10px;">Join our Server, and talk with like-minded peers. Ask doubts. Answer Doubts.</span>
-                    <svg style="width:50px;" alt="Discord Logo" style = "cursor:pointer;" class="rpl rpl-2"
+                    <svg style="width:50px;cursor:pointer;" alt="Discord Logo" class="rpl rpl-2"
                     onclick="window.open('https://discord.gg/XKTtqaSW', '_blank');" viewBox="0 -28.5 256 256" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMidYMid">
                     <g><path d="M216.856339,16.5966031 C200.285002,8.84328665 182.566144,3.2084988 164.041564,0 C161.766523,4.11318106 159.108624,9.64549908 157.276099,14.0464379 C137.583995,11.0849896 118.072967,11.0849896 98.7430163,14.0464379 C96.9108417,9.64549908 94.1925838,4.11318106 91.8971895,0 C73.3526068,3.2084988 55.6133949,8.86399117 39.0420583,16.6376612 C5.61752293,67.146514 -3.4433191,116.400813 1.08711069,164.955721 C23.2560196,181.510915 44.7403634,191.567697 65.8621325,198.148576 C71.0772151,190.971126 75.7283628,183.341335 79.7352139,175.300261 C72.104019,172.400575 64.7949724,168.822202 57.8887866,164.667963 C59.7209612,163.310589 61.5131304,161.891452 63.2445898,160.431257 C105.36741,180.133187 151.134928,180.133187 192.754523,160.431257 C194.506336,161.891452 196.298154,163.310589 198.110326,164.667963 C191.183787,168.842556 183.854737,172.420929 176.223542,175.320965 C180.230393,183.341335 184.861538,190.991831 190.096624,198.16893 C211.238746,191.588051 232.743023,181.531619 254.911949,164.955721 C260.227747,108.668201 245.831087,59.8662432 216.856339,16.5966031 Z M85.4738752,135.09489 C72.8290281,135.09489 62.4592217,123.290155 62.4592217,108.914901 C62.4592217,94.5396472 72.607595,82.7145587 85.4738752,82.7145587 C98.3405064,82.7145587 108.709962,94.5189427 108.488529,108.914901 C108.508531,123.290155 98.3405064,135.09489 85.4738752,135.09489 Z M170.525237,135.09489 C157.88039,135.09489 147.510584,123.290155 147.510584,108.914901 C147.510584,94.5396472 157.658606,82.7145587 170.525237,82.7145587 C183.391518,82.7145587 193.761324,94.5189427 193.539891,108.914901 C193.539891,123.290155 183.391518,135.09489 170.525237,135.09489 Z" fill="#5865F2" fill-rule="nonzero">
                     </path></g></svg>
@@ -41549,7 +41646,7 @@ let page_dashboard = `
 let page_bug_report = `
 <iframe id="bgrep_frame"
             src="https://docs.google.com/forms/d/e/1FAIpQLSeo2JZDaBApBiTeXmAnkVX60hSuJGHJkd9jsF9ePg0iM9ufjA/formResponse?embedded=true&entry.1599248323=Quarkz!&entry.1645606077=` + Date.now() + `"
-            frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>`;
+            frameborder="0" marginheight="0" marginwidth="0" width="100%" height="90%">Loading…</iframe>`;
 let page_app_info = `
 <span class="in_t">App Info</span>
         <code style = "width:100%" id="ren_appinf"></code>`;
@@ -41927,6 +42024,7 @@ let page_functions = `
                 <span style="font-size: 25px;color:var(--clr16);">Misc</span>
                 <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/edit_exams'">Edit Exams</div>
                 <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/site-analytics'">Site Analytics</div>
+                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/reports'">Reports</div>
             </div>
         </div>
 `;
@@ -42100,7 +42198,6 @@ let page_login = `
         <button class="tst_btn rpl" id="sgn_in">Sign In</button>
         <button class="tst_btn rpl" id="reg_in">Register</button>
     </div>
-    <span id="lgn_err" class="err_txt">ERROR:Wrong Username Or Password</span>
     <span class="lgn_c_1"><a href="/#/about">About</a>&nbsp;&nbsp;<a href="/#/legal">Legal</a>&nbsp;&nbsp;<a
             href="/#/bugreport">Report A Bug</a>
     </span>
@@ -42800,7 +42897,7 @@ let page_topic = `
                     </div>
                 </div>
                 <div id="toolbar"
-                    style="border:3px solid grey; border-radius: 10px 10px 10px 10px;padding-left: 5px;padding-right: 5px;">
+                    style="border:3px solid grey; border-radius: 10px 10px 10px 10px;padding-left: 5px;padding-right: 5px;min-width:400px;">
                     <span class="material-icons" id="tp_bw_btn" onclick="player.seekTo(player.getCurrentTime()-10)"
                         title="-10 Seconds">fast_rewind</span>
                     <span class="material-icons" id="tp_pl_btn" title="Play"
@@ -42969,6 +43066,7 @@ parcelHelpers.export(exports, "antiCopyEle", ()=>antiCopyEle);
 parcelHelpers.export(exports, "shuffleArrayWithSeed", ()=>shuffleArrayWithSeed);
 parcelHelpers.export(exports, "buildHtmlTable", ()=>buildHtmlTable);
 parcelHelpers.export(exports, "studentRanker", ()=>studentRanker);
+parcelHelpers.export(exports, "getAvatarURL", ()=>getAvatarURL);
 function sd(seconds) {
     seconds = Number(seconds);
     var d = Math.floor(seconds / 86400);
@@ -43209,6 +43307,31 @@ function studentRanker(students) {
     });
     return students;
 }
+function getAvatarURL(name, gen, ver) {
+    function getInitials(name) {
+        let initials = "";
+        const words = name.split(" ");
+        for(let i = 0; i < words.length; i++){
+            const word = words[i];
+            if (word.length > 0) initials += word[0].toUpperCase();
+        }
+        return initials;
+    }
+    // Import the crypto module for hashing
+    const crypto1 = require("19a2999d60f4b676");
+    // Hash the seed string using SHA-256 algorithm
+    const hash = crypto1.createHash("sha256").update(name).digest("hex");
+    // Take the first 6 digits of the hash and convert to number
+    const num = parseInt(hash.slice(0, 6), 16);
+    // Return the 6-digit number
+    if (ver == undefined || ver == "") ver;
+    let initials = getInitials(name);
+    if (ver == "v1") return "https://ui-avatars.com/api/?background=random&size=100&bold=true&name=" + getInitials(userinfo.name);
+    else if (ver == "v2") {
+        if (gen == "Male") return "https://api.dicebear.com/5.x/avataaars/svg?top%5B%5D=dreads01,dreads02,eyepatch,frizzle,shortCurly,shortFlat,shortRound,shortWaved,sides,theCaesar,theCaesarAndSidePart,turban&seed=" + initials + num.toString();
+        else return "https://api.dicebear.com/5.x/avataaars/svg?facialHairProbability=0&top%5B%5D=bigHair,bob,bun,curly,curvy,dreads,frida,fro,hijab,longButNotTooLong,miaWallace,shaggy,shaggyMullet,shavedSides,straightAndStrand,straight01,straight02&seed=" + initials + num.toString();
+    } else if (ver == "v3") return "https://api.dicebear.com/6.x/bottts/svg?seed=" + initials + num.toString();
+}
 exports.default = {
     sd,
     sha256,
@@ -43225,6 +43348,7 @@ exports.default = {
     mergeById,
     qCorrector,
     playSoundEffect,
+    getAvatarURL,
     showLS,
     antiCopyEle,
     shuffleArrayWithSeed,
@@ -43232,125 +43356,7 @@ exports.default = {
     studentRanker
 };
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"66uq8":[function(require,module,exports) {
-/*
-Copyright 2021-23 Quarkz By Mr Techtroid
-
-All rights reserved by [Mr Techtroid]. This work is not open-source.
-
-No part of these HTML, CSS, and JavaScript files may be reproduced, distributed, 
-or transmitted in any form or by any means, including photocopying, recording, 
-or other electronic or mechanical methods, without the prior written permission 
-of the author, except in the case of brief quotations embodied in critical reviews 
-and certain other noncommercial uses permitted by copyright law.
-
-For permission requests, please contact [Mr Techtroid] at mrtechtroid@outlook.com .
-*/ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "sysaccess", ()=>sysaccess);
-function sysaccess() {
-    function w(ele) {
-        return document.getElementById(ele);
-    }
-    function r(txt, st) {
-    // w("c-output").insertAdjacentHTML("beforeend","<div style = "+st+">"+txt+"</div>")
-    }
-    function init() {
-        r("Ariel", "color:pink;align-text:center;");
-    }
-    function x(fn) {
-        const u = w("c-input").value;
-        document.querySelector("body").insertAdjacentHTML("beforeend", `<script></script>`);
-    }
-    var clog = console;
-    console = {};
-    console = {
-        log: function(logtxt) {
-            r("", logtxt);
-        },
-        error: function(logtxt) {
-            r("", logtxt);
-        },
-        warn: function(logtxt) {
-            r("", logtxt);
-        }
-    };
-    // w("c-exec").addEventListener("click",x(w("c-input").value))
-    const cs = console;
-    // console = {}
-    init();
-}
-
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"1R5ZA":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "page_batch_list", ()=>page_batch_list);
-parcelHelpers.export(exports, "page_edit_batch", ()=>page_edit_batch);
-let page_batch_list = `
-<span class="in_t">Batches</span>
-        <hr style = "color:var(--clr18)" width="100%">
-        <div id="batchlinks">
-        </div>`;
-let page_edit_batch = `
-<span class="in_t" class="" id="fu_topic_title">Add/Edit Batch</span>
-<center>
-<div id="aq_basic" style="flex-direction: column;">    
-    <input type="text" id="aq_batname" class="_in_aq" placeholder="Batch Name">
-    <input type="number" id="aq_class" class="_in_aq" placeholder="Class">
-    <input type="datetime-local" id="aq_tst_delon" class="_in_aq">
-    <input type="text" id="aq_timetable" class="_in_aq" placeholder="Timetable ID">
-    <select name="type" id="aq_level" class="_in_aq col-red">
-                <option value="jee">JEE</option>
-                <option value="neet">NEET</option>
-                <option value="foundation">Foundation</option>
-    </select>
-</div>
-</center>
-    <button class="tst_btn rpl" id="aq_batch_save">Save/Update Batch</button>
-`;
-exports.default = {
-    page_batch_list,
-    page_edit_batch
-};
-
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"iujZH":[function(require,module,exports) {
-module.exports = require("abdd4d745856765b").getBundleURL("10Mjw") + "js/sw.js" + "?" + Date.now();
-
-},{"abdd4d745856765b":"lgJ39"}],"lgJ39":[function(require,module,exports) {
-"use strict";
-var bundleURL = {};
-function getBundleURLCached(id) {
-    var value = bundleURL[id];
-    if (!value) {
-        value = getBundleURL();
-        bundleURL[id] = value;
-    }
-    return value;
-}
-function getBundleURL() {
-    try {
-        throw new Error();
-    } catch (err) {
-        var matches = ("" + err.stack).match(/(https?|file|ftp|(chrome|moz|safari-web)-extension):\/\/[^)\n]+/g);
-        if (matches) // The first two stack frames will be this function and getBundleURLCached.
-        // Use the 3rd one, which will be a runtime in the original bundle.
-        return getBaseURL(matches[2]);
-    }
-    return "/";
-}
-function getBaseURL(url) {
-    return ("" + url).replace(/^((?:https?|file|ftp|(chrome|moz|safari-web)-extension):\/\/.+)\/[^/]+$/, "$1") + "/";
-} // TODO: Replace uses with `new URL(url).origin` when ie11 is no longer supported.
-function getOrigin(url) {
-    var matches = ("" + url).match(/(https?|file|ftp|(chrome|moz|safari-web)-extension):\/\/[^/]+/);
-    if (!matches) throw new Error("Origin not found");
-    return matches[0];
-}
-exports.getBundleURL = getBundleURLCached;
-exports.getBaseURL = getBaseURL;
-exports.getOrigin = getOrigin;
-
-},{}],"hagNj":[function(require,module,exports) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","19a2999d60f4b676":"hagNj"}],"hagNj":[function(require,module,exports) {
 "use strict";
 exports.randomBytes = exports.rng = exports.pseudoRandomBytes = exports.prng = require("6d7fc0dc5de28bcc");
 exports.createHash = exports.Hash = require("f44f80586868fcdc");
@@ -47044,8 +47050,8 @@ Object.defineProperty(Duplex.prototype, "destroyed", {
 // A bit simpler than readable streams.
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
 // the drain event emission and buffering.
-var process = require("62eaf9240176a82a");
 var global = arguments[3];
+var process = require("62eaf9240176a82a");
 "use strict";
 module.exports = Writable;
 /* <replacement> */ function WriteReq(chunk, encoding, cb) {
@@ -50143,8 +50149,8 @@ module.exports = function(iterations, keylen) {
 };
 
 },{}],"T9r9Q":[function(require,module,exports) {
-var global = arguments[3];
 var process = require("2b885cada18ff430");
+var global = arguments[3];
 var defaultEncoding;
 /* istanbul ignore next */ if (global.process && global.process.browser) defaultEncoding = "utf-8";
 else if (global.process && global.process.version) {
@@ -78717,8 +78723,8 @@ function compare(a, b) {
 }
 
 },{"96fb9b2f6750834a":"4Szbv","1b8c45d37d900c35":"e2JgG","c87367ab291092f2":"iaxu0","35d67ec2478cf4d6":"3pDum","f8caae6e7d4d6567":"e594P","e5400ba285150c22":"2WyL8","65eedc9f6297963":"fFkPV","446b20c2e1062b85":"eW7r9"}],"k3tsT":[function(require,module,exports) {
-var process = require("8ca93fa32364873");
 var global = arguments[3];
+var process = require("8ca93fa32364873");
 "use strict";
 function oldBrowser() {
     throw new Error("secure random number generation not supported by this browser\nuse chrome, FireFox or Internet Explorer 11");
@@ -78792,7 +78798,125 @@ function randomFillSync(buf, offset, size) {
     return actualFill(buf, offset, size);
 }
 
-},{"8ca93fa32364873":"d5jf4","ae1daa48485b3db0":"eW7r9","90c7c58f95ea0c69":"8hjhE"}],"d8NN9":[function(require,module,exports) {
+},{"8ca93fa32364873":"d5jf4","ae1daa48485b3db0":"eW7r9","90c7c58f95ea0c69":"8hjhE"}],"66uq8":[function(require,module,exports) {
+/*
+Copyright 2021-23 Quarkz By Mr Techtroid
+
+All rights reserved by [Mr Techtroid]. This work is not open-source.
+
+No part of these HTML, CSS, and JavaScript files may be reproduced, distributed, 
+or transmitted in any form or by any means, including photocopying, recording, 
+or other electronic or mechanical methods, without the prior written permission 
+of the author, except in the case of brief quotations embodied in critical reviews 
+and certain other noncommercial uses permitted by copyright law.
+
+For permission requests, please contact [Mr Techtroid] at mrtechtroid@outlook.com .
+*/ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "sysaccess", ()=>sysaccess);
+function sysaccess() {
+    function w(ele) {
+        return document.getElementById(ele);
+    }
+    function r(txt, st) {
+    // w("c-output").insertAdjacentHTML("beforeend","<div style = "+st+">"+txt+"</div>")
+    }
+    function init() {
+        r("Ariel", "color:pink;align-text:center;");
+    }
+    function x(fn) {
+        const u = w("c-input").value;
+        document.querySelector("body").insertAdjacentHTML("beforeend", `<script></script>`);
+    }
+    var clog = console;
+    console = {};
+    console = {
+        log: function(logtxt) {
+            r("", logtxt);
+        },
+        error: function(logtxt) {
+            r("", logtxt);
+        },
+        warn: function(logtxt) {
+            r("", logtxt);
+        }
+    };
+    // w("c-exec").addEventListener("click",x(w("c-input").value))
+    const cs = console;
+    // console = {}
+    init();
+}
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"1R5ZA":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "page_batch_list", ()=>page_batch_list);
+parcelHelpers.export(exports, "page_edit_batch", ()=>page_edit_batch);
+let page_batch_list = `
+<span class="in_t">Batches</span>
+        <hr style = "color:var(--clr18)" width="100%">
+        <div id="batchlinks">
+        </div>`;
+let page_edit_batch = `
+<span class="in_t" class="" id="fu_topic_title">Add/Edit Batch</span>
+<center>
+<div id="aq_basic" style="flex-direction: column;">    
+    <input type="text" id="aq_batname" class="_in_aq" placeholder="Batch Name">
+    <input type="number" id="aq_class" class="_in_aq" placeholder="Class">
+    <input type="datetime-local" id="aq_tst_delon" class="_in_aq">
+    <input type="text" id="aq_timetable" class="_in_aq" placeholder="Timetable ID">
+    <select name="type" id="aq_level" class="_in_aq col-red">
+                <option value="jee">JEE</option>
+                <option value="neet">NEET</option>
+                <option value="foundation">Foundation</option>
+    </select>
+</div>
+</center>
+    <button class="tst_btn rpl" id="aq_batch_save">Save/Update Batch</button>
+`;
+exports.default = {
+    page_batch_list,
+    page_edit_batch
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"iujZH":[function(require,module,exports) {
+module.exports = require("abdd4d745856765b").getBundleURL("10Mjw") + "js/sw.js" + "?" + Date.now();
+
+},{"abdd4d745856765b":"lgJ39"}],"lgJ39":[function(require,module,exports) {
+"use strict";
+var bundleURL = {};
+function getBundleURLCached(id) {
+    var value = bundleURL[id];
+    if (!value) {
+        value = getBundleURL();
+        bundleURL[id] = value;
+    }
+    return value;
+}
+function getBundleURL() {
+    try {
+        throw new Error();
+    } catch (err) {
+        var matches = ("" + err.stack).match(/(https?|file|ftp|(chrome|moz|safari-web)-extension):\/\/[^)\n]+/g);
+        if (matches) // The first two stack frames will be this function and getBundleURLCached.
+        // Use the 3rd one, which will be a runtime in the original bundle.
+        return getBaseURL(matches[2]);
+    }
+    return "/";
+}
+function getBaseURL(url) {
+    return ("" + url).replace(/^((?:https?|file|ftp|(chrome|moz|safari-web)-extension):\/\/.+)\/[^/]+$/, "$1") + "/";
+} // TODO: Replace uses with `new URL(url).origin` when ie11 is no longer supported.
+function getOrigin(url) {
+    var matches = ("" + url).match(/(https?|file|ftp|(chrome|moz|safari-web)-extension):\/\/[^/]+/);
+    if (!matches) throw new Error("Origin not found");
+    return matches[0];
+}
+exports.getBundleURL = getBundleURLCached;
+exports.getBaseURL = getBaseURL;
+exports.getOrigin = getOrigin;
+
+},{}],"d8NN9":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _chartJs = require("../dist/chart.js");
@@ -92222,37 +92346,50 @@ exports.default = {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "page_vidchat", ()=>page_vidchat);
+parcelHelpers.export(exports, "page_createvidchat", ()=>page_createvidchat);
 let page_vidchat = `
-<h2>1. Start your Webcam</h2>
-    <div class="videos">
-      <span>
-        <h3>Local Stream</h3>
-        <video id="webcamVideo" autoplay playsinline></video>
-      </span>
-      <span>
-        <h3>Remote Stream</h3>
-        <video id="remoteVideo" autoplay playsinline></video>
-      </span>
+<div style = "display:flex;flex-direction:row;flex-wrap:wrap;width:100%;margin:10px;padding:10px;padding-left:10px;justify-content:center">
+  <span style = "font-size:16px" id = "vid_title">Counsilling Session - 1</span>
+</div>
+<div style = "border-radius:5px;width:90vw;height:60vh;position:relative">
+  <video id="remoteVideo" autoplay playsinline style = "width:100%;height:100%;border: white solid 2px"></video>
+  <video id="webcamVideo" autoplay playsinline style="position:absolute;width:200px;height:100px;right:10px;bottom:10px;border: white solid 2px"></video>
+</div>
+<div>
 
+</div>
+<div style = "display:flex;flex-direction:row;width:100%;justify-content:space-around;padding:10px;">
+<div style = "display:flex;flex-direction:row">
+  <button id="joinaudioButton" class = "material-symbols-outlined vid_ico">mic</button>
+  <button id="webcamButton" class = "material-symbols-outlined vid_ico">videocam</button>
+</div>
+<div style = "display:flex;flex-direction:row">
+  <button id="callButton" class = "material-symbols-outlined vid_ico" disabled>call</button>
+  <button id="screenButton" class = "material-symbols-outlined vid_ico">desktop_windows</button>
+</div>
+<button id="hangupButton" class = "material-symbols-outlined vid_ico" disabled>call_end</button>
+</div>
 
-    </div>
-
-    <button id="webcamButton">Start webcam</button>
-    <h2>2. Create a new Call</h2>
-    <button id="callButton" disabled>Create Call (offer)</button>
-
-    <h2>3. Join a Call</h2>
-    <p>Answer the call from a different browser window or device</p>
-    
-    <input id="callInput" />
-    <button id="answerButton" disabled>Answer</button>
-
-    <h2>4. Hangup</h2>
-
-    <button id="hangupButton" disabled>Hangup</button>
+</div>
+`;
+let page_createvidchat = `
+<span class="in_t" class="" id="fu_vidchat_title">Schedule Meeting</span>
+        <div id="vdc_basic" style="flex-direction: column;width:100%;display:flex;align-items:center;">
+            <label for = "vdc_tpcname">Meeting Topic</label>
+            <input type="text" id="vdc_tpcname" class="_in_aq" placeholder="Dummy Meeting"><br>
+            <label for = "vdc_stron">Starts On:</label>
+            <input type="datetime-local" id="vdc_stron" class="_in_aq"><br>
+            <label for = "vdc_duration">Duration(mins)</label>
+            <input type="text" id="vdc_duration" class="_in_aq" placeholder="60" value = "60"><br>
+            <label for = "vdc_meetid">Meeting ID</label>
+            <input type="text" id="vdc_meetid" class="_in_aq" placeholder="GENERATINGSOON"><br>
+            <button class="tst_btn rpl" id="vdc_create">Create Call</button>
+            <button class="tst_btn rpl" id="vdc_update">Update Call Details</button>
+        </div>
 `;
 exports.default = {
-    page_vidchat
+    page_vidchat,
+    page_createvidchat
 };
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"9Hrvq":[function(require,module,exports) {
@@ -92260,6 +92397,7 @@ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "page_ch_solver", ()=>page_ch_solver);
 parcelHelpers.export(exports, "page_ch_list", ()=>page_ch_list);
+parcelHelpers.export(exports, "page_edit_ch", ()=>page_edit_ch);
 let page_ch_solver = `
 <div style = "width:100%;display:flex;flex-direction:row;height:100%;padding:10px;">
     <div style = "width:50%;overflow-y:scroll;margin:10px;border: 1px solid grey;padding:10px;">
@@ -92302,9 +92440,14 @@ let page_ch_list = `
 <hr style="color:var(--clr18)" width="100%">
 <div id = "prb_list" style = "width:100%;height:75vh;display:flex;flex-direction:row;flex-wrap:wrap;justify-content:center;"></div>
 `;
+let page_edit_ch = `
+
+
+`;
 exports.default = {
     page_ch_list,
-    page_ch_solver
+    page_ch_solver,
+    page_edit_ch
 };
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["9tRox","1SICI"], "1SICI", "parcelRequire43c0")

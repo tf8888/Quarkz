@@ -289,4 +289,37 @@ export function studentRanker(students) {
     });
     return students
 }
-export default { sd, sha256, makeid, mobileCheck, areObjectsEqual, areEqual, getServerTime, fullEle, dE, sortObj, sortObjv2, renderMarkedMath, mergeById, qCorrector, playSoundEffect, showLS, antiCopyEle, shuffleArrayWithSeed, buildHtmlTable, studentRanker }
+export function getAvatarURL(name, gen, ver) {
+    function getInitials(name) {
+      let initials = '';
+      const words = name.split(' ');
+      for (let i = 0; i < words.length; i++) {
+        const word = words[i];
+        if (word.length > 0) {
+          initials += word[0].toUpperCase();
+        }
+      }
+      return initials;
+    }
+    // Import the crypto module for hashing
+    const crypto = require('crypto');
+    // Hash the seed string using SHA-256 algorithm
+    const hash = crypto.createHash('sha256').update(name).digest('hex');
+    // Take the first 6 digits of the hash and convert to number
+    const num = parseInt(hash.slice(0, 6), 16);
+    // Return the 6-digit number
+    if (ver == undefined || ver == "") { ver == "v2" }
+    let initials = getInitials(name);
+    if (ver == "v1") {
+      return "https://ui-avatars.com/api/?background=random&size=100&bold=true&name=" + getInitials(userinfo.name)
+    } else if (ver == "v2") {
+      if (gen == "Male") {
+        return "https://api.dicebear.com/5.x/avataaars/svg?top%5B%5D=dreads01,dreads02,eyepatch,frizzle,shortCurly,shortFlat,shortRound,shortWaved,sides,theCaesar,theCaesarAndSidePart,turban&seed=" + initials + num.toString()
+      } else {
+        return "https://api.dicebear.com/5.x/avataaars/svg?facialHairProbability=0&top%5B%5D=bigHair,bob,bun,curly,curvy,dreads,frida,fro,hijab,longButNotTooLong,miaWallace,shaggy,shaggyMullet,shavedSides,straightAndStrand,straight01,straight02&seed=" + initials + num.toString()
+      }
+    } else if (ver == "v3") {
+      return "https://api.dicebear.com/6.x/bottts/svg?seed=" + initials + num.toString()
+    }
+  }
+export default { sd, sha256, makeid, mobileCheck, areObjectsEqual, areEqual, getServerTime, fullEle, dE, sortObj, sortObjv2, renderMarkedMath, mergeById, qCorrector, playSoundEffect,getAvatarURL, showLS, antiCopyEle, shuffleArrayWithSeed, buildHtmlTable, studentRanker }

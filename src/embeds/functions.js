@@ -29,6 +29,7 @@ export let page_functions = `
                 <span style="font-size: 25px;color:var(--clr16);">Misc</span>
                 <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/edit_exams'">Edit Exams</div>
                 <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/site-analytics'">Site Analytics</div>
+                <div class="dshbox_v2 rpl" onclick="window.location.hash = '#/reports'">Reports</div>
             </div>
         </div>
 `

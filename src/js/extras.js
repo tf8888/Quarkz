@@ -333,13 +333,13 @@ var codeEditorSubmission = 0
 //   }, 10000)
 
 // }
-function code_evalueter(cd_input, cd_output){
+function code_evalueter(cd_input, cd_output) {
   function* mape(code, cdinput) {
     for (var i = 0; i < cdinput.length; i++) {
-      try{
+      try {
         yield eval(`${code.replaceAll(/\n/g, '')};execute("` + cdinput[i] + `")`)
-      }catch(e){
-        yield "[QUARKZ-CODE-EXECUTION-ABANDONED]"+String(e)
+      } catch (e) {
+        yield "[QUARKZ-CODE-EXECUTION-ABANDONED]" + String(e)
       }
     }
   }
@@ -349,7 +349,7 @@ function code_evalueter(cd_input, cd_output){
   const mape2 = mape(code_value, cd_input)
   for (let i = 0; i < cd_input.length; i++) {
     let hjg = mape2.next().value
-    if (String(hjg).includes("[QUARKZ-CODE-EXECUTION-ABANDONED")){
+    if (String(hjg).includes("[QUARKZ-CODE-EXECUTION-ABANDONED")) {
       document.getElementById("code_console").insertAdjacentHTML("beforeend", "<span style = 'color:red'>Failed - Test Case #" + (testpass + 1).toString() + "</span><br>")
       document.getElementById("code_console").insertAdjacentHTML("beforeend", "<span style = 'color:white'>Input: " + cd_input[testpass] + "</span><br>")
       document.getElementById("code_console").insertAdjacentHTML("beforeend", "<span style = 'color:white'>Expected Output: " + cd_output[testpass] + "</span><br>")
@@ -369,11 +369,11 @@ function code_evalueter(cd_input, cd_output){
   }
   if (testpass == cd_input.length) {
     document.getElementById("code_console").insertAdjacentHTML("beforeend", "<span style = 'color:green'>Success - All Tests Passed</span><br>")
-    addToast("success","All Tests Passed",1000)
+    addToast("success", "All Tests Passed", 1000)
   }
   let timeAfter = Date.now()
   let timetaken = timeAfter - timebefore
-  document.getElementById("code_console").insertAdjacentHTML("beforeend", "<span style = 'color:yellow'>Time Taken(in ms): "+timetaken+"</span><br>")
+  document.getElementById("code_console").insertAdjacentHTML("beforeend", "<span style = 'color:yellow'>Time Taken(in ms): " + timetaken + "</span><br>")
   codeEditorSubmission = 0
 }
 function evaluateJSCode(cd_input, cd_output) {
@@ -386,7 +386,7 @@ function evaluateJSCode(cd_input, cd_output) {
     addToast("error", "Please Wait for Test Bench to complete execution before Resubmissions.")
     return
   }
-  setTimeout(function(){code_evalueter(cd_input, cd_output)},1000)
+  setTimeout(function () { code_evalueter(cd_input, cd_output) }, 1000)
 }
 
 function toastTimer(id, time) {
@@ -401,6 +401,10 @@ function toastTimer(id, time) {
       dE("toast" + id.split("toasttimer")[1]).remove()
     }
   }, 10))
+  dE(id).parentElement.onclick = function(){
+    clearInterval(dE(id).getAttribute('toastInterval'));
+    dE("toast" + id.split("toasttimer")[1]).remove()
+  }
 }
 function addToast(type, msg, time) {
   if (time == "" || time == undefined) {
@@ -422,4 +426,9 @@ function addToast(type, msg, time) {
   `)
   toastTimer("toasttimer" + idno, time)
   return "toast" + idno
+}
+function dateparser(var1) {
+  var now = new Date(var1);
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  return now.toISOString().slice(0, 16);
 }

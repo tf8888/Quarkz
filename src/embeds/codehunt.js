@@ -43,4 +43,9 @@ export let page_ch_list = `
 <div id = "prb_list" style = "width:100%;height:75vh;display:flex;flex-direction:row;flex-wrap:wrap;justify-content:center;"></div>
 `
 
-export default { page_ch_list, page_ch_solver}
+export let page_edit_ch = `
+
+
+`
+
+export default { page_ch_list, page_ch_solver,page_edit_ch}

@@ -140,7 +140,7 @@ export let page_topic = `
                     </div>
                 </div>
                 <div id="toolbar"
-                    style="border:3px solid grey; border-radius: 10px 10px 10px 10px;padding-left: 5px;padding-right: 5px;">
+                    style="border:3px solid grey; border-radius: 10px 10px 10px 10px;padding-left: 5px;padding-right: 5px;min-width:400px;">
                     <span class="material-icons" id="tp_bw_btn" onclick="player.seekTo(player.getCurrentTime()-10)"
                         title="-10 Seconds">fast_rewind</span>
                     <span class="material-icons" id="tp_pl_btn" title="Play"

@@ -7,7 +7,6 @@ export let page_login = `
         <button class="tst_btn rpl" id="sgn_in">Sign In</button>
         <button class="tst_btn rpl" id="reg_in">Register</button>
     </div>
-    <span id="lgn_err" class="err_txt">ERROR:Wrong Username Or Password</span>
     <span class="lgn_c_1"><a href="/#/about">About</a>&nbsp;&nbsp;<a href="/#/legal">Legal</a>&nbsp;&nbsp;<a
             href="/#/bugreport">Report A Bug</a>
     </span>

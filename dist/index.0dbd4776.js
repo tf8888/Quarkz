@@ -345,6 +345,10 @@ function toastTimer(id, time) {
             dE("toast" + id.split("toasttimer")[1]).remove();
         }
     }, 10));
+    dE(id).parentElement.onclick = function() {
+        clearInterval(dE(id).getAttribute("toastInterval"));
+        dE("toast" + id.split("toasttimer")[1]).remove();
+    };
 }
 function addToast(type, msg, time) {
     if (time == "" || time == undefined) time = 5000;
@@ -359,6 +363,11 @@ function addToast(type, msg, time) {
   `);
     toastTimer("toasttimer" + idno, time);
     return "toast" + idno;
+}
+function dateparser(var1) {
+    var now = new Date(var1);
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    return now.toISOString().slice(0, 16);
 }
 
 //# sourceMappingURL=index.0dbd4776.js.map
