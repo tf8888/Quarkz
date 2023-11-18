@@ -43,6 +43,11 @@ export let page_settings = `
                 <span>Retype Password: <input id = "inp_retype_pass" type = "password" value = ""></input></span>
                 <button id="sub_chg_pass" class="tst_btn rpl">Update Password</button>
             </div>
+            <div id="st_changebatch" class = "db_class">
+            <span style="font-size: 25px;color:var(--clr16);">Change Active Batch</span>
+            <span>BID:<select id = "inp_batch" value = ""></select></span>
+            <button id="sub_chg_batch" class="tst_btn rpl">Update Batch</button>
+            </div>
         </div>`
 
 export default {page_settings}

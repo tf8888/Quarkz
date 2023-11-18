@@ -1725,6 +1725,19 @@ async function settingsEvents() {
         });
         userinfo.prf_type = "v3";
     });
+    (0, _helper.dE)("sub_chg_batch").addEventListener("click", async function() {
+        await (0, _firestore.updateDoc)((0, _firestore.doc)(db, "users", userinfo.uuid), {
+            curr_batch: (0, _helper.dE)("inp_batch").value
+        });
+        userinfo.curr_batch = (0, _helper.dE)("inp_batch").value;
+        getCurrentBatchDetails(userinfo.curr_batch);
+        addToast("success", "Current Batch changed Successfully");
+    });
+    let FRAME_OPT = "";
+    let batchlist1 = userinfo.batch.split(",");
+    for(let i = 0; i < batchlist1.length; i++)FRAME_OPT += "<option value = '" + batchlist1[i] + "'>" + batchlist1[i] + "</option>";
+    (0, _helper.dE)("inp_batch").innerHTML = FRAME_OPT;
+    (0, _helper.dE)("inp_batch").value = userinfo.curr_batch;
 }
 // -----------------------
 // SIMULATIONS
@@ -3127,7 +3140,7 @@ async function profileDetails() {
     stclass.textContent = userinfo.class;
     crton.textContent = new Date(userinfo.sgndon.seconds * 1000).toDateString();
     gender.textContent = userinfo.gen;
-    batchno = userinfo.batch;
+    batchno = userinfo.curr_batch;
     courseno = userinfo.course;
     spoints1.textContent = userinfo.spoints;
     userinfo.usernotes = userinfo.usernotes;
@@ -3148,6 +3161,31 @@ function renderExams() {
         (0, _helper.dE)(iti).addEventListener("click", function() {});
     }
 }
+async function getCurrentBatchDetails(batchno) {
+    try {
+        var docRef = (0, _firestore.doc)(db, "batch", batchno);
+        var docSnap = await (0, _firestore.getDoc)(docRef);
+        if (docSnap.exists()) {
+            var docJSON = docSnap.data();
+            userinfo.batchname = docJSON.name;
+            userinfo.timetable = docJSON.timetable;
+            userinfo.timetableurl = "https://calendar.google.com/calendar/embed??height=600&wkst=2&bgcolor=%23ffffff&ctz=Asia%2FKolkata&showTitle=0&showCalendars=0&showTabs=0&showPrint=0&showDate=1&src=" + docJSON.timetable + "%40group.calendar.google.com&amp;ctz=Asia%2FKolkata";
+            getTestList(batchno, userinfo.uuid, 1);
+            if (docJSON.delon.seconds <= parseInt(Date.now() / 1000)) {
+                (0, _log.log)("Warning", "This Batch Has Been Deleted");
+                signOutUser();
+                window.reload();
+                throw new Error("DENIED");
+            }
+            chapterlist = [];
+            for(var i = 0; i < docJSON.chlist.length; i++)chapterlist.push({
+                name: docJSON.chlist[i].name,
+                id: docJSON.chlist[i].id,
+                subject: docJSON.chlist[i].subject
+            });
+        }
+    } catch  {}
+}
 window.log = (0, _log.log);
 async function authStateObserver(user) {
     var courseno, batchno, calenid;
@@ -3158,7 +3196,8 @@ async function authStateObserver(user) {
             var docJSON = docSnap.data();
             userinfo = docJSON;
             userinfo.uuid = user.uid;
-            batchno = userinfo.batch;
+            batchno = userinfo.curr_batch || userinfo.batch.split(",")[0];
+            batchlist = userinfo.batch;
             userinfo.storeitems = [];
             userinfo.codeitems = [];
             userrole = userinfo.roles["user"];
@@ -3171,28 +3210,7 @@ async function authStateObserver(user) {
             (0, _log.log)("Warning", "User Account Has Been Deleted");
             signOutUser();
         }
-        try {
-            var docRef = (0, _firestore.doc)(db, "batch", batchno);
-            var docSnap = await (0, _firestore.getDoc)(docRef);
-            if (docSnap.exists()) {
-                var docJSON = docSnap.data();
-                userinfo.batchname = docJSON.name;
-                userinfo.timetable = docJSON.timetable;
-                getTestList(batchno, user.uid);
-                userinfo.timetableurl = "https://calendar.google.com/calendar/embed??height=600&wkst=2&bgcolor=%23ffffff&ctz=Asia%2FKolkata&showTitle=0&showCalendars=0&showTabs=0&showPrint=0&showDate=1&src=" + docJSON.timetable + "%40group.calendar.google.com&amp;ctz=Asia%2FKolkata";
-                if (docJSON.delon.seconds <= parseInt(Date.now() / 1000)) {
-                    (0, _log.log)("Warning", "This Batch Has Been Deleted");
-                    signOutUser();
-                    window.reload();
-                    throw new Error("DENIED");
-                }
-                for(var i = 0; i < docJSON.chlist.length; i++)chapterlist.push({
-                    name: docJSON.chlist[i].name,
-                    id: docJSON.chlist[i].id,
-                    subject: docJSON.chlist[i].subject
-                });
-            }
-        } catch  {}
+        getCurrentBatchDetails(batchno);
         spoints.style.display = "block";
         (0, _helper.dE)("dsh_btn").style.display = "block";
         if (window.location.hash == "" || window.location.hash == null || window.location.hash == undefined) {
@@ -3352,7 +3370,8 @@ async function renderAdminTestList() {
         (0, _helper.dE)("batchlinks").innerHTML += '<div class="tlinks-3" id = "' + ele.id + '" onclick = "window.location.hash = `#/edit_tests/' + ele.id + '`"><center><span class = "t_title">' + ele.name + '</span></center><div class = "tl"><span class = "t_stron">Created On:' + strton.toISOString() + '</span><span class ="t_endon">Ends At:' + endon.toISOString() + '</div><div class = "tl"><span>Batch:' + ele.batch + "</span></div></div>";
     }
 }
-async function getTestList(batchid, userid) {
+async function getTestList(batchid, userid, force) {
+    if (force == 1) testList = [];
     if (testList != []) {
         const q = (0, _firestore.query)((0, _firestore.collection)(db, "tests"), (0, _firestore.where)("batch", "array-contains", batchid));
         const querySnapshot = await (0, _firestore.getDocs)(q);
@@ -6168,8 +6187,8 @@ parcelHelpers.export(exports, "validateCallback", ()=>validateCallback);
 parcelHelpers.export(exports, "validateContextObject", ()=>validateContextObject);
 parcelHelpers.export(exports, "validateIndexedDBOpenable", ()=>validateIndexedDBOpenable);
 parcelHelpers.export(exports, "validateNamespace", ()=>validateNamespace);
-var global = arguments[3];
 var process = require("5b35771edbb20914");
+var global = arguments[3];
 const CONSTANTS = {
     /**
      * @define {boolean} Whether this is the client Node.js SDK.
@@ -42418,6 +42437,11 @@ let page_settings = `
                 <span>Retype Password: <input id = "inp_retype_pass" type = "password" value = ""></input></span>
                 <button id="sub_chg_pass" class="tst_btn rpl">Update Password</button>
             </div>
+            <div id="st_changebatch" class = "db_class">
+            <span style="font-size: 25px;color:var(--clr16);">Change Active Batch</span>
+            <span>BID:<select id = "inp_batch" value = ""></select></span>
+            <button id="sub_chg_batch" class="tst_btn rpl">Update Batch</button>
+            </div>
         </div>`;
 exports.default = {
     page_settings
@@ -43326,7 +43350,7 @@ function getAvatarURL(name, gen, ver) {
     // Return the 6-digit number
     if (ver == undefined || ver == "") ver;
     let initials = getInitials(name);
-    if (ver == "v1") return "https://ui-avatars.com/api/?background=random&size=100&bold=true&name=" + getInitials(userinfo.name);
+    if (ver == "v1") return "https://ui-avatars.com/api/?background=random&size=100&bold=true&name=" + getInitials(name);
     else if (ver == "v2") {
         if (gen == "Male") return "https://api.dicebear.com/5.x/avataaars/svg?top%5B%5D=dreads01,dreads02,eyepatch,frizzle,shortCurly,shortFlat,shortRound,shortWaved,sides,theCaesar,theCaesarAndSidePart,turban&seed=" + initials + num.toString();
         else return "https://api.dicebear.com/5.x/avataaars/svg?facialHairProbability=0&top%5B%5D=bigHair,bob,bun,curly,curvy,dreads,frida,fro,hijab,longButNotTooLong,miaWallace,shaggy,shaggyMullet,shavedSides,straightAndStrand,straight01,straight02&seed=" + initials + num.toString();
@@ -43447,8 +43471,8 @@ exports.constants = {
 };
 
 },{"6d7fc0dc5de28bcc":"8hjhE","f44f80586868fcdc":"2WyL8","69ad8819e07e917e":"k1utz","975f0ee803b7bc7b":"busIB","845f1c258f278f9b":"g38Hg","eb3b967cf515d387":"d4idn","657f7974a39648c1":"hwD3y","88bbea401533a54f":"jbRNy","c23eebf13b558da3":"9Rcg1","5477e994dfe71234":"h9Rdh","c1bd70025e2af238":"k3tsT"}],"8hjhE":[function(require,module,exports) {
-var process = require("b055ad262129c80");
 var global = arguments[3];
+var process = require("b055ad262129c80");
 "use strict";
 // limit of Crypto.getRandomValues()
 // https://developer.mozilla.org/en-US/docs/Web/API/Crypto/getRandomValues
@@ -78723,8 +78747,8 @@ function compare(a, b) {
 }
 
 },{"96fb9b2f6750834a":"4Szbv","1b8c45d37d900c35":"e2JgG","c87367ab291092f2":"iaxu0","35d67ec2478cf4d6":"3pDum","f8caae6e7d4d6567":"e594P","e5400ba285150c22":"2WyL8","65eedc9f6297963":"fFkPV","446b20c2e1062b85":"eW7r9"}],"k3tsT":[function(require,module,exports) {
-var global = arguments[3];
 var process = require("8ca93fa32364873");
+var global = arguments[3];
 "use strict";
 function oldBrowser() {
     throw new Error("secure random number generation not supported by this browser\nuse chrome, FireFox or Internet Explorer 11");

@@ -836,6 +836,7 @@ async function settingsEvents() {
       addToast("warning","Your Feedback was not Submitted.")
     }
   })
+  
   dE("st_rateapp").style.display = "flex"
   if (localStorage.getItem("rate_app") == "true") {
     dE("st_rateapp").style.display = "none";
@@ -907,6 +908,21 @@ async function settingsEvents() {
     })
     userinfo.prf_type = "v3"
   })
+  dE("sub_chg_batch").addEventListener("click",async function(){
+    await updateDoc(doc(db, 'users', userinfo.uuid), {
+      curr_batch: dE("inp_batch").value
+    })
+    userinfo.curr_batch = dE("inp_batch").value
+    getCurrentBatchDetails(userinfo.curr_batch)
+    addToast("success","Current Batch changed Successfully")
+  })
+  let FRAME_OPT = ""
+  let batchlist = userinfo.batch.split(",")
+  for(let i =0;i<batchlist.length;i++){
+    FRAME_OPT+="<option value = '"+batchlist[i]+"'>"+batchlist[i]+"</option>"
+  }
+  dE("inp_batch").innerHTML = FRAME_OPT
+  dE("inp_batch").value = userinfo.curr_batch
 }
 
 // -----------------------
@@ -2071,6 +2087,7 @@ async function printQBank(type) {
       }
       var inhtml = '<div class = "les_q"><div id = "' + ele.id + '"><div style = "display:flex;flex-direction:row;justify-content: space-between;"><div style = "font-size:18px;">' + qtitle + '</div><img style = "float:right" src="' + src_url + '"></div><hr width="100%"></div>'
       dE("eqb_add").insertAdjacentHTML('beforeend', inhtml);
+      var expl = '<div class = "les_expl" style = "">' + docJSON.expl + '</div><hr width="100%">'
       dE(ele.id).insertAdjacentHTML('beforeend', expl)
       renderMathInElement(dE('eqb_add'));
     }
@@ -2233,7 +2250,7 @@ async function profileDetails() {
   stclass.textContent = userinfo.class
   crton.textContent = new Date(userinfo.sgndon.seconds * 1000).toDateString()
   gender.textContent = userinfo.gen
-  batchno = userinfo.batch
+  batchno = userinfo.curr_batch
   courseno = userinfo.course
   spoints.textContent = userinfo.spoints
   userinfo.usernotes = userinfo.usernotes
@@ -2254,6 +2271,29 @@ function renderExams() {
     dE(iti).addEventListener("click", function () { })
   }
 }
+async function getCurrentBatchDetails(batchno){
+  try {
+    var docRef = doc(db, "batch", batchno)
+    var docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      var docJSON = docSnap.data();
+      userinfo.batchname = docJSON.name;
+      userinfo.timetable = docJSON.timetable
+      userinfo.timetableurl = "https://calendar.google.com/calendar/embed??height=600&wkst=2&bgcolor=%23ffffff&ctz=Asia%2FKolkata&showTitle=0&showCalendars=0&showTabs=0&showPrint=0&showDate=1&src=" + docJSON.timetable + "%40group.calendar.google.com&amp;ctz=Asia%2FKolkata"
+      getTestList(batchno, userinfo.uuid,1)
+      if (docJSON.delon.seconds <= parseInt(Date.now() / 1000)) {
+        log("Warning", "This Batch Has Been Deleted")
+        signOutUser()
+        window.reload()
+        throw new Error("DENIED")
+      }
+      chapterlist = []
+      for (var i = 0; i < docJSON.chlist.length; i++) {
+        chapterlist.push({ name: docJSON.chlist[i].name, id: docJSON.chlist[i].id, subject: docJSON.chlist[i].subject })
+      }
+    }
+  } catch { }
+}
 window.log = log
 async function authStateObserver(user) {
   var courseno, batchno, calenid;
@@ -2264,7 +2304,8 @@ async function authStateObserver(user) {
       var docJSON = docSnap.data()
       userinfo = docJSON
       userinfo.uuid = user.uid
-      batchno = userinfo.batch
+      batchno = userinfo.curr_batch || userinfo.batch.split(",")[0]
+      batchlist = userinfo.batch
       userinfo.storeitems = []
       userinfo.codeitems = []
       userrole = userinfo.roles['user']
@@ -2277,26 +2318,7 @@ async function authStateObserver(user) {
       log("Warning", "User Account Has Been Deleted")
       signOutUser()
     }
-    try {
-      var docRef = doc(db, "batch", batchno)
-      var docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        var docJSON = docSnap.data();
-        userinfo.batchname = docJSON.name;
-        userinfo.timetable = docJSON.timetable
-        getTestList(batchno, user.uid)
-        userinfo.timetableurl = "https://calendar.google.com/calendar/embed??height=600&wkst=2&bgcolor=%23ffffff&ctz=Asia%2FKolkata&showTitle=0&showCalendars=0&showTabs=0&showPrint=0&showDate=1&src=" + docJSON.timetable + "%40group.calendar.google.com&amp;ctz=Asia%2FKolkata"
-        if (docJSON.delon.seconds <= parseInt(Date.now() / 1000)) {
-          log("Warning", "This Batch Has Been Deleted")
-          signOutUser()
-          window.reload()
-          throw new Error("DENIED")
-        }
-        for (var i = 0; i < docJSON.chlist.length; i++) {
-          chapterlist.push({ name: docJSON.chlist[i].name, id: docJSON.chlist[i].id, subject: docJSON.chlist[i].subject })
-        }
-      }
-    } catch { }
+    getCurrentBatchDetails(batchno)
     spoints.style.display = "block"
     dE("dsh_btn").style.display = "block"
     if (window.location.hash == "" || window.location.hash == null || window.location.hash == undefined) {
@@ -2465,7 +2487,10 @@ async function renderAdminTestList() {
     dE("batchlinks").innerHTML += '<div class="tlinks-3" id = "' + ele.id + '" onclick = "window.location.hash = `#/edit_tests/' + ele.id + '`"><center><span class = "t_title">' + ele.name + '</span></center><div class = "tl"><span class = "t_stron">Created On:' + strton.toISOString() + '</span><span class ="t_endon">Ends At:' + endon.toISOString() + '</div><div class = "tl"><span>Batch:' + ele.batch + '</span></div></div>'
   }
 }
-async function getTestList(batchid, userid) {
+async function getTestList(batchid, userid,force) {
+  if (force == 1){
+    testList = []
+  }
   if (testList != []) {
     const q = query(collection(db, "tests"), where("batch", "array-contains", batchid));
     const querySnapshot = await getDocs(q);

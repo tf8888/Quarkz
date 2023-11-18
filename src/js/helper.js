@@ -311,7 +311,7 @@ export function getAvatarURL(name, gen, ver) {
     if (ver == undefined || ver == "") { ver == "v2" }
     let initials = getInitials(name);
     if (ver == "v1") {
-      return "https://ui-avatars.com/api/?background=random&size=100&bold=true&name=" + getInitials(userinfo.name)
+      return "https://ui-avatars.com/api/?background=random&size=100&bold=true&name=" + getInitials(name)
     } else if (ver == "v2") {
       if (gen == "Male") {
         return "https://api.dicebear.com/5.x/avataaars/svg?top%5B%5D=dreads01,dreads02,eyepatch,frizzle,shortCurly,shortFlat,shortRound,shortWaved,sides,theCaesar,theCaesarAndSidePart,turban&seed=" + initials + num.toString()

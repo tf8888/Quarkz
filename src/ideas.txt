@@ -11,39 +11,5 @@ PDF generator for students registration slip and grade result
 Storing of quiz results under each user
 Success rate for each category can be monitored on a progress page
 Essay question type
-Custom permission (view_sittings) added, allowing users with that permission to view quiz results from users
 A marking page which lists completed quizzes, can be filtered by quiz or user, and is used to mark essay questions
 
-
-
-batch
-
-chapter
-
-codehunt
-
-cyberhunt
-
-qbank
-
-quarkz
-
-question
-
-reports
-
-reviews
-
-sims
-
-store
-
-tests
-
-topic
-
-usernotes
-
-users
-
-vidchat

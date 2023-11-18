@@ -1011,9 +1011,10 @@ input[type="radio"], input[type="checkbox"], select {
   background-color: var(--clr11);
   color: var(--clr16);
   cursor: pointer;
-  border: none;
-  border-radius: 10px;
+  border: 2px solid #fff;
+  border-radius: 0 0 10px 10px;
   outline: none;
+  margin: 5px;
   padding: 10px;
   font-size: max(18px, 4vh);
 }
