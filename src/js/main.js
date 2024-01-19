@@ -40,14 +40,14 @@ import { page_edit_user } from "../embeds/user";
 import { page_usernotes } from "../embeds/usernotes"
 import { page_store, page_store_edit } from "../embeds/store"
 import { page_vidchat, page_createvidchat } from "../embeds/vidchat";
-import { sd, sha256, makeid, mobileCheck, areObjectsEqual, areEqual, getServerTime, fullEle, dE, sortObj, sortObjv2, renderMarkedMath, mergeById, qCorrector, playSoundEffect, showLS, antiCopyEle, shuffleArrayWithSeed, buildHtmlTable, studentRanker,getAvatarURL } from '../js/helper'
+import { sd, sha256, makeid, mobileCheck, areObjectsEqual, areEqual, getServerTime, fullEle, dE, sortObj, sortObjv2, renderMarkedMath, mergeById, qCorrector, playSoundEffect, showLS, antiCopyEle, shuffleArrayWithSeed, buildHtmlTable, studentRanker, getAvatarURL } from '../js/helper'
 import { sysaccess } from "./reworkui";
 import { page_batch_list, page_edit_batch } from "../embeds/admin";
 import Chart, { scales } from 'chart.js/auto';
 import { page_ch_solver, page_ch_list } from "../embeds/codehunt";
 
 const registerServiceWorker = async () => {
-  const swRegistration = await navigator.serviceWorker.register(new URL('../js/sw.js', import.meta.url), { type: 'module' }); 
+  const swRegistration = await navigator.serviceWorker.register(new URL('../js/sw.js', import.meta.url), { type: 'module' });
   return swRegistration;
 }
 registerServiceWorker()
@@ -84,12 +84,12 @@ async function signIn() {
       const user = userCredential.user;
       userdetails.email = email
       creMng("dashboard", 1);
-      addToast("success","Login Successful!")
+      addToast("success", "Login Successful!")
     })
     .catch((error) => {
       const errorCode = error.code;
       const errorMessage = error.message;
-      addToast("error","Login Denied. Wrong Username or Password.")
+      addToast("error", "Login Denied. Wrong Username or Password.")
       dE("lg_pass").value = ""
     });
 }
@@ -99,7 +99,7 @@ function signOutUser() {
   signOut(getAuth());
   userdetails = []
   creMng("login", 1);
-  addToast("success","Logout Successful!")
+  addToast("success", "Logout Successful!")
   window.location.reload()
 }
 
@@ -112,10 +112,10 @@ function signUp() {
   var stclass = dE("rg_class").value;
   var stgender = dE("rg_gender").value;
   if (email == "" || password == "" || name == "" || mblno == "" || stclass == "") {
-    addToast("error","Details Cannot Be Empty")
+    addToast("error", "Details Cannot Be Empty")
   }
   if (password != dE("rg_pass1").value) {
-    addToast("error","Passwords dont match.")
+    addToast("error", "Passwords dont match.")
   }
   else {
     createUserWithEmailAndPassword(auth, email, password)
@@ -139,13 +139,13 @@ function signUp() {
             });
           }
           catch (error) {
-            addToast("error",'Error Adding New User'+ error);
+            addToast("error", 'Error Adding New User' + error);
           }
         }
         a();
       })
       .catch((error) => {
-        addToast("error",'Error Adding New User'+ error);
+        addToast("error", 'Error Adding New User' + error);
         const errorCode = error.code;
         const errorMessage = error.message;
         // ..
@@ -207,7 +207,7 @@ function chapterEvents() {
   var u_chb = dE("uchb").addEventListener("click", uchb)
 }
 document.addEventListener('copy', function (e) {
-  if (!userinfo.roles['admin'] && !userinfo.roles['editor']){
+  if (!userinfo.roles['admin'] && !userinfo.roles['editor']) {
     e.clipboardData.setData('text/plain', "It is forbidden to copy content from Quarkz!");
     e.preventDefault();
   }
@@ -390,7 +390,7 @@ function coreManager(newlocation, n1) {
     case "add/tests": handlebox = "fu_topic"; newTest(); break;
     case "add/batch": handlebox = "fu_topic"; newBatch(); break;
     case "add/store_item": handlebox = "fu_storeitem"; newStoreItem(); break;
-    case "add/codehunt": handlebox = "fu_codehunt"; newCodeHunt();break;
+    case "add/codehunt": handlebox = "fu_codehunt"; newCodeHunt(); break;
     case "codehunt": handlebox = "fu_code_problemlist"; renderBody(page_ch_list, "", ""); renderCodeProblemList(); break
     case "store": handlebox = "fu_shop"; renderBody(page_store, "height:max-content;", ""); renderStore(); break;
     case "list/batch": handlebox = "fu_batch"; renderBody(page_batch_list, "height:max-content;", ""); renderAdminBatchList(); break;
@@ -544,13 +544,13 @@ async function prepareVideoChat() {
     callData = docSnap.data()
     dE("vid_title").innerText = callData.name
     let datenow = Date.now()
-    if (callData.status != "notstarted" || callData.status != "callstarted"){
+    if (callData.status != "notstarted" || callData.status != "callstarted") {
       // window.location.hash = "#/dashboard"
       // addToast("error","Meeting has already started/ended"+JSON.stringify(callData))
       // return 0
-    }else if (callData.stron.seconds - datenow/1000 >= 300){
+    } else if (callData.stron.seconds - datenow / 1000 >= 300) {
       window.location.hash = "#/dashboard"
-      addToast("error","You can join the meeting at "+dateparser(callData.stron.seconds*1000))
+      addToast("error", "You can join the meeting at " + dateparser(callData.stron.seconds * 1000))
       return 0
     }
   } else {
@@ -614,12 +614,12 @@ async function prepareVideoChat() {
     hangupButton.disabled = false;
     webcamButton.disabled = true;
   };
-  hangupButton.onclick = async() => {
+  hangupButton.onclick = async () => {
     await updateDoc(doc(db, "vidchat", document.location.hash.split("#/vid_chat/")[1]), {
       status: "callended"
     });
     pc.close();
-    addToast("success","Meeting Ended",5000)
+    addToast("success", "Meeting Ended", 5000)
   }
   callButton.onclick = async () => {
     let docId = document.location.hash.split("#/vid_chat/")[1]
@@ -656,14 +656,14 @@ async function prepareVideoChat() {
 
         await updateDoc(doc(db, "vidchat", callId), {
           answer: answer,
-          status:"personjoined"
+          status: "personjoined"
         })
         const unsub = onSnapshot(doc(db, "vidchat", docId), (doc) => {
           const data = doc.data();
           console.log("Current data: ", doc.data());
-          if (data?.status == "callended"){
+          if (data?.status == "callended") {
             pc.close();
-            addToast("success","Meeting Ended",5000)
+            addToast("success", "Meeting Ended", 5000)
           }
           if (data?.offerCandidates) {
             let data = change.doc.data();
@@ -698,9 +698,9 @@ async function prepareVideoChat() {
             const answerDescription = new RTCSessionDescription(data.answer);
             pc.setRemoteDescription(answerDescription);
           }
-          if (data?.status == "callended"){
+          if (data?.status == "callended") {
             pc.close();
-            addToast("success","Meeting Ended",5000)
+            addToast("success", "Meeting Ended", 5000)
           }
           if (data?.answerCandidates) {
             const candidate = new RTCIceCandidate(data.answerCandidates);
@@ -830,13 +830,13 @@ async function settingsEvents() {
         type: "rating",
       })
       localStorage.setItem("rate_app", "true")
-      addToast("success","Thank You for your Valuable Feedback.")
+      addToast("success", "Thank You for your Valuable Feedback.")
       dE("st_rateapp").style.display = "none";
     } catch {
-      addToast("warning","Your Feedback was not Submitted.")
+      addToast("warning", "Your Feedback was not Submitted.")
     }
   })
-  
+
   dE("st_rateapp").style.display = "flex"
   if (localStorage.getItem("rate_app") == "true") {
     dE("st_rateapp").style.display = "none";
@@ -908,18 +908,18 @@ async function settingsEvents() {
     })
     userinfo.prf_type = "v3"
   })
-  dE("sub_chg_batch").addEventListener("click",async function(){
+  dE("sub_chg_batch").addEventListener("click", async function () {
     await updateDoc(doc(db, 'users', userinfo.uuid), {
       curr_batch: dE("inp_batch").value
     })
     userinfo.curr_batch = dE("inp_batch").value
     getCurrentBatchDetails(userinfo.curr_batch)
-    addToast("success","Current Batch changed Successfully")
+    addToast("success", "Current Batch changed Successfully")
   })
   let FRAME_OPT = ""
   let batchlist = userinfo.batch.split(",")
-  for(let i =0;i<batchlist.length;i++){
-    FRAME_OPT+="<option value = '"+batchlist[i]+"'>"+batchlist[i]+"</option>"
+  for (let i = 0; i < batchlist.length; i++) {
+    FRAME_OPT += "<option value = '" + batchlist[i] + "'>" + batchlist[i] + "</option>"
   }
   dE("inp_batch").innerHTML = FRAME_OPT
   dE("inp_batch").value = userinfo.curr_batch
@@ -1154,7 +1154,7 @@ async function newStoreItem() {
   } catch {
   }
 }
-async function newCodeHunt(){
+async function newCodeHunt() {
   try {
     const docRef = await addDoc(collection(db, 'store'), {
       active: "0",
@@ -1166,8 +1166,8 @@ async function newCodeHunt(){
       name: "Random Number?",
       solution: "function execute(val1){\n    val1 = parseInt(val1) * 2;\n    return val1;\n}",
       tag: "First Problem",
-      submit_input: ["1","2","3","4"],
-      submit_output: ["2","4","6","8"],
+      submit_input: ["1", "2", "3", "4"],
+      submit_output: ["2", "4", "6", "8"],
       p: 0,
     })
     creMng("edit_codehunt/" + docRef.id, 1)
@@ -2271,7 +2271,7 @@ function renderExams() {
     dE(iti).addEventListener("click", function () { })
   }
 }
-async function getCurrentBatchDetails(batchno){
+async function getCurrentBatchDetails(batchno) {
   try {
     var docRef = doc(db, "batch", batchno)
     var docSnap = await getDoc(docRef);
@@ -2280,12 +2280,21 @@ async function getCurrentBatchDetails(batchno){
       userinfo.batchname = docJSON.name;
       userinfo.timetable = docJSON.timetable
       userinfo.timetableurl = "https://calendar.google.com/calendar/embed??height=600&wkst=2&bgcolor=%23ffffff&ctz=Asia%2FKolkata&showTitle=0&showCalendars=0&showTabs=0&showPrint=0&showDate=1&src=" + docJSON.timetable + "%40group.calendar.google.com&amp;ctz=Asia%2FKolkata"
-      getTestList(batchno, userinfo.uuid,1)
+      getTestList(batchno, userinfo.uuid, 1)
       if (docJSON.delon.seconds <= parseInt(Date.now() / 1000)) {
         log("Warning", "This Batch Has Been Deleted")
-        signOutUser()
-        window.reload()
-        throw new Error("DENIED")
+        async function changeBatch() {
+          await updateDoc(doc(db, 'users', userinfo.uuid), {
+            curr_batch: "guest"
+          })
+          userinfo.curr_batch = dE("inp_batch").value
+          getCurrentBatchDetails(userinfo.curr_batch)
+          addToast("success", "Current Batch changed Successfully")
+        }
+        changeBatch()
+        // signOutUser()
+        // window.reload()
+        // throw new Error("DENIED")
       }
       chapterlist = []
       for (var i = 0; i < docJSON.chlist.length; i++) {
@@ -2338,7 +2347,7 @@ async function authStateObserver(user) {
         return 0
       }
       if (docJSON.warning != "") {
-        addToast("notice",docJSON.warning,10000)
+        addToast("notice", docJSON.warning, 10000)
         // log("Notice", docJSON.warning, function () { window.location.hash = "#/updates" }, "Release Notes")
       }
     }
@@ -2487,8 +2496,8 @@ async function renderAdminTestList() {
     dE("batchlinks").innerHTML += '<div class="tlinks-3" id = "' + ele.id + '" onclick = "window.location.hash = `#/edit_tests/' + ele.id + '`"><center><span class = "t_title">' + ele.name + '</span></center><div class = "tl"><span class = "t_stron">Created On:' + strton.toISOString() + '</span><span class ="t_endon">Ends At:' + endon.toISOString() + '</div><div class = "tl"><span>Batch:' + ele.batch + '</span></div></div>'
   }
 }
-async function getTestList(batchid, userid,force) {
-  if (force == 1){
+async function getTestList(batchid, userid, force) {
+  if (force == 1) {
     testList = []
   }
   if (testList != []) {
@@ -3303,11 +3312,15 @@ function testqHandler(id, no) {
         dE("tt_qtitle").insertAdjacentHTML('beforeend', '<span class = "tst_btn">' + ele.qtopic + '</span>');
       }
       var asi = "";
+      var is_disabled = "";
+      if (!window.location.hash.includes("/attempt/")) {
+        is_disabled = "disabled"
+      }
       if (ele.type == "mcq") {
         var qop = ele.op;
         for (let ele1 of qop) {
           let yt = Math.floor(Math.random() * 100000)
-          asi += '<span><input type="radio" class = "q_ans" id = "mcq_' + yt + '" value = "' + ele1 + '" name = "q_op"></input><label for = "mcq_' + yt + '"><li>' + ele1 + '</li></label></span>'
+          asi += '<span><input type="radio" class = "q_ans" ' + is_disabled + ' id = "mcq_' + yt + '" value = "' + ele1 + '" name = "q_op"></input><label for = "mcq_' + yt + '"><li>' + ele1 + '</li></label></span>'
         }
         var qrt = '<ol class = "qb_mcq" type = "A">' + asi + '</ol>'
       }
@@ -3315,7 +3328,7 @@ function testqHandler(id, no) {
         var qop = ele.op;
         for (let ele1 of qop) {
           let yt = Math.floor(Math.random() * 100000)
-          asi += '<span><input type="checkbox" class = "q_ans" id = "mcq_' + yt + '" value = "' + ele1 + '" name = "q_op"><label for = "mcq_' + yt + '"><li>' + ele1 + '</li></label></input></span>'
+          asi += '<span><input type="checkbox" class = "q_ans" ' + is_disabled + '  id = "mcq_' + yt + '" value = "' + ele1 + '" name = "q_op"><label for = "mcq_' + yt + '"><li>' + ele1 + '</li></label></input></span>'
         }
         var qrt = '<ol class = "qb_mcq" type = "A">' + asi + '</ol>'
       }

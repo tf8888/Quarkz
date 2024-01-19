@@ -4355,11 +4355,13 @@ function testqHandler(id, no) {
         (0, _helper.dE)("tt_qtitle").insertAdjacentHTML("beforeend", inhtml);
         if (!window.location.hash.includes("/attempt/")) (0, _helper.dE)("tt_qtitle").insertAdjacentHTML("beforeend", '<span class = "tst_btn">' + ele.qtopic + "</span>");
         var asi = "";
+        var is_disabled = "";
+        if (!window.location.hash.includes("/attempt/")) is_disabled = "disabled";
         if (ele.type == "mcq") {
             var qop = ele.op;
             for (let ele1 of qop){
                 let yt = Math.floor(Math.random() * 100000);
-                asi += '<span><input type="radio" class = "q_ans" id = "mcq_' + yt + '" value = "' + ele1 + '" name = "q_op"></input><label for = "mcq_' + yt + '"><li>' + ele1 + "</li></label></span>";
+                asi += '<span><input type="radio" class = "q_ans" ' + is_disabled + ' id = "mcq_' + yt + '" value = "' + ele1 + '" name = "q_op"></input><label for = "mcq_' + yt + '"><li>' + ele1 + "</li></label></span>";
             }
             var qrt = '<ol class = "qb_mcq" type = "A">' + asi + "</ol>";
         }
@@ -4367,7 +4369,7 @@ function testqHandler(id, no) {
             var qop = ele.op;
             for (let ele1 of qop){
                 let yt = Math.floor(Math.random() * 100000);
-                asi += '<span><input type="checkbox" class = "q_ans" id = "mcq_' + yt + '" value = "' + ele1 + '" name = "q_op"><label for = "mcq_' + yt + '"><li>' + ele1 + "</li></label></input></span>";
+                asi += '<span><input type="checkbox" class = "q_ans" ' + is_disabled + '  id = "mcq_' + yt + '" value = "' + ele1 + '" name = "q_op"><label for = "mcq_' + yt + '"><li>' + ele1 + "</li></label></input></span>";
             }
             var qrt = '<ol class = "qb_mcq" type = "A">' + asi + "</ol>";
         }
@@ -6187,8 +6189,8 @@ parcelHelpers.export(exports, "validateCallback", ()=>validateCallback);
 parcelHelpers.export(exports, "validateContextObject", ()=>validateContextObject);
 parcelHelpers.export(exports, "validateIndexedDBOpenable", ()=>validateIndexedDBOpenable);
 parcelHelpers.export(exports, "validateNamespace", ()=>validateNamespace);
-var process = require("5b35771edbb20914");
 var global = arguments[3];
+var process = require("5b35771edbb20914");
 const CONSTANTS = {
     /**
      * @define {boolean} Whether this is the client Node.js SDK.
@@ -50173,8 +50175,8 @@ module.exports = function(iterations, keylen) {
 };
 
 },{}],"T9r9Q":[function(require,module,exports) {
-var process = require("2b885cada18ff430");
 var global = arguments[3];
+var process = require("2b885cada18ff430");
 var defaultEncoding;
 /* istanbul ignore next */ if (global.process && global.process.browser) defaultEncoding = "utf-8";
 else if (global.process && global.process.version) {
@@ -78747,8 +78749,8 @@ function compare(a, b) {
 }
 
 },{"96fb9b2f6750834a":"4Szbv","1b8c45d37d900c35":"e2JgG","c87367ab291092f2":"iaxu0","35d67ec2478cf4d6":"3pDum","f8caae6e7d4d6567":"e594P","e5400ba285150c22":"2WyL8","65eedc9f6297963":"fFkPV","446b20c2e1062b85":"eW7r9"}],"k3tsT":[function(require,module,exports) {
-var process = require("8ca93fa32364873");
 var global = arguments[3];
+var process = require("8ca93fa32364873");
 "use strict";
 function oldBrowser() {
     throw new Error("secure random number generation not supported by this browser\nuse chrome, FireFox or Internet Explorer 11");
