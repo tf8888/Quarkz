@@ -3173,9 +3173,18 @@ async function getCurrentBatchDetails(batchno) {
             getTestList(batchno, userinfo.uuid, 1);
             if (docJSON.delon.seconds <= parseInt(Date.now() / 1000)) {
                 (0, _log.log)("Warning", "This Batch Has Been Deleted");
-                signOutUser();
-                window.reload();
-                throw new Error("DENIED");
+                async function changeBatch() {
+                    await (0, _firestore.updateDoc)((0, _firestore.doc)(db, "users", userinfo.uuid), {
+                        curr_batch: "guest"
+                    });
+                    userinfo.curr_batch = (0, _helper.dE)("inp_batch").value;
+                    getCurrentBatchDetails(userinfo.curr_batch);
+                    addToast("success", "Current Batch changed Successfully");
+                }
+                changeBatch();
+            // signOutUser()
+            // window.reload()
+            // throw new Error("DENIED")
             }
             chapterlist = [];
             for(var i = 0; i < docJSON.chlist.length; i++)chapterlist.push({
@@ -43473,8 +43482,8 @@ exports.constants = {
 };
 
 },{"6d7fc0dc5de28bcc":"8hjhE","f44f80586868fcdc":"2WyL8","69ad8819e07e917e":"k1utz","975f0ee803b7bc7b":"busIB","845f1c258f278f9b":"g38Hg","eb3b967cf515d387":"d4idn","657f7974a39648c1":"hwD3y","88bbea401533a54f":"jbRNy","c23eebf13b558da3":"9Rcg1","5477e994dfe71234":"h9Rdh","c1bd70025e2af238":"k3tsT"}],"8hjhE":[function(require,module,exports) {
-var global = arguments[3];
 var process = require("b055ad262129c80");
+var global = arguments[3];
 "use strict";
 // limit of Crypto.getRandomValues()
 // https://developer.mozilla.org/en-US/docs/Web/API/Crypto/getRandomValues
@@ -45238,8 +45247,8 @@ exports.pipeline = require("ce590b3502823b4");
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
-var global = arguments[3];
 var process = require("3e432ca2944df1d");
+var global = arguments[3];
 "use strict";
 module.exports = Readable;
 /*<replacement>*/ var Duplex;
