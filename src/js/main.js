@@ -297,11 +297,6 @@ function userNotesEvents() {
   var undelete = dE("un_delete").addEventListener("click", unotes2)
   var un_rendermode = dE("un_rendermode").addEventListener("change", notesUIHandler)
   var un_viewership = dE("un_viewership").addEventListener("change", notesUIHandler)
-  dE("un_print").addEventListener("click", function () {
-    dE("un_preview").style.display = "none";
-    dE("un_preview").innerHTML = "<h1 style = 'text-align:center;margin:0px'>" + dE("un_title").value + "</h1>" + getHTML("un_editable");
-    window.print()
-  })
 }
 async function codeproblemEvents() {
   window.code_editor = window.setupEditor()
@@ -428,7 +423,7 @@ function coreManager(newlocation, n1) {
   if (location1.includes("edit_qubank") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll", "1"); dE("aq_qbc_save").addEventListener("click", function () { updateTopicQBank(2) }); edittopicEvents(); prepareTopicQBank(2) }
   if (location1.includes("edit_exams") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll", "1"); dE("aq_exam_save").addEventListener("click", function () { updateTopicQBank(4) }); edittopicEvents(); prepareTopicQBank(4) }
   if (location1.includes("edit_batch") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_batch, "", ""); prepareBatch(); dE("aq_batch_save").addEventListener("click", updateBatch) }
-  if (location1.includes("codehunt/problem")) { renderBody(page_ch_solver, "", ""); codeproblemEvents() }
+  if (location1.includes("codehunt/problem")) { renderBody(page_ch_solver, "", ""); addToast("error","Codehunt is temporarily Unavailable due to a security issue by the test engine");window.location.hash = "#/error" } //codeproblemEvents()
   if (location1.includes("vid_chat")) { handlebox = "fu_vidchat"; renderBody(page_vidchat, "", ""); prepareVideoChat(); }
   if (location1.includes("site-analytics") && iorole == true) { handlebox = "fu_analytics"; renderBody(page_analytics, "", ""); }
   if (iorole) {
@@ -1273,6 +1268,9 @@ async function getUserNotes() {
       dE("un_title").value = docRef.title;
       setHTML("un_editable", docRef.notes);
       dE("un_viewership").value = docRef.type;
+      dE("un_print").addEventListener("click", function () {
+        idElementPrint(getHTML("un_editable"),dE("un_title").value, userinfo.name, docRef.uuid,userinfo.uuid)
+      })
       if (docRef.type == "public_view" && userinfo.uuid != docRef.uuid) {
         dE("un_rendermode").innerHTML = '<option value="preview">preview</option>'
         dE("un_rendermode").value = "preview";
@@ -2287,10 +2285,11 @@ async function getCurrentBatchDetails(batchno) {
           await updateDoc(doc(db, 'users', userinfo.uuid), {
             curr_batch: "guest"
           })
-          userinfo.curr_batch = dE("inp_batch").value
           getCurrentBatchDetails(userinfo.curr_batch)
           addToast("success", "Current Batch changed Successfully")
         }
+        userinfo.curr_batch = "guest";
+        dE("inp_batch").value = "guest";
         changeBatch()
         // signOutUser()
         // window.reload()

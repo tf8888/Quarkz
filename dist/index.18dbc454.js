@@ -887,11 +887,6 @@ function userNotesEvents() {
     var undelete = (0, _helper.dE)("un_delete").addEventListener("click", unotes2);
     var un_rendermode = (0, _helper.dE)("un_rendermode").addEventListener("change", notesUIHandler);
     var un_viewership = (0, _helper.dE)("un_viewership").addEventListener("change", notesUIHandler);
-    (0, _helper.dE)("un_print").addEventListener("click", function() {
-        (0, _helper.dE)("un_preview").style.display = "none";
-        (0, _helper.dE)("un_preview").innerHTML = "<h1 style = 'text-align:center;margin:0px'>" + (0, _helper.dE)("un_title").value + "</h1>" + getHTML("un_editable");
-        window.print();
-    });
 }
 async function codeproblemEvents() {
     window.code_editor = window.setupEditor();
@@ -1278,8 +1273,9 @@ function coreManager(newlocation, n1) {
     }
     if (location1.includes("codehunt/problem")) {
         renderBody((0, _codehunt.page_ch_solver), "", "");
-        codeproblemEvents();
-    }
+        addToast("error", "Codehunt is temporarily Unavailable due to a security issue by the test engine");
+        window.location.hash = "#/error";
+    } //codeproblemEvents()
     if (location1.includes("vid_chat")) {
         handlebox = "fu_vidchat";
         renderBody((0, _vidchat.page_vidchat), "", "");
@@ -2064,6 +2060,9 @@ async function getUserNotes() {
             (0, _helper.dE)("un_title").value = docRef.title;
             setHTML("un_editable", docRef.notes);
             (0, _helper.dE)("un_viewership").value = docRef.type;
+            (0, _helper.dE)("un_print").addEventListener("click", function() {
+                idElementPrint(getHTML("un_editable"), (0, _helper.dE)("un_title").value, userinfo.name, docRef.uuid, userinfo.uuid);
+            });
             if (docRef.type == "public_view" && userinfo.uuid != docRef.uuid) {
                 (0, _helper.dE)("un_rendermode").innerHTML = '<option value="preview">preview</option>';
                 (0, _helper.dE)("un_rendermode").value = "preview";
@@ -3177,10 +3176,11 @@ async function getCurrentBatchDetails(batchno) {
                     await (0, _firestore.updateDoc)((0, _firestore.doc)(db, "users", userinfo.uuid), {
                         curr_batch: "guest"
                     });
-                    userinfo.curr_batch = (0, _helper.dE)("inp_batch").value;
                     getCurrentBatchDetails(userinfo.curr_batch);
                     addToast("success", "Current Batch changed Successfully");
                 }
+                userinfo.curr_batch = "guest";
+                (0, _helper.dE)("inp_batch").value = "guest";
                 changeBatch();
             // signOutUser()
             // window.reload()
@@ -6198,8 +6198,8 @@ parcelHelpers.export(exports, "validateCallback", ()=>validateCallback);
 parcelHelpers.export(exports, "validateContextObject", ()=>validateContextObject);
 parcelHelpers.export(exports, "validateIndexedDBOpenable", ()=>validateIndexedDBOpenable);
 parcelHelpers.export(exports, "validateNamespace", ()=>validateNamespace);
-var global = arguments[3];
 var process = require("5b35771edbb20914");
+var global = arguments[3];
 const CONSTANTS = {
     /**
      * @define {boolean} Whether this is the client Node.js SDK.
@@ -47085,8 +47085,8 @@ Object.defineProperty(Duplex.prototype, "destroyed", {
 // A bit simpler than readable streams.
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
 // the drain event emission and buffering.
-var global = arguments[3];
 var process = require("62eaf9240176a82a");
+var global = arguments[3];
 "use strict";
 module.exports = Writable;
 /* <replacement> */ function WriteReq(chunk, encoding, cb) {
@@ -78758,8 +78758,8 @@ function compare(a, b) {
 }
 
 },{"96fb9b2f6750834a":"4Szbv","1b8c45d37d900c35":"e2JgG","c87367ab291092f2":"iaxu0","35d67ec2478cf4d6":"3pDum","f8caae6e7d4d6567":"e594P","e5400ba285150c22":"2WyL8","65eedc9f6297963":"fFkPV","446b20c2e1062b85":"eW7r9"}],"k3tsT":[function(require,module,exports) {
-var global = arguments[3];
 var process = require("8ca93fa32364873");
+var global = arguments[3];
 "use strict";
 function oldBrowser() {
     throw new Error("secure random number generation not supported by this browser\nuse chrome, FireFox or Internet Explorer 11");

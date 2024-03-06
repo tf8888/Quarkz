@@ -126,16 +126,17 @@ function dE(id) {
 function sleep(ms) {
     return new Promise((val)=>setTimeout(val, ms));
 }
-async function idElementPrint(ref, uname) {
+async function idElementPrint(ref, title, uname, author, userid) {
     iframe = dE("un_print_iframe");
     const pri = iframe.contentWindow;
     const csspage = document.querySelector('link[rel="stylesheet"]').href;
     pri.document.open();
-    pri.document.write('<head><link rel="stylesheet" href="' + csspage + '" onload = "print()"><style>body{border: 3px solid black;font-family:Nunito;font-size:12px;}</style></head>');
-    pri.document.write(ref.innerHTML);
-    pri.document.write('<div class="divFooter2" style = "text-align:center;">By ' + uname + " @ Quarkz!</div>");
+    pri.document.write('<head><link rel="stylesheet" href="' + csspage + '" onload = "setTimeout(print,3000)"><style>body{border: 3px solid black;font-family:Nunito;font-size:12px;}</style></head>');
+    pri.document.write("<body class = 'light_mode force_print' style = 'border:none;'><div id = 'output' class='full_page flex_type'><span class='in_t_3' id='qb_title'>" + title + "</span><hr width='100%'><div>" + ref + "</div></div>");
+    pri.document.write('<div class="divFooter2" style = "text-align:center;font-size:10px;font-color;grey;">Created By User ' + author + '@ Quarkz!<br><span style = "color:#fffff1">Downloaded By ' + uname + "," + userid + "</span></div></body>");
     pri.document.close();
     pri.focus();
+    addToast("Processing", "Your file is being processed.", 3000);
 }
 function examlog(examname, dates, examinfo, syllabus) {
     dE("exam_msg_popup").style.visibility = "visible";
