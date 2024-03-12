@@ -2314,7 +2314,7 @@ async function authStateObserver(user) {
       userinfo = docJSON
       userinfo.uuid = user.uid
       batchno = userinfo.curr_batch || userinfo.batch.split(",")[0]
-      batchlist = userinfo.batch
+      let batchlist = userinfo.batch
       userinfo.storeitems = []
       userinfo.codeitems = []
       userrole = userinfo.roles['user']

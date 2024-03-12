@@ -1730,8 +1730,8 @@ async function settingsEvents() {
         addToast("success", "Current Batch changed Successfully");
     });
     let FRAME_OPT = "";
-    let batchlist1 = userinfo.batch.split(",");
-    for(let i = 0; i < batchlist1.length; i++)FRAME_OPT += "<option value = '" + batchlist1[i] + "'>" + batchlist1[i] + "</option>";
+    let batchlist = userinfo.batch.split(",");
+    for(let i = 0; i < batchlist.length; i++)FRAME_OPT += "<option value = '" + batchlist[i] + "'>" + batchlist[i] + "</option>";
     (0, _helper.dE)("inp_batch").innerHTML = FRAME_OPT;
     (0, _helper.dE)("inp_batch").value = userinfo.curr_batch;
 }
@@ -3206,7 +3206,7 @@ async function authStateObserver(user) {
             userinfo = docJSON;
             userinfo.uuid = user.uid;
             batchno = userinfo.curr_batch || userinfo.batch.split(",")[0];
-            batchlist = userinfo.batch;
+            let batchlist = userinfo.batch;
             userinfo.storeitems = [];
             userinfo.codeitems = [];
             userrole = userinfo.roles["user"];
@@ -6198,8 +6198,8 @@ parcelHelpers.export(exports, "validateCallback", ()=>validateCallback);
 parcelHelpers.export(exports, "validateContextObject", ()=>validateContextObject);
 parcelHelpers.export(exports, "validateIndexedDBOpenable", ()=>validateIndexedDBOpenable);
 parcelHelpers.export(exports, "validateNamespace", ()=>validateNamespace);
-var process = require("5b35771edbb20914");
 var global = arguments[3];
+var process = require("5b35771edbb20914");
 const CONSTANTS = {
     /**
      * @define {boolean} Whether this is the client Node.js SDK.
@@ -47085,8 +47085,8 @@ Object.defineProperty(Duplex.prototype, "destroyed", {
 // A bit simpler than readable streams.
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
 // the drain event emission and buffering.
-var global = arguments[3];
 var process = require("62eaf9240176a82a");
+var global = arguments[3];
 "use strict";
 module.exports = Writable;
 /* <replacement> */ function WriteReq(chunk, encoding, cb) {
@@ -50184,8 +50184,8 @@ module.exports = function(iterations, keylen) {
 };
 
 },{}],"T9r9Q":[function(require,module,exports) {
-var global = arguments[3];
 var process = require("2b885cada18ff430");
+var global = arguments[3];
 var defaultEncoding;
 /* istanbul ignore next */ if (global.process && global.process.browser) defaultEncoding = "utf-8";
 else if (global.process && global.process.version) {
@@ -78758,8 +78758,8 @@ function compare(a, b) {
 }
 
 },{"96fb9b2f6750834a":"4Szbv","1b8c45d37d900c35":"e2JgG","c87367ab291092f2":"iaxu0","35d67ec2478cf4d6":"3pDum","f8caae6e7d4d6567":"e594P","e5400ba285150c22":"2WyL8","65eedc9f6297963":"fFkPV","446b20c2e1062b85":"eW7r9"}],"k3tsT":[function(require,module,exports) {
-var process = require("8ca93fa32364873");
 var global = arguments[3];
+var process = require("8ca93fa32364873");
 "use strict";
 function oldBrowser() {
     throw new Error("secure random number generation not supported by this browser\nuse chrome, FireFox or Internet Explorer 11");
