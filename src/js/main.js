@@ -11,6 +11,7 @@ and certain other noncommercial uses permitted by copyright law.
 
 For permission requests, please contact [Mr Techtroid] at mrtechtroid@outlook.com .
 */
+
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence, GoogleAuthProvider, signInWithPopup, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, updateEmail, updatePassword } from "firebase/auth";
 import { getFirestore, orderBy, limit, writeBatch, collection, addDoc, onSnapshot, deleteDoc, arrayUnion, arrayRemove, setDoc, updateDoc, getDocs, doc, serverTimestamp, getDoc, query, where } from "firebase/firestore";

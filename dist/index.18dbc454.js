@@ -43482,8 +43482,8 @@ exports.constants = {
 };
 
 },{"6d7fc0dc5de28bcc":"8hjhE","f44f80586868fcdc":"2WyL8","69ad8819e07e917e":"k1utz","975f0ee803b7bc7b":"busIB","845f1c258f278f9b":"g38Hg","eb3b967cf515d387":"d4idn","657f7974a39648c1":"hwD3y","88bbea401533a54f":"jbRNy","c23eebf13b558da3":"9Rcg1","5477e994dfe71234":"h9Rdh","c1bd70025e2af238":"k3tsT"}],"8hjhE":[function(require,module,exports) {
-var process = require("b055ad262129c80");
 var global = arguments[3];
+var process = require("b055ad262129c80");
 "use strict";
 // limit of Crypto.getRandomValues()
 // https://developer.mozilla.org/en-US/docs/Web/API/Crypto/getRandomValues
@@ -45247,8 +45247,8 @@ exports.pipeline = require("ce590b3502823b4");
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
-var process = require("3e432ca2944df1d");
 var global = arguments[3];
+var process = require("3e432ca2944df1d");
 "use strict";
 module.exports = Readable;
 /*<replacement>*/ var Duplex;
@@ -47085,8 +47085,8 @@ Object.defineProperty(Duplex.prototype, "destroyed", {
 // A bit simpler than readable streams.
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
 // the drain event emission and buffering.
-var process = require("62eaf9240176a82a");
 var global = arguments[3];
+var process = require("62eaf9240176a82a");
 "use strict";
 module.exports = Writable;
 /* <replacement> */ function WriteReq(chunk, encoding, cb) {
@@ -92347,7 +92347,7 @@ parcelHelpers.export(exports, "page_store_edit", ()=>page_store_edit);
 let page_store = `
 <span class="in_t">Store</span><button class="tst_btn rpl" id="stre_itm_add" style="display: none;" onclick='window.location.hash = "#/add_storeitem/"'>Add Item</button>
 <hr style="color:var(--clr18)" width="100%">
-<div id = "store_list" style = "width:100%;height:75vh;display:flex;flex-direction:row;flex-wrap:wrap;justify-content:center;"></div>
+<div id = "store_list" style = "width:100%;height:75vh;display:flex;flex-direction:row;flex-wrap:wrap;justify-content:center;overflow-y:scroll"></div>
 <span style = "font-size:10px">This page contains product affiliate links. We may receive a commission if you make a purchase after clicking on one of these links.</span>
 `;
 let page_store_edit = `

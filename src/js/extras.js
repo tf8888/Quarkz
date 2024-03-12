@@ -255,6 +255,9 @@ function changeLanguageByButtonClick() {
   for (var i = 0; i < selectField.children.length; i++) {
     var option = selectField.children[i];
     // find desired langauge and change the former language of the hidden selection-field 
+    if (language.value=="en"){
+      window.location.reload();
+    }
     if (option.value == language.value) {
       selectField.selectedIndex = i;
       // trigger change event afterwards to make google-lib translate this side

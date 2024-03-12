@@ -1,7 +1,7 @@
 export let page_store = `
 <span class="in_t">Store</span><button class="tst_btn rpl" id="stre_itm_add" style="display: none;" onclick='window.location.hash = "#/add_storeitem/"'>Add Item</button>
 <hr style="color:var(--clr18)" width="100%">
-<div id = "store_list" style = "width:100%;height:75vh;display:flex;flex-direction:row;flex-wrap:wrap;justify-content:center;"></div>
+<div id = "store_list" style = "width:100%;height:75vh;display:flex;flex-direction:row;flex-wrap:wrap;justify-content:center;overflow-y:scroll"></div>
 <span style = "font-size:10px">This page contains product affiliate links. We may receive a commission if you make a purchase after clicking on one of these links.</span>
 `
 export let page_store_edit = `
