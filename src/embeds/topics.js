@@ -20,6 +20,7 @@ export let page_edit_topic = `
         </div>
         <div id="aq_test_extra" style="flex-direction: column;width:72vw">
             <input type="text" id="aq_tst_batches" class="_in_aq" placeholder="Batch ID">
+            <input type="text" id="aq_quiz_pass" class="_in_aq" placeholder="Quiz Password(leave blank if no password)">
             <input type="datetime-local" id="aq_tst_stron" class="_in_aq">
             <input type="datetime-local" id="aq_tst_endon" class="_in_aq">
             <input type="text" id="aq_tst_syllabi" class="_in_aq" placeholder="Syllabus">

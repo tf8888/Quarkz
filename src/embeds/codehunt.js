@@ -38,9 +38,12 @@ export let page_ch_solver = `
 `
 
 export let page_ch_list = `
-<span class="in_t">CodeHunt<super style = "font-size:12px">BETA</super>- Problem List</span><button class="tst_btn rpl" id="stre_itm_add" style="display: none;" onclick='window.location.hash = "#/add_storeitem/"'>Add Item</button>
+<span class="in_t">CodeHunt<super style = "font-size:12px">DEPRECIATED</super></span><button class="tst_btn rpl" id="stre_itm_add" style="display: none;" onclick='window.location.hash = "#/add_storeitem/"'>Add Item</button>
 <hr style="color:var(--clr18)" width="100%">
-<div id = "prb_list" style = "width:100%;height:75vh;display:flex;flex-direction:row;flex-wrap:wrap;justify-content:center;"></div>
+<div id = "prb_list" style = "display:none;width:100%;height:75vh;flex-direction:row;flex-wrap:wrap;justify-content:center;"></div>
+<style>#join_codeblaze::hover{filter:greyscale(0.5)}</style>
+Join <a id = "join_codeblaze" href = "https://codeblaze.mtt.one" target = "_blank" ><img src = "https://codeblaze.mtt.one/codeblaze.png"></a>
+Our companion site where you can practice coding problems and improve your algorithimic skills. 
 `
 
 export let page_edit_ch = `

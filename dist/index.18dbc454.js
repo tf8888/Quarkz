@@ -1273,9 +1273,9 @@ function coreManager(newlocation, n1) {
     }
     if (location1.includes("codehunt/problem")) {
         renderBody((0, _codehunt.page_ch_solver), "", "");
-        addToast("error", "Codehunt is temporarily Unavailable due to a security issue by the test engine");
-        window.location.hash = "#/error";
-    } //codeproblemEvents()
+        addToast("error", "Codehunt is now Depreciated. Join Codeblaze to practice and hone your algorithmic skills. ");
+        window.location.hash = "#/codehunt";
+    } //codeproblemEvents() Codehunt is temporarily Unavailable due to a security issue by the test engine
     if (location1.includes("vid_chat")) {
         handlebox = "fu_vidchat";
         renderBody((0, _vidchat.page_vidchat), "", "");
@@ -2665,6 +2665,7 @@ async function prepareTopicQBank(iun) {
                 (0, _helper.dE)("aq_tst_endon").value = dateparser(docJSON.endon.seconds * 1000);
                 (0, _helper.dE)("aq_tst_timealotted").value = docJSON.timeallotted;
                 (0, _helper.dE)("aq_tst_passpercentage").value = docJSON.passpercentage;
+                (0, _helper.dE)("aq_quiz_pass").value = docJSON.quizpassword == undefined ? "" : docJSON.quizpassword;
                 (0, _helper.dE)("aq_tst_syllabi").value = docJSON.syllabus;
                 setHTML("aq_add_test_instr", docJSON.instructions);
                 let docSnap2 = await (0, _firestore.getDoc)((0, _firestore.doc)(db, "tests", id, "questions", "questions"));
@@ -2746,6 +2747,7 @@ async function updateTopicQBank(iun) {
                 instructions: getHTML("aq_add_test_instr"),
                 randomize: (0, _helper.dE)("aq_randomize").checked,
                 blockresult: (0, _helper.dE)("aq_blockresult").checked,
+                quizpassword: (0, _helper.dE)("aq_quiz_pass").value,
                 strton: fgio,
                 endon: fgio2,
                 batch: wer,
@@ -3505,7 +3507,13 @@ async function getSimpleTestReport() {
                     reQW = tT.info.mList;
                     let hji = "<ol>";
                     let missedtopics = tT.info.missedtopics;
+                    missedtopics = [
+                        ...new Set(missedtopics)
+                    ];
                     let unattemptedtopics = tT.info.unattemptedtopics;
+                    unattemptedtopics = [
+                        ...new Set(unattemptedtopics)
+                    ];
                     for(var i = 0; i < missedtopics.length; i++)hji += '<li><div class = "tlinks" style = "flex-direction:row;width:25vw;justify-content:space-between;"><span class = "t_name" style = "color:red;">' + missedtopics[i] + "</span></div></li>";
                     for(var i = 0; i < unattemptedtopics.length; i++)hji += '<li><div class = "tlinks" style = "flex-direction:row;width:25vw;justify-content:space-between;"><span class = "t_name">' + unattemptedtopics[i] + "</span></div></li>";
                     if (missedtopics.length == 0 && unattemptedtopics.length == 0) hji = "<span>Hoo! No Missed Concepts on This Test</span>";
@@ -4045,6 +4053,18 @@ async function getTestInfo() {
                 window.location.hash = "#/finished/" + window.location.hash.split("attempt/")[1];
                 return 0;
             }
+            if (testInfo.quizpassword != undefined && testInfo.quizpassword != "") {
+                var password1 = prompt("Please enter the quiz password:");
+                console.log(password1);
+                if (password1 == testInfo.quizpassword) ;
+                else {
+                    renderBody((0, _tests.page_test_end), "", "");
+                    (0, _helper.dE)("te_title").innerText = "Incorrect Quiz Password";
+                    (0, _helper.dE)("te_msg").innerText = "You have entered the incorrect quiz password, please contact your instructor for the password. ";
+                    // window.location.hash = "#/error/"
+                    return 0;
+                }
+            }
         }
     } else renderBody("This test either doesnt exist or you do not have access to this test.");
     try {
@@ -4277,7 +4297,13 @@ async function computeResult(type) {
             }
         }
     }
-    overall.acc = Math.floor((1 - overall.qic / overall.qc) * 100);
+    missedtopics = [
+        ...new Set(missedtopics)
+    ];
+    unattemptedtopics = [
+        ...new Set(unattemptedtopics)
+    ];
+    overall.acc = overall.qc != 0 ? Math.floor((1 - overall.qic / overall.qc) * 100) : 0;
     var t = subjectmarks["Physics"].total + subjectmarks["Chemistry"].total + subjectmarks["Math"].total + subjectmarks["Biology"].total + subjectmarks["Computer"].total + subjectmarks["Statistics"].total + subjectmarks["Unfiled"].total;
     var tFinal = {
         correct: c,
@@ -42812,6 +42838,7 @@ let page_edit_topic = `
         </div>
         <div id="aq_test_extra" style="flex-direction: column;width:72vw">
             <input type="text" id="aq_tst_batches" class="_in_aq" placeholder="Batch ID">
+            <input type="text" id="aq_quiz_pass" class="_in_aq" placeholder="Quiz Password(leave blank if no password)">
             <input type="datetime-local" id="aq_tst_stron" class="_in_aq">
             <input type="datetime-local" id="aq_tst_endon" class="_in_aq">
             <input type="text" id="aq_tst_syllabi" class="_in_aq" placeholder="Syllabus">
@@ -43482,8 +43509,8 @@ exports.constants = {
 };
 
 },{"6d7fc0dc5de28bcc":"8hjhE","f44f80586868fcdc":"2WyL8","69ad8819e07e917e":"k1utz","975f0ee803b7bc7b":"busIB","845f1c258f278f9b":"g38Hg","eb3b967cf515d387":"d4idn","657f7974a39648c1":"hwD3y","88bbea401533a54f":"jbRNy","c23eebf13b558da3":"9Rcg1","5477e994dfe71234":"h9Rdh","c1bd70025e2af238":"k3tsT"}],"8hjhE":[function(require,module,exports) {
-var global = arguments[3];
 var process = require("b055ad262129c80");
+var global = arguments[3];
 "use strict";
 // limit of Crypto.getRandomValues()
 // https://developer.mozilla.org/en-US/docs/Web/API/Crypto/getRandomValues
@@ -45247,8 +45274,8 @@ exports.pipeline = require("ce590b3502823b4");
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
-var global = arguments[3];
 var process = require("3e432ca2944df1d");
+var global = arguments[3];
 "use strict";
 module.exports = Readable;
 /*<replacement>*/ var Duplex;
@@ -47085,8 +47112,8 @@ Object.defineProperty(Duplex.prototype, "destroyed", {
 // A bit simpler than readable streams.
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
 // the drain event emission and buffering.
-var process = require("62eaf9240176a82a");
 var global = arguments[3];
+var process = require("62eaf9240176a82a");
 "use strict";
 module.exports = Writable;
 /* <replacement> */ function WriteReq(chunk, encoding, cb) {
@@ -92471,9 +92498,12 @@ let page_ch_solver = `
 </div>
 `;
 let page_ch_list = `
-<span class="in_t">CodeHunt<super style = "font-size:12px">BETA</super>- Problem List</span><button class="tst_btn rpl" id="stre_itm_add" style="display: none;" onclick='window.location.hash = "#/add_storeitem/"'>Add Item</button>
+<span class="in_t">CodeHunt<super style = "font-size:12px">DEPRECIATED</super></span><button class="tst_btn rpl" id="stre_itm_add" style="display: none;" onclick='window.location.hash = "#/add_storeitem/"'>Add Item</button>
 <hr style="color:var(--clr18)" width="100%">
-<div id = "prb_list" style = "width:100%;height:75vh;display:flex;flex-direction:row;flex-wrap:wrap;justify-content:center;"></div>
+<div id = "prb_list" style = "display:none;width:100%;height:75vh;flex-direction:row;flex-wrap:wrap;justify-content:center;"></div>
+<style>#join_codeblaze::hover{filter:greyscale(0.5)}</style>
+Join <a id = "join_codeblaze" href = "https://codeblaze.mtt.one" target = "_blank" ><img src = "https://codeblaze.mtt.one/codeblaze.png"></a>
+Our companion site where you can practice coding problems and improve your algorithimic skills. 
 `;
 let page_edit_ch = `
 

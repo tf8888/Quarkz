@@ -424,7 +424,7 @@ function coreManager(newlocation, n1) {
   if (location1.includes("edit_qubank") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll", "1"); dE("aq_qbc_save").addEventListener("click", function () { updateTopicQBank(2) }); edittopicEvents(); prepareTopicQBank(2) }
   if (location1.includes("edit_exams") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_topic, "", "ovr-scroll", "1"); dE("aq_exam_save").addEventListener("click", function () { updateTopicQBank(4) }); edittopicEvents(); prepareTopicQBank(4) }
   if (location1.includes("edit_batch") && iorole == true) { handlebox = "fu_topic"; renderBody(page_edit_batch, "", ""); prepareBatch(); dE("aq_batch_save").addEventListener("click", updateBatch) }
-  if (location1.includes("codehunt/problem")) { renderBody(page_ch_solver, "", ""); addToast("error","Codehunt is temporarily Unavailable due to a security issue by the test engine");window.location.hash = "#/error" } //codeproblemEvents()
+  if (location1.includes("codehunt/problem")) { renderBody(page_ch_solver, "", ""); addToast("error","Codehunt is now Depreciated. Join Codeblaze to practice and hone your algorithmic skills. "); window.location.hash = "#/codehunt"} //codeproblemEvents() Codehunt is temporarily Unavailable due to a security issue by the test engine
   if (location1.includes("vid_chat")) { handlebox = "fu_vidchat"; renderBody(page_vidchat, "", ""); prepareVideoChat(); }
   if (location1.includes("site-analytics") && iorole == true) { handlebox = "fu_analytics"; renderBody(page_analytics, "", ""); }
   if (iorole) {
@@ -1788,6 +1788,7 @@ async function prepareTopicQBank(iun) {
         dE("aq_tst_endon").value = dateparser(docJSON.endon.seconds * 1000)
         dE("aq_tst_timealotted").value = docJSON.timeallotted
         dE("aq_tst_passpercentage").value = docJSON.passpercentage
+        dE("aq_quiz_pass").value = docJSON.quizpassword==undefined?"":docJSON.quizpassword
         dE("aq_tst_syllabi").value = docJSON.syllabus
         setHTML("aq_add_test_instr", docJSON.instructions)
         let docSnap2 = await getDoc(doc(db, "tests", id, "questions", "questions"))
@@ -1872,6 +1873,7 @@ async function updateTopicQBank(iun) {
         instructions: getHTML("aq_add_test_instr"),
         randomize: dE("aq_randomize").checked,
         blockresult: dE("aq_blockresult").checked,
+        quizpassword: dE("aq_quiz_pass").value,
         strton: fgio,
         endon: fgio2,
         batch: wer,
@@ -2639,7 +2641,9 @@ async function getSimpleTestReport() {
 
               let hji = "<ol>"
               let missedtopics = tT.info.missedtopics
+              missedtopics = [...new Set(missedtopics)]
               let unattemptedtopics = tT.info.unattemptedtopics
+              unattemptedtopics = [...new Set(unattemptedtopics)]
               for (var i = 0; i < missedtopics.length; i++) {
                 hji += '<li><div class = "tlinks" style = "flex-direction:row;width:25vw;justify-content:space-between;"><span class = "t_name" style = "color:red;">' + missedtopics[i] + '</span></div></li>'
               }
@@ -3100,6 +3104,19 @@ async function getTestInfo() {
           return 0;
         }
       }
+      if (testInfo.quizpassword!=undefined && testInfo.quizpassword!=""){
+        var password = prompt("Please enter the quiz password:");
+        console.log(password);
+        if (password == testInfo.quizpassword) {
+          // alert("Correct password! You may proceed to the quiz.");
+        } else {
+          renderBody(page_test_end, "", "")
+          dE("te_title").innerText = "Incorrect Quiz Password"
+          dE("te_msg").innerText = "You have entered the incorrect quiz password, please contact your instructor for the password. "
+          // window.location.hash = "#/error/"
+          return 0;
+        }
+      }
     }
   } else {
     renderBody("This test either doesnt exist or you do not have access to this test.")
@@ -3255,7 +3272,9 @@ async function computeResult(type) {
       }
     }
   }
-  overall.acc = Math.floor((1 - overall.qic / overall.qc) * 100)
+  missedtopics = [...new Set(missedtopics)]
+  unattemptedtopics = [...new Set(unattemptedtopics)]
+  overall.acc = overall.qc!=0?Math.floor((1 - overall.qic / overall.qc) * 100):0
   var t = subjectmarks["Physics"].total + subjectmarks["Chemistry"].total + subjectmarks["Math"].total + subjectmarks["Biology"].total + subjectmarks["Computer"].total + subjectmarks["Statistics"].total + subjectmarks["Unfiled"].total
   var tFinal = { correct: c, incorrect: ic, unattempted: u, mList: marksList, total: t, usermarks: c + ic, subjectmarks: subjectmarks, overall: overall, missedtopics: missedtopics, unattemptedtopics: unattemptedtopics }
   if (type == 1) {
