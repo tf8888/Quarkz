@@ -3189,7 +3189,13 @@ async function getTestInfo() {
   dE("tt_testname").innerText = testInfo.title
   dE("dsh_btn").style.display = "none"
   var tbox = dE("output")
-  try { fullEle(tbox) } catch { }
+  function exitTest(){
+    submitTest()
+    addToast("error", "Your test has ended, due to exiting of full screen mode. ")
+    // log("Error", "Your test has ended, due to exiting of full screen mode. ")
+
+  }
+  try { fullEle(tbox,exitTest) } catch { }
   inittestHandler()
 }
 function tqH() {
@@ -3777,7 +3783,7 @@ setTimeout(() => {
     initFirebaseAuth()
     sysaccess()
   }
-}, 200);
+}, 1000);
 bc.onmessage = (event) => {
   if (event.data === `QZCODE-ASK`) {
     bc.postMessage(`QZCODE-NOTFIRST`);
@@ -3785,6 +3791,7 @@ bc.onmessage = (event) => {
   if (event.data === `QZCODE-NOTFIRST`) {
     isFirstTab = false;
     renderBody("Quarkz! is Open in Another Tab/Window! You can only use Quarkz! in one tab/window.", "", "")
+    bc.close()
   }
   if (event.data == `QZCODE-REPORT`) {
     reportHandler()

@@ -91,19 +91,34 @@ export function getServerTime(url) {
         });
 }
 // Make A Element Full Screen
-export function fullEle(ele) {
+export function fullEle(ele,exitHandler_) {
+    var exitHandler = function(e){
+            if (!document.webkitIsFullScreen && !document.mozFullScreen && !document.msFullscreenElement) {
+            console.log("exited");
+            exitHandler_();
+            ele.removeEventListener('fullscreenchange', exitHandler, false);
+            ele.removeEventListener('mozfullscreenchange', exitHandler, false);
+            ele.removeEventListener('webkitfullscreenchange', exitHandler, false);
+            ele.removeEventListener('MSFullscreenChange', exitHandler, false);
+    }
+}
+    
     if (ele.requestFullscreen) {
         ele.requestFullscreen();
+        ele.addEventListener('fullscreenchange', exitHandler, false);
     } else if (ele.mozRequestFullScreen) {
         /* Firefox */
         ele.mozRequestFullScreen();
+        ele.addEventListener('mozfullscreenchange', exitHandler, false);
     } else if (ele.webkitRequestFullscreen) {
         /* Chrome, Safari and Opera */
         ele.webkitRequestFullscreen();
+        ele.addEventListener('webkitfullscreenchange', exitHandler, false);
     } else if (ele.msRequestFullscreen) {
         /* IE/Edge */
         ele.msRequestFullscreen();
-    }
+        ele.addEventListener('MSFullscreenChange', exitHandler, false);
+    }  
 }
 // Merge The Contents of Two Array's
 export const mergeById = (a1, a2) =>

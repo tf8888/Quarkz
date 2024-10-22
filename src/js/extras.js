@@ -339,6 +339,7 @@ function code_evalueter(cd_input, cd_output) {
   function* mape(code, cdinput) {
     for (var i = 0; i < cdinput.length; i++) {
       try {
+        console.log(cdinput[i])
         yield eval(`${code.replaceAll(/\n/g, '')};execute("` + cdinput[i] + `")`)
       } catch (e) {
         yield "[QUARKZ-CODE-EXECUTION-ABANDONED]" + String(e)

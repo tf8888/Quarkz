@@ -36,8 +36,7 @@ export let page_test_instructions = `
                     submit your examination.</li>
                 <li>Make Sure To Have A Good Internet Connection. Loss in Internet Connectivity may prevent submission
                     of answers. </li>
-                <li>DO NOT TRY TO Minimise The Full Screen Mode Of The Exam. You Will Recieive 1 Warning For Doing So
-                    After Which Your Test Will End</li>
+                <li>DO NOT TRY TO Minimise The Full Screen Mode Of The Exam. The test will end immediately after removing the full screen mode.</li>
             </ol>
             <hr style = "width:95%">
             <span style="font-size:18px;color:var(--clr16)">Navigating to a Question:</span>
