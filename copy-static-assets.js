@@ -8,7 +8,7 @@ const distFolder = path.join(__dirname, 'dist');
 
 // Define the files you want to copy
 const filesToCopy = [
-  'print.css',
+  'print.css','recorder.js'
 ];
 
 // Use the CopyWebpackPlugin to copy the files

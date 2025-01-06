@@ -46,6 +46,7 @@ import { sysaccess } from "./reworkui";
 import { page_batch_list, page_edit_batch } from "../embeds/admin";
 import Chart, { scales } from 'chart.js/auto';
 import { page_ch_solver, page_ch_list } from "../embeds/codehunt";
+import {recordScreen, createRecorder,saveFile } from "../js/recorder";
 
 const registerServiceWorker = async () => {
   const swRegistration = await navigator.serviceWorker.register(new URL('../js/sw.js', import.meta.url), { type: 'module' });
