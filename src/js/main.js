@@ -626,7 +626,7 @@ async function prepareVideoChat() {
     }
     let docSnap = await getDoc(doc(db, 'vidchat', docId))
     if (docSnap.exists()) {
-      callData = docSnap.data()
+      let callData = docSnap.data()
       if (callData.status == "callstarted") {
         let callId = document.location.hash.split("#/vid_chat/")[1]
         pc.onicecandidate = async (event) => {
