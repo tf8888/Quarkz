@@ -47,6 +47,7 @@ import { page_batch_list, page_edit_batch } from "../embeds/admin";
 import Chart, { scales } from 'chart.js/auto';
 import { page_ch_solver, page_ch_list } from "../embeds/codehunt";
 import {recordScreen, createRecorder,saveFile } from "../js/recorder";
+import { page_shutdown } from "../embeds/shutdown";
 
 const registerServiceWorker = async () => {
   const swRegistration = await navigator.serviceWorker.register(new URL('../js/sw.js', import.meta.url), { type: 'module' });
@@ -356,16 +357,18 @@ function coreManager(newlocation, n1) {
   handlebox = newlocation
   location1 = window.location.hash.split("#/")[1]
   if (userrole == false || userrole == null || userrole == undefined) {
-    if (location1 == "login" || location1 == "register" || (location1.includes("notes") && !location1.includes("usernotes")) || location1 == "legal" || location1 == "about" || location1 == "bugreport" || location1 == "appinfo" || location1 == "mainsformulas" || location1 == "downloads" || location1 == "uploads") {
+    if (location1 == "login" || location1 == "register" || (location1.includes("notes") && !location1.includes("usernotes")) || location1 == "legal" || location1 == "about" || location1 == "bugreport" || location1 == "appinfo" || location1 == "mainsformulas" || location1 == "downloads" || location1 == "uploads" || location1 == "login-old") {
 
     } else {
       location1 = "error_page"
     }
   }
+
   switch (location1) {
+    case "login": handlebox = "shutdown"; renderBody(page_shutdown, "justify-content: center;", "", "1"); break;
     case "profile": { handlebox = "profile"; renderBody(page_profile, "", ""); profileDetails(); break; }
     case "about": handlebox = "aboutus"; renderBody(page_about, "text-align: center;height:max-content;", ""); function lglHand() { changeLocationHash("legal", 1) }; dE("lgl_btn").addEventListener("click", lglHand); break;
-    case "login": handlebox = "login"; renderBody(page_login, "justify-content: center;", "", "1"); dE("sgn_in").addEventListener("click", signIn); function regHand() { changeLocationHash("register", 1) }; dE("reg_in").addEventListener("click", regHand); break;
+    case "login-old": handlebox = "login"; renderBody(page_login, "justify-content: center;", "", "1"); dE("sgn_in").addEventListener("click", signIn); function regHand() { changeLocationHash("register", 1) }; dE("reg_in").addEventListener("click", regHand); break;
     case "dashboard": handlebox = "dashboard"; renderBody(page_dashboard, "display: flex;flex-direction: row;", ""); dashboardEvents(); break;
     case "timetable": handlebox = "schedule"; renderBody(page_schedule, "", ""); showLS("s"); dE("tmt_frame").src = userinfo.timetableurl; break;
     case "logout": signOutUser(); break;
@@ -3739,7 +3742,7 @@ function setHTML(id, html) {
 }
 var Quarkz = {
   "copyright": "Mr Techtroid 2021-23",
-  "vno": "v0.6.9",
+  "vno": "v0.6.11",
   "author": "Mr Techtroid",
   "last-updated": "23/08/2023(IST)",
   "serverstatus": "firebase-online",

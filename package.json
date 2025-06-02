@@ -3,7 +3,8 @@
   "source": "src/index.html",
   "scripts": {
     "start": "parcel",
-    "build": "parcel build --no-source-maps"
+    "build": "parcel build --no-source-maps",
+    "dev": "parcel serve --port 3000"
   },
   "copy": {
     "src/css/styles.css": "dist/print.css",
@@ -23,7 +24,7 @@
     "util": "^0.12.5"
   },
   "description": "An Online Quiz And Education Platform Built With Vanilla Javascript. \r ## NOTE\r This Repository Is Protected Under Copyright Law. Using Any File or Parts of Files From this Repository for Any Use Without Prior Consent May Result In DMCA Strikes. \r ### Copyright © 2020-22 Mr Techtroid",
-  "version": "0.6.9",
+  "version": "0.6.11",
   "author": "Mr Techtroid",
   "license": "ISC",
   "browserslist": [
